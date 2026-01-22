@@ -2,42 +2,42 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace Ouroboros.Core.Monads;
+namespace Ouroboros.Core.Learning;
 
 /// <summary>
-/// Unit type representing a void result in functional programming.
-/// Used for operations that succeed but don't return a meaningful value.
-/// This is the standard functional programming "unit" type.
+/// Represents a unit type (void equivalent in functional programming).
+/// Used to indicate successful completion without a meaningful return value.
 /// </summary>
 public readonly struct Unit : IEquatable<Unit>
 {
     /// <summary>
-    /// Gets the singleton instance of Unit.
+    /// The singleton instance of Unit.
     /// </summary>
-    public static Unit Value => default;
+    public static readonly Unit Value = default;
 
     /// <summary>
-    /// Determines equality with another Unit.
+    /// Determines equality with another Unit instance.
+    /// All Unit instances are equal.
     /// </summary>
-    /// <param name="other">The other unit to compare.</param>
-    /// <returns>Always true since all Unit values are equal.</returns>
+    /// <param name="other">The other Unit instance.</param>
+    /// <returns>Always true.</returns>
     public bool Equals(Unit other) => true;
 
     /// <summary>
     /// Determines equality with an object.
     /// </summary>
     /// <param name="obj">The object to compare.</param>
-    /// <returns>True if the object is a Unit.</returns>
+    /// <returns>True if obj is a Unit instance.</returns>
     public override bool Equals(object? obj) => obj is Unit;
 
     /// <summary>
-    /// Gets the hash code.
+    /// Gets the hash code for Unit.
     /// </summary>
-    /// <returns>Always returns 0 since all Unit values are equal.</returns>
+    /// <returns>Always returns 0.</returns>
     public override int GetHashCode() => 0;
 
     /// <summary>
-    /// Gets the string representation.
+    /// Returns a string representation of Unit.
     /// </summary>
     /// <returns>The string "()".</returns>
     public override string ToString() => "()";
