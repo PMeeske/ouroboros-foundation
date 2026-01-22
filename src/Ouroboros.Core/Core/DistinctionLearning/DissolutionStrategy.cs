@@ -2,10 +2,10 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace Ouroboros.Core.Learning;
+namespace Ouroboros.Core.DistinctionLearning;
 
 /// <summary>
-/// Strategies for dissolving distinctions.
+/// Strategy for dissolving low-value distinctions.
 /// </summary>
 public enum DissolutionStrategy
 {
@@ -27,5 +27,5 @@ public enum DissolutionStrategy
     /// <summary>
     /// Dissolve all distinctions.
     /// </summary>
-    All,
+    All
 }
