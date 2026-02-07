@@ -1,0 +1,55 @@
+# CI pipeline for ouroboros-foundation
+# Triggers on push to main and pull requests
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-dotnet-build.yml@main
+    with:
+      projects: >-
+        src/Ouroboros.Core/Ouroboros.Core.csproj
+        src/Ouroboros.Domain/Ouroboros.Domain.csproj
+        src/Ouroboros.Tools/Ouroboros.Tools.csproj
+        src/Ouroboros.Genetic/Ouroboros.Genetic.csproj
+        src/Ouroboros.Roslynator/Ouroboros.Roslynator.csproj
+
+  test:
+    name: Test
+    needs: build
+    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-dotnet-test.yml@main
+    with:
+      test-projects: >-
+        tests/Ouroboros.Core.Tests/Ouroboros.Core.Tests.csproj
+        tests/Ouroboros.Domain.Tests/Ouroboros.Domain.Tests.csproj
+        tests/Ouroboros.Tools.Tests/Ouroboros.Tools.Tests.csproj
+        tests/Ouroboros.Genetic.Tests/Ouroboros.Genetic.Tests.csproj
+      build-projects: >-
+        src/Ouroboros.Core/Ouroboros.Core.csproj
+        src/Ouroboros.Domain/Ouroboros.Domain.csproj
+        src/Ouroboros.Tools/Ouroboros.Tools.csproj
+        src/Ouroboros.Genetic/Ouroboros.Genetic.csproj
+      coverage-threshold: 60
+
+  bdd:
+    name: BDD Tests
+    needs: build
+    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-dotnet-test.yml@main
+    with:
+      test-projects: tests/Ouroboros.Foundation.BDD/Ouroboros.Foundation.BDD.csproj
+      build-projects: >-
+        src/Ouroboros.Core/Ouroboros.Core.csproj
+        src/Ouroboros.Domain/Ouroboros.Domain.csproj
+        src/Ouroboros.Tools/Ouroboros.Tools.csproj
+      coverage-threshold: 0
