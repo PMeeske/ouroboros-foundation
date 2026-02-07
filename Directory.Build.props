@@ -5,5 +5,7 @@
 
   <PropertyGroup>
     <OuroborosLayer>Foundation</OuroborosLayer>
+    <!-- Cross-layer paths for test projects that reference engine types -->
+    <OuroborosEngine>$(MSBuildThisFileDirectory)..\engine\src</OuroborosEngine>
   </PropertyGroup>
 </Project>
