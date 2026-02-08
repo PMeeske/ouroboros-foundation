@@ -363,13 +363,9 @@ Test coverage includes:
 
 ## Examples
 
-See `src/Ouroboros.Examples/Examples/GeneticOptimizationExample.cs` for complete working examples:
-
-```bash
-# Run all examples
-cd src/Ouroboros.Examples
-dotnet run
-```
+For complete working examples, see:
+- The test suite in `tests/Ouroboros.Genetic.Tests/`
+- The Ouroboros.Genetic README at `src/Ouroboros.Genetic/README.md`
 
 ## Integration with Existing Pipelines
 

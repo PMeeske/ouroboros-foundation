@@ -54,18 +54,16 @@ var result = await arrow(branch);
 ## Files Created
 
 ### Implementation Files
-1. `src/Ouroboros.Pipeline/Pipeline/Council/CouncilOrchestratorArrows.cs` (469 lines)
-2. `src/Ouroboros.Pipeline/Pipeline/Memory/EpisodicMemoryArrows.cs` (428 lines)
-3. `src/Ouroboros.Agent/Agent/ConsolidatedMind/ConsolidatedMindArrowsExtensions.cs` (324 lines)
+1. `CouncilOrchestratorArrows.cs` - Council deliberation arrows
+2. `EpisodicMemoryArrows.cs` - Memory storage and retrieval arrows
+3. `ConsolidatedMindArrowsExtensions.cs` - Mind integration arrows
 
 ### Test Files
-4. `src/Ouroboros.Tests/Tests/Council/CouncilOrchestratorArrowsTests.cs` (240 lines)
-5. `src/Ouroboros.Tests/Tests/Pipeline/Memory/EpisodicMemoryArrowsTests.cs` (210 lines)
-6. `src/Ouroboros.Tests/Tests/Agent/ConsolidatedMindArrowsExtensionsTests.cs` (234 lines)
+Test files are located in the main Ouroboros-v2 repository.
 
 ### Documentation
-7. `docs/ARROW_PARAMETERIZATION.md` (355 lines)
-8. `docs/ARROW_PARAMETERIZATION_SUMMARY.md` (this file)
+4. `docs/ARROW_PARAMETERIZATION.md` (355 lines)
+5. `docs/ARROW_PARAMETERIZATION_SUMMARY.md` (this file)
 
 ## Test Results
 

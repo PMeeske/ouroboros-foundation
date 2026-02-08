@@ -331,4 +331,4 @@ dotnet test --filter "FullyQualifiedName~LawsOfFormTests|FullyQualifiedName~Dist
 - **FormExtensions.cs**: `src/Ouroboros.Core/Core/LawsOfForm/FormExtensions.cs`
 - **Imagination.cs**: `src/Ouroboros.Core/Core/LawsOfForm/Imagination.cs`
 - **DistinctionArrow.cs**: `src/Ouroboros.Core/Core/LawsOfForm/DistinctionArrow.cs`
-- **Tests**: `src/Ouroboros.Tests/Tests/LawsOfFormTests.cs`, `DistinctionArrowTests.cs`, `ImaginationTests.cs`
+- **Tests**: Located in `tests/Ouroboros.Core.Tests/` - includes `FormTests.cs`, `LawsOfFormIntegrationTests.cs`, and property-based tests

@@ -416,16 +416,9 @@ var result = await processor.ProcessLargeContextAsync<string, string>(
 );
 ```
 
-### Example 4: Running the Built-in Example
+### Example 4: Implementation Reference
 
-```bash
-cd src/Ouroboros.Examples
-dotnet run
-
-# Then select RecursiveChunking example
-```
-
-See `src/Ouroboros.Examples/Examples/RecursiveChunking/` for complete code.
+The RecursiveChunkProcessor implementation can be found in the Ouroboros.Core library. For usage examples, see the test suite in `tests/Ouroboros.Core.Tests/`.
 
 ## Best Practices
 
@@ -599,9 +592,7 @@ public sealed record ChunkResult<TOutput>(
 
 ---
 
-**Adaptive Systems Inc.** - Enterprise AI Pipeline Solutions
-
 For more information, see:
-- [Ouroboros README](../README.md)
-- [IONOS Deployment Guide](./IONOS_DEPLOYMENT_GUIDE.md)
-- [Example Code](../src/Ouroboros.Examples/Examples/RecursiveChunking/)
+- [Ouroboros Foundation README](../README.md)
+- [Ouroboros-v2 Main Repository](https://github.com/PMeeske/Ouroboros-v2)
+- [Laws of Form Documentation](./LAWS_OF_FORM.md)
