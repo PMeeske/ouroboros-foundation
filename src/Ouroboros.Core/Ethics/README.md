@@ -168,7 +168,7 @@ var result = await framework.EvaluateSelfModificationAsync(request);
 
 ## Testing
 
-Comprehensive test suite in `src/Ouroboros.Tests/Tests/Ethics/`:
+Comprehensive test suite located in `tests/Ouroboros.Core.Tests/`:
 
 1. **EthicalPrincipleTests** - Principle immutability and properties
 2. **EthicsFrameworkTests** - All evaluation methods
@@ -178,15 +178,6 @@ Comprehensive test suite in `src/Ouroboros.Tests/Tests/Ethics/`:
 Run tests:
 ```bash
 dotnet test --filter "FullyQualifiedName~Ethics"
-```
-
-## Examples
-
-See `src/Ouroboros.Examples/Examples/EthicsFrameworkDemo.cs` for a working demonstration.
-
-Run demo:
-```csharp
-await EthicsFrameworkDemo.RunDemoAsync();
 ```
 
 ## Design Decisions

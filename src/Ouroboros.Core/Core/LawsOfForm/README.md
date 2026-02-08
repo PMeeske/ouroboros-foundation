@@ -211,13 +211,7 @@ Comprehensive test suite with 104 tests covering:
 - Integration scenarios (KYC, feature flags, leader election)
 - Edge cases and error handling
 
-See test files in `src/Ouroboros.Tests/Tests/`:
-- `FormTests.cs`
-- `AuditableDecisionTests.cs`
-- `DecisionPipelineTests.cs`
-- `TriStateTests.cs`
-- `HierarchicalConfigTests.cs`
-- `FormStateMachineTests.cs`
+Test files are located in the test projects under `tests/Ouroboros.Core.Tests/`.
 # Laws of Form Integration Layer
 
 ## Overview
@@ -397,6 +391,8 @@ Comprehensive test suite with 57+ tests:
 - `ConfidenceGatedPipelineTests` - Confidence-based routing
 - `ContradictionDetectorTests` - Hallucination detection
 - `LawsOfFormIntegrationTests` - End-to-end safety pipeline
+
+Test files are located in `tests/Ouroboros.Core.Tests/`.
 
 ## Benefits
 
