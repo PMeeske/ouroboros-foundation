@@ -142,7 +142,7 @@ internal sealed class BasicEthicalReasoner : IEthicalReasoner
         // Use word boundary matching to avoid false positives
         // e.g., "harmonic" won't match "harm", "embark" won't match "bar"
         return HarmfulKeywords.Any(keyword => 
-            Regex.IsMatch(lowerDescription, $@"\b{Regex.Escape(keyword)}\b", RegexOptions.IgnoreCase));
+            Regex.IsMatch(lowerDescription, $@"\b{Regex.Escape(keyword)}", RegexOptions.IgnoreCase));
     }
 
     /// <inheritdoc/>

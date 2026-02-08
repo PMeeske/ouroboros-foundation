@@ -37,8 +37,8 @@ public sealed class ImmutableEthicsFramework : IEthicsFramework
     /// <inheritdoc/>
     public IReadOnlyList<EthicalPrinciple> GetCorePrinciples()
     {
-        // Return a copy to prevent modification
-        return _corePrinciples.ToList();
+        // Return an array copy to prevent modification
+        return _corePrinciples.ToArray();
     }
 
     /// <inheritdoc/>

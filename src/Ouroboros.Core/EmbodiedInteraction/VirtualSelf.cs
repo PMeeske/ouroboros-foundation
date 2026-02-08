@@ -329,6 +329,7 @@ public sealed class VirtualSelf : IDisposable
     private readonly List<PerceptionEvent> _perceptionBuffer = new();
     private readonly TimeSpan _fusionWindow;
     private readonly object _lock = new();
+    private IDisposable? _fusionSubscription;
     private bool _disposed;
 
     /// <summary>
@@ -480,6 +481,8 @@ public sealed class VirtualSelf : IDisposable
 
     private void PublishPerception(PerceptionEvent perception)
     {
+        if (_disposed) return;
+
         lock (_lock)
         {
             _perceptionBuffer.Add(perception);
@@ -491,12 +494,14 @@ public sealed class VirtualSelf : IDisposable
     private void SetupFusionPipeline()
     {
         // Buffer and fuse perceptions at regular intervals
-        Observable.Interval(_fusionWindow)
+        _fusionSubscription = Observable.Interval(_fusionWindow)
             .Subscribe(_ => FusePerceptions());
     }
 
     private void FusePerceptions()
     {
+        if (_disposed) return;
+
         List<PerceptionEvent> toFuse;
         lock (_lock)
         {
@@ -526,7 +531,19 @@ public sealed class VirtualSelf : IDisposable
             understanding,
             avgConfidence);
 
-        _fusedPerceptionSubject.OnNext(fused);
+        // Guard against race condition where Dispose may run between the
+        // initial _disposed check and this point, disposing the subject.
+        if (!_disposed)
+        {
+            try
+            {
+                _fusedPerceptionSubject.OnNext(fused);
+            }
+            catch (ObjectDisposedException)
+            {
+                // Subject was disposed between the check and the call - safe to ignore.
+            }
+        }
     }
 
     private static string BuildIntegratedUnderstanding(
@@ -582,6 +599,8 @@ public sealed class VirtualSelf : IDisposable
     {
         if (_disposed) return;
         _disposed = true;
+
+        _fusionSubscription?.Dispose();
 
         _perceptionSubject.OnCompleted();
         _fusedPerceptionSubject.OnCompleted();

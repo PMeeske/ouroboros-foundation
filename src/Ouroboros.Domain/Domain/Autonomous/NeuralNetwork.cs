@@ -543,6 +543,8 @@ public sealed class OuroborosNeuralNetwork : IDisposable
     /// </summary>
     public void RouteMessage(NeuronMessage message)
     {
+        ArgumentNullException.ThrowIfNull(message);
+
         // Store in history
         _messageHistory.Enqueue(message);
         while (_messageHistory.Count > _maxHistorySize)
@@ -649,6 +651,8 @@ public sealed class OuroborosNeuralNetwork : IDisposable
 
     private void DeliverMessage(NeuronMessage message)
     {
+        ArgumentNullException.ThrowIfNull(message);
+
         // Route to specific target
         if (!string.IsNullOrEmpty(message.TargetNeuron))
         {
