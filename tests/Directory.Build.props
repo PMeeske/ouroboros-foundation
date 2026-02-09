@@ -13,7 +13,7 @@
   </ItemGroup>
   
   <!-- Domain usings for tests that reference Ouroboros.Domain -->
-  <ItemGroup Condition="'$(MSBuildProjectName)' != 'Ouroboros.Genetic.Tests'">
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'Ouroboros.Genetic.Tests' And '$(MSBuildProjectName)' != 'Ouroboros.Core.Tests'">
     <Using Include="Ouroboros.Domain" />
     <Using Include="Ouroboros.Domain.Events" />
     <Using Include="Ouroboros.Domain.States" />

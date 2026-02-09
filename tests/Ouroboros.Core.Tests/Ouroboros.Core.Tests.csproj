@@ -11,10 +11,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Ouroboros.Core\Ouroboros.Core.csproj" />
-    <ProjectReference Include="$(OuroborosEngine)\Ouroboros.Agent\Ouroboros.Agent.csproj" />
-    <ProjectReference Include="$(OuroborosEngine)\Ouroboros.Pipeline\Ouroboros.Pipeline.csproj" />
-    <ProjectReference Include="$(OuroborosEngine)\Ouroboros.Providers\Ouroboros.Providers.csproj" />
-    <ProjectReference Include="$(OuroborosEngine)\Ouroboros.Network\Ouroboros.Network.csproj" />
   </ItemGroup>
 
   <ItemGroup>
