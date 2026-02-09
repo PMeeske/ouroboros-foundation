@@ -116,11 +116,11 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
     }
 
     /// <inheritdoc/>
-    public Task<Result<Unit, string>> AddFactAsync(string fact, CancellationToken ct = default)
+    public Task<Result<MeTTaUnit, string>> AddFactAsync(string fact, CancellationToken ct = default)
     {
         if (_disposed)
         {
-            return Task.FromResult(Result<Unit, string>.Failure("Engine disposed"));
+            return Task.FromResult(Result<MeTTaUnit, string>.Failure("Engine disposed"));
         }
 
         try
@@ -128,15 +128,15 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
             Core.Monads.Result<Atom> parseResult = _parser.Parse(fact);
             if (!parseResult.IsSuccess)
             {
-                return Task.FromResult(Result<Unit, string>.Failure($"Parse error: {parseResult.Error}"));
+                return Task.FromResult(Result<MeTTaUnit, string>.Failure($"Parse error: {parseResult.Error}"));
             }
 
             AddAtom(parseResult.Value);
-            return Task.FromResult(Result<Unit, string>.Success(Unit.Value));
+            return Task.FromResult(Result<MeTTaUnit, string>.Success(MeTTaUnit.Value));
         }
         catch (Exception ex)
         {
-            return Task.FromResult(Result<Unit, string>.Failure($"Add fact error: {ex.Message}"));
+            return Task.FromResult(Result<MeTTaUnit, string>.Failure($"Add fact error: {ex.Message}"));
         }
     }
 
@@ -243,11 +243,11 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
     }
 
     /// <inheritdoc/>
-    public Task<Result<Unit, string>> ResetAsync(CancellationToken ct = default)
+    public Task<Result<MeTTaUnit, string>> ResetAsync(CancellationToken ct = default)
     {
         if (_disposed)
         {
-            return Task.FromResult(Result<Unit, string>.Failure("Engine disposed"));
+            return Task.FromResult(Result<MeTTaUnit, string>.Failure("Engine disposed"));
         }
 
         try
@@ -255,11 +255,11 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
             _space.Clear();
             _namedAtoms.Clear();
             InitializeCoreAtoms();
-            return Task.FromResult(Result<Unit, string>.Success(Unit.Value));
+            return Task.FromResult(Result<MeTTaUnit, string>.Success(MeTTaUnit.Value));
         }
         catch (Exception ex)
         {
-            return Task.FromResult(Result<Unit, string>.Failure($"Reset error: {ex.Message}"));
+            return Task.FromResult(Result<MeTTaUnit, string>.Failure($"Reset error: {ex.Message}"));
         }
     }
 
@@ -310,11 +310,11 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
     /// <param name="mettaSource">The MeTTa source code.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>Success or failure result.</returns>
-    public async Task<Result<Unit, string>> LoadMeTTaSourceAsync(string mettaSource, CancellationToken ct = default)
+    public async Task<Result<MeTTaUnit, string>> LoadMeTTaSourceAsync(string mettaSource, CancellationToken ct = default)
     {
         if (_disposed)
         {
-            return Result<Unit, string>.Failure("Engine disposed");
+            return Result<MeTTaUnit, string>.Failure("Engine disposed");
         }
 
         string[] lines = mettaSource.Split('\n');
@@ -326,14 +326,14 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
                 continue; // Skip empty lines and comments
             }
 
-            Result<Unit, string> result = await AddFactAsync(trimmed, ct);
+            Result<MeTTaUnit, string> result = await AddFactAsync(trimmed, ct);
             if (!result.IsSuccess)
             {
                 return result;
             }
         }
 
-        return Result<Unit, string>.Success(Unit.Value);
+        return Result<MeTTaUnit, string>.Success(MeTTaUnit.Value);
     }
 
     /// <summary>

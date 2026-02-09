@@ -156,11 +156,11 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
     }
 
     /// <inheritdoc />
-    public async Task<Result<Unit, string>> AddFactAsync(string fact, CancellationToken ct = default)
+    public async Task<Result<MeTTaUnit, string>> AddFactAsync(string fact, CancellationToken ct = default)
     {
         if (this.process == null || this.stdin == null)
         {
-            return Result<Unit, string>.Failure("MeTTa engine is not initialized");
+            return Result<MeTTaUnit, string>.Failure("MeTTa engine is not initialized");
         }
 
         await this.@lock.WaitAsync(ct);
@@ -171,11 +171,11 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
             await this.stdin.WriteLineAsync(command.AsMemory(), ct);
             await this.stdin.FlushAsync();
 
-            return Result<Unit, string>.Success(Unit.Value);
+            return Result<MeTTaUnit, string>.Success(MeTTaUnit.Value);
         }
         catch (Exception ex)
         {
-            return Result<Unit, string>.Failure($"Failed to add fact: {ex.Message}");
+            return Result<MeTTaUnit, string>.Failure($"Failed to add fact: {ex.Message}");
         }
         finally
         {
@@ -236,11 +236,11 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
     }
 
     /// <inheritdoc />
-    public async Task<Result<Unit, string>> ResetAsync(CancellationToken ct = default)
+    public async Task<Result<MeTTaUnit, string>> ResetAsync(CancellationToken ct = default)
     {
         if (this.process == null || this.stdin == null)
         {
-            return Result<Unit, string>.Failure("MeTTa engine is not initialized");
+            return Result<MeTTaUnit, string>.Failure("MeTTa engine is not initialized");
         }
 
         await this.@lock.WaitAsync(ct);
@@ -251,11 +251,11 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
             await this.stdin.WriteLineAsync(command.AsMemory(), ct);
             await this.stdin.FlushAsync();
 
-            return Result<Unit, string>.Success(Unit.Value);
+            return Result<MeTTaUnit, string>.Success(MeTTaUnit.Value);
         }
         catch (Exception ex)
         {
-            return Result<Unit, string>.Failure($"Failed to reset: {ex.Message}");
+            return Result<MeTTaUnit, string>.Failure($"Failed to reset: {ex.Message}");
         }
         finally
         {

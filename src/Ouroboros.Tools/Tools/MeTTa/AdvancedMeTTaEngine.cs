@@ -276,7 +276,7 @@ public sealed class AdvancedMeTTaEngine : IAdvancedMeTTaEngine
         => baseEngine.ExecuteQueryAsync(query, ct);
 
     /// <inheritdoc />
-    public Task<Result<Unit, string>> AddFactAsync(string fact, CancellationToken ct = default)
+    public Task<Result<MeTTaUnit, string>> AddFactAsync(string fact, CancellationToken ct = default)
         => baseEngine.AddFactAsync(fact, ct);
 
     /// <inheritdoc />
@@ -288,7 +288,7 @@ public sealed class AdvancedMeTTaEngine : IAdvancedMeTTaEngine
         => baseEngine.VerifyPlanAsync(plan, ct);
 
     /// <inheritdoc />
-    public Task<Result<Unit, string>> ResetAsync(CancellationToken ct = default)
+    public Task<Result<MeTTaUnit, string>> ResetAsync(CancellationToken ct = default)
         => baseEngine.ResetAsync(ct);
 
     /// <inheritdoc />
