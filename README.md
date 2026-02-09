@@ -4,7 +4,7 @@
 
 ## Overview
 
-`ouroboros-foundation` is the foundational layer of the [Ouroboros-v2](https://github.com/PMeeske/Ouroboros-v2) ecosystem, providing:
+`ouroboros-foundation` is the foundational layer of the [Ouroboros-v2](https://github.com/PMeeske/Ouroboros-v2) ecosystem, providing: 
 
 - **Core Monadic Abstractions**: `Option<T>`, `Result<T>`, `Step<TIn, TOut>` for composable, type-safe error handling
 - **Laws of Form Integration**: Three-valued logic (Mark/Void/Imaginary) for AI safety and uncertainty modeling
