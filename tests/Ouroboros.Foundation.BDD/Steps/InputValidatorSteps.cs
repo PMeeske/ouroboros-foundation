@@ -141,6 +141,8 @@ public class InputValidatorSteps
     public void ThenTheSanitizedValueShouldBe(string expected)
     {
         _result.Should().NotBeNull();
+        // Unescape common escape sequences like \0, \r, \n
+        expected = System.Text.RegularExpressions.Regex.Unescape(expected);
         _result!.SanitizedValue.Should().Be(expected);
     }
 
