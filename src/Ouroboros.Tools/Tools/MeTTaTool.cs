@@ -109,7 +109,7 @@ public sealed class MeTTaTool : ITool
 
     private async Task<Result<string, string>> ExecuteAddFactAsync(string fact, CancellationToken ct)
     {
-        Result<Unit, string> result = await this.engine.AddFactAsync(fact, ct);
+        Result<MeTTaUnit, string> result = await this.engine.AddFactAsync(fact, ct);
         return result.Match(
             _ => Result<string, string>.Success($"Fact added successfully: {fact}"),
             error => Result<string, string>.Failure(error));

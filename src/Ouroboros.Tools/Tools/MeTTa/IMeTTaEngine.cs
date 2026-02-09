@@ -24,7 +24,7 @@ public interface IMeTTaEngine : IDisposable
     /// <param name="fact">The fact to add in MeTTa format.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>A Result indicating success or failure.</returns>
-    Task<Result<Unit, string>> AddFactAsync(string fact, CancellationToken ct = default);
+    Task<Result<MeTTaUnit, string>> AddFactAsync(string fact, CancellationToken ct = default);
 
     /// <summary>
     /// Applies a rule to the knowledge base.
@@ -47,18 +47,18 @@ public interface IMeTTaEngine : IDisposable
     /// </summary>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>A Result indicating success or failure.</returns>
-    Task<Result<Unit, string>> ResetAsync(CancellationToken ct = default);
+    Task<Result<MeTTaUnit, string>> ResetAsync(CancellationToken ct = default);
 }
 
 /// <summary>
-/// Unit type for representing void/empty success results.
+/// MeTTa-specific unit type for representing void/empty success results.
 /// </summary>
-public readonly struct Unit
+public readonly struct MeTTaUnit
 {
     /// <summary>
-    /// Gets the singleton Unit value.
+    /// Gets the singleton MeTTaUnit value.
     /// </summary>
-    public static Unit Value => default;
+    public static MeTTaUnit Value => default;
 
     /// <summary>
     /// Returns string representation.
