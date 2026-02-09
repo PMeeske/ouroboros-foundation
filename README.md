@@ -1,5 +1,8 @@
 # Ouroboros Foundation
 
+[![CI](https://github.com/PMeeske/ouroboros-foundation/actions/workflows/ci.yml/badge.svg)](https://github.com/PMeeske/ouroboros-foundation/actions/workflows/ci.yml)
+[![Mutation Testing](https://github.com/PMeeske/ouroboros-foundation/actions/workflows/mutation.yml/badge.svg)](https://github.com/PMeeske/ouroboros-foundation/actions/workflows/mutation.yml)
+
 **Core functional programming abstractions and domain primitives for the Ouroboros AI agent system.**
 
 ## Overview
