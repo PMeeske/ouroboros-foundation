@@ -70,6 +70,7 @@ public class ObjectPoolSteps
     {
         _pool.Should().NotBeNull();
         _rentedObject = _pool!.Rent();
+        _firstObject = _rentedObject;
     }
 
     [When("I return the object")]

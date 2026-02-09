@@ -148,7 +148,7 @@ public static class CommonPools
     /// Pool for StringBuilder instances.
     /// </summary>
     public static readonly ObjectPool<StringBuilder> StringBuilder = new(
-        () => new StringBuilder(),
+        () => new StringBuilder(256),
         sb => sb.Clear(),
         maxPoolSize: 100);
 

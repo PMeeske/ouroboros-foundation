@@ -74,7 +74,7 @@ Feature: Object Pool
         Then the pool size should not increase
 
     Scenario: Thread safety stress test
-        Given an object pool of StringBuilder with max size 10
+        Given an object pool with max size 10
         When I run 100 parallel rent and return operations
         Then all operations should complete without exceptions
 

@@ -105,8 +105,8 @@ Feature: Input Validator
         And the sanitized value should be "<expected>"
         
         Examples:
-            | input                | expected           |
-            | Line1\r\nLine2\rLine3 | Line1\nLine2\nLine3 |
+            | input                  | expected             |
+            | Line1\\r\\nLine2\\rLine3 | Line1\\nLine2\\nLine3 |
 
     Scenario Outline: HTML escaping when enabled
         Given a lenient input validator with HTML escaping
