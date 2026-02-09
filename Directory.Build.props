@@ -1,11 +1,34 @@
 <Project>
-  <!-- Import base build config from ouroboros-build (via submodule or manual copy) -->
+  <!-- Import base build config from ouroboros-build -->
+  <!-- Layout 1: local .build submodule -->
+  <Import Project="$(MSBuildThisFileDirectory).build\build\Directory.Build.props"
+          Condition="Exists('$(MSBuildThisFileDirectory).build\build\Directory.Build.props')" />
+  <!-- Layout 2: meta-repo parent's .build submodule -->
   <Import Project="$(MSBuildThisFileDirectory)..\.build\build\Directory.Build.props"
-          Condition="Exists('$(MSBuildThisFileDirectory)..\.build\build\Directory.Build.props')" />
+          Condition="'$(TargetFramework)' == ''
+                     AND Exists('$(MSBuildThisFileDirectory)..\.build\build\Directory.Build.props')" />
+  <!-- Layout 3: standalone peer checkout -->
+  <Import Project="$(MSBuildThisFileDirectory)..\ouroboros-build\build\Directory.Build.props"
+          Condition="'$(TargetFramework)' == ''
+                     AND Exists('$(MSBuildThisFileDirectory)..\ouroboros-build\build\Directory.Build.props')" />
+
+  <!-- Fallback: minimal defaults when no build config is available -->
+  <PropertyGroup Condition="'$(TargetFramework)' == ''">
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>14.0</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
 
   <PropertyGroup>
     <OuroborosLayer>Foundation</OuroborosLayer>
-    <!-- Cross-layer paths for test projects that reference engine types -->
-    <OuroborosEngine>$(MSBuildThisFileDirectory)..\engine\src</OuroborosEngine>
+    <!-- OuroborosBuild path resolution -->
+    <OuroborosBuild Condition="Exists('$(MSBuildThisFileDirectory).build')">$(MSBuildThisFileDirectory).build</OuroborosBuild>
+    <OuroborosBuild Condition="'$(OuroborosBuild)' == '' AND Exists('$(MSBuildThisFileDirectory)..\.build')">$(MSBuildThisFileDirectory)..\.build</OuroborosBuild>
+    <OuroborosBuild Condition="'$(OuroborosBuild)' == '' AND Exists('$(MSBuildThisFileDirectory)..\ouroboros-build')">$(MSBuildThisFileDirectory)..\ouroboros-build</OuroborosBuild>
+    <!-- Cross-layer paths: meta-repo layout -->
+    <OuroborosEngine Condition="Exists('$(MSBuildThisFileDirectory)..\engine\src')">$(MSBuildThisFileDirectory)..\engine\src</OuroborosEngine>
+    <!-- Cross-layer paths: standalone layout -->
+    <OuroborosEngine Condition="'$(OuroborosEngine)' == '' AND Exists('$(MSBuildThisFileDirectory)..\ouroboros-engine\src')">$(MSBuildThisFileDirectory)..\ouroboros-engine\src</OuroborosEngine>
   </PropertyGroup>
 </Project>
