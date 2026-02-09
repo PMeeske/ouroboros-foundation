@@ -448,4 +448,32 @@ public class ToolRegistryExtendedTests
     }
 
     #endregion
+
+    #region Mock Tool Helper
+
+    /// <summary>
+    /// A simple mock tool implementation for testing.
+    /// </summary>
+    private sealed class MockTool : ITool
+    {
+        public MockTool(string name, string? description = null, string? jsonSchema = null)
+        {
+            this.Name = name;
+            this.Description = description ?? $"Mock tool: {name}";
+            this.JsonSchema = jsonSchema;
+        }
+
+        public string Name { get; }
+
+        public string Description { get; }
+
+        public string? JsonSchema { get; }
+
+        public Task<Result<string, string>> InvokeAsync(string input, CancellationToken ct = default)
+        {
+            return Task.FromResult(Result<string, string>.Success($"Mock result for: {input}"));
+        }
+    }
+
+    #endregion
 }

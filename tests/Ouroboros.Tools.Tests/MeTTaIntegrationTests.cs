@@ -550,7 +550,7 @@ public class MeTTaIntegrationTests
     #region Engine Disposal Tests
 
     [Fact]
-    public void MockEngine_AfterDispose_ThrowsObjectDisposedException()
+    public async Task MockEngine_AfterDispose_ThrowsObjectDisposedException()
     {
         // Arrange
         var engine = new MockMeTTaEngine();
@@ -558,7 +558,7 @@ public class MeTTaIntegrationTests
 
         // Act & Assert
         // Verify that the mock engine correctly throws when disposed
-        Assert.ThrowsAsync<ObjectDisposedException>(
+        await Assert.ThrowsAsync<ObjectDisposedException>(
             async () => await engine.ExecuteQueryAsync("!(test)"));
     }
 
