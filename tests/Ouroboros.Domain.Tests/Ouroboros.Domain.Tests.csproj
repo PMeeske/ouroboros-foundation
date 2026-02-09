@@ -10,7 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(OuroborosBuild)\test-infra\Ouroboros.TestKit\Ouroboros.TestKit.csproj" />
     <ProjectReference Include="..\..\src\Ouroboros.Core\Ouroboros.Core.csproj" />
     <ProjectReference Include="..\..\src\Ouroboros.Domain\Ouroboros.Domain.csproj" />
   </ItemGroup>

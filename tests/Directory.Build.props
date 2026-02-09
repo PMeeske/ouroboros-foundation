@@ -10,16 +10,14 @@
     <Using Include="Ouroboros.Core.Memory" />
     <Using Include="Ouroboros.Core.Monads" />
     <Using Include="Ouroboros.Core.Steps" />
+  </ItemGroup>
+  
+  <!-- Domain usings for tests that reference Ouroboros.Domain -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'Ouroboros.Genetic.Tests'">
     <Using Include="Ouroboros.Domain" />
     <Using Include="Ouroboros.Domain.Events" />
     <Using Include="Ouroboros.Domain.States" />
     <Using Include="Ouroboros.Domain.Vectors" />
-    <Using Include="Ouroboros.Tools" />
-    <Using Include="Ouroboros.Tools.MeTTa" />
-    <Using Include="Ouroboros.Tests.Mocks" />
-    <Using Include="Ouroboros.Tests.Infrastructure" />
-    <Using Include="Ouroboros.Tests.Infrastructure.Utilities" />
-    <Using Include="Ouroboros.Tests.Infrastructure.Fixtures" />
   </ItemGroup>
 
   <!-- Usings for engine types (some foundation tests reference Agent types) -->
