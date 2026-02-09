@@ -16,6 +16,12 @@ concurrency:
   group: ci-${{ github.event_name == 'repository_dispatch' && format('dispatch-{0}', github.event.client_payload.source_repo) || github.ref }}
   cancel-in-progress: true
 
+# Permissions required for test result publishing and artifact uploads
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
 jobs:
   build:
     name: Build
@@ -32,6 +38,10 @@ jobs:
     name: Test
     needs: build
     uses: PMeeske/ouroboros-build/.github/workflows/_reusable-dotnet-test.yml@main
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
     with:
       test-projects: >-
         tests/Ouroboros.Core.Tests/Ouroboros.Core.Tests.csproj
@@ -47,8 +57,14 @@ jobs:
 
   bdd:
     name: BDD Tests
-    needs: build
+    # Run after test job to avoid artifact naming conflicts
+    # TODO: Remove this dependency once reusable workflow supports unique artifact names
+    needs: [build, test]
     uses: PMeeske/ouroboros-build/.github/workflows/_reusable-dotnet-test.yml@main
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
     with:
       test-projects: tests/Ouroboros.Foundation.BDD/Ouroboros.Foundation.BDD.csproj
       build-projects: >-
