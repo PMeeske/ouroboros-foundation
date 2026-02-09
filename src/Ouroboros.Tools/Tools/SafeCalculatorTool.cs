@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Text.Json;
 using Ouroboros.Core.Monads;
 using Ouroboros.Tools.MeTTa;
+using Unit = Ouroboros.Core.Learning.Unit;
 
 /// <summary>
 /// A specialized calculator tool that demonstrates "Proof-Carrying Code" / Verification.
