@@ -43,6 +43,7 @@ jobs:
       checks: write
       pull-requests: write
     with:
+      job-identifier: "test"
       test-projects: >-
         tests/Ouroboros.Core.Tests/Ouroboros.Core.Tests.csproj
         tests/Ouroboros.Domain.Tests/Ouroboros.Domain.Tests.csproj
@@ -57,15 +58,14 @@ jobs:
 
   bdd:
     name: BDD Tests
-    # Run after test job to avoid artifact naming conflicts
-    # TODO: Remove this dependency once reusable workflow supports unique artifact names
-    needs: [build, test]
+    needs: build
     uses: PMeeske/ouroboros-build/.github/workflows/_reusable-dotnet-test.yml@main
     permissions:
       contents: read
       checks: write
       pull-requests: write
     with:
+      job-identifier: "bdd"
       test-projects: tests/Ouroboros.Foundation.BDD/Ouroboros.Foundation.BDD.csproj
       build-projects: >-
         src/Ouroboros.Core/Ouroboros.Core.csproj
