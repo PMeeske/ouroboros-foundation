@@ -2,7 +2,6 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
-#pragma warning disable SA1309 // Field names should not begin with underscore
 #pragma warning disable SA1101 // Prefix local calls with this
 
 namespace Ouroboros.Tools.MeTTa;
@@ -47,11 +46,11 @@ public class PatternMatch
 /// </summary>
 public sealed class HyperonFlowIntegration : IAsyncDisposable
 {
-    private readonly HyperonMeTTaEngine _engine;
-    private readonly ConcurrentDictionary<string, PatternSubscription> _subscriptions = new();
-    private readonly ConcurrentDictionary<string, HyperonFlow> _flows = new();
-    private readonly CancellationTokenSource _disposeCts = new();
-    private bool _disposed;
+    private readonly HyperonMeTTaEngine hyperonEngine;
+    private readonly ConcurrentDictionary<string, PatternSubscription> subscriptions = new();
+    private readonly ConcurrentDictionary<string, HyperonFlow> flows = new();
+    private readonly CancellationTokenSource disposeCts = new();
+    private bool disposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HyperonFlowIntegration"/> class.
@@ -59,14 +58,14 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
     /// <param name="engine">The Hyperon engine to use.</param>
     public HyperonFlowIntegration(HyperonMeTTaEngine engine)
     {
-        _engine = engine ?? throw new ArgumentNullException(nameof(engine));
-        _engine.AtomAdded += OnAtomAdded;
+        hyperonEngine = engine ?? throw new ArgumentNullException(nameof(engine));
+        hyperonEngine.AtomAdded += OnAtomAdded;
     }
 
     /// <summary>
     /// Gets the underlying engine.
     /// </summary>
-    public HyperonMeTTaEngine Engine => _engine;
+    public HyperonMeTTaEngine Engine => hyperonEngine;
 
     /// <summary>
     /// Event raised when a pattern is matched.
@@ -88,7 +87,7 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
             Handler = handler,
         };
 
-        _subscriptions[subscriptionId] = subscription;
+        subscriptions[subscriptionId] = subscription;
     }
 
     /// <summary>
@@ -97,7 +96,7 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
     /// <param name="subscriptionId">The subscription to remove.</param>
     public void UnsubscribePattern(string subscriptionId)
     {
-        _subscriptions.TryRemove(subscriptionId, out _);
+        subscriptions.TryRemove(subscriptionId, out _);
     }
 
     /// <summary>
@@ -108,8 +107,8 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
     /// <returns>A chainable HyperonFlow.</returns>
     public HyperonFlow CreateFlow(string name, string description)
     {
-        var flow = new HyperonFlow(_engine, name, description);
-        _flows[name] = flow;
+        var flow = new HyperonFlow(hyperonEngine, name, description);
+        flows[name] = flow;
         return flow;
     }
 
@@ -120,7 +119,7 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
     /// <returns>The flow if found, null otherwise.</returns>
     public HyperonFlow? GetFlow(string name)
     {
-        return _flows.TryGetValue(name, out HyperonFlow? flow) ? flow : null;
+        return flows.TryGetValue(name, out HyperonFlow? flow) ? flow : null;
     }
 
     /// <summary>
@@ -131,7 +130,7 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
     /// <returns>Task completing when flow is executed.</returns>
     public async Task ExecuteFlowAsync(string flowName, CancellationToken ct = default)
     {
-        if (_flows.TryGetValue(flowName, out HyperonFlow? flow))
+        if (flows.TryGetValue(flowName, out HyperonFlow? flow))
         {
             await flow.ExecuteAsync(ct);
         }
@@ -149,7 +148,7 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
         int reflectionDepth = 2,
         TimeSpan? interval = null)
     {
-        var cts = CancellationTokenSource.CreateLinkedTokenSource(_disposeCts.Token);
+        var cts = CancellationTokenSource.CreateLinkedTokenSource(disposeCts.Token);
         TimeSpan loopInterval = interval ?? TimeSpan.FromSeconds(5);
 
         Task.Run(async () =>
@@ -178,17 +177,17 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
     /// <inheritdoc/>
     public ValueTask DisposeAsync()
     {
-        if (_disposed)
+        if (disposed)
         {
             return ValueTask.CompletedTask;
         }
 
-        _disposed = true;
-        _disposeCts.Cancel();
-        _disposeCts.Dispose();
-        _engine.AtomAdded -= OnAtomAdded;
-        _subscriptions.Clear();
-        _flows.Clear();
+        disposed = true;
+        disposeCts.Cancel();
+        disposeCts.Dispose();
+        hyperonEngine.AtomAdded -= OnAtomAdded;
+        subscriptions.Clear();
+        flows.Clear();
 
         return ValueTask.CompletedTask;
     }
@@ -196,7 +195,7 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
     private void OnAtomAdded(Atom atom)
     {
         // Check each subscription for pattern matches
-        foreach (PatternSubscription subscription in _subscriptions.Values)
+        foreach (PatternSubscription subscription in subscriptions.Values)
         {
             if (TryMatch(atom, subscription.Pattern, out Substitution? bindings))
             {
@@ -227,7 +226,7 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
 
         try
         {
-            Core.Monads.Result<Atom> parseResult = _engine.Parser.Parse(pattern);
+            Core.Monads.Result<Atom> parseResult = hyperonEngine.Parser.Parse(pattern);
             if (!parseResult.IsSuccess)
             {
                 return false;
@@ -256,17 +255,17 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
     private async Task PerformReflectionAsync(string loopId, int depth, CancellationToken ct)
     {
         // Add reflection event
-        await _engine.AddFactAsync($"(Reflection {loopId} {DateTime.UtcNow.Ticks} {depth})", ct);
+        await hyperonEngine.AddFactAsync($"(Reflection {loopId} {DateTime.UtcNow.Ticks} {depth})", ct);
 
         // Query for thoughts to reflect on
-        Result<string, string> thoughtsResult = await _engine.ExecuteQueryAsync(
+        Result<string, string> thoughtsResult = await hyperonEngine.ExecuteQueryAsync(
             "(match &self (Thought $content $type) (: $content $type))",
             ct);
 
         if (thoughtsResult.IsSuccess && !string.IsNullOrEmpty(thoughtsResult.Value))
         {
             // Add meta-cognition atom
-            await _engine.AddFactAsync(
+            await hyperonEngine.AddFactAsync(
                 $"(MetaCognition {loopId} reflecting-on {thoughtsResult.Value})",
                 ct);
         }
@@ -274,7 +273,7 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
         // Recursive reflection if depth > 1
         if (depth > 1)
         {
-            await _engine.AddFactAsync(
+            await hyperonEngine.AddFactAsync(
                 $"(DeepReflection {loopId} depth-{depth} {DateTime.UtcNow.Ticks})",
                 ct);
         }
@@ -293,27 +292,27 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
 /// </summary>
 public sealed class HyperonFlow
 {
-    private readonly HyperonMeTTaEngine _engine;
-    private readonly string _name;
-    private readonly string _description;
-    private readonly List<Func<CancellationToken, Task>> _steps = new();
+    private readonly HyperonMeTTaEngine hyperonEngine;
+    private readonly string flowName;
+    private readonly string flowDescription;
+    private readonly List<Func<CancellationToken, Task>> steps = new();
 
     internal HyperonFlow(HyperonMeTTaEngine engine, string name, string description)
     {
-        _engine = engine;
-        _name = name;
-        _description = description;
+        hyperonEngine = engine;
+        flowName = name;
+        flowDescription = description;
     }
 
     /// <summary>
     /// Gets the flow name.
     /// </summary>
-    public string Name => _name;
+    public string Name => flowName;
 
     /// <summary>
     /// Gets the flow description.
     /// </summary>
-    public string Description => _description;
+    public string Description => flowDescription;
 
     /// <summary>
     /// Loads facts into the AtomSpace.
@@ -322,11 +321,11 @@ public sealed class HyperonFlow
     /// <returns>This flow for chaining.</returns>
     public HyperonFlow LoadFacts(params string[] facts)
     {
-        _steps.Add(async ct =>
+        steps.Add(async ct =>
         {
             foreach (string fact in facts)
             {
-                await _engine.AddFactAsync(fact, ct);
+                await hyperonEngine.AddFactAsync(fact, ct);
             }
         });
         return this;
@@ -339,9 +338,9 @@ public sealed class HyperonFlow
     /// <returns>This flow for chaining.</returns>
     public HyperonFlow ApplyRule(string rule)
     {
-        _steps.Add(async ct =>
+        steps.Add(async ct =>
         {
-            await _engine.ApplyRuleAsync(rule, ct);
+            await hyperonEngine.ApplyRuleAsync(rule, ct);
         });
         return this;
     }
@@ -354,9 +353,9 @@ public sealed class HyperonFlow
     /// <returns>This flow for chaining.</returns>
     public HyperonFlow Query(string query, Action<string>? resultHandler = null)
     {
-        _steps.Add(async ct =>
+        steps.Add(async ct =>
         {
-            Result<string, string> result = await _engine.ExecuteQueryAsync(query, ct);
+            Result<string, string> result = await hyperonEngine.ExecuteQueryAsync(query, ct);
             if (result.IsSuccess)
             {
                 resultHandler?.Invoke(result.Value);
@@ -372,7 +371,7 @@ public sealed class HyperonFlow
     /// <returns>This flow for chaining.</returns>
     public HyperonFlow Transform(Func<HyperonMeTTaEngine, CancellationToken, Task> transform)
     {
-        _steps.Add(ct => transform(_engine, ct));
+        steps.Add(ct => transform(hyperonEngine, ct));
         return this;
     }
 
@@ -383,9 +382,9 @@ public sealed class HyperonFlow
     /// <returns>This flow for chaining.</returns>
     public HyperonFlow SideEffect(Action<HyperonMeTTaEngine> action)
     {
-        _steps.Add(_ =>
+        steps.Add(_ =>
         {
-            action(_engine);
+            action(hyperonEngine);
             return Task.CompletedTask;
         });
         return this;
@@ -398,7 +397,7 @@ public sealed class HyperonFlow
     /// <returns>Task completing when flow is done.</returns>
     public async Task ExecuteAsync(CancellationToken ct = default)
     {
-        foreach (Func<CancellationToken, Task> step in _steps)
+        foreach (Func<CancellationToken, Task> step in steps)
         {
             ct.ThrowIfCancellationRequested();
             await step(ct);
