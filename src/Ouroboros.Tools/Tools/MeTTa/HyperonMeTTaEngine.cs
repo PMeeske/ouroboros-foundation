@@ -2,7 +2,6 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
-#pragma warning disable SA1309 // Field names should not begin with underscore
 #pragma warning disable SA1101 // Prefix local calls with this
 
 namespace Ouroboros.Tools.MeTTa;
@@ -17,27 +16,27 @@ using Ouroboros.Core.Hyperon.Parsing;
 /// </summary>
 public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
 {
-    private readonly AtomSpace _space;
-    private readonly Interpreter _interpreter;
-    private readonly SExpressionParser _parser;
-    private readonly GroundedRegistry _groundedOps;
-    private readonly ConcurrentDictionary<string, Atom> _namedAtoms = new();
-    private bool _disposed;
+    private readonly AtomSpace space;
+    private readonly Interpreter interpreter;
+    private readonly SExpressionParser parser;
+    private readonly GroundedRegistry groundedRegistry;
+    private readonly ConcurrentDictionary<string, Atom> namedAtoms = new();
+    private bool disposed;
 
     /// <summary>
     /// Gets the underlying AtomSpace for direct access.
     /// </summary>
-    public IAtomSpace AtomSpace => _space;
+    public IAtomSpace AtomSpace => space;
 
     /// <summary>
     /// Gets the interpreter for direct evaluation.
     /// </summary>
-    public Interpreter Interpreter => _interpreter;
+    public Interpreter Interpreter => interpreter;
 
     /// <summary>
     /// Gets the parser for S-expression parsing.
     /// </summary>
-    public SExpressionParser Parser => _parser;
+    public SExpressionParser Parser => parser;
 
     /// <summary>
     /// Event raised when atoms are added to the space.
@@ -55,10 +54,10 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
     /// <param name="groundedOps">Optional custom grounded operations.</param>
     public HyperonMeTTaEngine(GroundedRegistry? groundedOps = null)
     {
-        _groundedOps = groundedOps ?? CreateDefaultGroundedOps();
-        _space = new AtomSpace();
-        _interpreter = new Interpreter(_space, _groundedOps);
-        _parser = new SExpressionParser();
+        groundedRegistry = groundedOps ?? CreateDefaultGroundedOps();
+        space = new AtomSpace();
+        interpreter = new Interpreter(space, groundedRegistry);
+        parser = new SExpressionParser();
 
         // Initialize with core atoms
         InitializeCoreAtoms();
@@ -75,7 +74,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
         var engine = new HyperonMeTTaEngine(groundedOps);
         foreach (Atom atom in space.All())
         {
-            engine._space.Add(atom);
+            engine.space.Add(atom);
         }
 
         return engine;
@@ -84,20 +83,20 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
     /// <inheritdoc/>
     public Task<Result<string, string>> ExecuteQueryAsync(string query, CancellationToken ct = default)
     {
-        if (_disposed)
+        if (disposed)
         {
             return Task.FromResult(Result<string, string>.Failure("Engine disposed"));
         }
 
         try
         {
-            Core.Monads.Result<Atom> parseResult = _parser.Parse(query);
+            Core.Monads.Result<Atom> parseResult = parser.Parse(query);
             if (!parseResult.IsSuccess)
             {
                 return Task.FromResult(Result<string, string>.Failure($"Parse error: {parseResult.Error}"));
             }
 
-            List<Atom> results = _interpreter.Evaluate(parseResult.Value).ToList();
+            List<Atom> results = interpreter.Evaluate(parseResult.Value).ToList();
 
             QueryEvaluated?.Invoke(query, results);
 
@@ -118,14 +117,14 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
     /// <inheritdoc/>
     public Task<Result<MeTTaUnit, string>> AddFactAsync(string fact, CancellationToken ct = default)
     {
-        if (_disposed)
+        if (disposed)
         {
             return Task.FromResult(Result<MeTTaUnit, string>.Failure("Engine disposed"));
         }
 
         try
         {
-            Core.Monads.Result<Atom> parseResult = _parser.Parse(fact);
+            Core.Monads.Result<Atom> parseResult = parser.Parse(fact);
             if (!parseResult.IsSuccess)
             {
                 return Task.FromResult(Result<MeTTaUnit, string>.Failure($"Parse error: {parseResult.Error}"));
@@ -143,14 +142,14 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
     /// <inheritdoc/>
     public Task<Result<string, string>> ApplyRuleAsync(string rule, CancellationToken ct = default)
     {
-        if (_disposed)
+        if (disposed)
         {
             return Task.FromResult(Result<string, string>.Failure("Engine disposed"));
         }
 
         try
         {
-            Core.Monads.Result<Atom> parseResult = _parser.Parse(rule);
+            Core.Monads.Result<Atom> parseResult = parser.Parse(rule);
             if (!parseResult.IsSuccess)
             {
                 return Task.FromResult(Result<string, string>.Failure($"Parse error: {parseResult.Error}"));
@@ -160,7 +159,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
             AddAtom(parseResult.Value);
 
             // Evaluate to trigger any immediate inference
-            List<Atom> results = _interpreter.Evaluate(parseResult.Value).ToList();
+            List<Atom> results = interpreter.Evaluate(parseResult.Value).ToList();
             string resultStr = results.Count > 0
                 ? string.Join(" ", results.Select(a => a.ToSExpr()))
                 : "rule-added";
@@ -176,7 +175,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
     /// <inheritdoc/>
     public Task<Result<bool, string>> VerifyPlanAsync(string plan, CancellationToken ct = default)
     {
-        if (_disposed)
+        if (disposed)
         {
             return Task.FromResult(Result<bool, string>.Failure("Engine disposed"));
         }
@@ -184,14 +183,14 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
         try
         {
             // Parse the plan
-            Core.Monads.Result<Atom> parseResult = _parser.Parse(plan);
+            Core.Monads.Result<Atom> parseResult = parser.Parse(plan);
             if (!parseResult.IsSuccess)
             {
                 return Task.FromResult(Result<bool, string>.Success(false));
             }
 
             // Check if plan can be evaluated
-            List<Atom> results = _interpreter.Evaluate(parseResult.Value).ToList();
+            List<Atom> results = interpreter.Evaluate(parseResult.Value).ToList();
             bool isValid = results.Count > 0 || parseResult.IsSuccess;
 
             return Task.FromResult(Result<bool, string>.Success(isValid));
@@ -210,7 +209,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
     /// <returns>Verification result.</returns>
     public Task<Result<bool, string>> VerifyPlanStepsAsync(IEnumerable<string> steps, CancellationToken ct = default)
     {
-        if (_disposed)
+        if (disposed)
         {
             return Task.FromResult(Result<bool, string>.Failure("Engine disposed"));
         }
@@ -227,7 +226,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
             // Verify each step can be executed
             foreach (string step in stepsList)
             {
-                Core.Monads.Result<Atom> parseResult = _parser.Parse(step);
+                Core.Monads.Result<Atom> parseResult = parser.Parse(step);
                 if (!parseResult.IsSuccess)
                 {
                     return Task.FromResult(Result<bool, string>.Success(false));
@@ -245,15 +244,15 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
     /// <inheritdoc/>
     public Task<Result<MeTTaUnit, string>> ResetAsync(CancellationToken ct = default)
     {
-        if (_disposed)
+        if (disposed)
         {
             return Task.FromResult(Result<MeTTaUnit, string>.Failure("Engine disposed"));
         }
 
         try
         {
-            _space.Clear();
-            _namedAtoms.Clear();
+            space.Clear();
+            namedAtoms.Clear();
             InitializeCoreAtoms();
             return Task.FromResult(Result<MeTTaUnit, string>.Success(MeTTaUnit.Value));
         }
@@ -269,7 +268,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
     /// <param name="atom">The atom to add.</param>
     public void AddAtom(Atom atom)
     {
-        _space.Add(atom);
+        space.Add(atom);
         AtomAdded?.Invoke(atom);
     }
 
@@ -280,7 +279,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
     /// <param name="atom">The atom to bind to the name.</param>
     public void BindAtom(string name, Atom atom)
     {
-        _namedAtoms[name] = atom;
+        namedAtoms[name] = atom;
         AddAtom(atom);
     }
 
@@ -291,7 +290,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
     /// <returns>The atom if found, null otherwise.</returns>
     public Atom? GetNamedAtom(string name)
     {
-        return _namedAtoms.TryGetValue(name, out Atom? atom) ? atom : null;
+        return namedAtoms.TryGetValue(name, out Atom? atom) ? atom : null;
     }
 
     /// <summary>
@@ -301,7 +300,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
     /// <returns>Matching atoms with their substitutions.</returns>
     public IEnumerable<(Atom Atom, Substitution Bindings)> Query(Atom pattern)
     {
-        return _space.Query(pattern);
+        return space.Query(pattern);
     }
 
     /// <summary>
@@ -312,7 +311,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
     /// <returns>Success or failure result.</returns>
     public async Task<Result<MeTTaUnit, string>> LoadMeTTaSourceAsync(string mettaSource, CancellationToken ct = default)
     {
-        if (_disposed)
+        if (disposed)
         {
             return Result<MeTTaUnit, string>.Failure("Engine disposed");
         }
@@ -347,7 +346,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
         sb.AppendLine($"; Exported at {DateTime.UtcNow:O}");
         sb.AppendLine();
 
-        foreach (Atom atom in _space.All())
+        foreach (Atom atom in space.All())
         {
             sb.AppendLine(atom.ToSExpr());
         }
@@ -362,19 +361,19 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
     /// <param name="operation">The operation implementation.</param>
     public void RegisterGroundedOp(string name, GroundedOperation operation)
     {
-        _groundedOps.Register(name, operation);
+        groundedRegistry.Register(name, operation);
     }
 
     /// <inheritdoc/>
     public void Dispose()
     {
-        if (_disposed)
+        if (disposed)
         {
             return;
         }
 
-        _disposed = true;
-        _namedAtoms.Clear();
+        disposed = true;
+        namedAtoms.Clear();
     }
 
     private static GroundedRegistry CreateDefaultGroundedOps()
