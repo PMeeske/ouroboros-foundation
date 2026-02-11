@@ -2,6 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+// ReSharper disable once RedundantUsingDirective
 using System;
 
 namespace Ouroboros.Abstractions;

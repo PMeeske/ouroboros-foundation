@@ -2,7 +2,13 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-// System namespaces are auto-imported via <ImplicitUsings>enable</ImplicitUsings>
+// System namespaces (ImplicitUsings is disabled in csproj)
+global using System;
+global using System.Collections.Generic;
+global using System.Threading;
+global using System.Threading.Tasks;
+
+// Project namespaces
 global using Ouroboros.Core.Interop;
 global using Ouroboros.Core.Kleisli;
 global using Ouroboros.Core.Memory;
