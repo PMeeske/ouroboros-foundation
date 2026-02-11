@@ -6,7 +6,6 @@ namespace Ouroboros.Tests.Core;
 
 using FluentAssertions;
 using Ouroboros.Core.Kleisli;
-using Ouroboros.Core.Monads;
 using Ouroboros.Core.Steps;
 using Xunit;
 

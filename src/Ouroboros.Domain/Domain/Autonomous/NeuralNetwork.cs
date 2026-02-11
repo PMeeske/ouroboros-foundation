@@ -5,7 +5,6 @@
 using System.Collections.Concurrent;
 using System.Reactive.Subjects;
 using System.Text;
-using System.Text.Json;
 
 namespace Ouroboros.Domain.Autonomous;
 
@@ -14,6 +13,18 @@ namespace Ouroboros.Domain.Autonomous;
 /// </summary>
 public enum NeuronType
 {
+    /// <summary>The neuron responsible for processing incoming messages and executing associated logic.</summary>
+    Processor,
+
+    /// <summary>The neuron responsible for aggregating data from multiple sources and synthesizing it into a unified representation.</summary>
+    Aggregator,
+
+    /// <summary>The neuron responsible for monitoring and observing system states, events, or changes in the environment.</summary>
+    Observer,
+
+    /// <summary>The neuron responsible for generating responses to incoming messages or requests.</summary>
+    Responder,
+
     /// <summary>The core reasoning neuron.</summary>
     Core,
 

@@ -3,7 +3,7 @@
 // </copyright>
 
 using System.Collections.Concurrent;
-using Ouroboros.Core.Monads;
+using Ouroboros.Abstractions;
 using Ouroboros.Domain.Environment;
 
 namespace Ouroboros.Domain.Reinforcement;

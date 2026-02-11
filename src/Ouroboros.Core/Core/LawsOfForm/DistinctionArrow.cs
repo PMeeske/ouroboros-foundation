@@ -4,8 +4,6 @@
 
 namespace Ouroboros.Core.LawsOfForm;
 
-using Ouroboros.Core.Kleisli;
-
 /// <summary>
 /// Provides Kleisli arrows for distinction-based reasoning using the Laws of Form.
 /// These arrows allow pipeline composition where computations are gated by distinctions.

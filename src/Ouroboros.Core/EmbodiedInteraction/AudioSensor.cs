@@ -2,6 +2,8 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using Ouroboros.Abstractions;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 using System.Reactive.Linq;
@@ -264,7 +266,7 @@ public sealed class AudioSensor : IDisposable
             _virtualSelf.ActivateSensor(SensorModality.Audio);
             _virtualSelf.SetState(EmbodimentState.Listening);
 
-            return Result<Unit, string>.Success(Unit.Default);
+            return Result<Unit, string>.Success(Unit.Value);
         }
         catch (Exception ex)
         {
@@ -277,7 +279,7 @@ public sealed class AudioSensor : IDisposable
     /// </summary>
     public async Task<Result<Unit, string>> StopListeningAsync(CancellationToken ct = default)
     {
-        if (!_isListening) return Result<Unit, string>.Success(Unit.Default);
+        if (!_isListening) return Result<Unit, string>.Success(Unit.Value);
 
         try
         {
@@ -291,7 +293,7 @@ public sealed class AudioSensor : IDisposable
             _isListening = false;
             _virtualSelf.DeactivateSensor(SensorModality.Audio);
 
-            return Result<Unit, string>.Success(Unit.Default);
+            return Result<Unit, string>.Success(Unit.Value);
         }
         catch (Exception ex)
         {
@@ -331,7 +333,7 @@ public sealed class AudioSensor : IDisposable
                 }
             }
 
-            return Result<Unit, string>.Success(Unit.Default);
+            return Result<Unit, string>.Success(Unit.Value);
         }
         catch (Exception ex)
         {

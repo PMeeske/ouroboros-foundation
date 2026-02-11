@@ -20,14 +20,6 @@
     <Using Include="Ouroboros.Domain.Vectors" />
   </ItemGroup>
 
-  <!-- Usings for engine types (some foundation tests reference Agent types) -->
-  <ItemGroup Condition="Exists('$(OuroborosEngine)')">
-    <Using Include="Ouroboros.Agent" />
-    <Using Include="Ouroboros.Pipeline.Branches" />
-    <Using Include="Ouroboros.Pipeline.Reasoning" />
-    <Using Include="Ouroboros.Providers" />
-  </ItemGroup>
-
   <!-- Alias for naming conflicts -->
   <ItemGroup>
     <Using Include="Ouroboros.Core.Synthesis.Program" Alias="SynthesisProgram" />

@@ -3,7 +3,6 @@
 // </copyright>
 
 using System.Collections.Concurrent;
-using System.Collections.Immutable;
 using Ouroboros.Core.LawsOfForm;
 
 namespace Ouroboros.Core.Hyperon;

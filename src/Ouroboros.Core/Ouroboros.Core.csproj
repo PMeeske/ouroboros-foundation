@@ -40,5 +40,8 @@
     <Compile Remove="Core\LangChain\LangChainIntegration.cs" />
     <Compile Remove="Core\LangChain\LangChainConversationPipeline.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Ouroboros.Abstractions\Ouroboros.Abstractions.csproj" />
+  </ItemGroup>
 
 </Project>

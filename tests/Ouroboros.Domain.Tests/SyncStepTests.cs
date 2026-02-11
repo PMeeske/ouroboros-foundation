@@ -5,7 +5,6 @@
 namespace Ouroboros.Tests.Steps;
 
 using FluentAssertions;
-using Ouroboros.Core.Monads;
 using Ouroboros.Core.Steps;
 using Xunit;
 

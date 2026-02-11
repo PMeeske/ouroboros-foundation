@@ -5,7 +5,6 @@
 namespace Ouroboros.Genetic.Steps;
 
 using Ouroboros.Genetic.Abstractions;
-using Ouroboros.Genetic.Core;
 
 /// <summary>
 /// A pipeline step that uses genetic algorithms to evolve and optimize parameters or configurations.

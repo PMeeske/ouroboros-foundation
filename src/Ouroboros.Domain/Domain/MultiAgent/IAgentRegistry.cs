@@ -2,10 +2,11 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using Ouroboros.Abstractions;
+
 namespace Ouroboros.Domain.MultiAgent;
 
 using Ouroboros.Core.Monads;
-using Ouroboros.Domain.Reinforcement;
 
 /// <summary>
 /// Registry for tracking and managing agent capabilities and availability.

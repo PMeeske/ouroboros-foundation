@@ -1,15 +1,33 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading.Tasks;
-using Ouroboros.Core.Monads;
-using Ouroboros.Core.Learning;
+using Ouroboros.Abstractions;
 
 namespace Ouroboros.Core.Tracing
 {
+    /// <summary>
+    /// Defines a service for recording and managing diagnostic tracing information.
+    /// </summary>
     public interface ITracingService
     {
+        /// <summary>
+        /// Enables tracing functionality for the current instance.
+        /// </summary>
+        /// <remarks>
+        /// This method configures the system to capture and record trace information
+        /// for debugging and monitoring purposes. Once enabled, trace output will be
+        /// generated according to the configured trace level and output settings.
+        /// </remarks>
+        /// <return>true if tracing was successfully enabled; otherwise, false.</return>
         Task<Result<Unit, string>> EnableTracing();
+
+        /// <summary>
+        /// Disables tracing functionality for the current instance.
+        /// </summary>
+        /// <remarks>
+        /// This method disables the tracing mechanism and stops capturing trace information.
+        /// Any previously configured trace settings will remain intact but tracing output
+        /// will no longer be generated or recorded.
+        /// </remarks>
+        /// <return>true if tracing was successfully disabled; otherwise, false.</return>
         Task<Result<Unit, string>> DisableTracing();
         Task<Result<Unit, string>> EnableTracingWithCallbacks(Action started, Action stopped);
         Task<Result<Activity, string>> StartActivity(string name, Dictionary<string, object>? tags = null);

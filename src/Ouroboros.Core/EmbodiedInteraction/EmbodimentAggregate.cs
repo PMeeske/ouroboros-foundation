@@ -5,7 +5,7 @@
 using System.Collections.Concurrent;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using Ouroboros.Core.Monads;
+using Ouroboros.Abstractions;
 
 namespace Ouroboros.Core.EmbodiedInteraction;
 
@@ -268,7 +268,7 @@ public sealed class EmbodimentAggregate : IDisposable
         if (_disposed) return Result<Unit>.Failure("Aggregate is disposed");
         if (_state.Status == AggregateStatus.Inactive)
         {
-            return Result<Unit>.Success(Unit.Default);
+            return Result<Unit>.Success(Unit.Value);
         }
 
         UpdateState(_state with { Status = AggregateStatus.Deactivating });
@@ -292,7 +292,7 @@ public sealed class EmbodimentAggregate : IDisposable
             EmbodimentDomainEventType.AggregateDeactivated,
             DateTime.UtcNow));
 
-        return Result<Unit>.Success(Unit.Default);
+        return Result<Unit>.Success(Unit.Value);
     }
 
     /// <summary>

@@ -5,7 +5,6 @@
 namespace Ouroboros.Tests.Genetic;
 
 using FluentAssertions;
-using Ouroboros.Core.Monads;
 using Ouroboros.Core.Steps;
 using Ouroboros.Genetic.Abstractions;
 using Ouroboros.Genetic.Core;

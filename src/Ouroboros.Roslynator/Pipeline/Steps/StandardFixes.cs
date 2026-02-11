@@ -1,7 +1,5 @@
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
-using FixState = Ouroboros.Roslynator.Pipeline.FixState;
-
 namespace Ouroboros.Roslynator.Pipeline.Steps;
 
 /// <summary>

@@ -2,6 +2,8 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using Ouroboros.Abstractions;
+
 namespace Ouroboros.Tests.Tools;
 
 using FluentAssertions;
@@ -25,14 +27,14 @@ public class MeTTaIntegrationTests
     {
         private readonly Dictionary<string, string> knowledgeBase = new();
         private readonly Func<string, Result<string, string>>? queryHandler;
-        private readonly Func<string, Result<MeTTaUnit, string>>? addFactHandler;
+        private readonly Func<string, Result<Unit, string>>? addFactHandler;
         private readonly Func<string, Result<string, string>>? applyRuleHandler;
         private readonly Func<string, Result<bool, string>>? verifyPlanHandler;
         private bool isDisposed;
 
         public MockMeTTaEngine(
             Func<string, Result<string, string>>? queryHandler = null,
-            Func<string, Result<MeTTaUnit, string>>? addFactHandler = null,
+            Func<string, Result<Unit, string>>? addFactHandler = null,
             Func<string, Result<string, string>>? applyRuleHandler = null,
             Func<string, Result<bool, string>>? verifyPlanHandler = null)
         {
@@ -66,7 +68,7 @@ public class MeTTaIntegrationTests
             return Task.FromResult(Result<string, string>.Success($"Result of: {query}"));
         }
 
-        public Task<Result<MeTTaUnit, string>> AddFactAsync(string fact, CancellationToken ct = default)
+        public Task<Result<Unit, string>> AddFactAsync(string fact, CancellationToken ct = default)
         {
             this.ThrowIfDisposed();
             this.AddFactCount++;
@@ -78,7 +80,7 @@ public class MeTTaIntegrationTests
 
             // Default behavior: store in knowledge base
             this.knowledgeBase[fact] = fact;
-            return Task.FromResult(Result<MeTTaUnit, string>.Success(MeTTaUnit.Value));
+            return Task.FromResult(Result<Unit, string>.Success(Unit.Value));
         }
 
         public Task<Result<string, string>> ApplyRuleAsync(string rule, CancellationToken ct = default)
@@ -109,12 +111,12 @@ public class MeTTaIntegrationTests
             return Task.FromResult(Result<bool, string>.Success(true));
         }
 
-        public Task<Result<MeTTaUnit, string>> ResetAsync(CancellationToken ct = default)
+        public Task<Result<Unit, string>> ResetAsync(CancellationToken ct = default)
         {
             this.ThrowIfDisposed();
             this.ResetCount++;
             this.knowledgeBase.Clear();
-            return Task.FromResult(Result<MeTTaUnit, string>.Success(MeTTaUnit.Value));
+            return Task.FromResult(Result<Unit, string>.Success(Unit.Value));
         }
 
         public void Dispose()
@@ -209,7 +211,7 @@ public class MeTTaIntegrationTests
     {
         // Arrange
         var engine = new MockMeTTaEngine(
-            addFactHandler: _ => Result<MeTTaUnit, string>.Failure("Fact addition failed"));
+            addFactHandler: _ => Result<Unit, string>.Failure("Fact addition failed"));
         var tool = new MeTTaTool(engine);
         var json = @"{""expression"": ""(invalid fact)"", ""operation"": ""add_fact""}";
 

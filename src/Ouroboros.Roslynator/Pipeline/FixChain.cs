@@ -1,4 +1,3 @@
-using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 
 namespace Ouroboros.Roslynator.Pipeline;

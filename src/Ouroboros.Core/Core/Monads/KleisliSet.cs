@@ -2,8 +2,6 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using System.Linq;
-
 namespace Ouroboros.Core.Monads;
 
 /// <summary>

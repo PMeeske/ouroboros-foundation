@@ -2,12 +2,13 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using Ouroboros.Abstractions;
+
 namespace Ouroboros.Domain.DistinctionLearning;
 
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Ouroboros.Core.DistinctionLearning;
-using Ouroboros.Core.Learning;
 using Ouroboros.Core.Monads;
 
 /// <summary>

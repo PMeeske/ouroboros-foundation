@@ -2,8 +2,6 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using System.Collections.Immutable;
-
 namespace Ouroboros.Core.Hyperon;
 
 /// <summary>

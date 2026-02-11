@@ -4,9 +4,6 @@
 
 namespace Ouroboros.Tests.Core.PropertyBased;
 
-using FsCheck;
-using Ouroboros.Core.Monads;
-
 /// <summary>
 /// Custom FsCheck generators for Ouroboros types.
 /// Provides Arbitrary instances for Option and Result monads with reasonable distributions.

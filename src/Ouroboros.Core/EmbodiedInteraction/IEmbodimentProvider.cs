@@ -2,7 +2,7 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
-using Ouroboros.Core.Monads;
+using Ouroboros.Abstractions;
 
 namespace Ouroboros.Core.EmbodiedInteraction;
 

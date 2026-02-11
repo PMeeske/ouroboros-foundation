@@ -1,7 +1,6 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using FixState = Ouroboros.Roslynator.Pipeline.FixState;
 
 namespace Ouroboros.Roslynator.Pipeline.Steps;
 

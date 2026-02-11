@@ -2,6 +2,8 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using Ouroboros.Abstractions;
+
 namespace Ouroboros.Tools;
 
 using System.Data;
@@ -9,7 +11,7 @@ using System.Globalization;
 using System.Text.Json;
 using Ouroboros.Core.Monads;
 using Ouroboros.Tools.MeTTa;
-using Unit = Ouroboros.Core.Learning.Unit;
+using Unit = Unit;
 
 /// <summary>
 /// A specialized calculator tool that demonstrates "Proof-Carrying Code" / Verification.

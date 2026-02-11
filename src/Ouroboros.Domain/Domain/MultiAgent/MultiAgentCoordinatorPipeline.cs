@@ -2,12 +2,13 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using Ouroboros.Abstractions;
+
 namespace Ouroboros.Domain.MultiAgent;
 
 using Ouroboros.Core.Kleisli;
 using Ouroboros.Core.Monads;
 using Ouroboros.Core.Steps;
-using Ouroboros.Domain.Reinforcement;
 
 /// <summary>
 /// Pipeline-based multi-agent coordinator using composable arrows.

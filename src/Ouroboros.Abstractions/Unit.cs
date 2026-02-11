@@ -2,35 +2,36 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace Ouroboros.Core.Synthesis;
+namespace Ouroboros.Abstractions;
 
 /// <summary>
-/// Represents a unit type (void equivalent) for functional programming.
-/// Used when an operation completes successfully but has no meaningful return value.
+/// Represents a unit type (void equivalent in functional programming).
+/// Used to indicate successful completion without a meaningful return value.
 /// </summary>
 public readonly struct Unit : IEquatable<Unit>
 {
     /// <summary>
-    /// Gets the singleton instance of Unit.
+    /// The singleton instance of Unit.
     /// </summary>
-    public static Unit Value { get; } = default;
+    public static readonly Unit Value = default;
 
     /// <summary>
-    /// Determines whether two Unit instances are equal (always true).
+    /// Determines equality with another Unit instance.
+    /// All Unit instances are equal.
     /// </summary>
     /// <param name="other">The other Unit instance.</param>
-    /// <returns>Always returns true.</returns>
+    /// <returns>Always true.</returns>
     public bool Equals(Unit other) => true;
 
     /// <summary>
-    /// Determines whether this instance equals another object.
+    /// Determines equality with an object.
     /// </summary>
     /// <param name="obj">The object to compare.</param>
     /// <returns>True if obj is a Unit instance.</returns>
     public override bool Equals(object? obj) => obj is Unit;
 
     /// <summary>
-    /// Returns a hash code for this instance.
+    /// Gets the hash code for Unit.
     /// </summary>
     /// <returns>Always returns 0.</returns>
     public override int GetHashCode() => 0;
@@ -42,18 +43,12 @@ public readonly struct Unit : IEquatable<Unit>
     public override string ToString() => "()";
 
     /// <summary>
-    /// Equality operator for Unit.
+    /// Equality operator.
     /// </summary>
-    /// <param name="left">Left operand.</param>
-    /// <param name="right">Right operand.</param>
-    /// <returns>Always returns true.</returns>
     public static bool operator ==(Unit left, Unit right) => true;
 
     /// <summary>
-    /// Inequality operator for Unit.
+    /// Inequality operator.
     /// </summary>
-    /// <param name="left">Left operand.</param>
-    /// <param name="right">Right operand.</param>
-    /// <returns>Always returns false.</returns>
     public static bool operator !=(Unit left, Unit right) => false;
 }

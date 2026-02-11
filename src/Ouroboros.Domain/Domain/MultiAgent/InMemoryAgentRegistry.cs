@@ -2,11 +2,12 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using Ouroboros.Abstractions;
+
 namespace Ouroboros.Domain.MultiAgent;
 
 using System.Collections.Concurrent;
 using Ouroboros.Core.Monads;
-using Ouroboros.Domain.Reinforcement;
 
 /// <summary>
 /// In-memory implementation of agent registry for tracking agent capabilities.

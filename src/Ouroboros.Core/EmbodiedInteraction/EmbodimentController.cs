@@ -2,6 +2,8 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using Ouroboros.Abstractions;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 using System.Collections.Concurrent;
@@ -49,16 +51,6 @@ public sealed record ActionResult(
     string? Error = null,
     TimeSpan? Duration = null);
 
-/// <summary>
-/// Unit type for void results in Result monad.
-/// </summary>
-public readonly struct Unit
-{
-    /// <summary>
-    /// The single unit value.
-    /// </summary>
-    public static readonly Unit Default = new();
-}
 
 /// <summary>
 /// Controller that orchestrates all sensors, actuators, and the virtual self.
@@ -249,7 +241,7 @@ public sealed class EmbodimentController : IDisposable
             _isRunning = true;
             _virtualSelf.SetState(EmbodimentState.Awake);
 
-            return Result<Unit, string>.Success(Unit.Default);
+            return Result<Unit, string>.Success(Unit.Value);
         }
         catch (Exception ex)
         {
@@ -262,7 +254,7 @@ public sealed class EmbodimentController : IDisposable
     /// </summary>
     public async Task<Result<Unit, string>> StopAsync(CancellationToken ct = default)
     {
-        if (!_isRunning) return Result<Unit, string>.Success(Unit.Default);
+        if (!_isRunning) return Result<Unit, string>.Success(Unit.Value);
 
         try
         {
@@ -275,7 +267,7 @@ public sealed class EmbodimentController : IDisposable
                 sensor.StopObserving();
 
             _isRunning = false;
-            return Result<Unit, string>.Success(Unit.Default);
+            return Result<Unit, string>.Success(Unit.Value);
         }
         catch (Exception ex)
         {

@@ -2,10 +2,8 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using System.Collections.Immutable;
 using System.Diagnostics;
-using Ouroboros.Core.Hyperon;
-using Ouroboros.Core.Monads;
+using Ouroboros.Abstractions;
 
 namespace Ouroboros.Core.Synthesis;
 

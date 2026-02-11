@@ -3,7 +3,6 @@
 // </copyright>
 
 using System.Diagnostics;
-using Ouroboros.Core.Monads;
 
 namespace Ouroboros.Domain.Benchmarks;
 

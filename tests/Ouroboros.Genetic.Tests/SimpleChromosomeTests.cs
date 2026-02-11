@@ -6,7 +6,6 @@ namespace Ouroboros.Tests.Genetic;
 
 using FluentAssertions;
 using Ouroboros.Genetic.Abstractions;
-using Ouroboros.Genetic.Core;
 using Xunit;
 
 /// <summary>

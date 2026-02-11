@@ -1,5 +1,3 @@
-using FixState = Ouroboros.Roslynator.Pipeline.FixState;
-
 namespace Ouroboros.Roslynator.Pipeline.Steps;
 
 /// <summary>

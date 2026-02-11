@@ -2,6 +2,8 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using Ouroboros.Abstractions;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 using System.Reactive.Linq;
@@ -217,7 +219,7 @@ public sealed class VisualSensor : IDisposable
         _virtualSelf.ActivateSensor(SensorModality.Visual);
         _virtualSelf.SetState(EmbodimentState.Observing);
 
-        return Result<Unit, string>.Success(Unit.Default);
+        return Result<Unit, string>.Success(Unit.Value);
     }
 
     /// <summary>
@@ -225,12 +227,12 @@ public sealed class VisualSensor : IDisposable
     /// </summary>
     public Result<Unit, string> StopObserving()
     {
-        if (!_isObserving) return Result<Unit, string>.Success(Unit.Default);
+        if (!_isObserving) return Result<Unit, string>.Success(Unit.Value);
 
         _isObserving = false;
         _virtualSelf.DeactivateSensor(SensorModality.Visual);
 
-        return Result<Unit, string>.Success(Unit.Default);
+        return Result<Unit, string>.Success(Unit.Value);
     }
 
     /// <summary>

@@ -3,8 +3,8 @@
 // </copyright>
 
 using Microsoft.Extensions.Logging;
+using Ouroboros.Abstractions;
 using Ouroboros.Core.Learning;
-using Ouroboros.Core.Monads;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
 

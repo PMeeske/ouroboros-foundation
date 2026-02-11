@@ -3,7 +3,6 @@
 // </copyright>
 
 using System.Collections.Concurrent;
-using Ouroboros.Core.Monads;
 
 namespace Ouroboros.Domain.Governance;
 

@@ -2,7 +2,6 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using System.Collections.Immutable;
 using Ouroboros.Core.LawsOfForm;
 
 namespace Ouroboros.Core.Hyperon;

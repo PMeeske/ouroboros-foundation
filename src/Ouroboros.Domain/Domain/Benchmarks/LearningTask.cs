@@ -2,6 +2,8 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using Ouroboros.Core.Learning;
+
 namespace Ouroboros.Domain.Benchmarks;
 
 /// <summary>

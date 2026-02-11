@@ -2,6 +2,8 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using Ouroboros.Abstractions;
+
 namespace Ouroboros.Tools.MeTTa;
 
 using System.Net.Http.Json;
@@ -66,7 +68,7 @@ public sealed class HttpMeTTaEngine : IMeTTaEngine
     }
 
     /// <inheritdoc />
-    public async Task<Result<MeTTaUnit, string>> AddFactAsync(string fact, CancellationToken ct = default)
+    public async Task<Result<Unit, string>> AddFactAsync(string fact, CancellationToken ct = default)
     {
         try
         {
@@ -75,18 +77,18 @@ public sealed class HttpMeTTaEngine : IMeTTaEngine
 
             if (!response.IsSuccessStatusCode)
             {
-                return Result<MeTTaUnit, string>.Failure($"HTTP {response.StatusCode}: {await response.Content.ReadAsStringAsync(ct)}");
+                return Result<Unit, string>.Failure($"HTTP {response.StatusCode}: {await response.Content.ReadAsStringAsync(ct)}");
             }
 
-            return Result<MeTTaUnit, string>.Success(MeTTaUnit.Value);
+            return Result<Unit, string>.Success(Unit.Value);
         }
         catch (HttpRequestException ex)
         {
-            return Result<MeTTaUnit, string>.Failure($"HTTP request failed: {ex.Message}");
+            return Result<Unit, string>.Failure($"HTTP request failed: {ex.Message}");
         }
         catch (Exception ex)
         {
-            return Result<MeTTaUnit, string>.Failure($"Failed to add fact: {ex.Message}");
+            return Result<Unit, string>.Failure($"Failed to add fact: {ex.Message}");
         }
     }
 
@@ -149,7 +151,7 @@ public sealed class HttpMeTTaEngine : IMeTTaEngine
     }
 
     /// <inheritdoc />
-    public async Task<Result<MeTTaUnit, string>> ResetAsync(CancellationToken ct = default)
+    public async Task<Result<Unit, string>> ResetAsync(CancellationToken ct = default)
     {
         try
         {
@@ -157,18 +159,18 @@ public sealed class HttpMeTTaEngine : IMeTTaEngine
 
             if (!response.IsSuccessStatusCode)
             {
-                return Result<MeTTaUnit, string>.Failure($"HTTP {response.StatusCode}: {await response.Content.ReadAsStringAsync(ct)}");
+                return Result<Unit, string>.Failure($"HTTP {response.StatusCode}: {await response.Content.ReadAsStringAsync(ct)}");
             }
 
-            return Result<MeTTaUnit, string>.Success(MeTTaUnit.Value);
+            return Result<Unit, string>.Success(Unit.Value);
         }
         catch (HttpRequestException ex)
         {
-            return Result<MeTTaUnit, string>.Failure($"HTTP request failed: {ex.Message}");
+            return Result<Unit, string>.Failure($"HTTP request failed: {ex.Message}");
         }
         catch (Exception ex)
         {
-            return Result<MeTTaUnit, string>.Failure($"Failed to reset: {ex.Message}");
+            return Result<Unit, string>.Failure($"Failed to reset: {ex.Message}");
         }
     }
 
