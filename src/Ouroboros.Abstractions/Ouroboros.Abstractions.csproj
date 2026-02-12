@@ -6,14 +6,4 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\Ouroboros.Core\Ouroboros.Core.csproj" />
-        <ProjectReference Include="..\Ouroboros.Domain\Ouroboros.Domain.csproj" />
-        <ProjectReference Include="..\Ouroboros.Tools\Ouroboros.Tools.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="System.Reactive" Version="6.1.0" />
-    </ItemGroup>
-
 </Project>
