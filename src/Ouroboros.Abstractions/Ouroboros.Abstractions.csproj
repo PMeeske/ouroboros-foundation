@@ -1,9 +1,44 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>false</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     </PropertyGroup>
+
+
+
+    <ItemGroup>
+        <PackageReference Include="System.Reactive" Version="6.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="Agent\IOrchestrator.cs" />
+        <Compile Include="Agent\IModelOrchestrator.cs" />
+        <Compile Include="Agent\MetaAI\IMetricsStore.cs" />
+        <Compile Include="Agent\MetaAI\MetaLearning\IMetaLearner.cs" />
+        <Compile Include="Agent\MetaAI\SelfImprovement\ITransferLearner.cs" />
+        <Compile Include="Agent\MetaAI\SelfImprovement\ISkillExtractor.cs" />
+        <Compile Include="Agent\MetaAI\WorldModel\IWorldModelEngine.cs" />
+        <Compile Include="Agent\MetaAI\Affect\IHomeostasisPolicy.cs" />
+        <Compile Include="Agent\MetaAI\SelfModel\IPredictiveMonitor.cs" />
+        <Compile Include="Agent\TheoryOfMind\ITheoryOfMind.cs" />
+        <Compile Include="Agent\NeuralSymbolic\ISymbolicKnowledgeBase.cs" />
+        <Compile Include="Agent\TemporalReasoning\ITemporalReasoner.cs" />
+        <Compile Include="Agent\WorldModel\IWorldModel.cs" />
+        <Compile Include="Network\Persistence\IGraphPersistence.cs" />
+        <Compile Include="Providers\TextToSpeech\ITextToSpeechService.cs" />
+        <Compile Include="Providers\TextToSpeech\IStreamingTtsService.cs" />
+        <Compile Include="Providers\SpeechToText\ISpeechToTextService.cs" />
+        <Compile Include="Providers\SpeechToText\IStreamingSttService.cs" />
+        <Compile Include="Providers\LoadBalancing\IProviderLoadBalancer.cs" />
+        <Compile Include="Providers\LoadBalancing\IProviderSelectionStrategy.cs" />
+        <Compile Include="Providers\Kubernetes\IKubernetesMcpClient.cs" />
+        <Compile Include="Providers\DuckDuckGo\IDuckDuckGoMcpClient.cs" />
+        <Compile Include="Providers\Firecrawl\IFirecrawlMcpClient.cs" />
+        <Compile Include="Providers\Docker\IDockerMcpClient.cs" />
+        <Compile Include="Unit.cs" />
+    </ItemGroup>
 
 </Project>
