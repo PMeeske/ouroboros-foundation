@@ -78,7 +78,7 @@ public sealed class ZeroShiftOperator
         if (ethicsResult.IsUncertain)
         {
             // Soft fail: apply resource penalty but do not transition
-            double penalizedResources = state.Resources - _config.UncertaintyPenalty;
+            double penalizedResources = Math.Max(0.0, state.Resources - _config.UncertaintyPenalty);
             CognitiveState penalizedState = state with { Resources = penalizedResources };
             return ZeroShiftResult.Failed(penalizedState, $"Ethics gate uncertain: {ethicsResult.Reason}");
         }

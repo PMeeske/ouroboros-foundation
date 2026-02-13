@@ -2,7 +2,6 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace Ouroboros.Core.CognitivePhysics;
@@ -36,7 +35,7 @@ public static class SemanticDistance
         }
 
         double denominator = Math.Sqrt(normA) * Math.Sqrt(normB);
-        return denominator == 0.0 ? 0.0 : dot / denominator;
+        return denominator < 1e-15 ? 0.0 : dot / denominator;
     }
 
     /// <summary>
@@ -45,7 +44,7 @@ public static class SemanticDistance
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static double Compute(ReadOnlySpan<float> a, ReadOnlySpan<float> b) =>
-        1.0 - CosineSimilarity(a, b);
+        Math.Clamp(1.0 - CosineSimilarity(a, b), 0.0, 1.0);
 
     /// <summary>
     /// Computes the semantic distance between two concepts using an embedding provider.

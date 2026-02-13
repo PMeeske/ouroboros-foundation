@@ -148,7 +148,6 @@ public sealed class CognitivePhysicsEngine
 
             if (!result.Success)
             {
-                current = _evolution.OnFailure(result.State);
                 return Result<CognitiveState>.Failure(
                     result.FailureReason ?? $"Failed to shift to '{target}'.");
             }

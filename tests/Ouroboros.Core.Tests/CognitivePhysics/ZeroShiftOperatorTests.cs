@@ -69,6 +69,19 @@ public class ZeroShiftOperatorTests
     }
 
     [Fact]
+    public async Task Shift_EthicsUncertain_ShouldClampResourcesAtZero()
+    {
+        _gate.SetRule("risky", EthicsGateResult.Uncertain("Ambiguous domain"));
+        ZeroShiftOperator op = CreateOperator(new ZeroShiftConfig(UncertaintyPenalty: 100.0));
+        CognitiveState state = CognitiveState.Create("math", 5.0);
+
+        ZeroShiftResult result = await op.ShiftAsync(state, "risky");
+
+        result.Success.Should().BeFalse();
+        result.State.Resources.Should().Be(0.0);
+    }
+
+    [Fact]
     public async Task Shift_InsufficientResources_ShouldFail()
     {
         // Set up embeddings that are distant (high cost)

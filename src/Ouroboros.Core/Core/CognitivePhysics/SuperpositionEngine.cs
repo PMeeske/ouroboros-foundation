@@ -36,20 +36,14 @@ public sealed class SuperpositionEngine
         ImmutableHashSet<string> entanglement = state.Entanglement.Union(targets);
         double equalWeight = 1.0 / targets.Count;
 
-        ImmutableList<CognitiveBranch>.Builder builder = ImmutableList.CreateBuilder<CognitiveBranch>();
-
-        foreach (string target in targets)
-        {
-            CognitiveState branchState = state with
+        return targets.Select(target => new CognitiveBranch(
+            state with
             {
                 Focus = target,
                 History = state.History.Add(target),
                 Entanglement = entanglement
-            };
-            builder.Add(new CognitiveBranch(branchState, equalWeight));
-        }
-
-        return builder.ToImmutable();
+            },
+            equalWeight)).ToImmutableList();
     }
 
     /// <summary>
@@ -71,11 +65,16 @@ public sealed class SuperpositionEngine
 
         foreach (CognitiveBranch branch in branches)
         {
+            EthicsGateResult ethics = await _ethicsGate.EvaluateAsync(origin, branch.State.Focus);
+
+            // Denied branches are excluded entirely — they cannot win collapse
+            if (ethics.IsDenied)
+                continue;
+
             double coherence = 1.0 - await SemanticDistance.ComputeAsync(
                 _embeddingProvider, origin, branch.State.Focus);
 
-            EthicsGateResult ethics = await _ethicsGate.EvaluateAsync(origin, branch.State.Focus);
-            double ethicsScore = ethics.IsAllowed ? 1.0 : ethics.IsUncertain ? 0.5 : 0.0;
+            double ethicsScore = ethics.IsAllowed ? 1.0 : 0.5;
 
             double score = (coherence + ethicsScore) * branch.Weight;
 

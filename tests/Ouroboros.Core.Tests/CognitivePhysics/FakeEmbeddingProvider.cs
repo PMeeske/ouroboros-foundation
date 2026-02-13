@@ -23,13 +23,13 @@ internal sealed class FakeEmbeddingProvider : IEmbeddingProvider
             return ValueTask.FromResult(embedding);
 
         // Generate a deterministic pseudo-embedding from hash
-        int hash = text.GetHashCode();
+        long hash = unchecked((long)text.GetHashCode());
         float[] generated =
         [
             (float)Math.Sin(hash),
             (float)Math.Cos(hash),
-            (float)Math.Sin(hash * 2),
-            (float)Math.Cos(hash * 2)
+            (float)Math.Sin(hash * 2L),
+            (float)Math.Cos(hash * 2L)
         ];
         return ValueTask.FromResult(generated);
     }

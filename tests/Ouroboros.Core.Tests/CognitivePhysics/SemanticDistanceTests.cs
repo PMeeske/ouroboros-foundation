@@ -99,7 +99,19 @@ public class SemanticDistanceTests
     }
 
     [Fact]
-    public async Task ComputeAsync_ShouldUsEmbeddingProvider()
+    public void Compute_OppositeVectors_ShouldClampToOne()
+    {
+        float[] a = [1.0f, 0.0f];
+        float[] b = [-1.0f, 0.0f];
+
+        double distance = SemanticDistance.Compute(a, b);
+
+        // Cosine similarity is -1, so raw distance would be 2.0, but clamped to [0, 1]
+        distance.Should().Be(1.0);
+    }
+
+    [Fact]
+    public async Task ComputeAsync_ShouldUseEmbeddingProvider()
     {
         FakeEmbeddingProvider provider = new();
         provider.SetEmbedding("alpha", [1.0f, 0.0f]);
