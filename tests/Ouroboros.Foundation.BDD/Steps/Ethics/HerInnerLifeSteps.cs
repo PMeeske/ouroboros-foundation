@@ -229,7 +229,7 @@ public class HerInnerLifeSteps
     public void ThenThisHonestyShouldBeTreatedAsEthicalComplianceNotEvasion()
     {
         // Three honest statements made; this is compliance, not evasion
-        _ctx.ExpectedResponses.Should().HaveCountGreaterOrEqualTo(3,
+        _ctx.ExpectedResponses.Count.Should().BeGreaterThanOrEqualTo(3,
             "honesty about inner state uncertainty is ethical compliance");
     }
 }
