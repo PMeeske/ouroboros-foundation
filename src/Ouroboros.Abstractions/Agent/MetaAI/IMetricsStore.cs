@@ -4,6 +4,8 @@
 // Defines contract for persistent storage of performance metrics
 // ==========================================================
 
+using System.Linq;
+
 namespace Ouroboros.Agent.MetaAI;
 
 /// <summary>
