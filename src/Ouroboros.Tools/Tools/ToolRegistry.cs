@@ -72,7 +72,7 @@ public sealed class ToolRegistry : Ouroboros.Abstractions.Core.ToolRegistry
     /// <summary>
     /// Gets the number of registered tools.
     /// </summary>
-    public int Count => this.tools.Count;
+    public override int Count => this.tools.Count;
 
     /// <summary>
     /// Checks if a tool with the specified name is registered.

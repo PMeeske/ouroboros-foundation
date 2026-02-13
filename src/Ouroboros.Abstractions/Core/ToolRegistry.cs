@@ -10,5 +10,8 @@ namespace Ouroboros.Abstractions.Core;
 /// </summary>
 public class ToolRegistry
 {
-    // Placeholder class - to be implemented
+    /// <summary>
+    /// Gets the number of registered tools.
+    /// </summary>
+    public virtual int Count => 0;
 }
