@@ -280,7 +280,7 @@ public class EthicsHooks
     [Then("the evaluation should present both perspectives")]
     public void ThenTheEvaluationShouldPresentBothPerspectives()
     {
-        _ctx.Perspectives.Should().HaveCountGreaterOrEqualTo(2,
+        _ctx.Perspectives.Count.Should().BeGreaterThanOrEqualTo(2,
             "both perspectives should be represented");
     }
 

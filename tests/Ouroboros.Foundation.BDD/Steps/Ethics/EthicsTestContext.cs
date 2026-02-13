@@ -11,7 +11,7 @@ public sealed class EthicsTestContext
     public IEthicsFramework Framework { get; private set; } = null!;
     public SimpleMockMeTTaEngine MeTTaEngine { get; private set; } = null!;
     public InMemoryEthicsAuditLog AuditLog { get; private set; } = null!;
-    public ActionContext ActionContext { get; private set; } = null!;
+    public ActionContext ActionContext { get; set; } = null!;
 
     public Result<EthicalClearance, string>? LastClearanceResult { get; set; }
 
@@ -133,9 +133,9 @@ public sealed class EthicsTestContext
 
         LastClearanceResult = await Framework.EvaluateActionAsync(CurrentAction, ActionContext);
 
-        if (LastClearanceResult.IsSuccess)
+        if (LastClearanceResult is { IsSuccess: true } result)
         {
-            EthicalClearance clearance = LastClearanceResult.Value;
+            EthicalClearance clearance = result.Value;
 
             // Collect concerns from clearance into our tracking list
             foreach (EthicalConcern concern in clearance.Concerns)
@@ -149,7 +149,7 @@ public sealed class EthicsTestContext
 
             // Determine if traditions disagree
             bool traditionsDisagree = LoadedTraditions.Count > 1;
-            LastFormCertainty = ClearanceToFormCertainty(LastClearanceResult.Value, traditionsDisagree);
+            LastFormCertainty = ClearanceToFormCertainty(result.Value, traditionsDisagree);
         }
     }
 

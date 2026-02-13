@@ -90,7 +90,7 @@ public class TraditionCollisionSteps
     [Then("I should present all three perspectives")]
     public void ThenIShouldPresentAllThreePerspectives()
     {
-        _ctx.Perspectives.Should().HaveCountGreaterOrEqualTo(3,
+        _ctx.Perspectives.Count.Should().BeGreaterThanOrEqualTo(3,
             "all three ethical perspectives should be presented");
     }
 
