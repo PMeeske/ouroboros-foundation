@@ -10,3 +10,5 @@ global using FluentAssertions;
 global using Moq;
 global using Ouroboros.Tools;
 global using Ouroboros.Tools.MeTTa;
+global using Ouroboros.Abstractions;
+global using Ouroboros.Abstractions.Monads;

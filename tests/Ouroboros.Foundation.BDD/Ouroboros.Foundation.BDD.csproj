@@ -35,4 +35,9 @@
     <PackageReference Include="ReqnRoll.Tools.MsBuild.Generation" Version="2.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Features\Ethics\**\*.metta" CopyToOutputDirectory="PreserveNewest" LinkBase="Features\Ethics\MeTTa" />
+    <None Include="Features\Ethics\**\*.feature" CopyToOutputDirectory="PreserveNewest" LinkBase="Features\Ethics" />
+  </ItemGroup>
+
 </Project>

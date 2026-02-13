@@ -1,6 +1,5 @@
 using Ouroboros.Core.Ethics;
 using Ouroboros.Core.LawsOfForm;
-using Ouroboros.Monads;
 
 namespace Ouroboros.Specs.Steps.Ethics;
 

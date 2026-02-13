@@ -1,5 +1,3 @@
-using Ouroboros.Monads;
-
 namespace Ouroboros.Specs.Steps.Ethics;
 
 /// <summary>
