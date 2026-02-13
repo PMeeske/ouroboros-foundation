@@ -51,19 +51,19 @@ public sealed record FeedbackSignal(
     /// Validates the feedback signal.
     /// </summary>
     /// <returns>Success if valid, Failure with error message otherwise.</returns>
-    public Monads.Result<FeedbackSignal, string> Validate()
+    public Result<FeedbackSignal, string> Validate()
     {
         if (this.Score < -1.0 || this.Score > 1.0)
         {
-            return Monads.Result<FeedbackSignal, string>.Failure("Score must be between -1.0 and 1.0");
+            return Result<FeedbackSignal, string>.Failure("Score must be between -1.0 and 1.0");
         }
 
         if (this.Type == FeedbackType.UserCorrection && string.IsNullOrWhiteSpace(this.Correction))
         {
-            return Monads.Result<FeedbackSignal, string>.Failure("User correction requires correction text");
+            return Result<FeedbackSignal, string>.Failure("User correction requires correction text");
         }
 
-        return Monads.Result<FeedbackSignal, string>.Success(this);
+        return Result<FeedbackSignal, string>.Success(this);
     }
 }
 

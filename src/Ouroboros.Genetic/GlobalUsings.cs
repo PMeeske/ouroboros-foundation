@@ -9,5 +9,6 @@ global using System.Linq;
 global using System.Threading;
 global using System.Threading.Tasks;
 global using Ouroboros.Core.Kleisli;
+global using Ouroboros.Abstractions.Monads;
 global using Ouroboros.Core.Monads;
 global using Ouroboros.Core.Steps;

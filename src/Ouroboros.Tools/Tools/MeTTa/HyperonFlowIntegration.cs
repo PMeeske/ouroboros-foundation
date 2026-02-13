@@ -226,7 +226,7 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
 
         try
         {
-            Core.Monads.Result<Atom> parseResult = hyperonEngine.Parser.Parse(pattern);
+            Result<Atom> parseResult = hyperonEngine.Parser.Parse(pattern);
             if (!parseResult.IsSuccess)
             {
                 return false;

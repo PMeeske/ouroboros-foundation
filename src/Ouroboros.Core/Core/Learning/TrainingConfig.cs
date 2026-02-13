@@ -37,18 +37,18 @@ public sealed record TrainingConfig(
     /// Validates the training configuration.
     /// </summary>
     /// <returns>Success if valid, Failure with error message otherwise.</returns>
-    public Monads.Result<TrainingConfig, string> Validate()
+    public Result<TrainingConfig, string> Validate()
     {
         if (this.BatchSize <= 0)
         {
-            return Monads.Result<TrainingConfig, string>.Failure("Batch size must be positive");
+            return Result<TrainingConfig, string>.Failure("Batch size must be positive");
         }
 
         if (this.Epochs <= 0)
         {
-            return Monads.Result<TrainingConfig, string>.Failure("Epochs must be positive");
+            return Result<TrainingConfig, string>.Failure("Epochs must be positive");
         }
 
-        return Monads.Result<TrainingConfig, string>.Success(this);
+        return Result<TrainingConfig, string>.Success(this);
     }
 }

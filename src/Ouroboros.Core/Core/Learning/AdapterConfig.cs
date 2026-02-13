@@ -41,28 +41,28 @@ public sealed record AdapterConfig(
     /// Validates the adapter configuration.
     /// </summary>
     /// <returns>Success if valid, Failure with error message otherwise.</returns>
-    public Monads.Result<AdapterConfig, string> Validate()
+    public Result<AdapterConfig, string> Validate()
     {
         if (this.Rank <= 0)
         {
-            return Monads.Result<AdapterConfig, string>.Failure("Rank must be positive");
+            return Result<AdapterConfig, string>.Failure("Rank must be positive");
         }
 
         if (this.LearningRate <= 0)
         {
-            return Monads.Result<AdapterConfig, string>.Failure("Learning rate must be positive");
+            return Result<AdapterConfig, string>.Failure("Learning rate must be positive");
         }
 
         if (this.MaxSteps <= 0)
         {
-            return Monads.Result<AdapterConfig, string>.Failure("Max steps must be positive");
+            return Result<AdapterConfig, string>.Failure("Max steps must be positive");
         }
 
         if (string.IsNullOrWhiteSpace(this.TargetModules))
         {
-            return Monads.Result<AdapterConfig, string>.Failure("Target modules cannot be empty");
+            return Result<AdapterConfig, string>.Failure("Target modules cannot be empty");
         }
 
-        return Monads.Result<AdapterConfig, string>.Success(this);
+        return Result<AdapterConfig, string>.Success(this);
     }
 }

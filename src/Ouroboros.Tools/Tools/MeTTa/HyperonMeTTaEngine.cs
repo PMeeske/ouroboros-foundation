@@ -92,7 +92,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
 
         try
         {
-            Core.Monads.Result<Atom> parseResult = parser.Parse(query);
+            Result<Atom> parseResult = parser.Parse(query);
             if (!parseResult.IsSuccess)
             {
                 return Task.FromResult(Result<string, string>.Failure($"Parse error: {parseResult.Error}"));
@@ -126,7 +126,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
 
         try
         {
-            Core.Monads.Result<Atom> parseResult = parser.Parse(fact);
+            Result<Atom> parseResult = parser.Parse(fact);
             if (!parseResult.IsSuccess)
             {
                 return Task.FromResult(Result<Unit, string>.Failure($"Parse error: {parseResult.Error}"));
@@ -151,7 +151,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
 
         try
         {
-            Core.Monads.Result<Atom> parseResult = parser.Parse(rule);
+            Result<Atom> parseResult = parser.Parse(rule);
             if (!parseResult.IsSuccess)
             {
                 return Task.FromResult(Result<string, string>.Failure($"Parse error: {parseResult.Error}"));
@@ -185,7 +185,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
         try
         {
             // Parse the plan
-            Core.Monads.Result<Atom> parseResult = parser.Parse(plan);
+            Result<Atom> parseResult = parser.Parse(plan);
             if (!parseResult.IsSuccess)
             {
                 return Task.FromResult(Result<bool, string>.Success(false));
@@ -228,7 +228,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
             // Verify each step can be executed
             foreach (string step in stepsList)
             {
-                Core.Monads.Result<Atom> parseResult = parser.Parse(step);
+                Result<Atom> parseResult = parser.Parse(step);
                 if (!parseResult.IsSuccess)
                 {
                     return Task.FromResult(Result<bool, string>.Success(false));

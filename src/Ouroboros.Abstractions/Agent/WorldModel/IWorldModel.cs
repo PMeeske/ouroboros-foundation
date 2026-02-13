@@ -3,11 +3,9 @@
 // </copyright>
 
 using Ouroboros.Abstractions;
+using Ouroboros.Abstractions.Monads;
 
 namespace Ouroboros.Agent.WorldModel;
-
-using Ouroboros.Core.Monads;
-using Ouroboros.Domain.Embodied;
 
 /// <summary>
 /// Interface for predictive world models enabling model-based planning.

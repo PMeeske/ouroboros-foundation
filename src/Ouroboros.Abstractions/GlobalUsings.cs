@@ -5,3 +5,5 @@ global using System.Threading;
 global using System.Threading.Tasks;
 global using System.Collections.Immutable;
 global using System.Text.Json;
+global using Ouroboros.Abstractions.Monads;
+global using Ouroboros.Abstractions.Domain;

@@ -4,7 +4,7 @@
 
 namespace Ouroboros.Agent.MetaAI.WorldModel;
 
-using Ouroboros.Core.Monads;
+using Ouroboros.Abstractions.Monads;
 
 /// <summary>
 /// Main interface for world model learning and imagination-based planning.
@@ -20,8 +20,8 @@ public interface IWorldModelEngine
     /// <param name="architecture">The model architecture to use.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>Result containing the learned world model or error message.</returns>
-    Task<Result<WorldModel, string>> LearnModelAsync(
-        List<Transition> transitions,
+    Task<Result<LearnedWorldModel, string>> LearnModelAsync(
+        List<WorldTransition> transitions,
         ModelArchitecture architecture,
         CancellationToken ct = default);
 
@@ -33,10 +33,10 @@ public interface IWorldModelEngine
     /// <param name="model">The world model to use for prediction.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>Result containing the predicted next state or error message.</returns>
-    Task<Result<State, string>> PredictNextStateAsync(
-        State currentState,
-        Action action,
-        WorldModel model,
+    Task<Result<WorldState, string>> PredictNextStateAsync(
+        WorldState currentState,
+        AgentAction action,
+        LearnedWorldModel model,
         CancellationToken ct = default);
 
     /// <summary>
@@ -49,10 +49,10 @@ public interface IWorldModelEngine
     /// <param name="lookaheadDepth">How many steps to look ahead.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>Result containing the planned action sequence or error message.</returns>
-    Task<Result<Plan, string>> PlanInImaginationAsync(
-        State initialState,
+    Task<Result<ActionPlan, string>> PlanInImaginationAsync(
+        WorldState initialState,
         string goal,
-        WorldModel model,
+        LearnedWorldModel model,
         int lookaheadDepth,
         CancellationToken ct = default);
 
@@ -64,8 +64,8 @@ public interface IWorldModelEngine
     /// <param name="ct">Cancellation token.</param>
     /// <returns>Result containing quality metrics or error message.</returns>
     Task<Result<ModelQuality, string>> EvaluateModelAsync(
-        WorldModel model,
-        List<Transition> testSet,
+        LearnedWorldModel model,
+        List<WorldTransition> testSet,
         CancellationToken ct = default);
 
     /// <summary>
@@ -77,9 +77,9 @@ public interface IWorldModelEngine
     /// <param name="trajectoryLength">Number of steps to generate.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>Result containing synthetic transitions or error message.</returns>
-    Task<Result<List<Transition>, string>> GenerateSyntheticExperienceAsync(
-        WorldModel model,
-        State startState,
+    Task<Result<List<WorldTransition>, string>> GenerateSyntheticExperienceAsync(
+        LearnedWorldModel model,
+        WorldState startState,
         int trajectoryLength,
         CancellationToken ct = default);
 }

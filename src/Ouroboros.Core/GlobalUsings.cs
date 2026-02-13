@@ -22,5 +22,6 @@ global using System.Threading.Tasks;
 global using Ouroboros.Core.Interop;
 global using Ouroboros.Core.Kleisli;
 global using Ouroboros.Core.Memory;
+global using Ouroboros.Abstractions.Monads;
 global using Ouroboros.Core.Monads;
 global using Ouroboros.Core.Steps;

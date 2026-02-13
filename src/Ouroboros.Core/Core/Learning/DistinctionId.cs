@@ -21,14 +21,14 @@ public sealed record DistinctionId(Guid Value)
     /// </summary>
     /// <param name="value">The string representation of the GUID.</param>
     /// <returns>A distinction ID if parsing succeeds, otherwise None.</returns>
-    public static Monads.Option<DistinctionId> FromString(string value)
+    public static Option<DistinctionId> FromString(string value)
     {
         if (Guid.TryParse(value, out var guid))
         {
-            return Monads.Option<DistinctionId>.Some(new DistinctionId(guid));
+            return Option<DistinctionId>.Some(new DistinctionId(guid));
         }
 
-        return Monads.Option<DistinctionId>.None();
+        return Option<DistinctionId>.None();
     }
 
     /// <summary>

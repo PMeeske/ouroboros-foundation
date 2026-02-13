@@ -14,19 +14,41 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="GlobalUsings.cs" />
+        <Compile Include="Monads\Result.cs" />
+        <Compile Include="Monads\Option.cs" />
+        <Compile Include="Core\IChatCompletionModel.cs" />
+        <Compile Include="Core\ToolRegistry.cs" />
+        <Compile Include="Domain\ActionPrediction.cs" />
+        <Compile Include="Domain\AgentModel.cs" />
+        <Compile Include="Domain\AgentObservation.cs" />
+        <Compile Include="Domain\BeliefState.cs" />
+        <Compile Include="Domain\IntentionPrediction.cs" />
+        <Compile Include="Domain\SymbolicRule.cs" />
+        <Compile Include="Domain\TemporalEvent.cs" />
+        <Compile Include="Domain\EmbodiedTypes.cs" />
+        <Compile Include="Network\MonadNode.cs" />
+        <Compile Include="Network\TransitionEdge.cs" />
+        <Compile Include="Network\WalEntry.cs" />
         <Compile Include="Agent\IOrchestrator.cs" />
         <Compile Include="Agent\IModelOrchestrator.cs" />
         <Compile Include="Agent\MetaAI\IMetricsStore.cs" />
         <Compile Include="Agent\MetaAI\MetaLearning\IMetaLearner.cs" />
+        <Compile Include="Agent\MetaAI\MetaLearning\MetaLearningModels.cs" />
         <Compile Include="Agent\MetaAI\SelfImprovement\ITransferLearner.cs" />
         <Compile Include="Agent\MetaAI\SelfImprovement\ISkillExtractor.cs" />
+        <Compile Include="Agent\MetaAI\SelfImprovement\SelfImprovementModels.cs" />
         <Compile Include="Agent\MetaAI\WorldModel\IWorldModelEngine.cs" />
+        <Compile Include="Agent\MetaAI\WorldModel\WorldModelTypes.cs" />
         <Compile Include="Agent\MetaAI\Affect\IHomeostasisPolicy.cs" />
+        <Compile Include="Agent\MetaAI\Affect\AffectModels.cs" />
         <Compile Include="Agent\MetaAI\SelfModel\IPredictiveMonitor.cs" />
         <Compile Include="Agent\TheoryOfMind\ITheoryOfMind.cs" />
         <Compile Include="Agent\NeuralSymbolic\ISymbolicKnowledgeBase.cs" />
         <Compile Include="Agent\TemporalReasoning\ITemporalReasoner.cs" />
+        <Compile Include="Agent\TemporalReasoning\TemporalTypes.cs" />
         <Compile Include="Agent\WorldModel\IWorldModel.cs" />
+        <Compile Include="Agent\WorldModel\WorldModelDomainTypes.cs" />
         <Compile Include="Network\Persistence\IGraphPersistence.cs" />
         <Compile Include="Providers\TextToSpeech\ITextToSpeechService.cs" />
         <Compile Include="Providers\TextToSpeech\IStreamingTtsService.cs" />
@@ -35,9 +57,13 @@
         <Compile Include="Providers\LoadBalancing\IProviderLoadBalancer.cs" />
         <Compile Include="Providers\LoadBalancing\IProviderSelectionStrategy.cs" />
         <Compile Include="Providers\Kubernetes\IKubernetesMcpClient.cs" />
+        <Compile Include="Providers\Kubernetes\KubernetesModels.cs" />
         <Compile Include="Providers\DuckDuckGo\IDuckDuckGoMcpClient.cs" />
+        <Compile Include="Providers\DuckDuckGo\DuckDuckGoModels.cs" />
         <Compile Include="Providers\Firecrawl\IFirecrawlMcpClient.cs" />
+        <Compile Include="Providers\Firecrawl\FirecrawlModels.cs" />
         <Compile Include="Providers\Docker\IDockerMcpClient.cs" />
+        <Compile Include="Providers\Docker\DockerModels.cs" />
         <Compile Include="Unit.cs" />
     </ItemGroup>
 

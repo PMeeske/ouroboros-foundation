@@ -19,23 +19,23 @@ public sealed record TrainingExample(
     /// Validates the training example.
     /// </summary>
     /// <returns>Success if valid, Failure with error message otherwise.</returns>
-    public Monads.Result<TrainingExample, string> Validate()
+    public Result<TrainingExample, string> Validate()
     {
         if (string.IsNullOrWhiteSpace(this.Input))
         {
-            return Monads.Result<TrainingExample, string>.Failure("Input cannot be empty");
+            return Result<TrainingExample, string>.Failure("Input cannot be empty");
         }
 
         if (string.IsNullOrWhiteSpace(this.Output))
         {
-            return Monads.Result<TrainingExample, string>.Failure("Output cannot be empty");
+            return Result<TrainingExample, string>.Failure("Output cannot be empty");
         }
 
         if (this.Weight <= 0)
         {
-            return Monads.Result<TrainingExample, string>.Failure("Weight must be positive");
+            return Result<TrainingExample, string>.Failure("Weight must be positive");
         }
 
-        return Monads.Result<TrainingExample, string>.Success(this);
+        return Result<TrainingExample, string>.Success(this);
     }
 }

@@ -5,6 +5,8 @@
 // based on prompt analysis and performance metrics
 // ==========================================================
 
+using Ouroboros.Abstractions.Core;
+
 namespace Ouroboros.Agent;
 
 /// <summary>

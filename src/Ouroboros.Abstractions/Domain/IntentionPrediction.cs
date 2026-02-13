@@ -1,4 +1,4 @@
-"// <copyright file=\"IntentionPrediction.cs\" company=\"Ouroboros\">
+﻿// <copyright file="IntentionPrediction.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
@@ -12,4 +12,3 @@ public class IntentionPrediction
 {
     // Placeholder class - to be implemented
 }
-"

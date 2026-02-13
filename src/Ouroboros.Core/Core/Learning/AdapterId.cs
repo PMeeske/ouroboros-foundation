@@ -21,14 +21,14 @@ public sealed record AdapterId(Guid Value)
     /// </summary>
     /// <param name="value">The string representation of the GUID.</param>
     /// <returns>An adapter ID if parsing succeeds, otherwise None.</returns>
-    public static Monads.Option<AdapterId> FromString(string value)
+    public static Option<AdapterId> FromString(string value)
     {
         if (Guid.TryParse(value, out var guid))
         {
-            return Monads.Option<AdapterId>.Some(new AdapterId(guid));
+            return Option<AdapterId>.Some(new AdapterId(guid));
         }
 
-        return Monads.Option<AdapterId>.None();
+        return Option<AdapterId>.None();
     }
 
     /// <summary>
