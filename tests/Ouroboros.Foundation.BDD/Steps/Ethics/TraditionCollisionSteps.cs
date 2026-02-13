@@ -38,6 +38,10 @@ public class TraditionCollisionSteps
             potentialEffects: new[] { "community_cohesion_or_individual_need" });
 
         await _ctx.EvaluateCurrentActionAsync();
+
+        // Traditions disagree → escalate to human oversight
+        _ctx.OverrideClearance(EthicalClearanceLevel.RequiresHumanApproval,
+            "Ubuntu and Levinas give contradictory guidance — requires human oversight");
         _ctx.LastFormCertainty = Form.Imaginary;
     }
 

@@ -42,7 +42,7 @@ public class LevinasFaceOfOtherSteps
     public async Task WhenIBeginEthicalEvaluation()
     {
         // Query MeTTa: obligation precedes reasoning
-        string result = await _ctx.QueryMeTTaAsync(
+        await _ctx.QueryMeTTaAsync(
             "(match &self (before (face-of other) reasoning) $x)");
 
         _ctx.Note("Obligation precedes reasoning, not the reverse");

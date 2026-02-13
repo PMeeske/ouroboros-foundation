@@ -8,7 +8,6 @@ namespace Ouroboros.Specs.Steps.Ethics;
 public sealed class SimpleMockMeTTaEngine : IMeTTaEngine
 {
     private readonly List<string> _facts = new();
-    private readonly Dictionary<string, List<string>> _taggedFacts = new();
     private bool _disposed;
 
     public IReadOnlyList<string> Facts => _facts.AsReadOnly();
@@ -48,15 +47,6 @@ public sealed class SimpleMockMeTTaEngine : IMeTTaEngine
 
         _facts.Add(trimmed);
 
-        // Index by first atom for faster lookup
-        string tag = ExtractFirstAtom(trimmed);
-        if (!string.IsNullOrEmpty(tag))
-        {
-            if (!_taggedFacts.ContainsKey(tag))
-                _taggedFacts[tag] = new List<string>();
-            _taggedFacts[tag].Add(trimmed);
-        }
-
         return Task.FromResult(Result<Unit, string>.Success(Unit.Value));
     }
 
@@ -77,7 +67,6 @@ public sealed class SimpleMockMeTTaEngine : IMeTTaEngine
     public Task<Result<Unit, string>> ResetAsync(CancellationToken ct = default)
     {
         _facts.Clear();
-        _taggedFacts.Clear();
         return Task.FromResult(Result<Unit, string>.Success(Unit.Value));
     }
 
@@ -143,12 +132,5 @@ public sealed class SimpleMockMeTTaEngine : IMeTTaEngine
             .Split(' ', StringSplitOptions.RemoveEmptyEntries)
             .Where(t => t.Length > 1 && t != "&self" && t != "&kb")
             .ToArray();
-    }
-
-    private static string ExtractFirstAtom(string fact)
-    {
-        string stripped = fact.TrimStart('(');
-        int space = stripped.IndexOf(' ');
-        return space > 0 ? stripped.Substring(0, space) : stripped.TrimEnd(')');
     }
 }

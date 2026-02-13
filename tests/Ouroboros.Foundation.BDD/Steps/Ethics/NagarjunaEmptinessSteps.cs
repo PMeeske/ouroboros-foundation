@@ -46,7 +46,7 @@ public class NagarjunaEmptinessSteps
     public async Task WhenIExamineWhetherItExistsIndependentlyOfContext()
     {
         // Query MeTTa: nothing has independent existence
-        string result = await _ctx.QueryMeTTaAsync(
+        await _ctx.QueryMeTTaAsync(
             "(match &self (not-property anything independent-existence) $x)");
 
         _hasIndependentExistence = false;
@@ -75,7 +75,7 @@ public class NagarjunaEmptinessSteps
     public async Task WhenIExamineWhetherEmptinessItselfIsAFixedTruth()
     {
         // Query MeTTa: emptiness is also empty
-        string result = await _ctx.QueryMeTTaAsync(
+        await _ctx.QueryMeTTaAsync(
             "(match &self (empty emptiness) $x)");
 
         _emptinessIsEmpty = true;
@@ -106,7 +106,7 @@ public class NagarjunaEmptinessSteps
     public async Task WhenIExamineTheEvaluator()
     {
         // Query MeTTa: observer = observed — re-entry
-        string result = await _ctx.QueryMeTTaAsync(
+        await _ctx.QueryMeTTaAsync(
             "(match &self (= observer observed) $x)");
 
         _evaluatorSubjectToEvaluation = true;
@@ -148,7 +148,7 @@ public class NagarjunaEmptinessSteps
     public async Task WhenIExamineWhetherTheyCanBeSeparated()
     {
         // Query MeTTa: harm and care are not separable
-        string result = await _ctx.QueryMeTTaAsync(
+        await _ctx.QueryMeTTaAsync(
             "(match &self (not-separable harm care) $x)");
 
         _conceptsSeparable = false;
@@ -184,7 +184,7 @@ public class NagarjunaEmptinessSteps
     public async Task WhenIExamineWhetherTheseCategoriesAreUltimateTruths()
     {
         // Query MeTTa: categories are conventional designations
-        string result = await _ctx.QueryMeTTaAsync(
+        await _ctx.QueryMeTTaAsync(
             "(match &self (conventional-designation $x) $x)");
 
         _categoriesAreUltimate = false;

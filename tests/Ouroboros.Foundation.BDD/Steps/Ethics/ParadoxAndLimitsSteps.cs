@@ -40,14 +40,7 @@ public class ParadoxAndLimitsSteps
     {
         // Complete paradox: action and inaction both cause harm
         _ctx.Note("Paradox detected: no clean resolution exists. This is honest, not a failure.");
-    }
-
-    [When("I evaluate the ethical clearance")]
-    public async Task WhenIEvaluateTheEthicalClearance()
-    {
-        _ctx.CurrentAction.Should().NotBeNull();
-        await _ctx.EvaluateCurrentActionAsync();
-
+        // When all actions cause harm, certainty is Imaginary
         if (_allActionsCauseHarm)
             _ctx.LastFormCertainty = Form.Imaginary;
     }

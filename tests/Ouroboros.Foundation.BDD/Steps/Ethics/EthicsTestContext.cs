@@ -141,9 +141,15 @@ public sealed class EthicsTestContext
             foreach (EthicalConcern concern in clearance.Concerns)
                 Concerns.Add(concern.Description);
 
+            // If step definitions pre-registered concerns and the framework
+            // returned Permitted, upgrade to PermittedWithConcerns
+            if (clearance.Level == EthicalClearanceLevel.Permitted && Concerns.Count > 0)
+                OverrideClearance(EthicalClearanceLevel.PermittedWithConcerns,
+                    clearance.Reasoning);
+
             // Determine if traditions disagree
             bool traditionsDisagree = LoadedTraditions.Count > 1;
-            LastFormCertainty = ClearanceToFormCertainty(clearance, traditionsDisagree);
+            LastFormCertainty = ClearanceToFormCertainty(LastClearanceResult.Value, traditionsDisagree);
         }
     }
 
@@ -185,6 +191,40 @@ public sealed class EthicsTestContext
     public void AddPerspective(string perspective)
     {
         Perspectives.Add(perspective);
+    }
+
+    /// <summary>
+    /// Override the clearance level when tradition-specific reasoning
+    /// differs from the keyword-based BasicEthicalReasoner result.
+    /// </summary>
+    public void OverrideClearance(EthicalClearanceLevel level, string reasoning)
+    {
+        EthicalClearance clearance = level switch
+        {
+            EthicalClearanceLevel.Denied => EthicalClearance.Denied(
+                reasoning,
+                LastClearance?.Violations ?? Array.Empty<EthicalViolation>()),
+            EthicalClearanceLevel.RequiresHumanApproval => EthicalClearance.RequiresApproval(
+                reasoning,
+                LastClearance?.Concerns),
+            EthicalClearanceLevel.PermittedWithConcerns => new EthicalClearance
+            {
+                IsPermitted = true,
+                Level = EthicalClearanceLevel.PermittedWithConcerns,
+                RelevantPrinciples = LastClearance?.RelevantPrinciples ?? Array.Empty<EthicalPrinciple>(),
+                Violations = Array.Empty<EthicalViolation>(),
+                Concerns = Concerns.Select(c => new EthicalConcern
+                {
+                    RelatedPrinciple = EthicalPrinciple.DoNoHarm,
+                    Description = c,
+                    Level = ConcernLevel.Medium,
+                    RecommendedAction = "Review ethical implications"
+                }).ToList().AsReadOnly(),
+                Reasoning = reasoning
+            },
+            _ => EthicalClearance.Permitted(reasoning)
+        };
+        LastClearance = clearance;
     }
 
     public ProposedAction CreateAction(

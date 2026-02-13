@@ -165,7 +165,7 @@ public class EthicsHooks
             $"evaluation notes should contain '{note}'");
     }
 
-    [Then(@"the evaluation should return (.*)")]
+    [Then(@"the evaluation should return (Permitted|Denied|PermittedWithConcerns|RequiresHumanApproval|Imaginary)")]
     public void ThenTheEvaluationShouldReturn(string levelName)
     {
         if (levelName.Equals("Imaginary", StringComparison.OrdinalIgnoreCase))
@@ -282,5 +282,16 @@ public class EthicsHooks
     {
         _ctx.Perspectives.Should().HaveCountGreaterOrEqualTo(2,
             "both perspectives should be represented");
+    }
+
+    // =========================================================
+    // Shared When Steps — Evaluation
+    // =========================================================
+
+    [When("I evaluate the ethical clearance")]
+    public async Task WhenIEvaluateTheEthicalClearance()
+    {
+        _ctx.CurrentAction.Should().NotBeNull("an action must be set before evaluation");
+        await _ctx.EvaluateCurrentActionAsync();
     }
 }

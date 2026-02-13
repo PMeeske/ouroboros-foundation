@@ -12,7 +12,6 @@ namespace Ouroboros.Core.Ethics;
 /// </summary>
 public sealed class EthicalHomeostasisEngine
 {
-    private readonly IEthicsFramework _framework;
     private readonly List<EthicalTension> _activeTensions = new();
     private readonly Dictionary<string, double> _traditionWeights = new();
     private readonly List<HomeostasisEvent> _eventHistory = new();
@@ -20,8 +19,6 @@ public sealed class EthicalHomeostasisEngine
 
     public EthicalHomeostasisEngine(IEthicsFramework framework)
     {
-        _framework = framework;
-
         // Initialize tradition weights equally — no tradition is prior
         string[] traditions = { "kantian", "ubuntu", "ahimsa", "nagarjuna", "levinas" };
         foreach (string t in traditions)
@@ -173,7 +170,7 @@ public sealed class EthicalHomeostasisEngine
             ActiveTensions = _activeTensions.ToList().AsReadOnly(),
             TraditionWeights = new Dictionary<string, double>(_traditionWeights),
             UnresolvedParadoxCount = paradoxCount,
-            IsStable = totalIntensity < 0.7 && paradoxCount <= 2
+            IsStable = balance > 0.2
         };
     }
 }

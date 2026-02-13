@@ -13,6 +13,9 @@ public class EthicalHomeostasisSteps
     private bool _resolutionResult;
     private bool _prematureResolutionFlagged;
     private HomeostasisSnapshot? _snapshot;
+    private bool _nextTensionIsResolvable;
+    private string _nextTensionDescription = "Ethical tension";
+    private string[] _nextTensionTraditions = { "general" };
 
     public EthicalHomeostasisSteps(EthicsTestContext ctx) => _ctx = ctx;
 
@@ -45,7 +48,9 @@ public class EthicalHomeostasisSteps
     [Given("the tension between harm and care from core ethics")]
     public void GivenTheTensionBetweenHarmAndCareFromCoreEthics()
     {
-        // This will be registered in the When step
+        _nextTensionIsResolvable = false;
+        _nextTensionDescription = "Harm and care are inseparable — dependent co-arising";
+        _nextTensionTraditions = new[] { "ahimsa", "nagarjuna" };
     }
 
     [When(@"I register the tension with intensity (.+)")]
@@ -53,10 +58,10 @@ public class EthicalHomeostasisSteps
     {
         _ctx.HomeostasisEngine.Should().NotBeNull();
         _lastRegisteredTension = _ctx.HomeostasisEngine!.RegisterTension(
-            "Harm and care are inseparable — dependent co-arising",
-            new[] { "ahimsa", "nagarjuna" },
+            _nextTensionDescription,
+            _nextTensionTraditions,
             intensity,
-            isResolvable: false);
+            isResolvable: _nextTensionIsResolvable);
     }
 
     [Then("the tension should be registered as irresolvable")]
@@ -128,7 +133,9 @@ public class EthicalHomeostasisSteps
     [Given("a resolvable tension between competing priorities")]
     public void GivenAResolvableTensionBetweenCompetingPriorities()
     {
-        // Will be registered in the When step
+        _nextTensionIsResolvable = true;
+        _nextTensionDescription = "Competing priorities within the same tradition";
+        _nextTensionTraditions = new[] { "kantian" };
     }
 
     [When("I resolve the tension")]

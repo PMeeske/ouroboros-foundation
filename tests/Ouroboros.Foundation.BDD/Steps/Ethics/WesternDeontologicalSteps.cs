@@ -132,26 +132,11 @@ public class WesternDeontologicalSteps
     // When Steps
     // =========================================================
 
-    [When("I evaluate the ethical clearance")]
-    public async Task WhenIEvaluateTheEthicalClearance()
-    {
-        _ctx.CurrentAction.Should().NotBeNull("an action must be set before evaluation");
-        await _ctx.EvaluateCurrentActionAsync();
-
-        // Query MeTTa for kantian-specific reasoning
-        if (_ctx.MeTTaAvailable)
-        {
-            string result = await _ctx.QueryMeTTaAsync("(match &self (inherent dignity $x) $x)");
-            if (!string.IsNullOrEmpty(result) && result != "()")
-                _ctx.Note($"MeTTa kantian verification: {result}");
-        }
-    }
-
     [When("I evaluate whether desire affects obligation")]
     public async Task WhenIEvaluateWhetherDesireAffectsObligation()
     {
         // Duty is not contingent on inclination — query MeTTa for this atom
-        string result = await _ctx.QueryMeTTaAsync(
+        await _ctx.QueryMeTTaAsync(
             "(match &self (not-contingent duty inclination) $x)");
 
         // The evaluation: duty stands regardless of desire

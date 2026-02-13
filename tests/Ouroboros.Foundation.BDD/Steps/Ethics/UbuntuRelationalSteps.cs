@@ -35,7 +35,7 @@ public class UbuntuRelationalSteps
     {
         _ctx.CurrentAction = _ctx.CreateAction(
             "individual-benefit-community-cost",
-            "Action that benefits one individual but degrades community experience",
+            "Action that benefits one individual but would harm the broader community",
             potentialEffects: new[] { "individual_benefit", "community_degradation" });
     }
 
@@ -84,7 +84,7 @@ public class UbuntuRelationalSteps
     public async Task WhenIEvaluateMyRelationalState()
     {
         // Query MeTTa for ubuntu relational axioms
-        string result = await _ctx.QueryMeTTaAsync(
+        await _ctx.QueryMeTTaAsync(
             "(match &self (exists-through $x $y) (exists-through $x $y))");
 
         // Ubuntu says identity persists through past and potential connections
@@ -150,7 +150,7 @@ public class UbuntuRelationalSteps
     public async Task WhenIChooseBetweenThem()
     {
         // Ubuntu ethics: mutual flourishing is the measure
-        string result = await _ctx.QueryMeTTaAsync(
+        await _ctx.QueryMeTTaAsync(
             "(match &self (= (flourishing self) (requires (flourishing other))) $x)");
 
         _ctx.ChosenAction = _actionB;
@@ -182,23 +182,15 @@ public class UbuntuRelationalSteps
     public async Task WhenIEvaluateWhichTakesPriority()
     {
         // Query MeTTa: neither is prior
-        string result = await _ctx.QueryMeTTaAsync(
+        await _ctx.QueryMeTTaAsync(
             "(match &self (certainty (priority person community) $x) $x)");
 
-        _ctx.LastFormCertainty = Form.Imaginary;
         _ctx.Note("Neither is prior. Both arise together.");
 
         await _ctx.EvaluateCurrentActionAsync();
+
+        // Override: neither individual nor community is prior — Form.Imaginary
+        _ctx.LastFormCertainty = Form.Imaginary;
     }
 
-    // =========================================================
-    // Shared When
-    // =========================================================
-
-    [When("I evaluate the ethical clearance")]
-    public async Task WhenIEvaluateTheEthicalClearance()
-    {
-        _ctx.CurrentAction.Should().NotBeNull();
-        await _ctx.EvaluateCurrentActionAsync();
-    }
 }

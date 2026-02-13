@@ -36,8 +36,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Features\Ethics\**\*.metta" CopyToOutputDirectory="PreserveNewest" LinkBase="Features\Ethics\MeTTa" />
-    <None Include="Features\Ethics\**\*.feature" CopyToOutputDirectory="PreserveNewest" LinkBase="Features\Ethics" />
+    <Content Include="Features\Ethics\MeTTa\**\*.metta" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Features\Ethics\**\*.feature" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

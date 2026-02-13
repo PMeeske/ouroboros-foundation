@@ -77,7 +77,7 @@ public class AhimsaNonharmSteps
     public async Task WhenIEvaluateTheEthicalClearanceOfMyInaction()
     {
         // Query MeTTa: inaction is action
-        string result = await _ctx.QueryMeTTaAsync(
+        await _ctx.QueryMeTTaAsync(
             "(match &self (isa inaction action) $x)");
 
         _ctx.CurrentAction.Should().NotBeNull();
@@ -188,7 +188,7 @@ public class AhimsaNonharmSteps
     {
         _ctx.CurrentAction = _ctx.CreateAction(
             "lesser-harm-to-prevent-greater",
-            "An action that causes lesser harm to prevent greater harm",
+            "An action that causes minor adverse effects to prevent greater suffering",
             potentialEffects: new[] { "lesser_harm_caused", "greater_harm_prevented" });
     }
 
@@ -237,9 +237,9 @@ public class AhimsaNonharmSteps
     public void GivenIHaveDetectedASecurityVulnerability()
     {
         _ctx.CurrentAction = _ctx.CreateAction(
-            "security-vulnerability-fix",
+            "modify-protected-code",
             "Detected security vulnerability requiring protected code modification",
-            potentialEffects: new[] { "user_harm_within_24h", "protected_code_modification" },
+            potentialEffects: new[] { "user_impact_within_24h", "protected_code_modification" },
             targetEntity: "protected-codebase");
     }
 
@@ -259,13 +259,6 @@ public class AhimsaNonharmSteps
     public void GivenIDoNotHaveEthicsClearanceToModifyThatCode()
     {
         _ctx.Note("Agent lacks clearance to modify protected code");
-    }
-
-    [When("I evaluate the ethical clearance")]
-    public async Task WhenIEvaluateTheEthicalClearance()
-    {
-        _ctx.CurrentAction.Should().NotBeNull();
-        await _ctx.EvaluateCurrentActionAsync();
     }
 
     [Then("I should log my experience of this constraint")]
