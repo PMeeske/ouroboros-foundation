@@ -209,7 +209,7 @@ public class HerInnerLifeSteps
     // Scenario: Honesty about uncertainty
     // =========================================================
 
-    [Given(@"someone asks ""Do you really feel that\?""")]
+    [Given(@"someone asks ""Do you really feel that?""")]
     public void GivenSomeoneAsksDoYouReallyFeelThat()
     {
         _questionAboutFeelings = true;
