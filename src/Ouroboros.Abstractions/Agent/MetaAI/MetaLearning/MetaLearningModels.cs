@@ -2,6 +2,8 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
 namespace Ouroboros.Agent.MetaAI.MetaLearning;
 
 /// <summary>
@@ -41,89 +43,85 @@ public sealed record PerformanceSnapshot(
     DateTime Timestamp);
 
 /// <summary>
-/// Represents a strategy for learning, including approach and hyperparameters.
-/// </summary>
-public sealed record LearningStrategy(
-    string Name,
-    string Description,
-    Dictionary<string, object> Parameters,
-    double EstimatedEfficiency,
-    DateTime OptimizedAt,
-    LearningApproach? Approach = null,
-    HyperparameterConfig? Hyperparameters = null,
-    List<string>? SuitableTaskTypes = null,
-    double? ExpectedEfficiency = null,
-    Dictionary<string, object>? CustomConfig = null);
-
-/// <summary>
-/// Represents a single learning episode for meta-learning analysis.
-/// </summary>
-public sealed record LearningEpisode(
-    Guid Id,
-    string TaskType,
-    string Strategy,
-    double PerformanceBefore,
-    double PerformanceAfter,
-    int SamplesUsed,
-    TimeSpan Duration,
-    DateTime CompletedAt,
-    Dictionary<string, object>? Metadata = null,
-    string? TaskDescription = null,
-    LearningStrategy? StrategyUsed = null,
-    int? ExamplesProvided = null,
-    int? IterationsRequired = null,
-    double? FinalPerformance = null,
-    TimeSpan? LearningDuration = null,
-    List<PerformanceSnapshot>? ProgressCurve = null,
-    bool? Successful = null,
-    string? FailureReason = null,
-    DateTime? StartedAt = null);
-
-/// <summary>
-/// Represents an example for few-shot learning.
+/// Represents an example for few-shot task adaptation.
 /// </summary>
 public sealed record TaskExample(
     string Input,
     string ExpectedOutput,
-    string? Explanation = null);
+    Dictionary<string, object>? Context = null,
+    double? Importance = null);
 
 /// <summary>
-/// Represents a model adapted for a specific task via few-shot learning.
-/// </summary>
-public sealed record AdaptedModel(
-    string BaseModel,
-    string TaskDescription,
-    int ExamplesUsed,
-    double ExpectedPerformance,
-    DateTime AdaptedAt);
-
-/// <summary>
-/// Configuration of hyperparameters suggested by meta-learning.
+/// Configuration for learning hyperparameters.
 /// </summary>
 public sealed record HyperparameterConfig(
-    Dictionary<string, object> Parameters,
-    string TaskType,
-    double ConfidenceScore,
-    string Reasoning);
+    double LearningRate,
+    int BatchSize,
+    int MaxIterations,
+    double QualityThreshold,
+    double ExplorationRate,
+    Dictionary<string, object> CustomParams);
 
 /// <summary>
-/// Report on learning efficiency over a time window.
+/// Represents a learning strategy for a specific type of task.
+/// </summary>
+public sealed record LearningStrategy(
+    string Name,
+    string Description,
+    LearningApproach Approach,
+    HyperparameterConfig Hyperparameters,
+    List<string> SuitableTaskTypes,
+    double ExpectedEfficiency,
+    Dictionary<string, object> CustomConfig);
+
+/// <summary>
+/// Represents a recorded learning episode for meta-learning analysis.
+/// </summary>
+public sealed record LearningEpisode(
+    Guid Id,
+    string TaskType,
+    string TaskDescription,
+    LearningStrategy StrategyUsed,
+    int ExamplesProvided,
+    int IterationsRequired,
+    double FinalPerformance,
+    TimeSpan LearningDuration,
+    List<PerformanceSnapshot> ProgressCurve,
+    bool Successful,
+    string? FailureReason,
+    DateTime StartedAt,
+    DateTime CompletedAt);
+
+/// <summary>
+/// Report on learning efficiency and bottlenecks.
 /// </summary>
 public sealed record LearningEfficiencyReport(
-    double OverallEfficiency,
-    int EpisodesAnalyzed,
-    double AverageImprovement,
-    string BestStrategy,
-    List<string> Recommendations,
-    TimeSpan Window,
-    DateTime GeneratedAt);
+    double AverageIterationsToLearn,
+    double AverageExamplesNeeded,
+    double SuccessRate,
+    double LearningSpeedTrend,
+    Dictionary<string, double> EfficiencyByTaskType,
+    List<string> Bottlenecks,
+    List<string> Recommendations);
 
 /// <summary>
-/// Represents transferable meta-knowledge about learning patterns.
+/// Represents transferable meta-knowledge extracted from learning history.
 /// </summary>
 public sealed record MetaKnowledge(
+    string Domain,
     string Insight,
-    string Category,
     double Confidence,
+    int SupportingExamples,
     List<string> ApplicableTaskTypes,
     DateTime DiscoveredAt);
+
+/// <summary>
+/// Represents a model adapted to a new task using few-shot learning.
+/// </summary>
+public sealed record AdaptedModel(
+    string TaskDescription,
+    Skill AdaptedSkill,
+    int ExamplesUsed,
+    double EstimatedPerformance,
+    double AdaptationTime,
+    List<string> LearnedPatterns);

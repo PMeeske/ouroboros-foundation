@@ -11,7 +11,7 @@ using System.Text.Json;
 /// A registry for managing and organizing tools that can be invoked within the pipeline system.
 /// Enhanced with functional programming patterns and immutable operations.
 /// </summary>
-public sealed class ToolRegistry
+public sealed class ToolRegistry : Ouroboros.Abstractions.Core.ToolRegistry
 {
     private readonly ImmutableDictionary<string, ITool> tools;
 

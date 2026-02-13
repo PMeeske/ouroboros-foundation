@@ -40,23 +40,38 @@ public sealed record AgentAction(
     Dictionary<string, object>? Parameters = null);
 
 /// <summary>
-/// Architecture specification for a world model.
+/// Supported model architectures for world model learning.
 /// </summary>
-public sealed record ModelArchitecture(
-    string Name,
-    Dictionary<string, object>? Hyperparameters = null);
+public enum ModelArchitecture
+{
+    /// <summary>Multi-layer perceptron (simple feed-forward network).</summary>
+    MLP,
+
+    /// <summary>Transformer-based architecture with attention mechanisms.</summary>
+    Transformer,
+
+    /// <summary>Graph neural network for structured state spaces.</summary>
+    GNN,
+
+    /// <summary>Hybrid architecture combining multiple approaches.</summary>
+    Hybrid,
+}
 
 /// <summary>
-/// Quality metrics for a world model evaluation.
+/// Represents quality metrics for a world model.
+/// Used to evaluate model accuracy and calibration.
 /// </summary>
+/// <param name="PredictionAccuracy">Accuracy of state predictions (0-1).</param>
+/// <param name="RewardCorrelation">Correlation of predicted vs actual rewards (0-1).</param>
+/// <param name="TerminalAccuracy">Accuracy of terminal state predictions (0-1).</param>
+/// <param name="CalibrationError">Mean calibration error for uncertainty estimates.</param>
+/// <param name="TestSamples">Number of samples used in evaluation.</param>
 public sealed record ModelQuality(
     double PredictionAccuracy,
-    double MeanSquaredError,
-    int TestSamples,
-    DateTime EvaluatedAt,
-    double? RewardCorrelation = null,
-    double? TerminalAccuracy = null,
-    double? CalibrationError = null);
+    double RewardCorrelation,
+    double TerminalAccuracy,
+    double CalibrationError,
+    int TestSamples);
 
 /// <summary>
 /// Represents a planned sequence of actions from model-based planning.

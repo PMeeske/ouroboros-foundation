@@ -2,10 +2,24 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
 namespace Ouroboros.Agent.TemporalReasoning;
 
 /// <summary>
-/// Represents a temporal relation between two events (Allen's interval algebra).
+/// Represents a temporal event with a start time and optional end time.
+/// </summary>
+public sealed record TemporalEvent(
+    Guid Id,
+    string EventType,
+    string Description,
+    DateTime StartTime,
+    DateTime? EndTime,
+    IReadOnlyDictionary<string, object> Properties,
+    IReadOnlyList<string> Participants);
+
+/// <summary>
+/// Represents a temporal relation between two events (Allen's interval algebra) — simplified canonical form.
 /// </summary>
 public enum TemporalRelation
 {
@@ -35,6 +49,71 @@ public enum TemporalRelation
 }
 
 /// <summary>
+/// Allen Interval Algebra relation types for temporal reasoning (detailed form).
+/// </summary>
+public enum TemporalRelationType
+{
+    /// <summary>A ends before B starts.</summary>
+    Before,
+
+    /// <summary>A starts after B ends.</summary>
+    After,
+
+    /// <summary>A ends exactly when B starts.</summary>
+    Meets,
+
+    /// <summary>A starts exactly when B ends.</summary>
+    MetBy,
+
+    /// <summary>A starts before B, ends during B.</summary>
+    Overlaps,
+
+    /// <summary>B starts before A, ends during A.</summary>
+    OverlappedBy,
+
+    /// <summary>A is contained within B.</summary>
+    During,
+
+    /// <summary>A contains B.</summary>
+    Contains,
+
+    /// <summary>A and B start together, A ends first.</summary>
+    Starts,
+
+    /// <summary>A and B start together, B ends first.</summary>
+    StartedBy,
+
+    /// <summary>A and B end together, A starts later.</summary>
+    Finishes,
+
+    /// <summary>A and B end together, B starts later.</summary>
+    FinishedBy,
+
+    /// <summary>A and B have same start and end.</summary>
+    Equals,
+}
+
+/// <summary>
+/// Represents a temporal relationship between two events using Allen Interval Algebra.
+/// </summary>
+public sealed record TemporalRelationEdge(
+    TemporalEvent Event1,
+    TemporalEvent Event2,
+    TemporalRelationType RelationType,
+    double Confidence);
+
+/// <summary>
+/// Default configuration values for temporal queries.
+/// </summary>
+public static class TemporalQueryDefaults
+{
+    /// <summary>
+    /// Default maximum number of results to return from a temporal query.
+    /// </summary>
+    public const int DefaultMaxResults = 100;
+}
+
+/// <summary>
 /// Parameters for querying temporal events.
 /// </summary>
 public sealed record TemporalQuery(
@@ -50,31 +129,35 @@ public sealed record TemporalQuery(
     Guid? RelatedEventId = null);
 
 /// <summary>
-/// Represents a causal relationship between events.
+/// Represents a causal relationship between two temporal events.
 /// </summary>
 public sealed record CausalRelation(
-    string CauseEventId,
-    string EffectEventId,
-    double Confidence,
-    string? Mechanism = null);
+    TemporalEvent Cause,
+    TemporalEvent Effect,
+    double CausalStrength,
+    string Mechanism,
+    IReadOnlyList<string> ConfoundingFactors);
 
 /// <summary>
-/// Represents a predicted future event.
+/// Represents a predicted future event based on temporal patterns.
 /// </summary>
 public sealed record PredictedEvent(
     string EventType,
+    string Description,
     DateTime PredictedTime,
-    double Probability,
-    string? Description = null);
+    double Confidence,
+    IReadOnlyList<TemporalEvent> BasedOnEvents,
+    string ReasoningExplanation);
 
 /// <summary>
-/// Represents an ordered timeline of events.
+/// Represents a timeline constructed from a set of temporal events.
 /// </summary>
 public sealed record Timeline(
-    List<Abstractions.Domain.TemporalEvent> Events,
-    DateTime Start,
-    DateTime End,
-    string? Description = null);
+    IReadOnlyList<TemporalEvent> Events,
+    IReadOnlyList<TemporalRelationEdge> Relations,
+    DateTime EarliestTime,
+    DateTime LatestTime,
+    IReadOnlyDictionary<string, IReadOnlyList<TemporalEvent>> EventsByType);
 
 /// <summary>
 /// Represents a temporal constraint for satisfiability checking.

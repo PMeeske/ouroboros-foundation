@@ -2,40 +2,70 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
 namespace Ouroboros.Agent.MetaAI;
 
 /// <summary>
-/// Represents a learned skill that can be reused across executions.
+/// Represents a single step in a plan.
 /// </summary>
-public sealed record Skill(
-    Guid Id,
-    string Name,
-    string Description,
-    string Domain,
-    List<string> Steps,
-    double QualityScore,
-    DateTime CreatedAt,
-    int UsageCount = 0);
+public sealed record PlanStep(
+    string Action,
+    Dictionary<string, object> Parameters,
+    string ExpectedOutcome,
+    double ConfidenceScore);
 
 /// <summary>
-/// Represents the result of an execution that may yield extractable skills.
+/// Represents a plan with steps and expected outcomes.
 /// </summary>
-public sealed record ExecutionResult(
-    Guid Id,
-    string TaskDescription,
-    List<string> Steps,
+public sealed record Plan(
+    string Goal,
+    List<PlanStep> Steps,
+    Dictionary<string, double> ConfidenceScores,
+    DateTime CreatedAt);
+
+/// <summary>
+/// Represents the result of executing a single plan step.
+/// </summary>
+public sealed record StepResult(
+    PlanStep Step,
     bool Success,
-    double QualityScore,
+    string Output,
+    string? Error,
     TimeSpan Duration,
-    DateTime CompletedAt,
-    Dictionary<string, object>? Metadata = null);
+    Dictionary<string, object> ObservedState);
 
 /// <summary>
-/// Represents the result of verifying an execution output.
+/// Represents the result of executing a plan.
 /// </summary>
-public sealed record VerificationResult(
-    Guid ExecutionId,
-    bool IsCorrect,
+public sealed record PlanExecutionResult(
+    Plan Plan,
+    List<StepResult> StepResults,
+    bool Success,
+    string FinalOutput,
+    Dictionary<string, object> Metadata,
+    TimeSpan Duration);
+
+/// <summary>
+/// Represents verification result with feedback for improvement.
+/// </summary>
+public sealed record PlanVerificationResult(
+    PlanExecutionResult Execution,
+    bool Verified,
     double QualityScore,
     List<string> Issues,
-    DateTime VerifiedAt);
+    List<string> Improvements,
+    string? RevisedPlan);
+
+/// <summary>
+/// Represents a learned skill that can be reused.
+/// </summary>
+public sealed record Skill(
+    string Name,
+    string Description,
+    List<string> Prerequisites,
+    List<PlanStep> Steps,
+    double SuccessRate,
+    int UsageCount,
+    DateTime CreatedAt,
+    DateTime LastUsed);

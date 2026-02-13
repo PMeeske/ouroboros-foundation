@@ -7,8 +7,15 @@ namespace Ouroboros.Abstractions.Core;
 
 /// <summary>
 /// Represents a chat completion model interface.
+/// Provides the minimal contract for text generation used across the pipeline.
 /// </summary>
 public interface IChatCompletionModel
 {
-    // Placeholder interface - to be implemented
+    /// <summary>
+    /// Generates text from a prompt.
+    /// </summary>
+    /// <param name="prompt">The input prompt.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The generated text response.</returns>
+    Task<string> GenerateTextAsync(string prompt, CancellationToken ct = default);
 }

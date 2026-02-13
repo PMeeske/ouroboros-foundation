@@ -31,8 +31,8 @@ public interface ISkillExtractor
     /// <param name="ct">Cancellation token</param>
     /// <returns>Extracted skill or error message</returns>
     Task<Result<Skill, string>> ExtractSkillAsync(
-        ExecutionResult execution,
-        VerificationResult verification,
+        PlanExecutionResult execution,
+        PlanVerificationResult verification,
         SkillExtractionConfig? config = null,
         CancellationToken ct = default);
 
@@ -43,7 +43,7 @@ public interface ISkillExtractor
     /// <param name="config">Optional extraction configuration</param>
     /// <returns>True if skill should be extracted, false otherwise</returns>
     Task<bool> ShouldExtractSkillAsync(
-        VerificationResult verification,
+        PlanVerificationResult verification,
         SkillExtractionConfig? config = null);
 
     /// <summary>
@@ -53,7 +53,7 @@ public interface ISkillExtractor
     /// <param name="ct">Cancellation token</param>
     /// <returns>Generated skill name</returns>
     Task<string> GenerateSkillNameAsync(
-        ExecutionResult execution,
+        PlanExecutionResult execution,
         CancellationToken ct = default);
 
     /// <summary>
@@ -63,6 +63,6 @@ public interface ISkillExtractor
     /// <param name="ct">Cancellation token</param>
     /// <returns>Generated skill description</returns>
     Task<string> GenerateSkillDescriptionAsync(
-        ExecutionResult execution,
+        PlanExecutionResult execution,
         CancellationToken ct = default);
 }

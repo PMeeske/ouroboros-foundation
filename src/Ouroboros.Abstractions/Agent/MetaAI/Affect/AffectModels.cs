@@ -2,83 +2,43 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
 namespace Ouroboros.Agent.MetaAI.Affect;
 
 /// <summary>
-/// Types of affective signals monitored by homeostasis policies.
+/// Types of valence signals.
 /// </summary>
 public enum SignalType
 {
-    /// <summary>Stress indicator from system load or failures.</summary>
+    /// <summary>Stress indicator from system load or failures</summary>
     Stress,
 
-    /// <summary>Confidence level in current task.</summary>
+    /// <summary>Confidence from successful task completions</summary>
     Confidence,
 
-    /// <summary>Curiosity-driven exploration drive.</summary>
+    /// <summary>Curiosity from novelty detection</summary>
     Curiosity,
 
-    /// <summary>General valence (positive/negative affect).</summary>
+    /// <summary>General valence (positive/negative affect)</summary>
     Valence,
 
-    /// <summary>Arousal level (energy/activation).</summary>
-    Arousal,
-
-    /// <summary>Frustration from repeated failures.</summary>
-    Frustration,
-
-    /// <summary>Engagement level with current task.</summary>
-    Engagement,
-
-    /// <summary>Fatigue from extended operations.</summary>
-    Fatigue,
-
-    /// <summary>Satisfaction from successful outcomes.</summary>
-    Satisfaction,
-
-    /// <summary>Anxiety from uncertainty or risk.</summary>
-    Anxiety,
-
-    /// <summary>Custom signal type.</summary>
-    Custom,
+    /// <summary>Arousal level (energy/activation)</summary>
+    Arousal
 }
 
 /// <summary>
 /// Represents the current affective state of an agent.
 /// </summary>
 public sealed record AffectiveState(
+    Guid Id,
+    double Valence,
     double Stress,
     double Confidence,
     double Curiosity,
-    double Valence,
     double Arousal,
-    double Frustration,
-    double Engagement,
-    double Fatigue,
-    double Satisfaction,
-    double Anxiety,
     DateTime Timestamp,
-    Dictionary<string, double>? CustomSignals = null)
-{
-    /// <summary>
-    /// Gets the value of a specific signal type.
-    /// </summary>
-    public double GetSignalValue(SignalType signal) => signal switch
-    {
-        SignalType.Stress => Stress,
-        SignalType.Confidence => Confidence,
-        SignalType.Curiosity => Curiosity,
-        SignalType.Valence => Valence,
-        SignalType.Arousal => Arousal,
-        SignalType.Frustration => Frustration,
-        SignalType.Engagement => Engagement,
-        SignalType.Fatigue => Fatigue,
-        SignalType.Satisfaction => Satisfaction,
-        SignalType.Anxiety => Anxiety,
-        SignalType.Custom => CustomSignals?.Values.FirstOrDefault() ?? 0.0,
-        _ => 0.0,
-    };
-}
+    Dictionary<string, object> Metadata);
 
 /// <summary>
 /// Represents a valence signal measurement.
@@ -119,8 +79,9 @@ public sealed record AffectConfig(
 public interface IValenceMonitor
 {
     /// <summary>
-    /// Gets the current affective state snapshot.
+    /// Gets the current affective state.
     /// </summary>
+    /// <returns>Current affective state</returns>
     AffectiveState GetCurrentState();
 
     /// <summary>
@@ -133,6 +94,7 @@ public interface IValenceMonitor
 
     /// <summary>
     /// Computes stress level using Fourier-based signal analysis.
+    /// Analyzes frequency patterns in recent stress signals to detect anomalies.
     /// </summary>
     /// <param name="ct">Cancellation token</param>
     /// <returns>Stress detection result with spectral analysis</returns>
@@ -169,7 +131,7 @@ public interface IValenceMonitor
     double[] GetSignalHistory(SignalType type);
 
     /// <summary>
-    /// Gets the running average for a signal type.
+    /// Computes the running average for a signal type.
     /// </summary>
     /// <param name="type">Signal type</param>
     /// <param name="windowSize">Window size for averaging</param>
