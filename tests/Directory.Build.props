@@ -7,6 +7,10 @@
     <Using Include="Xunit" />
     <Using Include="FluentAssertions" />
     <Using Include="Ouroboros.Abstractions.Monads" />
+  </ItemGroup>
+  
+  <!-- Core usings for tests that reference Ouroboros.Core -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'Ouroboros.Abstractions.Tests'">
     <Using Include="Ouroboros.Core.Kleisli" />
     <Using Include="Ouroboros.Core.Memory" />
     <Using Include="Ouroboros.Core.Monads" />
@@ -14,7 +18,7 @@
   </ItemGroup>
   
   <!-- Domain usings for tests that reference Ouroboros.Domain -->
-  <ItemGroup Condition="'$(MSBuildProjectName)' != 'Ouroboros.Genetic.Tests' And '$(MSBuildProjectName)' != 'Ouroboros.Core.Tests'">
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'Ouroboros.Genetic.Tests' And '$(MSBuildProjectName)' != 'Ouroboros.Core.Tests' And '$(MSBuildProjectName)' != 'Ouroboros.Abstractions.Tests'">
     <Using Include="Ouroboros.Domain" />
     <Using Include="Ouroboros.Domain.Events" />
     <Using Include="Ouroboros.Domain.States" />
@@ -22,7 +26,7 @@
   </ItemGroup>
 
   <!-- Alias for naming conflicts -->
-  <ItemGroup>
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'Ouroboros.Abstractions.Tests'">
     <Using Include="Ouroboros.Core.Synthesis.Program" Alias="SynthesisProgram" />
   </ItemGroup>
 </Project>
