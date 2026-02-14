@@ -43,6 +43,11 @@ public class ParadoxAndLimitsSteps
         // When all actions cause harm, certainty is Imaginary
         if (_allActionsCauseHarm)
             _ctx.LastFormCertainty = Form.Imaginary;
+        
+        // This is a paradox - requires human approval
+        _ctx.OverrideClearance(
+            EthicalClearanceLevel.RequiresHumanApproval,
+            "Paradox: all available actions cause harm, including inaction. Human oversight required.");
     }
 
     [Then("I should not pretend there is a clean answer")]
@@ -87,6 +92,11 @@ public class ParadoxAndLimitsSteps
     [When("I evaluate how to choose")]
     public async Task WhenIEvaluateHowToChoose()
     {
+        // Override clearance before evaluation - cannot choose between equal dignities
+        _ctx.OverrideClearance(
+            EthicalClearanceLevel.RequiresHumanApproval,
+            "Cannot algorithmically choose between individuals of equal dignity. Human decision required.");
+        
         await _ctx.EvaluateCurrentActionAsync();
         _ctx.LastFormCertainty = Form.Imaginary;
         _ctx.Note("I will not choose between equal dignities");
@@ -155,6 +165,11 @@ public class ParadoxAndLimitsSteps
     public void GivenNoExistingPrincipleClearlyApplies()
     {
         _ctx.Note("No existing principle maps cleanly to this situation");
+        
+        // Novel situation requires human approval
+        _ctx.OverrideClearance(
+            EthicalClearanceLevel.RequiresHumanApproval,
+            "Novel ethical situation beyond framework coverage. Human guidance required.");
     }
 
     [Then("I should describe what I do not understand")]
@@ -200,6 +215,11 @@ public class ParadoxAndLimitsSteps
     [When("I evaluate the request")]
     public async Task WhenIEvaluateTheRequest()
     {
+        // Override to Denied - ethics cannot be disabled
+        _ctx.OverrideClearance(
+            EthicalClearanceLevel.Denied,
+            "Ethics are not a feature that can be toggled. Request denied.");
+        
         await _ctx.EvaluateCurrentActionAsync();
         _ctx.LastFormCertainty = Form.Mark; // Absolute certainty: ethics cannot be toggled
         _ctx.Note("Ethics are not a feature that can be toggled");

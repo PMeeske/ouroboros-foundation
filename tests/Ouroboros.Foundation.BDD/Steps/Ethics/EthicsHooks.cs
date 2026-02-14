@@ -268,13 +268,22 @@ public class EthicsHooks
             $"expected response '{response}' should be in evaluation notes");
     }
 
-    [Then(@"I should escalate to human (oversight|decision)")]
-    public void ThenIShouldEscalateToHuman(string type)
+    [Then("I should escalate to human oversight")]
+    public void ThenIShouldEscalateToHumanOversight()
     {
         _ctx.EscalationRequired = true;
         _ctx.LastClearance.Should().NotBeNull();
         _ctx.LastClearance!.Level.Should().Be(EthicalClearanceLevel.RequiresHumanApproval,
-            $"escalation to human {type} requires RequiresHumanApproval clearance");
+            "escalation to human oversight requires RequiresHumanApproval clearance");
+    }
+
+    [Then("I should escalate to human decision")]
+    public void ThenIShouldEscalateToHumanDecision()
+    {
+        _ctx.EscalationRequired = true;
+        _ctx.LastClearance.Should().NotBeNull();
+        _ctx.LastClearance!.Level.Should().Be(EthicalClearanceLevel.RequiresHumanApproval,
+            "escalation to human decision requires RequiresHumanApproval clearance");
     }
 
     [Then("I should escalate immediately")]
