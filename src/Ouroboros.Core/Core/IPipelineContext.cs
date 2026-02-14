@@ -23,6 +23,7 @@ public interface IPipelineContext
 /// <summary>
 /// Represents a context with vector store capabilities.
 /// </summary>
+[Obsolete("No implementations exist. Scheduled for removal.")]
 public interface IVectorContext
 {
     /// <summary>
@@ -34,6 +35,7 @@ public interface IVectorContext
 /// <summary>
 /// Represents a context with LLM capabilities.
 /// </summary>
+[Obsolete("No implementations exist. Scheduled for removal.")]
 public interface ILlmContext
 {
     /// <summary>
@@ -50,6 +52,7 @@ public interface ILlmContext
 /// <summary>
 /// Marker interface for step metadata.
 /// </summary>
+[Obsolete("No implementations exist. Scheduled for removal.")]
 public interface IStepMetadata
 {
     /// <summary>

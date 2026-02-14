@@ -30,6 +30,7 @@ public sealed record EthicsGateResult(Form Decision, string Reason)
 /// Interface for evaluating ethical constraints on context transitions.
 /// Implements the three-valued ethics gate described in the CPE specification.
 /// </summary>
+[Obsolete("No implementations exist. Scheduled for removal.")]
 public interface IEthicsGate
 {
     /// <summary>
@@ -45,6 +46,7 @@ public interface IEthicsGate
 /// <summary>
 /// Default ethics gate that permits all transitions.
 /// </summary>
+[Obsolete("No implementations exist. Scheduled for removal.")]
 public sealed class PermissiveEthicsGate : IEthicsGate
 {
     public ValueTask<EthicsGateResult> EvaluateAsync(string from, string to) =>

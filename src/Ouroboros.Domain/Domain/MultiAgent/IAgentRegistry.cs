@@ -11,6 +11,7 @@ using Ouroboros.Core.Monads;
 /// <summary>
 /// Registry for tracking and managing agent capabilities and availability.
 /// </summary>
+[Obsolete("No implementations exist. Scheduled for removal.")]
 public interface IAgentRegistry
 {
     /// <summary>

@@ -11,6 +11,7 @@ using Ouroboros.Core.Monads;
 /// <summary>
 /// Coordinates multiple Ouroboros instances for collaborative intelligence and distributed problem-solving.
 /// </summary>
+[Obsolete("No implementations exist. Scheduled for removal.")]
 public interface IMultiAgentCoordinator
 {
     /// <summary>

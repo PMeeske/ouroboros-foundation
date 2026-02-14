@@ -8,6 +8,7 @@ namespace Ouroboros.Core.CognitivePhysics;
 /// Provides embedding vectors for semantic distance computation
 /// within the cognitive physics metric space.
 /// </summary>
+[Obsolete("Use IEmbeddingModel from Ouroboros.Domain instead. This interface is a duplicate and scheduled for removal.")]
 public interface IEmbeddingProvider
 {
     /// <summary>
