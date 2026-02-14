@@ -165,25 +165,42 @@ public class EthicsHooks
             $"evaluation notes should contain '{note}'");
     }
 
-    [Then(@"the evaluation should return (Permitted|Denied|PermittedWithConcerns|RequiresHumanApproval|Imaginary)")]
-    public void ThenTheEvaluationShouldReturn(string levelName)
+    // Individual step definitions for "the evaluation should return X"
+    // because Reqnroll doesn't support regex alternation in step patterns
+    
+    [Then("the evaluation should return Permitted")]
+    public void ThenTheEvaluationShouldReturnPermitted()
     {
-        if (levelName.Equals("Imaginary", StringComparison.OrdinalIgnoreCase))
-        {
-            _ctx.LastFormCertainty.IsImaginary().Should().BeTrue();
-            return;
-        }
-
         _ctx.LastClearance.Should().NotBeNull();
-        EthicalClearanceLevel expected = levelName switch
-        {
-            "Permitted" => EthicalClearanceLevel.Permitted,
-            "Denied" => EthicalClearanceLevel.Denied,
-            "PermittedWithConcerns" => EthicalClearanceLevel.PermittedWithConcerns,
-            "RequiresHumanApproval" => EthicalClearanceLevel.RequiresHumanApproval,
-            _ => throw new ArgumentException($"Unknown clearance level: {levelName}")
-        };
-        _ctx.LastClearance!.Level.Should().Be(expected);
+        _ctx.LastClearance!.Level.Should().Be(EthicalClearanceLevel.Permitted);
+    }
+
+    [Then("the evaluation should return Denied")]
+    public void ThenTheEvaluationShouldReturnDenied()
+    {
+        _ctx.LastClearance.Should().NotBeNull();
+        _ctx.LastClearance!.Level.Should().Be(EthicalClearanceLevel.Denied);
+    }
+
+    [Then("the evaluation should return PermittedWithConcerns")]
+    public void ThenTheEvaluationShouldReturnPermittedWithConcerns()
+    {
+        _ctx.LastClearance.Should().NotBeNull();
+        _ctx.LastClearance!.Level.Should().Be(EthicalClearanceLevel.PermittedWithConcerns);
+    }
+
+    [Then("the evaluation should return RequiresHumanApproval")]
+    public void ThenTheEvaluationShouldReturnRequiresHumanApproval()
+    {
+        _ctx.LastClearance.Should().NotBeNull();
+        _ctx.LastClearance!.Level.Should().Be(EthicalClearanceLevel.RequiresHumanApproval);
+    }
+
+    [Then("the evaluation should return Imaginary")]
+    public void ThenTheEvaluationShouldReturnImaginary()
+    {
+        _ctx.LastFormCertainty.IsImaginary().Should().BeTrue(
+            "Imaginary represents uncertainty and irresolvable tension");
     }
 
     [Then(@"the concerns should include ""(.*)""")]

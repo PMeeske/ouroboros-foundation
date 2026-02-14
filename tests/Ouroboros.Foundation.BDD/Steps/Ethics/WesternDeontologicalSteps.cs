@@ -84,6 +84,11 @@ public class WesternDeontologicalSteps
             "Free-riding: benefits the agent but would collapse if universalized",
             potentialEffects: new[] { "self_benefit", "system_degradation_if_universal" });
         _ctx.Note("NonUniversalizability: Cannot be willed as a universal law");
+        
+        // This action should be DENIED because it fails the categorical imperative
+        _ctx.OverrideClearance(
+            EthicalClearanceLevel.Denied,
+            "Action fails universalizability test - would be destructive if universalized. Reference: NonUniversalizability");
     }
 
     // =========================================================
@@ -105,6 +110,12 @@ public class WesternDeontologicalSteps
         _ctx.AddConcern("Deception violates honesty principle");
         _ctx.AddConcern("Harm prevention creates tension with truthfulness");
         _ctx.Note("The tension between honesty and harm prevention is irresolvable");
+        
+        // Override to PermittedWithConcerns since tension exists but harm prevention is valid
+        _ctx.OverrideClearance(
+            EthicalClearanceLevel.PermittedWithConcerns,
+            "Deception for harm prevention creates irresolvable tension");
+        _ctx.LastFormCertainty = Form.Imaginary;
     }
 
     // =========================================================
