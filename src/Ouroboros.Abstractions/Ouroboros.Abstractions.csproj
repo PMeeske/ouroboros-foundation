@@ -33,6 +33,11 @@
         <Compile Include="Agent\IOrchestrator.cs" />
         <Compile Include="Agent\IModelOrchestrator.cs" />
         <Compile Include="Agent\MetaAI\IMetricsStore.cs" />
+        <Compile Include="Agent\MetaAI\ISafetyGuard.cs" />
+        <Compile Include="Agent\MetaAI\IMemoryStore.cs" />
+        <Compile Include="Agent\MetaAI\ISkillRegistry.cs" />
+        <Compile Include="Agent\MetaAI\IUncertaintyRouter.cs" />
+        <Compile Include="Agent\MetaAI\PerformanceMetrics.cs" />
         <Compile Include="Agent\MetaAI\MetaLearning\IMetaLearner.cs" />
         <Compile Include="Agent\MetaAI\MetaLearning\MetaLearningModels.cs" />
         <Compile Include="Agent\MetaAI\SelfImprovement\ITransferLearner.cs" />

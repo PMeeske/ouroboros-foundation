@@ -2,7 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace Ouroboros.Abstractions.Agent;
+namespace Ouroboros.Agent.MetaAI;
 
 /// <summary>
 /// Defines permission levels for agent actions.

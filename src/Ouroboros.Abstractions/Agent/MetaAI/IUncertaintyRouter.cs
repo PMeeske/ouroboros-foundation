@@ -2,7 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace Ouroboros.Abstractions.Agent;
+namespace Ouroboros.Agent.MetaAI;
 
 /// <summary>
 /// Strategies for handling uncertain situations when primary approach fails.

@@ -2,7 +2,9 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace Ouroboros.Abstractions.Agent;
+using Ouroboros.Abstractions;
+
+namespace Ouroboros.Agent.MetaAI;
 
 /// <summary>
 /// Represents a learnable skill that an agent can acquire and execute.
@@ -17,7 +19,7 @@ namespace Ouroboros.Abstractions.Agent;
 /// <param name="UsageCount">Number of times the skill has been used.</param>
 /// <param name="AverageExecutionTime">Average time to execute in milliseconds.</param>
 /// <param name="Tags">Tags for categorization and search.</param>
-public sealed record Skill(
+public sealed record AgentSkill(
     string Id,
     string Name,
     string Description,
@@ -42,7 +44,7 @@ public interface ISkillRegistry
     /// <param name="ct">Cancellation token.</param>
     /// <returns>Success indicator or error message.</returns>
     Task<Result<Unit, string>> RegisterSkillAsync(
-        Skill skill,
+        AgentSkill skill,
         CancellationToken ct = default);
 
     /// <summary>
@@ -51,7 +53,7 @@ public interface ISkillRegistry
     /// <param name="skillId">The skill identifier.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>The skill or error message.</returns>
-    Task<Result<Skill, string>> GetSkillAsync(
+    Task<Result<AgentSkill, string>> GetSkillAsync(
         string skillId,
         CancellationToken ct = default);
 
@@ -62,7 +64,7 @@ public interface ISkillRegistry
     /// <param name="tags">Optional tags filter.</param>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>List of matching skills or error message.</returns>
-    Task<Result<IReadOnlyList<Skill>, string>> FindSkillsAsync(
+    Task<Result<IReadOnlyList<AgentSkill>, string>> FindSkillsAsync(
         string? category = null,
         IReadOnlyList<string>? tags = null,
         CancellationToken ct = default);
@@ -74,7 +76,7 @@ public interface ISkillRegistry
     /// <param name="ct">Cancellation token.</param>
     /// <returns>Success indicator or error message.</returns>
     Task<Result<Unit, string>> UpdateSkillAsync(
-        Skill skill,
+        AgentSkill skill,
         CancellationToken ct = default);
 
     /// <summary>
@@ -106,6 +108,6 @@ public interface ISkillRegistry
     /// </summary>
     /// <param name="ct">Cancellation token.</param>
     /// <returns>List of all skills or error message.</returns>
-    Task<Result<IReadOnlyList<Skill>, string>> GetAllSkillsAsync(
+    Task<Result<IReadOnlyList<AgentSkill>, string>> GetAllSkillsAsync(
         CancellationToken ct = default);
 }

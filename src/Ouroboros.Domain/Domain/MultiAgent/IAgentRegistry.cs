@@ -11,7 +11,7 @@ using Ouroboros.Core.Monads;
 /// <summary>
 /// Registry for tracking and managing agent capabilities and availability.
 /// </summary>
-[Obsolete("No implementations exist. Scheduled for removal.")]
+[Obsolete("Multi-agent coordination is being consolidated into a unified framework. This interface will be replaced in a future version.")]
 public interface IAgentRegistry
 {
     /// <summary>

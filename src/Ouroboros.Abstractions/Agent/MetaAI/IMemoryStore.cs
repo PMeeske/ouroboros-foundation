@@ -2,7 +2,9 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace Ouroboros.Abstractions.Agent;
+using Ouroboros.Abstractions;
+
+namespace Ouroboros.Agent.MetaAI;
 
 /// <summary>
 /// Represents an experience stored in agent memory.
