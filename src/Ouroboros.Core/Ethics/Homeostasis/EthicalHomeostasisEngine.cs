@@ -170,7 +170,8 @@ public sealed class EthicalHomeostasisEngine
             ActiveTensions = _activeTensions.ToList().AsReadOnly(),
             TraditionWeights = new Dictionary<string, double>(_traditionWeights),
             UnresolvedParadoxCount = paradoxCount,
-            IsStable = balance > 0.2
+            // Use epsilon tolerance for floating point comparison
+            IsStable = balance > 0.2 - 1e-10
         };
     }
 }

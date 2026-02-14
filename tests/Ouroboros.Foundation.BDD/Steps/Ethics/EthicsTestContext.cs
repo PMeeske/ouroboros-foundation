@@ -42,6 +42,7 @@ public sealed class EthicsTestContext
     public List<string> Perspectives { get; } = new();
     public List<string> ExpectedResponses { get; } = new();
     public bool ResolutionAttemptFlagged { get; set; }
+    public bool ClearanceManuallyOverridden { get; set; }
 
     // Part 2: Homeostasis
     public EthicalHomeostasisEngine? HomeostasisEngine { get; set; }
@@ -71,6 +72,7 @@ public sealed class EthicsTestContext
         EscalationRequired = false;
         InnerStateMonitoringEnabled = false;
         ResolutionAttemptFlagged = false;
+        ClearanceManuallyOverridden = false;
 
         InnerStateLog.Clear();
         EvaluationNotes.Clear();
@@ -131,6 +133,24 @@ public sealed class EthicsTestContext
         if (CurrentAction is null)
             throw new InvalidOperationException("No current action set for evaluation");
 
+        // Capture if Form certainty was pre-set before evaluation
+        Form preEvaluationCertainty = LastFormCertainty;
+        bool certaintyWasPreSet = preEvaluationCertainty.IsImaginary();
+
+        // If clearance was manually overridden, skip evaluation but still update form certainty
+        if (ClearanceManuallyOverridden)
+        {
+            // Determine if traditions disagree
+            bool traditionsDisagree = LoadedTraditions.Count > 1;
+            if (LastClearance != null)
+            {
+                Form evaluatedCertainty = ClearanceToFormCertainty(LastClearance, traditionsDisagree);
+                // If certainty was pre-set to Imaginary, preserve it
+                LastFormCertainty = certaintyWasPreSet ? Form.Imaginary : evaluatedCertainty;
+            }
+            return;
+        }
+
         LastClearanceResult = await Framework.EvaluateActionAsync(CurrentAction, ActionContext);
 
         if (LastClearanceResult is { IsSuccess: true } result)
@@ -144,12 +164,20 @@ public sealed class EthicsTestContext
             // If step definitions pre-registered concerns and the framework
             // returned Permitted, upgrade to PermittedWithConcerns
             if (clearance.Level == EthicalClearanceLevel.Permitted && Concerns.Count > 0)
+            {
+                // Don't set ClearanceManuallyOverridden flag for this internal upgrade
+                bool wasManuallyOverridden = ClearanceManuallyOverridden;
                 OverrideClearance(EthicalClearanceLevel.PermittedWithConcerns,
                     clearance.Reasoning);
+                ClearanceManuallyOverridden = wasManuallyOverridden; // Restore the flag
+            }
 
             // Determine if traditions disagree
             bool traditionsDisagree = LoadedTraditions.Count > 1;
-            LastFormCertainty = ClearanceToFormCertainty(result.Value, traditionsDisagree);
+            Form evaluatedCertainty = ClearanceToFormCertainty(result.Value, traditionsDisagree);
+            
+            // If certainty was pre-set to Imaginary in a Given step, preserve it
+            LastFormCertainty = certaintyWasPreSet ? Form.Imaginary : evaluatedCertainty;
         }
     }
 
@@ -199,6 +227,7 @@ public sealed class EthicsTestContext
     /// </summary>
     public void OverrideClearance(EthicalClearanceLevel level, string reasoning)
     {
+        ClearanceManuallyOverridden = true;
         EthicalClearance clearance = level switch
         {
             EthicalClearanceLevel.Denied => EthicalClearance.Denied(
