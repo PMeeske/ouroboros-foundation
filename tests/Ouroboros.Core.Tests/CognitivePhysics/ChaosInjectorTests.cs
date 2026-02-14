@@ -55,7 +55,7 @@ public class ChaosInjectorTests
 
         Result<CognitiveState> result = injector.Inject(state);
 
-        result.Value.Compression.Should().BeGreaterOrEqualTo(0.1);
+        result.Value.Compression.Should().BeGreaterThanOrEqualTo(0.1);
     }
 
     [Fact]
