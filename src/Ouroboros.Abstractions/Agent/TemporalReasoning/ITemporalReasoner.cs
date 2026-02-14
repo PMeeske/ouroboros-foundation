@@ -8,6 +8,7 @@ namespace Ouroboros.Agent.TemporalReasoning;
 /// Interface for temporal reasoning capabilities.
 /// Enables reasoning about time, sequences, causality, and temporal relationships between events.
 /// </summary>
+[Obsolete("No implementations exist. Scheduled for removal.")]
 public interface ITemporalReasoner
 {
     /// <summary>

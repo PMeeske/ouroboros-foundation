@@ -8,6 +8,7 @@ namespace Ouroboros.Domain.Environment;
 /// Interface for actors that can interact with environments.
 /// Enables embodiment for closed-loop learning.
 /// </summary>
+[Obsolete("No implementations exist. Scheduled for removal.")]
 public interface IEnvironmentActor
 {
     /// <summary>
