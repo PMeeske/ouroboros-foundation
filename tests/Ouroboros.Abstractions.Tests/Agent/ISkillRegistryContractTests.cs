@@ -5,7 +5,7 @@
 namespace Ouroboros.Abstractions.Tests.Agent;
 
 /// <summary>
-/// Contract tests for ISkillRegistry interface concept for Ouroboros.Abstractions.Agent namespace.
+/// Contract tests demonstrating an ISkillRegistry interface concept that could be implemented in the Ouroboros.Abstractions.Agent namespace.
 /// These tests verify that such an interface can be implemented standalone
 /// without Engine dependencies, using test-local mock definitions.
 /// </summary>
@@ -51,8 +51,8 @@ public class ISkillRegistryContractTests
     [Fact]
     public async Task ISkillRegistry_CanBeReferencedFromAbstractionsAgent()
     {
-        // This test verifies a skill registry interface concept can be implemented
-        // without requiring Core or Engine dependencies
+        // This test demonstrates a skill registry interface concept that could be implemented
+        // in the Ouroboros.Abstractions.Agent namespace without requiring Core or Engine dependencies
         
         // Arrange
         ISkillRegistry registry = new FakeSkillRegistry();

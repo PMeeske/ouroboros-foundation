@@ -5,7 +5,7 @@
 namespace Ouroboros.Abstractions.Tests.Agent;
 
 /// <summary>
-/// Contract tests for IUncertaintyRouter interface concept for Ouroboros.Abstractions.Agent namespace.
+/// Contract tests demonstrating an IUncertaintyRouter interface concept that could be implemented in the Ouroboros.Abstractions.Agent namespace.
 /// These tests verify that such an interface can be implemented standalone
 /// without Engine dependencies, using test-local mock definitions.
 /// </summary>
@@ -81,8 +81,8 @@ public class IUncertaintyRouterContractTests
     [Fact]
     public async Task IUncertaintyRouter_CanBeReferencedFromAbstractionsAgent()
     {
-        // This test verifies an uncertainty router interface concept can be implemented
-        // without requiring Core or Engine dependencies
+        // This test demonstrates an uncertainty router interface concept that could be implemented
+        // in the Ouroboros.Abstractions.Agent namespace without requiring Core or Engine dependencies
         
         // Arrange
         IUncertaintyRouter router = new FakeUncertaintyRouter();

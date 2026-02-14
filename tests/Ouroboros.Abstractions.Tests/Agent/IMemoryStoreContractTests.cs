@@ -5,7 +5,7 @@
 namespace Ouroboros.Abstractions.Tests.Agent;
 
 /// <summary>
-/// Contract tests for IMemoryStore interface concept for Ouroboros.Abstractions.Agent namespace.
+/// Contract tests demonstrating an IMemoryStore interface concept that could be implemented in the Ouroboros.Abstractions.Agent namespace.
 /// These tests verify that such an interface can be implemented standalone
 /// without Engine dependencies, using test-local mock definitions.
 /// </summary>
@@ -76,8 +76,8 @@ public class IMemoryStoreContractTests
     [Fact]
     public async Task IMemoryStore_CanBeReferencedFromAbstractionsAgent()
     {
-        // This test verifies a memory store interface concept can be implemented
-        // without requiring Core or Engine dependencies
+        // This test demonstrates a memory store interface concept that could be implemented
+        // in the Ouroboros.Abstractions.Agent namespace without requiring Core or Engine dependencies
         
         // Arrange
         IMemoryStore store = new FakeMemoryStore();
@@ -114,7 +114,7 @@ public class IMemoryStoreContractTests
 
         // Assert
         results.Should().NotBeNull();
-        results.Should().HaveCountGreaterThanOrEqualTo(1);
+        results.Count.Should().BeGreaterThanOrEqualTo(1);
     }
 }
 

@@ -5,7 +5,7 @@
 namespace Ouroboros.Abstractions.Tests.Agent;
 
 /// <summary>
-/// Contract tests for ISafetyGuard interface concept for Ouroboros.Abstractions.Agent namespace.
+/// Contract tests demonstrating an ISafetyGuard interface concept that could be implemented in the Ouroboros.Abstractions.Agent namespace.
 /// These tests verify that such an interface can be implemented standalone
 /// without Engine dependencies, using test-local mock definitions.
 /// </summary>
@@ -73,8 +73,8 @@ public class ISafetyGuardContractTests
     [Fact]
     public async Task ISafetyGuard_CanBeReferencedFromAbstractionsAgent()
     {
-        // This test verifies a safety guard interface concept can be implemented
-        // without requiring Core or Engine dependencies
+        // This test demonstrates a safety guard interface concept that could be implemented
+        // in the Ouroboros.Abstractions.Agent namespace without requiring Core or Engine dependencies
         
         // Arrange
         ISafetyGuard guard = new FakeSafetyGuard();
