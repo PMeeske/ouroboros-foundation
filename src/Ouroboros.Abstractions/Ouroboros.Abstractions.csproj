@@ -50,8 +50,6 @@
         <Compile Include="Agent\MetaAI\SelfModel\IPredictiveMonitor.cs" />
         <Compile Include="Agent\TheoryOfMind\ITheoryOfMind.cs" />
         <Compile Include="Agent\NeuralSymbolic\ISymbolicKnowledgeBase.cs" />
-        <Compile Include="Agent\TemporalReasoning\ITemporalReasoner.cs" />
-        <Compile Include="Agent\TemporalReasoning\TemporalTypes.cs" />
         <Compile Include="Agent\WorldModel\IWorldModel.cs" />
         <Compile Include="Agent\WorldModel\WorldModelDomainTypes.cs" />
         <Compile Include="Network\Persistence\IGraphPersistence.cs" />

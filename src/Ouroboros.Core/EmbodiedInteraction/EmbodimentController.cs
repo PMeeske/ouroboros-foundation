@@ -61,7 +61,6 @@ public sealed class EmbodimentController : IDisposable
     private readonly VirtualSelf _virtualSelf;
     private readonly BodySchema _bodySchema;
     private readonly ConcurrentDictionary<string, AudioSensor> _audioSensors = new();
-    private readonly ConcurrentDictionary<string, VisualSensor> _visualSensors = new();
     private readonly ConcurrentDictionary<string, VoiceActuator> _voiceActuators = new();
     private readonly Subject<UnifiedPerception> _perceptions = new();
     private readonly Subject<ActionResult> _actionResults = new();
@@ -134,37 +133,6 @@ public sealed class EmbodimentController : IDisposable
     }
 
     /// <summary>
-    /// Registers a visual sensor.
-    /// </summary>
-    public EmbodimentController RegisterVisualSensor(string id, VisualSensor sensor)
-    {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-
-        _visualSensors[id] = sensor;
-
-        // Subscribe to sensor analysis results and convert to unified perceptions
-        var sub = sensor.AnalysisResults
-            .Select(v => new UnifiedPerception(
-                id,
-                SensorModality.Visual,
-                new VisualPerception(
-                    Guid.NewGuid(),
-                    DateTime.UtcNow,
-                    v.Confidence,
-                    v.Description,
-                    v.Objects,
-                    v.Faces,
-                    v.SceneType,
-                    v.Faces.FirstOrDefault()?.Emotion,
-                    null),
-                DateTime.UtcNow))
-            .Subscribe(_perceptions);
-
-        _subscriptions.Add(sub);
-        return this;
-    }
-
-    /// <summary>
     /// Registers a voice actuator.
     /// </summary>
     public EmbodimentController RegisterVoiceActuator(string id, VoiceActuator actuator)
@@ -191,14 +159,6 @@ public sealed class EmbodimentController : IDisposable
                 var result = await sensor.StartListeningAsync(ct);
                 if (!result.IsSuccess)
                     return Result<Unit, string>.Failure($"Failed to start audio sensor {id}: {result.Error}");
-            }
-
-            // Start all visual sensors
-            foreach (var (id, sensor) in _visualSensors)
-            {
-                var result = sensor.StartObserving();
-                if (!result.IsSuccess)
-                    return Result<Unit, string>.Failure($"Failed to start visual sensor {id}: {result.Error}");
             }
 
             // Subscribe perceptions to virtual self
@@ -262,9 +222,6 @@ public sealed class EmbodimentController : IDisposable
 
             foreach (var sensor in _audioSensors.Values)
                 await sensor.StopListeningAsync(ct);
-
-            foreach (var sensor in _visualSensors.Values)
-                sensor.StopObserving();
 
             _isRunning = false;
             return Result<Unit, string>.Success(Unit.Value);
@@ -418,9 +375,6 @@ public sealed class EmbodimentController : IDisposable
             sub.Dispose();
 
         foreach (var sensor in _audioSensors.Values)
-            sensor.Dispose();
-
-        foreach (var sensor in _visualSensors.Values)
             sensor.Dispose();
 
         foreach (var actuator in _voiceActuators.Values)
