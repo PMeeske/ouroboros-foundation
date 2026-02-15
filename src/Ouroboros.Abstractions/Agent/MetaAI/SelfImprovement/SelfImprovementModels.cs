@@ -25,37 +25,51 @@ public sealed record Plan(
     DateTime CreatedAt);
 
 /// <summary>
-/// Represents the result of executing a single plan step.
+/// Result of a single plan step execution.
 /// </summary>
+/// <param name="StepIndex">Index of the step in the plan.</param>
+/// <param name="Success">Whether the step was successful.</param>
+/// <param name="Output">Output from the step.</param>
+/// <param name="ErrorMessage">Error message if step failed.</param>
 public sealed record StepResult(
-    PlanStep Step,
+    int StepIndex,
     bool Success,
-    string Output,
-    string? Error,
-    TimeSpan Duration,
-    Dictionary<string, object> ObservedState);
+    string? Output,
+    string? ErrorMessage);
 
 /// <summary>
-/// Represents the result of executing a plan.
+/// Result of plan execution.
 /// </summary>
+/// <param name="Plan">The plan that was executed.</param>
+/// <param name="Steps">The steps that were executed.</param>
+/// <param name="Success">Whether execution was successful.</param>
+/// <param name="ErrorMessage">Error message if execution failed.</param>
+/// <param name="Metadata">Additional metadata about execution.</param>
+/// <param name="Duration">How long execution took.</param>
 public sealed record PlanExecutionResult(
     Plan Plan,
-    List<StepResult> StepResults,
+    IReadOnlyList<StepResult> Steps,
     bool Success,
-    string FinalOutput,
-    Dictionary<string, object> Metadata,
+    string? ErrorMessage,
+    IReadOnlyDictionary<string, object> Metadata,
     TimeSpan Duration);
 
 /// <summary>
-/// Represents verification result with feedback for improvement.
+/// Result of plan verification.
 /// </summary>
+/// <param name="Execution">The execution result that was verified.</param>
+/// <param name="Verified">Whether the plan was verified successfully.</param>
+/// <param name="QualityScore">Quality score from 0.0 to 1.0.</param>
+/// <param name="Issues">List of issues found during verification.</param>
+/// <param name="Recommendations">List of recommendations for improvement.</param>
+/// <param name="Timestamp">When verification occurred.</param>
 public sealed record PlanVerificationResult(
     PlanExecutionResult Execution,
     bool Verified,
     double QualityScore,
-    List<string> Issues,
-    List<string> Improvements,
-    string? RevisedPlan);
+    IReadOnlyList<string> Issues,
+    IReadOnlyList<string> Recommendations,
+    DateTime? Timestamp);
 
 /// <summary>
 /// Represents a learned skill that can be reused.

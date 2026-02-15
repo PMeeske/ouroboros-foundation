@@ -17,6 +17,10 @@ namespace Ouroboros.Agent.MetaAI;
 /// <param name="Outcome">The result or outcome.</param>
 /// <param name="Success">Whether the experience was successful.</param>
 /// <param name="Tags">Tags for categorization and retrieval.</param>
+/// <param name="Goal">The goal that was being pursued.</param>
+/// <param name="Execution">The execution result.</param>
+/// <param name="Verification">The verification result.</param>
+/// <param name="Plan">The plan that was executed (optional).</param>
 public sealed record Experience(
     string Id,
     DateTime Timestamp,
@@ -24,7 +28,11 @@ public sealed record Experience(
     string Action,
     string Outcome,
     bool Success,
-    IReadOnlyList<string> Tags);
+    IReadOnlyList<string> Tags,
+    string Goal,
+    PlanExecutionResult Execution,
+    PlanVerificationResult Verification,
+    Plan? Plan = null);
 
 /// <summary>
 /// Query parameters for retrieving experiences from memory.
@@ -53,6 +61,7 @@ public sealed record MemoryQuery(
 /// <param name="UniqueTags">Number of unique tags.</param>
 /// <param name="OldestExperience">Timestamp of oldest experience.</param>
 /// <param name="NewestExperience">Timestamp of newest experience.</param>
+/// <param name="AverageQualityScore">Average quality score across all experiences.</param>
 public sealed record MemoryStatistics(
     int TotalExperiences,
     int SuccessfulExperiences,
@@ -60,7 +69,8 @@ public sealed record MemoryStatistics(
     int UniqueContexts,
     int UniqueTags,
     DateTime? OldestExperience,
-    DateTime? NewestExperience);
+    DateTime? NewestExperience,
+    double AverageQualityScore);
 
 /// <summary>
 /// Interface for storing and retrieving agent experiences.
