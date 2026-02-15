@@ -12,17 +12,26 @@ public enum PermissionLevel
     /// <summary>No permission granted.</summary>
     None = 0,
 
+    /// <summary>Isolated execution with no external access.</summary>
+    Isolated = 1,
+
     /// <summary>Read-only permission.</summary>
-    Read = 1,
+    Read = 2,
+
+    /// <summary>Read-only permission (alias for Read).</summary>
+    ReadOnly = 2,
 
     /// <summary>Write permission (includes Read).</summary>
-    Write = 2,
+    Write = 3,
 
     /// <summary>Execute permission.</summary>
-    Execute = 3,
+    Execute = 4,
+
+    /// <summary>User data access with confirmation required.</summary>
+    UserDataWithConfirmation = 5,
 
     /// <summary>Full administrative access.</summary>
-    Admin = 4,
+    Admin = 6,
 }
 
 /// <summary>
@@ -43,11 +52,62 @@ public sealed record Permission(
 /// <param name="Reason">Explanation for the decision.</param>
 /// <param name="RequiredPermissions">Permissions that were evaluated.</param>
 /// <param name="RiskScore">Risk assessment score (0.0 to 1.0).</param>
+/// <param name="Violations">List of safety violations found.</param>
 public sealed record SafetyCheckResult(
     bool IsAllowed,
     string Reason,
     IReadOnlyList<Permission> RequiredPermissions,
-    double RiskScore);
+    double RiskScore,
+    IReadOnlyList<string> Violations)
+{
+    /// <summary>
+    /// Gets whether the action is safe (alias for IsAllowed).
+    /// </summary>
+    public bool Safe => IsAllowed;
+
+    /// <summary>
+    /// Gets any warnings (empty list, for compatibility).
+    /// </summary>
+    public IReadOnlyList<string> Warnings => Array.Empty<string>();
+
+    /// <summary>
+    /// Gets the required permission level (first permission's level or None).
+    /// </summary>
+    public PermissionLevel RequiredLevel => RequiredPermissions.Count > 0
+        ? RequiredPermissions[0].Level
+        : PermissionLevel.None;
+
+    /// <summary>
+    /// Creates a safe result with no violations.
+    /// </summary>
+    /// <param name="reason">Reason for allowing the action.</param>
+    /// <returns>A safe result.</returns>
+    public static SafetyCheckResult Allowed(string reason = "Action is safe") =>
+        new(true, reason, Array.Empty<Permission>(), 0.0, Array.Empty<string>());
+
+    /// <summary>
+    /// Creates an unsafe result with violations.
+    /// </summary>
+    /// <param name="reason">Reason for denying the action.</param>
+    /// <param name="violations">List of violations.</param>
+    /// <param name="riskScore">Risk score.</param>
+    /// <returns>An unsafe result.</returns>
+    public static SafetyCheckResult Denied(string reason, IReadOnlyList<string> violations, double riskScore = 1.0) =>
+        new(false, reason, Array.Empty<Permission>(), riskScore, violations);
+}
+
+/// <summary>
+/// Result of sandboxing a step for safe execution.
+/// </summary>
+/// <param name="Success">Whether sandboxing was successful.</param>
+/// <param name="SandboxedStep">The sandboxed step ready for execution.</param>
+/// <param name="Restrictions">Restrictions applied to the step.</param>
+/// <param name="Error">Error message if sandboxing failed.</param>
+public sealed record SandboxResult(
+    bool Success,
+    PlanStep? SandboxedStep,
+    IReadOnlyList<string> Restrictions,
+    string? Error);
 
 /// <summary>
 /// Interface for safety guard that validates agent actions before execution.
@@ -68,6 +128,47 @@ public interface ISafetyGuard
         IReadOnlyDictionary<string, object> parameters,
         object? context = null,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Checks safety of an action (simplified async overload).
+    /// </summary>
+    /// <param name="action">The action description.</param>
+    /// <param name="permissionLevel">Required permission level.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Safety check result.</returns>
+    Task<SafetyCheckResult> CheckSafetyAsync(
+        string action,
+        PermissionLevel permissionLevel,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Checks safety of an action (sync convenience method).
+    /// </summary>
+    /// <param name="action">The action description.</param>
+    /// <param name="parameters">Parameters for the action.</param>
+    /// <param name="permissionLevel">Required permission level.</param>
+    /// <returns>Safety check result.</returns>
+    SafetyCheckResult CheckSafety(
+        string action,
+        Dictionary<string, object> parameters,
+        PermissionLevel permissionLevel);
+
+    /// <summary>
+    /// Sandboxes a step for safe execution (async).
+    /// </summary>
+    /// <param name="step">The step to sandbox.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Sandbox result with the sandboxed step.</returns>
+    Task<SandboxResult> SandboxStepAsync(
+        PlanStep step,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Sandboxes a step for safe execution (sync convenience method).
+    /// </summary>
+    /// <param name="step">The step to sandbox.</param>
+    /// <returns>The sandboxed step.</returns>
+    PlanStep SandboxStep(PlanStep step);
 
     /// <summary>
     /// Checks if an agent has the required permissions.

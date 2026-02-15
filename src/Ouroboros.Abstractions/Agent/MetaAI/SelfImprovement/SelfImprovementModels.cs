@@ -27,30 +27,42 @@ public sealed record Plan(
 /// <summary>
 /// Result of a single plan step execution.
 /// </summary>
-/// <param name="StepIndex">Index of the step in the plan.</param>
+
+/// <param name="Step">The plan step that was executed.</param>
 /// <param name="Success">Whether the step was successful.</param>
 /// <param name="Output">Output from the step.</param>
-/// <param name="ErrorMessage">Error message if step failed.</param>
+
+/// <param name="Error">Error message if step failed.</param>
+/// <param name="Duration">How long the step took to execute.</param>
+/// <param name="ObservedState">State observed after execution.</param>
 public sealed record StepResult(
-    int StepIndex,
+
+    PlanStep Step,
     bool Success,
     string? Output,
-    string? ErrorMessage);
+
+    string? Error,
+    TimeSpan Duration,
+    IReadOnlyDictionary<string, object> ObservedState);
 
 /// <summary>
 /// Result of plan execution.
 /// </summary>
 /// <param name="Plan">The plan that was executed.</param>
-/// <param name="Steps">The steps that were executed.</param>
+
+/// <param name="StepResults">The results of each step execution.</param>
 /// <param name="Success">Whether execution was successful.</param>
-/// <param name="ErrorMessage">Error message if execution failed.</param>
+
+/// <param name="FinalOutput">Final output or error message.</param>
 /// <param name="Metadata">Additional metadata about execution.</param>
 /// <param name="Duration">How long execution took.</param>
 public sealed record PlanExecutionResult(
     Plan Plan,
-    IReadOnlyList<StepResult> Steps,
+
+    IReadOnlyList<StepResult> StepResults,
     bool Success,
-    string? ErrorMessage,
+
+    string? FinalOutput,
     IReadOnlyDictionary<string, object> Metadata,
     TimeSpan Duration);
 
@@ -61,14 +73,16 @@ public sealed record PlanExecutionResult(
 /// <param name="Verified">Whether the plan was verified successfully.</param>
 /// <param name="QualityScore">Quality score from 0.0 to 1.0.</param>
 /// <param name="Issues">List of issues found during verification.</param>
-/// <param name="Recommendations">List of recommendations for improvement.</param>
+
+/// <param name="Improvements">List of suggested improvements.</param>
 /// <param name="Timestamp">When verification occurred.</param>
 public sealed record PlanVerificationResult(
     PlanExecutionResult Execution,
     bool Verified,
     double QualityScore,
     IReadOnlyList<string> Issues,
-    IReadOnlyList<string> Recommendations,
+
+    IReadOnlyList<string> Improvements,
     DateTime? Timestamp);
 
 /// <summary>

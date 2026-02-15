@@ -21,6 +21,7 @@ namespace Ouroboros.Agent.MetaAI;
 /// <param name="Execution">The execution result.</param>
 /// <param name="Verification">The verification result.</param>
 /// <param name="Plan">The plan that was executed (optional).</param>
+/// <param name="Metadata">Additional metadata about the experience.</param>
 public sealed record Experience(
     string Id,
     DateTime Timestamp,
@@ -32,7 +33,8 @@ public sealed record Experience(
     string Goal,
     PlanExecutionResult Execution,
     PlanVerificationResult Verification,
-    Plan? Plan = null);
+    Plan? Plan = null,
+    IReadOnlyDictionary<string, object>? Metadata = null);
 
 /// <summary>
 /// Query parameters for retrieving experiences from memory.
@@ -43,13 +45,19 @@ public sealed record Experience(
 /// <param name="FromDate">Filter experiences from this date.</param>
 /// <param name="ToDate">Filter experiences to this date.</param>
 /// <param name="MaxResults">Maximum number of results to return.</param>
+/// <param name="Goal">Goal to search for relevant experiences.</param>
+/// <param name="MinSimilarity">Minimum similarity threshold (0.0 to 1.0).</param>
+/// <param name="Context">Context for similarity search (alias for ContextSimilarity).</param>
 public sealed record MemoryQuery(
     IReadOnlyList<string>? Tags = null,
     string? ContextSimilarity = null,
     bool? SuccessOnly = null,
     DateTime? FromDate = null,
     DateTime? ToDate = null,
-    int MaxResults = 100);
+    int MaxResults = 100,
+    string? Goal = null,
+    double MinSimilarity = 0.0,
+    string? Context = null);
 
 /// <summary>
 /// Statistics about the memory store.
@@ -68,9 +76,9 @@ public sealed record MemoryStatistics(
     int FailedExperiences,
     int UniqueContexts,
     int UniqueTags,
-    DateTime? OldestExperience,
-    DateTime? NewestExperience,
-    double AverageQualityScore);
+    DateTime? OldestExperience = null,
+    DateTime? NewestExperience = null,
+    double AverageQualityScore = 0.0);
 
 /// <summary>
 /// Interface for storing and retrieving agent experiences.
@@ -95,6 +103,16 @@ public interface IMemoryStore
     /// <param name="ct">Cancellation token.</param>
     /// <returns>List of matching experiences or error message.</returns>
     Task<Result<IReadOnlyList<Experience>, string>> QueryExperiencesAsync(
+        MemoryQuery query,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Retrieves relevant experiences based on a query.
+    /// </summary>
+    /// <param name="query">Query parameters for filtering.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>List of relevant experiences or error message.</returns>
+    Task<Result<IReadOnlyList<Experience>, string>> RetrieveRelevantExperiencesAsync(
         MemoryQuery query,
         CancellationToken ct = default);
 
@@ -124,6 +142,14 @@ public interface IMemoryStore
     /// <param name="ct">Cancellation token.</param>
     /// <returns>Memory statistics or error message.</returns>
     Task<Result<MemoryStatistics, string>> GetStatisticsAsync(
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Gets statistics (returns MemoryStatistics directly for convenience).
+    /// </summary>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>Memory statistics.</returns>
+    Task<MemoryStatistics> GetStatsAsync(
         CancellationToken ct = default);
 
     /// <summary>

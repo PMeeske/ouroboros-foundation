@@ -48,6 +48,13 @@ public interface ISkillRegistry
         CancellationToken ct = default);
 
     /// <summary>
+    /// Registers a skill (sync-style convenience method).
+    /// </summary>
+    /// <param name="skill">The skill to register.</param>
+    /// <returns>Success indicator or error message.</returns>
+    Result<Unit, string> RegisterSkill(AgentSkill skill);
+
+    /// <summary>
     /// Retrieves a skill by its identifier.
     /// </summary>
     /// <param name="skillId">The skill identifier.</param>
@@ -56,6 +63,13 @@ public interface ISkillRegistry
     Task<Result<AgentSkill, string>> GetSkillAsync(
         string skillId,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Retrieves a skill by its identifier (sync-style convenience method).
+    /// </summary>
+    /// <param name="skillId">The skill identifier.</param>
+    /// <returns>The skill or null if not found.</returns>
+    AgentSkill? GetSkill(string skillId);
 
     /// <summary>
     /// Finds skills matching the given criteria.
@@ -67,6 +81,18 @@ public interface ISkillRegistry
     Task<Result<IReadOnlyList<AgentSkill>, string>> FindSkillsAsync(
         string? category = null,
         IReadOnlyList<string>? tags = null,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Finds skills matching a goal and context.
+    /// </summary>
+    /// <param name="goal">The goal to find skills for.</param>
+    /// <param name="context">Optional context for matching.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>List of matching skills.</returns>
+    Task<List<Skill>> FindMatchingSkillsAsync(
+        string goal,
+        Dictionary<string, object>? context = null,
         CancellationToken ct = default);
 
     /// <summary>
@@ -94,6 +120,14 @@ public interface ISkillRegistry
         CancellationToken ct = default);
 
     /// <summary>
+    /// Records a skill execution (sync-style convenience method).
+    /// </summary>
+    /// <param name="skillId">The skill identifier.</param>
+    /// <param name="success">Whether execution was successful.</param>
+    /// <param name="executionTimeMs">Execution time in milliseconds.</param>
+    void RecordSkillExecution(string skillId, bool success, long executionTimeMs);
+
+    /// <summary>
     /// Removes a skill from the registry.
     /// </summary>
     /// <param name="skillId">The skill identifier.</param>
@@ -109,5 +143,25 @@ public interface ISkillRegistry
     /// <param name="ct">Cancellation token.</param>
     /// <returns>List of all skills or error message.</returns>
     Task<Result<IReadOnlyList<AgentSkill>, string>> GetAllSkillsAsync(
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Gets all registered skills (sync-style convenience method).
+    /// </summary>
+    /// <returns>List of all skills.</returns>
+    IReadOnlyList<AgentSkill> GetAllSkills();
+
+    /// <summary>
+    /// Extracts a skill from an execution result.
+    /// </summary>
+    /// <param name="execution">The execution result to extract from.</param>
+    /// <param name="skillName">Name for the new skill.</param>
+    /// <param name="description">Description of the skill.</param>
+    /// <param name="ct">Cancellation token.</param>
+    /// <returns>The extracted skill or error message.</returns>
+    Task<Result<Skill, string>> ExtractSkillAsync(
+        PlanExecutionResult execution,
+        string skillName,
+        string description,
         CancellationToken ct = default);
 }
