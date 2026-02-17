@@ -5,20 +5,6 @@
 namespace Ouroboros.Core.CognitivePhysics;
 
 /// <summary>
-/// Configuration for the Cognitive Physics Engine.
-/// </summary>
-public sealed record CognitivePhysicsConfig(
-    ZeroShiftConfig ZeroShift,
-    ChaosConfig Chaos,
-    EvolutionaryConfig Evolution)
-{
-    public static CognitivePhysicsConfig Default => new(
-        new ZeroShiftConfig(),
-        new ChaosConfig(),
-        new EvolutionaryConfig());
-}
-
-/// <summary>
 /// The Cognitive Physics Engine (CPE) orchestrates reasoning as resource-bounded,
 /// state-driven transformations through a metric conceptual space.
 ///

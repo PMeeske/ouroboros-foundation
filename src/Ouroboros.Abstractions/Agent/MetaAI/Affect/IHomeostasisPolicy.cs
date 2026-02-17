@@ -7,76 +7,6 @@
 namespace Ouroboros.Agent.MetaAI.Affect;
 
 /// <summary>
-/// Represents a homeostasis policy for maintaining affective equilibrium.
-/// </summary>
-public sealed record HomeostasisRule(
-    Guid Id,
-    string Name,
-    string Description,
-    SignalType TargetSignal,
-    double LowerBound,
-    double UpperBound,
-    double TargetValue,
-    HomeostasisAction Action,
-    double Priority,
-    bool IsActive,
-    DateTime CreatedAt);
-
-/// <summary>
-/// Actions to take when homeostasis is violated.
-/// </summary>
-public enum HomeostasisAction
-{
-    /// <summary>Log the violation but take no action</summary>
-    Log,
-    
-    /// <summary>Send an alert notification</summary>
-    Alert,
-    
-    /// <summary>Reduce workload or task complexity</summary>
-    Throttle,
-    
-    /// <summary>Increase workload or seek challenges</summary>
-    Boost,
-    
-    /// <summary>Pause non-critical operations</summary>
-    Pause,
-    
-    /// <summary>Reset to baseline state</summary>
-    Reset,
-    
-    /// <summary>Execute custom corrective action</summary>
-    Custom
-}
-
-/// <summary>
-/// Result of a policy evaluation.
-/// </summary>
-public sealed record PolicyViolation(
-    Guid RuleId,
-    string RuleName,
-    SignalType Signal,
-    double ObservedValue,
-    double LowerBound,
-    double UpperBound,
-    string ViolationType,
-    HomeostasisAction RecommendedAction,
-    double Severity,
-    DateTime DetectedAt);
-
-/// <summary>
-/// Result of applying a corrective action.
-/// </summary>
-public sealed record CorrectionResult(
-    Guid ViolationId,
-    HomeostasisAction ActionTaken,
-    bool Success,
-    string Message,
-    double ValueBefore,
-    double ValueAfter,
-    DateTime AppliedAt);
-
-/// <summary>
 /// Interface for homeostasis policy management.
 /// Enforces SLA boundaries and triggers corrective actions.
 /// </summary>
@@ -173,16 +103,3 @@ public interface IHomeostasisPolicy
     /// <returns>Policy health metrics</returns>
     PolicyHealthSummary GetHealthSummary();
 }
-
-/// <summary>
-/// Summary of policy health.
-/// </summary>
-public sealed record PolicyHealthSummary(
-    int TotalRules,
-    int ActiveRules,
-    int TotalViolations,
-    int RecentViolations,
-    int TotalCorrections,
-    int SuccessfulCorrections,
-    double CorrectionSuccessRate,
-    Dictionary<SignalType, int> ViolationsBySignal);

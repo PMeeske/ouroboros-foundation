@@ -7,26 +7,6 @@
 namespace Ouroboros.Agent.MetaAI;
 
 /// <summary>
-/// Represents the result of a skill transfer attempt.
-/// </summary>
-public sealed record TransferResult(
-    Skill AdaptedSkill,
-    double TransferabilityScore,
-    string SourceDomain,
-    string TargetDomain,
-    List<string> Adaptations,
-    DateTime TransferredAt);
-
-/// <summary>
-/// Configuration for transfer learning behavior.
-/// </summary>
-public sealed record TransferLearningConfig(
-    double MinTransferabilityThreshold = 0.5,
-    int MaxAdaptationAttempts = 3,
-    bool EnableAnalogicalReasoning = true,
-    bool TrackTransferHistory = true);
-
-/// <summary>
 /// Interface for transfer learning capabilities.
 /// Enables applying learned skills across different domains.
 /// </summary>

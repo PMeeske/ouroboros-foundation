@@ -8,14 +8,6 @@ using System.Reactive.Subjects;
 namespace Ouroboros.Domain.Autonomous;
 
 /// <summary>
-/// Speech request for the queue.
-/// </summary>
-public sealed record SpeechRequest(
-    string Text,
-    string Persona,
-    TaskCompletionSource<bool>? Completion = null);
-
-/// <summary>
 /// Rx-based speech queue that serializes voice output across all sources.
 /// Ensures voices don't overlap and messages play in order.
 /// </summary>

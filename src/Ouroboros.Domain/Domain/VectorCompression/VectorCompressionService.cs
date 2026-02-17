@@ -5,32 +5,6 @@
 namespace Ouroboros.Domain.VectorCompression;
 
 /// <summary>
-/// Available compression methods.
-/// </summary>
-public enum CompressionMethod
-{
-    /// <summary>Discrete Cosine Transform - best for real-valued embeddings.</summary>
-    DCT,
-
-    /// <summary>Fast Fourier Transform - good for periodic patterns.</summary>
-    FFT,
-
-    /// <summary>Quantized DCT - maximum compression with some quality loss.</summary>
-    QuantizedDCT,
-
-    /// <summary>Adaptive - auto-select based on vector characteristics.</summary>
-    Adaptive
-}
-
-/// <summary>
-/// Configuration for vector compression operations.
-/// </summary>
-public sealed record CompressionConfig(
-    int TargetDimension = 128,
-    double EnergyThreshold = 0.95,
-    CompressionMethod DefaultMethod = CompressionMethod.DCT);
-
-/// <summary>
 /// Unified service for vector compression using spectral methods.
 /// Refactored to follow immutable event sourcing pattern with PipelineBranch.
 /// All compression operations track statistics through events.
@@ -427,35 +401,5 @@ public static class VectorCompressionService
             return 0;
 
         return dot / (Math.Sqrt(normA) * Math.Sqrt(normB));
-    }
-}
-
-/// <summary>
-/// Preview of compression options for a vector.
-/// </summary>
-public sealed record CompressionPreview(
-    int OriginalDimension,
-    int OriginalSizeBytes,
-    int DCTCompressedSize,
-    double DCTEnergyRetained,
-    int FFTCompressedSize,
-    double FFTCompressionRatio,
-    int QuantizedDCTSize)
-{
-    /// <summary>Best compression ratio achievable.</summary>
-    public double BestCompressionRatio => (double)OriginalSizeBytes / Math.Min(DCTCompressedSize, Math.Min(FFTCompressedSize, QuantizedDCTSize));
-
-    /// <summary>Recommended method based on size/quality tradeoff.</summary>
-    public CompressionMethod RecommendedMethod
-    {
-        get
-        {
-            if (QuantizedDCTSize < DCTCompressedSize / 2 && DCTEnergyRetained > 0.9)
-                return CompressionMethod.QuantizedDCT;
-
-            return DCTCompressedSize <= FFTCompressedSize
-                ? CompressionMethod.DCT
-                : CompressionMethod.FFT;
-        }
     }
 }

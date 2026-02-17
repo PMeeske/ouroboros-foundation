@@ -7,65 +7,6 @@
 namespace Ouroboros.Agent.MetaAI.SelfModel;
 
 /// <summary>
-/// Represents a forecast made by the agent.
-/// </summary>
-public sealed record Forecast(
-    Guid Id,
-    string Description,
-    string MetricName,
-    double PredictedValue,
-    double Confidence,
-    DateTime PredictionTime,
-    DateTime TargetTime,
-    ForecastStatus Status,
-    double? ActualValue,
-    Dictionary<string, object> Metadata);
-
-/// <summary>
-/// Status of a forecast.
-/// </summary>
-public enum ForecastStatus
-{
-    /// <summary>Forecast is pending - target time not reached</summary>
-    Pending,
-    
-    /// <summary>Forecast verified - outcome matches prediction</summary>
-    Verified,
-    
-    /// <summary>Forecast failed - outcome differs from prediction</summary>
-    Failed,
-    
-    /// <summary>Forecast cancelled - no longer relevant</summary>
-    Cancelled
-}
-
-/// <summary>
-/// Calibration metrics for forecast accuracy.
-/// </summary>
-public sealed record ForecastCalibration(
-    int TotalForecasts,
-    int VerifiedForecasts,
-    int FailedForecasts,
-    double AverageConfidence,
-    double AverageAccuracy,
-    double BrierScore,
-    double CalibrationError,
-    Dictionary<string, double> MetricAccuracies);
-
-/// <summary>
-/// Anomaly detection result.
-/// </summary>
-public sealed record AnomalyDetection(
-    string MetricName,
-    double ObservedValue,
-    double ExpectedValue,
-    double Deviation,
-    bool IsAnomaly,
-    string Severity,
-    DateTime DetectedAt,
-    List<string> PossibleCauses);
-
-/// <summary>
 /// Interface for predictive monitoring and forecast tracking.
 /// Compares predictions with outcomes for self-calibration.
 /// </summary>

@@ -236,38 +236,4 @@ public class Result<T>
             return "Unknown command";
         }
     }
-
-    /// <summary>
-    /// Represents a DSL suggestion.
-    /// </summary>
-    public class DslSuggestion
-    {
-        public string Step { get; }
-        public string Explanation { get; }
-        public double Confidence { get; }
-
-        public DslSuggestion(string step, string explanation, double confidence)
-        {
-            Step = step;
-            Explanation = explanation;
-            Confidence = confidence;
-        }
-    }
-
-    /// <summary>
-    /// Represents DSL validation result.
-    /// </summary>
-    public class ValidationResult
-    {
-        public bool IsValid { get; }
-        public string[] Errors { get; }
-        public string[] Suggestions { get; }
-
-        public ValidationResult(bool isValid, string[] errors, string[] suggestions)
-        {
-            IsValid = isValid;
-            Errors = errors;
-            Suggestions = suggestions;
-        }
-    }
 }

@@ -7,36 +7,6 @@ using Ouroboros.Domain.Vectors;
 namespace Ouroboros.Domain.Persistence;
 
 /// <summary>
-/// Memory layer types in Ouroboros's cognitive architecture.
-/// </summary>
-public enum MemoryLayer
-{
-    /// <summary>Immediate working memory - active thoughts.</summary>
-    Working,
-
-    /// <summary>Short-term episodic memory - recent conversations.</summary>
-    Episodic,
-
-    /// <summary>Long-term semantic memory - knowledge and facts.</summary>
-    Semantic,
-
-    /// <summary>Procedural memory - skills and tool patterns.</summary>
-    Procedural,
-
-    /// <summary>Self-referential memory - identity and self-model.</summary>
-    Autobiographical,
-}
-
-/// <summary>
-/// Maps memory layers to their underlying collections.
-/// </summary>
-public sealed record MemoryLayerMapping(
-    MemoryLayer Layer,
-    IReadOnlyList<string> Collections,
-    string Description,
-    double RetentionPriority);
-
-/// <summary>
 /// Ouroboros's unified memory management system.
 /// Provides a cognitive architecture over the underlying vector collections.
 /// </summary>
@@ -273,23 +243,3 @@ public sealed class OuroborosMemoryManager : IAsyncDisposable
         await _admin.DisposeAsync();
     }
 }
-
-/// <summary>
-/// Report of a memory health check operation.
-/// </summary>
-public sealed record MemoryHealthReport(
-    int HealthyCollections,
-    int UnhealthyCollections,
-    IReadOnlyList<string> HealedCollections,
-    IReadOnlyList<string> RemainingIssues,
-    MemoryStatistics Statistics);
-
-/// <summary>
-/// A point-in-time snapshot of the memory system.
-/// </summary>
-public sealed record MemorySnapshot(
-    DateTime Timestamp,
-    IReadOnlyList<CollectionInfo> Collections,
-    IReadOnlyList<CollectionLink> Links,
-    IReadOnlyDictionary<MemoryLayer, long> VectorsByLayer,
-    MemoryStatistics Statistics);

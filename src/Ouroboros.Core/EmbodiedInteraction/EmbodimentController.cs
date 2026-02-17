@@ -13,46 +13,6 @@ using System.Reactive.Threading.Tasks;
 using Ouroboros.Core.Monads;
 
 /// <summary>
-/// Unified perception event from any sensor.
-/// </summary>
-/// <param name="Source">Source sensor ID.</param>
-/// <param name="Modality">Sensor modality.</param>
-/// <param name="Perception">The perception event.</param>
-/// <param name="Timestamp">When perceived.</param>
-public sealed record UnifiedPerception(
-    string Source,
-    SensorModality Modality,
-    PerceptionEvent Perception,
-    DateTime Timestamp);
-
-/// <summary>
-/// Action request to an actuator.
-/// </summary>
-/// <param name="TargetActuator">Target actuator ID.</param>
-/// <param name="Modality">Output modality.</param>
-/// <param name="Content">Content to output.</param>
-/// <param name="Parameters">Additional parameters.</param>
-public sealed record ActionRequest(
-    string TargetActuator,
-    ActuatorModality Modality,
-    object Content,
-    IReadOnlyDictionary<string, object>? Parameters = null);
-
-/// <summary>
-/// Result of an action.
-/// </summary>
-/// <param name="Request">The original request.</param>
-/// <param name="Success">Whether action succeeded.</param>
-/// <param name="Error">Error message if failed.</param>
-/// <param name="Duration">How long the action took.</param>
-public sealed record ActionResult(
-    ActionRequest Request,
-    bool Success,
-    string? Error = null,
-    TimeSpan? Duration = null);
-
-
-/// <summary>
 /// Controller that orchestrates all sensors, actuators, and the virtual self.
 /// Acts as the central nervous system coordinating embodied interaction.
 /// </summary>

@@ -5,47 +5,6 @@
 namespace Ouroboros.Providers.SpeechToText;
 
 /// <summary>
-/// Represents the result of a speech-to-text transcription.
-/// </summary>
-/// <param name="Text">The transcribed text.</param>
-/// <param name="Language">The detected or specified language.</param>
-/// <param name="Duration">Duration of the audio in seconds.</param>
-/// <param name="Segments">Optional word/segment-level timestamps.</param>
-public sealed record TranscriptionResult(
-    string Text,
-    string? Language = null,
-    double? Duration = null,
-    IReadOnlyList<TranscriptionSegment>? Segments = null);
-
-/// <summary>
-/// Represents a segment of transcribed audio with timing information.
-/// </summary>
-/// <param name="Text">The text of this segment.</param>
-/// <param name="Start">Start time in seconds.</param>
-/// <param name="End">End time in seconds.</param>
-/// <param name="Confidence">Optional confidence score (0-1).</param>
-public sealed record TranscriptionSegment(
-    string Text,
-    double Start,
-    double End,
-    double? Confidence = null);
-
-/// <summary>
-/// Configuration options for speech-to-text transcription.
-/// </summary>
-/// <param name="Language">Optional language hint (ISO 639-1 code, e.g., "en", "de", "fr").</param>
-/// <param name="ResponseFormat">Response format: "text", "json", "verbose_json", "srt", "vtt".</param>
-/// <param name="Temperature">Sampling temperature (0-1). Lower = more deterministic.</param>
-/// <param name="TimestampGranularity">Granularity for timestamps: "word", "segment", or null.</param>
-/// <param name="Prompt">Optional prompt to guide the transcription style.</param>
-public sealed record TranscriptionOptions(
-    string? Language = null,
-    string ResponseFormat = "json",
-    double? Temperature = null,
-    string? TimestampGranularity = null,
-    string? Prompt = null);
-
-/// <summary>
 /// Defines the contract for speech-to-text transcription services.
 /// Supports various audio formats and providers (OpenAI Whisper, Azure, local Whisper, etc.).
 /// </summary>

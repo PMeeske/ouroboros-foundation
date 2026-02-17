@@ -5,78 +5,7 @@
 // based on prompt analysis and performance metrics
 // ==========================================================
 
-using Ouroboros.Abstractions.Core;
-
 namespace Ouroboros.Agent;
-
-/// <summary>
-/// Represents metadata about a model's capabilities and performance characteristics.
-/// </summary>
-public sealed record ModelCapability(
-    string ModelName,
-    string[] Strengths,
-    int MaxTokens,
-    double AverageCost,
-    double AverageLatencyMs,
-    ModelType Type);
-
-/// <summary>
-/// Classification of model types for orchestration decisions.
-/// </summary>
-public enum ModelType
-{
-    General,
-    Code,
-    Reasoning,
-    Creative,
-    Summary,
-    Analysis
-}
-
-/// <summary>
-/// Use case classification derived from prompt analysis.
-/// </summary>
-public sealed record UseCase(
-    UseCaseType Type,
-    int EstimatedComplexity,
-    string[] RequiredCapabilities,
-    double PerformanceWeight,
-    double CostWeight);
-
-/// <summary>
-/// Primary use case types for model selection.
-/// </summary>
-public enum UseCaseType
-{
-    CodeGeneration,
-    Reasoning,
-    Creative,
-    Summarization,
-    Analysis,
-    Conversation,
-    ToolUse
-}
-
-/// <summary>
-/// Performance metrics for model/tool execution tracking.
-/// </summary>
-public sealed record PerformanceMetrics(
-    string ResourceName,
-    int ExecutionCount,
-    double AverageLatencyMs,
-    double SuccessRate,
-    DateTime LastUsed,
-    Dictionary<string, double> CustomMetrics);
-
-/// <summary>
-/// Result of orchestrator's model selection decision.
-/// </summary>
-public sealed record OrchestratorDecision(
-    IChatCompletionModel SelectedModel,
-    string ModelName,
-    string Reason,
-    ToolRegistry RecommendedTools,
-    double ConfidenceScore);
 
 /// <summary>
 /// Orchestrates model and tool selection based on prompt analysis and performance metrics.

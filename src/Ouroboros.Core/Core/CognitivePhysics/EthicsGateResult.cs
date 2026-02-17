@@ -25,30 +25,3 @@ public sealed record EthicsGateResult(Form Decision, string Reason)
     public static EthicsGateResult Deny(string reason) => new(Form.Void, reason);
     public static EthicsGateResult Uncertain(string reason) => new(Form.Imaginary, reason);
 }
-
-/// <summary>
-/// Interface for evaluating ethical constraints on context transitions.
-/// Implements the three-valued ethics gate described in the CPE specification.
-/// </summary>
-[Obsolete("This interface is part of the Cognitive Physics Engine which is being refactored. Use the Ethics framework from Ouroboros.Core.Ethics instead.")]
-public interface IEthicsGate
-{
-    /// <summary>
-    /// Evaluates whether a context transition from <paramref name="from"/> to
-    /// <paramref name="to"/> is ethically permissible.
-    /// </summary>
-    /// <param name="from">The source conceptual domain.</param>
-    /// <param name="to">The target conceptual domain.</param>
-    /// <returns>A three-valued result: Allow, Deny, or Uncertain.</returns>
-    ValueTask<EthicsGateResult> EvaluateAsync(string from, string to);
-}
-
-/// <summary>
-/// Default ethics gate that permits all transitions.
-/// </summary>
-[Obsolete("This implementation is part of the Cognitive Physics Engine which is being refactored. Use the Ethics framework from Ouroboros.Core.Ethics instead.")]
-public sealed class PermissiveEthicsGate : IEthicsGate
-{
-    public ValueTask<EthicsGateResult> EvaluateAsync(string from, string to) =>
-        ValueTask.FromResult(EthicsGateResult.Allow("Default permissive policy"));
-}

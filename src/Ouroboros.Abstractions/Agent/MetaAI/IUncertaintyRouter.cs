@@ -5,47 +5,6 @@
 namespace Ouroboros.Agent.MetaAI;
 
 /// <summary>
-/// Strategies for handling uncertain situations when primary approach fails.
-/// </summary>
-public enum FallbackStrategy
-{
-    /// <summary>Retry the same approach.</summary>
-    Retry = 0,
-
-    /// <summary>Escalate to human oversight.</summary>
-    EscalateToHuman = 1,
-
-    /// <summary>Use a simpler, more conservative approach.</summary>
-    UseConservativeApproach = 2,
-
-    /// <summary>Defer the decision for later.</summary>
-    Defer = 3,
-
-    /// <summary>Abort the operation.</summary>
-    Abort = 4,
-
-    /// <summary>Ask for clarification or more information.</summary>
-    RequestClarification = 5,
-}
-
-/// <summary>
-/// Represents a routing decision for handling uncertainty.
-/// </summary>
-/// <param name="ShouldProceed">Whether to proceed with the action.</param>
-/// <param name="ConfidenceLevel">Confidence in the decision (0.0 to 1.0).</param>
-/// <param name="RecommendedStrategy">Recommended fallback strategy if confidence is low.</param>
-/// <param name="Reason">Explanation for the routing decision.</param>
-/// <param name="RequiresHumanOversight">Whether human oversight is required.</param>
-/// <param name="AlternativeActions">Suggested alternative actions if available.</param>
-public sealed record RoutingDecision(
-    bool ShouldProceed,
-    double ConfidenceLevel,
-    FallbackStrategy RecommendedStrategy,
-    string Reason,
-    bool RequiresHumanOversight,
-    IReadOnlyList<string> AlternativeActions);
-
-/// <summary>
 /// Interface for routing decisions under uncertainty.
 /// Determines how to handle situations where the agent lacks sufficient confidence.
 /// </summary>

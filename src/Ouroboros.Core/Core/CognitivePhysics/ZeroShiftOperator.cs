@@ -5,32 +5,6 @@
 namespace Ouroboros.Core.CognitivePhysics;
 
 /// <summary>
-/// Result of a ZeroShift context transition operation.
-/// </summary>
-public sealed record ZeroShiftResult
-{
-    public required bool Success { get; init; }
-    public required CognitiveState State { get; init; }
-    public required double Cost { get; init; }
-    public string? FailureReason { get; init; }
-
-    public static ZeroShiftResult Succeeded(CognitiveState state, double cost) =>
-        new() { Success = true, State = state, Cost = cost };
-
-    public static ZeroShiftResult Failed(CognitiveState state, string reason) =>
-        new() { Success = false, State = state, Cost = 0.0, FailureReason = reason };
-}
-
-/// <summary>
-/// Configuration for the ZeroShift operator.
-/// </summary>
-/// <param name="StabilityFactor">Multiplier applied to cost to determine cooldown increment.</param>
-/// <param name="UncertaintyPenalty">Resource penalty applied on uncertain ethics evaluations.</param>
-public sealed record ZeroShiftConfig(
-    double StabilityFactor = 0.5,
-    double UncertaintyPenalty = 5.0);
-
-/// <summary>
 /// The ZeroShift operator performs resource-bounded, ethics-gated context transitions
 /// in the cognitive physics metric space.
 ///

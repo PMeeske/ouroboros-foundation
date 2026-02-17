@@ -7,35 +7,6 @@ namespace Ouroboros.Core.LawsOfForm;
 using Ouroboros.Core.Monads;
 
 /// <summary>
-/// Interface for tool lookup operations.
-/// Abstracts tool registry to avoid circular dependencies.
-/// </summary>
-public interface IToolLookup
-{
-    /// <summary>
-    /// Gets a tool by name.
-    /// </summary>
-    /// <param name="toolName">The name of the tool.</param>
-    /// <returns>An Option containing the tool if found.</returns>
-    Option<IToolExecutor> GetTool(string toolName);
-}
-
-/// <summary>
-/// Interface for tool execution.
-/// Abstracts the tool interface to avoid circular dependencies.
-/// </summary>
-public interface IToolExecutor
-{
-    /// <summary>
-    /// Executes the tool with the given input.
-    /// </summary>
-    /// <param name="input">The input for the tool.</param>
-    /// <param name="ct">Cancellation token.</param>
-    /// <returns>A Result containing the tool output or error.</returns>
-    Task<Result<string, string>> InvokeAsync(string input, CancellationToken ct = default);
-}
-
-/// <summary>
 /// Executes tools with safety gates based on multiple criteria.
 /// Uses AuditableDecision for full audit trail and three-valued certainty logic.
 /// </summary>

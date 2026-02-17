@@ -5,56 +5,6 @@
 namespace Ouroboros.Providers.TextToSpeech;
 
 /// <summary>
-/// Represents the result of a text-to-speech synthesis.
-/// </summary>
-/// <param name="AudioData">The synthesized audio data.</param>
-/// <param name="Format">The audio format (e.g., "mp3", "wav", "opus").</param>
-/// <param name="Duration">Optional duration in seconds.</param>
-public sealed record SpeechResult(
-    byte[] AudioData,
-    string Format,
-    double? Duration = null);
-
-/// <summary>
-/// Available voices for text-to-speech synthesis.
-/// </summary>
-public enum TtsVoice
-{
-    /// <summary>Alloy - neutral, balanced voice.</summary>
-    Alloy,
-
-    /// <summary>Echo - warm, conversational voice.</summary>
-    Echo,
-
-    /// <summary>Fable - expressive, narrative voice.</summary>
-    Fable,
-
-    /// <summary>Onyx - deep, authoritative voice.</summary>
-    Onyx,
-
-    /// <summary>Nova - friendly, upbeat voice.</summary>
-    Nova,
-
-    /// <summary>Shimmer - soft, gentle voice.</summary>
-    Shimmer,
-}
-
-/// <summary>
-/// Configuration options for text-to-speech synthesis.
-/// </summary>
-/// <param name="Voice">The voice to use for synthesis.</param>
-/// <param name="Speed">Speech speed (0.25 to 4.0, default 1.0).</param>
-/// <param name="Format">Output format: "mp3", "opus", "aac", "flac", "wav", "pcm".</param>
-/// <param name="Model">TTS model to use (e.g., "tts-1", "tts-1-hd").</param>
-/// <param name="IsWhisper">If true, uses a soft whispering style for inner thoughts.</param>
-public sealed record TextToSpeechOptions(
-    TtsVoice Voice = TtsVoice.Alloy,
-    double Speed = 1.0,
-    string Format = "mp3",
-    string? Model = null,
-    bool IsWhisper = false);
-
-/// <summary>
 /// Defines the contract for text-to-speech synthesis services.
 /// Supports various providers (OpenAI TTS, Azure, local engines, etc.).
 /// </summary>

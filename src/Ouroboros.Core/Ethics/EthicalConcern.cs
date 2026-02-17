@@ -5,24 +5,6 @@
 namespace Ouroboros.Core.Ethics;
 
 /// <summary>
-/// Severity levels for ethical concerns.
-/// </summary>
-public enum ConcernLevel
-{
-    /// <summary>Informational, for awareness</summary>
-    Info,
-
-    /// <summary>Minor concern, should be noted</summary>
-    Low,
-
-    /// <summary>Moderate concern, should be reviewed</summary>
-    Medium,
-
-    /// <summary>Significant concern, requires careful consideration</summary>
-    High
-}
-
-/// <summary>
 /// Represents an immutable ethical concern that doesn't rise to a violation.
 /// Concerns are issues that warrant attention but don't necessarily block action.
 /// </summary>

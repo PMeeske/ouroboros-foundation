@@ -12,27 +12,3 @@ public class EmbodiedAction
 {
     // Placeholder class - to be implemented
 }
-
-/// <summary>
-/// Represents the sensor state of an embodied agent.
-/// </summary>
-public class SensorState
-{
-    // Placeholder class - to be implemented
-}
-
-/// <summary>
-/// Represents a state transition observed by an embodied agent.
-/// </summary>
-public class EmbodiedTransition
-{
-    // Placeholder class - to be implemented
-}
-
-/// <summary>
-/// Represents a predicted future state.
-/// </summary>
-public class PredictedState
-{
-    // Placeholder class - to be implemented
-}

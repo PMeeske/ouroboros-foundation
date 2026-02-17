@@ -8,54 +8,6 @@ using Qdrant.Client.Grpc;
 namespace Ouroboros.Domain.Vectors;
 
 /// <summary>
-/// Represents metadata about a Qdrant collection managed by Ouroboros.
-/// </summary>
-public sealed record CollectionInfo(
-    string Name,
-    ulong VectorSize,
-    ulong PointsCount,
-    Distance DistanceMetric,
-    CollectionStatus Status,
-    DateTime? CreatedAt = null,
-    string? Purpose = null,
-    IReadOnlyList<string>? LinkedCollections = null);
-
-/// <summary>
-/// Represents a link between two collections in Ouroboros's memory system.
-/// </summary>
-public sealed record CollectionLink(
-    string SourceCollection,
-    string TargetCollection,
-    string RelationType,
-    double Strength = 1.0,
-    string? Description = null)
-{
-    /// <summary>Common link types for collection relationships.</summary>
-    public static class Types
-    {
-        public const string DependsOn = "depends_on";
-        public const string Indexes = "indexes";
-        public const string Extends = "extends";
-        public const string Mirrors = "mirrors";
-        public const string Aggregates = "aggregates";
-        public const string PartOf = "part_of";
-        public const string RelatedTo = "related_to";
-    }
-}
-
-/// <summary>
-/// Result of a collection health check.
-/// </summary>
-public sealed record CollectionHealthReport(
-    string CollectionName,
-    bool IsHealthy,
-    ulong ExpectedDimension,
-    ulong ActualDimension,
-    bool DimensionMismatch,
-    string? Issue = null,
-    string? Recommendation = null);
-
-/// <summary>
 /// Ouroboros's self-administered Qdrant collection manager.
 /// Provides capabilities for managing, linking, and self-healing vector collections.
 /// </summary>
@@ -497,14 +449,3 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
         await Task.CompletedTask;
     }
 }
-
-/// <summary>
-/// Statistics about Ouroboros's vector memory usage.
-/// </summary>
-public sealed record MemoryStatistics(
-    int TotalCollections,
-    long TotalVectors,
-    int HealthyCollections,
-    int UnhealthyCollections,
-    int CollectionLinks,
-    IReadOnlyDictionary<ulong, int> DimensionDistribution);

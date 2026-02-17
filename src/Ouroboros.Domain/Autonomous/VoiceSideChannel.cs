@@ -8,48 +8,6 @@ using System.Threading.Channels;
 namespace Ouroboros.Domain.Autonomous;
 
 /// <summary>
-/// Voice configuration for a persona.
-/// </summary>
-public sealed record PersonaVoice(
-    string PersonaName,
-    string VoiceId,
-    float Rate = 1.0f,
-    float Pitch = 1.0f,
-    int Volume = 100);
-
-/// <summary>
-/// Message to be spoken on the voice side channel.
-/// </summary>
-public sealed record VoiceMessage(
-    string Text,
-    string? PersonaName = null,
-    VoicePriority Priority = VoicePriority.Normal,
-    bool Interrupt = false);
-
-/// <summary>
-/// Priority levels for voice messages.
-/// </summary>
-public enum VoicePriority
-{
-    /// <summary>Background announcements that can be skipped.</summary>
-    Low = 0,
-
-    /// <summary>Normal conversational output.</summary>
-    Normal = 1,
-
-    /// <summary>Important notifications.</summary>
-    High = 2,
-
-    /// <summary>Critical alerts that should interrupt.</summary>
-    Critical = 3
-}
-
-/// <summary>
-/// Delegate for voice synthesis.
-/// </summary>
-public delegate Task VoiceSynthesizer(string text, PersonaVoice voice, CancellationToken ct);
-
-/// <summary>
 /// Fire-and-forget voice side channel for parallel audio playback.
 /// Components publish messages; the channel handles async TTS playback
 /// without blocking the main processing flow.
@@ -418,35 +376,5 @@ Voice-friendly version:";
         }
 
         _cts.Dispose();
-    }
-}
-
-/// <summary>
-/// Extension methods for voice side channel integration.
-/// </summary>
-public static class VoiceSideChannelExtensions
-{
-    /// <summary>
-    /// Speaks with the specified persona's voice.
-    /// </summary>
-    public static void SayAs(this VoiceSideChannel channel, string persona, string text)
-    {
-        channel.Say(text, persona);
-    }
-
-    /// <summary>
-    /// Speaks a system announcement.
-    /// </summary>
-    public static void Announce(this VoiceSideChannel channel, string text)
-    {
-        channel.Say(text, "System", VoicePriority.High);
-    }
-
-    /// <summary>
-    /// Speaks a low-priority background message.
-    /// </summary>
-    public static void Whisper(this VoiceSideChannel channel, string text, string? persona = null)
-    {
-        channel.Say(text, persona, VoicePriority.Low);
     }
 }

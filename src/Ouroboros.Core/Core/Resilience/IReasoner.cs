@@ -7,34 +7,6 @@ namespace Ouroboros.Core.Resilience;
 using Ouroboros.Core.Monads;
 
 /// <summary>
-/// Reasoning modes for hybrid neural-symbolic systems.
-/// IMPORTANT: This enum is duplicated here to avoid circular dependencies between Core and Agent layers.
-/// It must be kept in sync with Ouroboros.Agent.NeuralSymbolic.ReasoningMode.
-/// The integer values MUST match exactly for casting to work correctly in ResilientReasoner.
-/// Changes to one enum must be reflected in the other.
-/// 
-/// Source of Truth: Ouroboros.Agent.NeuralSymbolic.ReasoningMode (defined in ReasoningResult.cs)
-/// This enum: Duplicate for Core layer use only
-/// </summary>
-public enum ReasoningMode
-{
-    /// <summary>Try symbolic first, fall back to neural.</summary>
-    SymbolicFirst = 0,
-
-    /// <summary>Try neural first, fall back to symbolic.</summary>
-    NeuralFirst = 1,
-
-    /// <summary>Run both in parallel, combine results.</summary>
-    Parallel = 2,
-
-    /// <summary>Use only symbolic reasoning.</summary>
-    SymbolicOnly = 3,
-
-    /// <summary>Use only neural reasoning.</summary>
-    NeuralOnly = 4
-}
-
-/// <summary>
 /// Unified reasoning interface that abstracts over LLM and symbolic reasoning
 /// with automatic fallback and circuit breaking.
 /// </summary>
@@ -58,16 +30,3 @@ public interface IReasoner
     /// <returns>Health information including circuit state and failure counts.</returns>
     ReasonerHealth GetHealth();
 }
-
-/// <summary>
-/// Represents the health status of the reasoning system.
-/// </summary>
-/// <param name="CircuitState">Current state of the LLM circuit breaker (Closed/Open/HalfOpen).</param>
-/// <param name="SymbolicAvailable">Whether symbolic reasoning is available.</param>
-/// <param name="ConsecutiveLlmFailures">Number of consecutive LLM failures.</param>
-/// <param name="LastLlmSuccess">Timestamp of last successful LLM operation, if any.</param>
-public sealed record ReasonerHealth(
-    string CircuitState,
-    bool SymbolicAvailable,
-    int ConsecutiveLlmFailures,
-    DateTimeOffset? LastLlmSuccess);

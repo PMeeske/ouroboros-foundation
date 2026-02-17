@@ -1,38 +1,6 @@
 namespace Ouroboros.Tools
 {
     /// <summary>
-    /// Information about a tool.
-    /// </summary>
-    public class ToolInfo
-    {
-        public string Name { get; }
-        public string Description { get; }
-        public object InputSchema { get; }
-
-        public ToolInfo(string name, string description, object inputSchema)
-        {
-            Name = name;
-            Description = description;
-            InputSchema = inputSchema;
-        }
-    }
-
-    /// <summary>
-    /// Result of tool execution.
-    /// </summary>
-    public class ToolExecutionResult
-    {
-        public bool Success { get; }
-        public string Result { get; }
-
-        public ToolExecutionResult(bool success, string result)
-        {
-            Success = success;
-            Result = result;
-        }
-    }
-
-    /// <summary>
     /// Mock MCP server for testing.
     /// </summary>
     public class MockMcpServer
