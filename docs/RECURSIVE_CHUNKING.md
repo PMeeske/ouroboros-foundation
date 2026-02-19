@@ -175,8 +175,8 @@ cd src/Ouroboros.Core
 ### Basic Usage
 
 ```csharp
-using LangChainPipeline.Core.Processing;
-using LangChainPipeline.Core.Monads;
+using Ouroboros.Core.Processing;
+using Ouroboros.Core.Monads;
 
 // Define chunk processing function
 Func<string, Task<Result<string>>> processChunk = async chunk =>

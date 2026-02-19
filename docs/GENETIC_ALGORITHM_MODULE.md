@@ -13,13 +13,15 @@ This module treats "Emergence" as an optimization problem, allowing pipelines to
 
 ## Architecture
 
-### Abstractions (`Abstractions/`)
+The module provides two parallel API generations. The Classic API follows the original design with `IChromosome<TGene>`, while the newer Evolution API provides a streamlined interface via `IEvolutionEngine<TChromosome>`.
+
+### Classic API — Abstractions (`Abstractions/`)
 
 - **`IChromosome<TGene>`**: Represents a solution candidate with genes and fitness score
 - **`IFitnessFunction<TGene>`**: Evaluates how good a solution is
 - **`IGeneticAlgorithm<TGene>`**: Orchestrates the evolution process
 
-### Core Components (`Core/`)
+### Classic API — Core Components (`Core/`)
 
 - **`Chromosome<TGene>`**: Immutable implementation of `IChromosome`
 - **`Population<TGene>`**: Manages a collection of chromosomes
@@ -28,18 +30,67 @@ This module treats "Emergence" as an optimization problem, allowing pipelines to
 - **`Mutation<TGene>`**: Mutation operator with configurable rate
 - **`GeneticAlgorithm<TGene>`**: Complete GA implementation
 
+### Evolution API (`Genetic/Core/`)
+
+The newer Evolution API provides a more flexible interface:
+
+- **`IEvolutionEngine<TChromosome>`**: Evolution engine interface with `EvolveAsync()` and `GetBest()`
+- **`IEvolutionFitnessFunction<TChromosome>`**: Fitness evaluation returning `Result<double>`
+- **`EvolutionEngine<TChromosome>`**: Main engine implementation
+- **`EvolutionPopulation<TChromosome>`**: Enhanced population management
+- **`EvolutionRouletteWheelSelection<TChromosome>`**: Selection operator
+- **`EvolutionCrossover`**: Crossover operator
+- **`EvolutionMutation`**: Mutation operator
+
 ### Pipeline Integration (`Steps/`, `Extensions/`)
 
-- **`GeneticEvolutionStep<TIn, TOut, TGene>`**: Wraps pipeline steps with evolution
-- **`GeneticPipelineExtensions`**: Fluent API for `.Evolve(...)` and `.EvolveWithMetadata(...)`
+- **`GeneticEvolutionStep<TIn, TOut, TGene>`**: Wraps pipeline steps with evolution (Classic API)
+- **`GeneticPipelineExtensions`**: Fluent API for both APIs:
+  - `.Evolve(engine, generations)` — Evolve and return best chromosome
+  - `.EvolvePopulation(engine, generations)` — Evolve and return entire population
+  - `.EvolveWith(fitnessFunction, crossoverFunc, mutationFunc, ...)` — One-shot evolution
+  - `.EvolveWithMetadata(...)` — Classic API evolution with metadata
 
 ## Usage
 
-### Basic Example: Optimizing a Multiplier
+### Evolution API (Recommended for New Code)
 
 ```csharp
-using LangChainPipeline.Genetic.Core;
-using LangChainPipeline.Genetic.Extensions;
+using Ouroboros.Core.Steps;
+using Ouroboros.Genetic;
+
+// Define fitness function
+var fitnessFunction = new MyFitnessFunction(targetValue);
+
+// Define genetic operators
+Func<MyChromosome, MyChromosome, double, Result<MyChromosome>> crossoverFunc =
+    (p1, p2, ratio) => /* crossover logic */;
+
+Func<MyChromosome, Random, Result<MyChromosome>> mutationFunc =
+    (c, random) => /* mutation logic */;
+
+// Create engine
+var engine = new EvolutionEngine<MyChromosome>(
+    fitnessFunction,
+    crossoverFunc,
+    mutationFunc,
+    crossoverRate: 0.8,
+    mutationRate: 0.1,
+    elitismRate: 0.1,
+    seed: 42);
+
+// Build and execute pipeline using Kleisli composition
+var result = await createPopulation
+    .Evolve(engine, generations: 50)("10");
+```
+
+The Evolution API returns `Result<T>` from all operations, making error handling explicit and composable.
+
+### Classic API Example: Optimizing a Multiplier
+
+```csharp
+using Ouroboros.Genetic.Core;
+using Ouroboros.Genetic.Extensions;
 
 // Define fitness function (minimize distance from target)
 var fitnessFunction = new TargetFitnessFunction(target: 100);
@@ -372,8 +423,8 @@ For complete working examples, see:
 The Genetic module integrates seamlessly with existing Ouroboros pipelines:
 
 ```csharp
-using LangChainPipeline.Core.Steps;
-using LangChainPipeline.Genetic.Extensions;
+using Ouroboros.Core.Steps;
+using Ouroboros.Genetic.Extensions;
 
 // Existing pipeline
 var pipeline = Step.Pure<string>()

@@ -65,7 +65,7 @@ This triad mirrors:
 The core abstraction is the `Form` abstract record type with these concrete implementations:
 
 ```csharp
-using LangChainPipeline.Core.LawsOfForm;
+using Ouroboros.Core.LawsOfForm;
 
 // The unmarked state (void/empty)
 var v = Form.Void;
@@ -115,7 +115,7 @@ var combined = form1.Superimpose(form2);
 The `Imagination` static class provides high-level operations:
 
 ```csharp
-using LangChainPipeline.Core.LawsOfForm;
+using Ouroboros.Core.LawsOfForm;
 
 // The imaginary constant
 var i = Imagination.I;

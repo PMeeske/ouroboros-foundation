@@ -254,7 +254,7 @@ if (clearance.Level == EthicalClearanceLevel.Denied)
 
 ## License
 
-Copyright (c) PlaceholderCompany. All rights reserved.
+Copyright (c) 2025 PMeeske. MIT License - See repository root for details.
 
 ---
 

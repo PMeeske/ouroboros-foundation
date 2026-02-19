@@ -73,7 +73,9 @@ fullResult.Match(
     onFailure: error => Console.WriteLine($"Failed: {error}"));
 ```
 
-### CLI Interface
+### CLI Interface (Planned)
+
+> **Note**: The CLI interface below is a design target. The benchmark domain types and `BenchmarkSuite` class are implemented in `Ouroboros.Domain.Benchmarks`; the CLI wrapper is part of the Ouroboros-v2 application layer.
 
 ```bash
 # Run individual benchmarks
@@ -98,16 +100,14 @@ ouroboros benchmark --arc --task-count 200
 ### Example Output
 
 ```
-╔════════════════════════════════════════════════════════════╗
-║  ARC-AGI-2                                                 ║
-╚════════════════════════════════════════════════════════════╝
-
-✓ Overall Score:  45.2%
-  Duration:       00:00:05.3421
-  Tasks:          100
-  Successful:     45
-  Failed:         55
-  Completed at:   2026-01-10 08:00:00 UTC
+ARC-AGI-2
+---------
+Overall Score:  45.2%
+Duration:       00:00:05.3421
+Tasks:          100
+Successful:     45
+Failed:         55
+Completed at:   2026-01-10 08:00:00 UTC
 
 Sub-Scores:
   rotation                       65.3%
