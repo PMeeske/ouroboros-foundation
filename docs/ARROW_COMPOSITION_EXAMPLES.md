@@ -2,6 +2,8 @@
 
 This document demonstrates how to use the arrow-based composition patterns that replace inheritance-based template methods.
 
+> **Note**: The examples below reference types from both `ouroboros-foundation` (e.g., `Step<TIn, TOut>`, `Result<T, E>`, `FixChain`, `FixState`, `Future<T>`) and the higher-level [Ouroboros-v2](https://github.com/PMeeske/Ouroboros-v2) repository (e.g., `CouncilTopic`, `AgentContribution`, `BaseAgentPersona`, `OrchestratorBase`, `ToolAwareChatModel`). The core arrow composition concepts and `Step<TIn, TOut>` delegate are defined in this foundation repo; the agent persona and orchestrator types are in the main Ouroboros-v2 repo.
+
 ## Important Notes
 
 ### Cancellation Token Support

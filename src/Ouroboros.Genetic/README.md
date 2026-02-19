@@ -11,50 +11,62 @@ Ouroboros.Genetic provides primitives for implementing genetic algorithms that i
 - **Composability**: Integrates via Kleisli arrow composition
 - **Type Safety**: Leverages C# type system for compile-time guarantees
 
-## Core Abstractions
+## Two API Generations
 
-### IChromosome
-Interface for an evolving solution (e.g., prompts, parameters, configurations):
-```csharp
-public interface IChromosome
-{
-    string Id { get; }
-    double Fitness { get; }
-    int Generation { get; }
-    IChromosome Clone();
-    IChromosome WithFitness(double fitness);
-}
-```
+This module provides two parallel API generations. The **Evolution API** is recommended for new code; the **Classic API** remains available for backward compatibility.
 
-### IFitnessFunction<T>
-Interface for evaluating chromosomes:
-```csharp
-public interface IFitnessFunction<TChromosome>
-{
-    Task<Result<double>> EvaluateAsync(TChromosome chromosome);
-}
-```
+### Evolution API (Recommended)
 
-### IEvolutionEngine
-Interface for the main evolution loop:
 ```csharp
 public interface IEvolutionEngine<TChromosome>
 {
     Task<Result<Population<TChromosome>>> EvolveAsync(
         Population<TChromosome> initialPopulation,
         int generations);
-    
+
     Option<TChromosome> GetBest(Population<TChromosome> population);
+}
+
+public interface IEvolutionFitnessFunction<TChromosome>
+{
+    Task<Result<double>> EvaluateAsync(TChromosome chromosome);
 }
 ```
 
-## Core Implementations
+Evolution API implementations: `EvolutionEngine<TChromosome>`, `EvolutionPopulation<TChromosome>`, `EvolutionRouletteWheelSelection<TChromosome>`, `EvolutionCrossover`, `EvolutionMutation`
 
-- **Population**: Manages collections of chromosomes with immutable operations
+### Classic API
+
+```csharp
+public interface IChromosome<TGene>
+{
+    IReadOnlyList<TGene> Genes { get; }
+    double Fitness { get; }
+    IChromosome<TGene> WithFitness(double fitness);
+}
+
+public interface IFitnessFunction<TGene>
+{
+    Task<double> EvaluateAsync(IChromosome<TGene> chromosome);
+}
+
+public interface IGeneticAlgorithm<TGene>
+{
+    Task<IChromosome<TGene>> EvolveAsync(
+        IReadOnlyList<IChromosome<TGene>> initialPopulation,
+        int generations);
+}
+```
+
+Classic API implementations: `Chromosome<TGene>`, `Population<TGene>`, `RouletteWheelSelection<TGene>`, `UniformCrossover<TGene>`, `Mutation<TGene>`, `GeneticAlgorithm<TGene>`
+
+## Core Operators
+
+Both APIs share the same operator patterns:
 - **RouletteWheelSelection**: Fitness-proportionate selection strategy
 - **UniformCrossover**: Standard crossover with configurable rate
 - **Mutation**: Random mutation with configurable rate
-- **EvolutionEngine**: Main orchestrator implementing the complete GA loop
+- **Elitism**: Preservation of top chromosomes across generations
 
 ## Fluent API Usage
 

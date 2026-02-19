@@ -1,6 +1,8 @@
 # Arrow Parameterization Transformation - Summary
 
-## Objective Completed ✅
+> **Note**: The implementation files and tests described below live in the [Ouroboros-v2](https://github.com/PMeeske/Ouroboros-v2) main repository. The `Step<TIn, TOut>` Kleisli arrow type and `Result<T, E>` monad used by these patterns are defined in this foundation repo.
+
+## Objective Completed
 
 Successfully converted traditional constructor dependency injection patterns to arrow parameterization, making dependencies explicit at composition time rather than instantiation time.
 

@@ -1,5 +1,7 @@
 # Arrow Parameterization Pattern
 
+> **Note**: This document describes the arrow parameterization pattern using concrete examples from the [Ouroboros-v2](https://github.com/PMeeske/Ouroboros-v2) main repository (CouncilOrchestrator, EpisodicMemoryEngine, ConsolidatedMind). The `Step<TIn, TOut>` Kleisli arrow type and `Result<T, E>` monad referenced here are defined in this foundation repo (`Ouroboros.Core.Steps`). The implementation files referenced below live in the Ouroboros-v2 repository.
+
 ## Overview
 
 This document describes the arrow parameterization pattern implemented in Ouroboros, which transforms traditional constructor dependency injection (DI) into explicit parameter passing at composition time.
