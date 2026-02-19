@@ -3,7 +3,6 @@
 /// <summary>
 /// Interface for vision/image analysis models.
 /// </summary>
-[Obsolete("No implementations exist. Scheduled for removal.")]
 public interface IVisionModel
 {
     /// <summary>
