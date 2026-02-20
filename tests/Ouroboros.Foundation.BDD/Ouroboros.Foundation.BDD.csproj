@@ -40,4 +40,49 @@
     <Content Include="Features\Ethics\**\*.feature" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ReqnrollFeatureFile Update="Features\CSharpHashVectorizer.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\DelegateTool.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\EventStore.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\InputValidator.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\MathTool.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\MetricCollector.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\MonadicToolExtensions.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\ObjectPool.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\OptionMonad.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\ResultMonad.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\Retrieval.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\SchemaGnerator.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\ToolBuilder.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\ToolRegistry.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+  </ItemGroup>
+
 </Project>
