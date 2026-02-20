@@ -26,6 +26,7 @@ public static class GeneticPipelineExtensions
     /// <param name="mutateGene">Function to mutate a single gene.</param>
     /// <param name="initialPopulation">The initial population of configurations.</param>
     /// <param name="generations">The number of generations to evolve.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <param name="mutationRate">The probability of mutating each gene (default 0.01).</param>
     /// <param name="crossoverRate">The probability of performing crossover (default 0.8).</param>
     /// <param name="elitismRate">The proportion of top configurations to preserve (default 0.1).</param>
@@ -38,6 +39,7 @@ public static class GeneticPipelineExtensions
         Func<TGene, TGene> mutateGene,
         IReadOnlyList<IChromosome<TGene>> initialPopulation,
         int generations,
+        CancellationToken cancellationToken,
         double mutationRate = 0.01,
         double crossoverRate = 0.8,
         double elitismRate = 0.1,
@@ -59,7 +61,7 @@ public static class GeneticPipelineExtensions
             var baseOutput = await step(input);
             
             // Then apply the evolved step
-            var evolvedStep = evolutionStep.CreateEvolvedStep(initialPopulation, generations);
+            var evolvedStep = evolutionStep.CreateEvolvedStep(initialPopulation, generations, cancellationToken);
             return await evolvedStep(baseOutput);
         };
     }
@@ -75,6 +77,7 @@ public static class GeneticPipelineExtensions
     /// <param name="fitnessFunction">Function to evaluate the fitness of a configuration.</param>
     /// <param name="mutateGene">Function to mutate a single gene.</param>
     /// <param name="initialPopulation">The initial population of configurations.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <param name="generations">The number of generations to evolve.</param>
     /// <param name="mutationRate">The probability of mutating each gene (default 0.01).</param>
     /// <param name="crossoverRate">The probability of performing crossover (default 0.8).</param>
@@ -87,6 +90,7 @@ public static class GeneticPipelineExtensions
         IFitnessFunction<TGene> fitnessFunction,
         Func<TGene, TGene> mutateGene,
         IReadOnlyList<IChromosome<TGene>> initialPopulation,
+        CancellationToken cancellationToken,
         int generations,
         double mutationRate = 0.01,
         double crossoverRate = 0.8,
@@ -109,7 +113,7 @@ public static class GeneticPipelineExtensions
             var baseOutput = await step(input);
             
             // Then apply the evolved step with metadata
-            var evolvedStep = evolutionStep.CreateEvolvedStepWithMetadata(initialPopulation, generations);
+            var evolvedStep = evolutionStep.CreateEvolvedStepWithMetadata(initialPopulation, generations, cancellationToken);
             return await evolvedStep(baseOutput);
         };
     }

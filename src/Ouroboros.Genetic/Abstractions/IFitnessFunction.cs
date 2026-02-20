@@ -15,6 +15,7 @@ public interface IFitnessFunction<TGene>
     /// Evaluates the fitness of a chromosome asynchronously.
     /// </summary>
     /// <param name="chromosome">The chromosome to evaluate.</param>
+    /// <param name="cancellationToken"></param>
     /// <returns>A task representing the fitness score (higher is better).</returns>
-    Task<double> EvaluateAsync(IChromosome<TGene> chromosome);
+    Task<double> EvaluateAsync(IChromosome<TGene> chromosome, CancellationToken cancellationToken);
 }

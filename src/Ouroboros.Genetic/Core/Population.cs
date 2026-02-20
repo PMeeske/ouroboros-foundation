@@ -62,14 +62,16 @@ public sealed class Population<TGene>
     /// Evaluates all chromosomes in the population using the provided fitness function.
     /// </summary>
     /// <param name="fitnessFunction">The fitness function to use.</param>
+    /// <param name="cancellationToken"></param>
     /// <returns>A task representing a new population with evaluated chromosomes.</returns>
-    public async Task<Population<TGene>> EvaluateAsync(IFitnessFunction<TGene> fitnessFunction)
+    public async Task<Population<TGene>> EvaluateAsync(IFitnessFunction<TGene> fitnessFunction,
+        CancellationToken cancellationToken)
     {
         var evaluatedChromosomes = new List<IChromosome<TGene>>();
         
         foreach (var chromosome in this.chromosomes)
         {
-            double fitness = await fitnessFunction.EvaluateAsync(chromosome);
+            double fitness = await fitnessFunction.EvaluateAsync(chromosome, cancellationToken);
             evaluatedChromosomes.Add(chromosome.WithFitness(fitness));
         }
         

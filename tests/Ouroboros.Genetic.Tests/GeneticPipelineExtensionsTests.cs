@@ -76,6 +76,7 @@ public class GeneticPipelineExtensionsTests
             fitnessFunction,
             mutateGene,
             initialPopulation,
+            cancellationToken: CancellationToken.None,
             generations: 20,
             seed: 42);
 
@@ -113,6 +114,7 @@ public class GeneticPipelineExtensionsTests
             fitnessFunction,
             suffix => suffix + "!",
             initialPopulation,
+            cancellationToken: CancellationToken.None,
             generations: 5,
             seed: 42);
 
@@ -159,6 +161,7 @@ public class GeneticPipelineExtensionsTests
             fitnessFunction,
             mutateGene,
             initialPopulation,
+            cancellationToken: CancellationToken.None,
             generations: 10,
             seed: 42);
 
@@ -178,7 +181,7 @@ public class GeneticPipelineExtensionsTests
             this.target = target;
         }
 
-        public Task<double> EvaluateAsync(IChromosome<int> chromosome)
+        public Task<double> EvaluateAsync(IChromosome<int> chromosome, CancellationToken cancellationToken)
         {
             // For testing, we simulate evaluation by computing with input 10
             // In real scenarios, this would involve running the actual step
@@ -191,7 +194,7 @@ public class GeneticPipelineExtensionsTests
 
     private class LengthFitnessFunction : IFitnessFunction<string>
     {
-        public Task<double> EvaluateAsync(IChromosome<string> chromosome)
+        public Task<double> EvaluateAsync(IChromosome<string> chromosome, CancellationToken cancellationToken)
         {
             // Fitness based on length of the suffix
             string suffix = chromosome.Genes.FirstOrDefault() ?? string.Empty;
@@ -202,7 +205,7 @@ public class GeneticPipelineExtensionsTests
 
     private class TupleFitnessFunction : IFitnessFunction<(int a, int b)>
     {
-        public Task<double> EvaluateAsync(IChromosome<(int a, int b)> chromosome)
+        public Task<double> EvaluateAsync(IChromosome<(int a, int b)> chromosome, CancellationToken cancellationToken)
         {
             // Simple fitness based on sum
             var gene = chromosome.Genes.FirstOrDefault();

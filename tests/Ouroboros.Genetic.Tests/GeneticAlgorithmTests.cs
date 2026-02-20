@@ -63,7 +63,7 @@ public class GeneticAlgorithmTests
         var emptyPopulation = new List<IChromosome<int>>();
 
         // Act
-        var result = await ga.EvolveAsync(emptyPopulation, generations: 10);
+        var result = await ga.EvolveAsync(emptyPopulation, generations: 10, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -81,7 +81,7 @@ public class GeneticAlgorithmTests
         };
 
         // Act
-        var result = await ga.EvolveAsync(population, generations: 0);
+        var result = await ga.EvolveAsync(population, generations: 0, CancellationToken.None);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -109,7 +109,7 @@ public class GeneticAlgorithmTests
         };
 
         // Act
-        var result = await ga.EvolveAsync(initialPopulation, generations: 10);
+        var result = await ga.EvolveAsync(initialPopulation, generations: 10, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -137,7 +137,7 @@ public class GeneticAlgorithmTests
         };
 
         // Act
-        var result = await ga.EvolveAsync(initialPopulation, generations: 5);
+        var result = await ga.EvolveAsync(initialPopulation, generations: 5,CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -165,8 +165,8 @@ public class GeneticAlgorithmTests
             seed: 42);
 
         // Act
-        var result1 = await ga1.EvolveAsync(population, generations: 5);
-        var result2 = await ga2.EvolveAsync(population, generations: 5);
+        var result1 = await ga1.EvolveAsync(population, generations: 5, CancellationToken.None);
+        var result2 = await ga2.EvolveAsync(population, generations: 5, CancellationToken.None);
 
         // Assert
         result1.IsSuccess.Should().BeTrue();
@@ -176,7 +176,7 @@ public class GeneticAlgorithmTests
 
     private class SimpleFitnessFunction : IFitnessFunction<int>
     {
-        public Task<double> EvaluateAsync(IChromosome<int> chromosome)
+        public Task<double> EvaluateAsync(IChromosome<int> chromosome, CancellationToken cancellationToken)
         {
             return Task.FromResult(1.0);
         }
@@ -184,7 +184,7 @@ public class GeneticAlgorithmTests
 
     private class SumFitnessFunction : IFitnessFunction<int>
     {
-        public Task<double> EvaluateAsync(IChromosome<int> chromosome)
+        public Task<double> EvaluateAsync(IChromosome<int> chromosome, CancellationToken cancellationToken)
         {
             double fitness = chromosome.Genes.Sum();
             return Task.FromResult(fitness);

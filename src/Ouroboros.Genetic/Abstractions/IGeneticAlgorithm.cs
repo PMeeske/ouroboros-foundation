@@ -18,7 +18,7 @@ public interface IGeneticAlgorithm<TGene>
     /// <returns>A task representing the best chromosome found.</returns>
     Task<Result<IChromosome<TGene>, string>> EvolveAsync(
         IReadOnlyList<IChromosome<TGene>> initialPopulation,
-        int generations);
+        int generations, CancellationToken cancellationToken);
 
     /// <summary>
     /// Gets the fitness function used by this algorithm.

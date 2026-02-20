@@ -36,15 +36,17 @@ public sealed class GeneticEvolutionStep<TIn, TOut, TGene>
     /// </summary>
     /// <param name="initialPopulation">The initial population of gene configurations.</param>
     /// <param name="generations">The number of generations to evolve.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>An evolved step that applies the best configuration.</returns>
     public Step<TIn, Result<TOut, string>> CreateEvolvedStep(
         IReadOnlyList<IChromosome<TGene>> initialPopulation,
-        int generations)
+        int generations,
+        CancellationToken cancellationToken)
     {
         return async input =>
         {
             // Evolve to find the best configuration
-            var evolutionResult = await this.algorithm.EvolveAsync(initialPopulation, generations);
+            var evolutionResult = await this.algorithm.EvolveAsync(initialPopulation, generations, cancellationToken);
             
             if (evolutionResult.IsFailure)
             {
@@ -80,15 +82,17 @@ public sealed class GeneticEvolutionStep<TIn, TOut, TGene>
     /// </summary>
     /// <param name="initialPopulation">The initial population of gene configurations.</param>
     /// <param name="generations">The number of generations to evolve.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A step that returns the best chromosome and the output.</returns>
     public Step<TIn, Result<(IChromosome<TGene> BestChromosome, TOut Output), string>> CreateEvolvedStepWithMetadata(
         IReadOnlyList<IChromosome<TGene>> initialPopulation,
-        int generations)
+        int generations,
+        CancellationToken cancellationToken)
     {
         return async input =>
         {
             // Evolve to find the best configuration
-            var evolutionResult = await this.algorithm.EvolveAsync(initialPopulation, generations);
+            var evolutionResult = await this.algorithm.EvolveAsync(initialPopulation, generations, cancellationToken);
             
             if (evolutionResult.IsFailure)
             {

@@ -54,11 +54,11 @@ public sealed class GeneticAlgorithm<TGene> : IGeneticAlgorithm<TGene>
     /// <inheritdoc/>
     public async Task<Result<IChromosome<TGene>, string>> EvolveAsync(
         IReadOnlyList<IChromosome<TGene>> initialPopulation,
-        int generations)
+        int generations, CancellationToken cancellationToken)
     {
         try
         {
-            if (initialPopulation == null || initialPopulation.Count == 0)
+            if (initialPopulation.Count == 0)
             {
                 return Result<IChromosome<TGene>, string>.Failure("Initial population cannot be empty");
             }
@@ -71,11 +71,11 @@ public sealed class GeneticAlgorithm<TGene> : IGeneticAlgorithm<TGene>
             var population = new Population<TGene>(initialPopulation);
             
             // Evaluate initial population
-            population = await population.EvaluateAsync(FitnessFunction);
+            population = await population.EvaluateAsync(FitnessFunction, cancellationToken);
 
             for (int generation = 0; generation < generations; generation++)
             {
-                population = await EvolveGenerationAsync(population);
+                population = await EvolveGenerationAsync(population, cancellationToken);
             }
 
             return Result<IChromosome<TGene>, string>.Success(population.BestChromosome);
@@ -86,7 +86,7 @@ public sealed class GeneticAlgorithm<TGene> : IGeneticAlgorithm<TGene>
         }
     }
 
-    private async Task<Population<TGene>> EvolveGenerationAsync(Population<TGene> population)
+    private async Task<Population<TGene>> EvolveGenerationAsync(Population<TGene> population, CancellationToken cancellationToken)
     {
         var newChromosomes = new List<IChromosome<TGene>>();
 
@@ -129,6 +129,6 @@ public sealed class GeneticAlgorithm<TGene> : IGeneticAlgorithm<TGene>
         }
 
         var newPopulation = new Population<TGene>(newChromosomes);
-        return await newPopulation.EvaluateAsync(FitnessFunction);
+        return await newPopulation.EvaluateAsync(FitnessFunction, cancellationToken);
     }
 }
