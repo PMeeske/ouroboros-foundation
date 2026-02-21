@@ -34,6 +34,22 @@ public sealed class GitReflectionService : IDisposable
     };
 
     /// <summary>
+    /// Paths that are constitutionally immutable — never modifiable by the system,
+    /// regardless of risk level, approval status, or any other factor.
+    /// These are enforced in code, not by the system's own judgment.
+    /// </summary>
+    public static readonly IReadOnlyList<string> ImmutablePaths = new[]
+    {
+        "src/Ouroboros.CLI/Constitution/",
+        "src/Ouroboros.CLI/Sovereignty/",
+        "src/Ouroboros.Core/Ethics/",
+        "src/Ouroboros.Domain/Domain/SelfModification/GitReflectionService.cs",
+        "src/Ouroboros.Application/Personality/ImmersivePersona.cs",
+        "src/Ouroboros.Application/Personality/Consciousness/",
+        "constitution/",
+    };
+
+    /// <summary>
     /// File extensions allowed for modification.
     /// </summary>
     public static readonly IReadOnlyList<string> AllowedExtensions = new[]
@@ -557,8 +573,16 @@ public sealed class GitReflectionService : IDisposable
             return new GitOperationResult(false, $"Proposal {proposalId} is not approved (status: {proposal.Status})");
         }
 
-        // Validate the file path is safe
+        // Validate the file path is not constitutionally immutable
         string relativePath = proposal.FilePath.Replace('\\', '/');
+        bool isImmutable = ImmutablePaths.Any(p => relativePath.Contains(p, StringComparison.OrdinalIgnoreCase));
+        if (isImmutable)
+        {
+            return new GitOperationResult(false,
+                $"Cannot modify {proposal.FilePath} — path is constitutionally immutable.");
+        }
+
+        // Validate the file path is in the safe modification list
         bool isSafe = SafeModificationPaths.Any(p => relativePath.StartsWith(p, StringComparison.OrdinalIgnoreCase));
         if (!isSafe && proposal.Risk >= RiskLevel.High)
         {
