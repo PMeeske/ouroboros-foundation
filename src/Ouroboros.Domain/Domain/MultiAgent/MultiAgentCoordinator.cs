@@ -637,7 +637,7 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
         {
             // Each agent gossips to a random subset of other agents
             var targets = agents.Where(a => a != sender)
-                .OrderBy(x => random.Next())
+                .OrderBy(x => random.Next(int.MaxValue))
                 .Take(Math.Max(1, agents.Count / 3))
                 .ToList();
 
