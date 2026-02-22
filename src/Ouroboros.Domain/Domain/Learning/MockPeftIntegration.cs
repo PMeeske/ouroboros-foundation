@@ -8,6 +8,8 @@ using Microsoft.Extensions.Logging;
 using Ouroboros.Core.LawsOfForm;
 using Ouroboros.Core.Learning;
 using Ouroboros.Core.Monads;
+using Ouroboros.Core.Randomness;
+using Ouroboros.Providers.Random;
 
 /// <summary>
 /// Mock implementation of PEFT integration for testing and development.
@@ -16,15 +18,17 @@ using Ouroboros.Core.Monads;
 public sealed class MockPeftIntegration : IPeftIntegration
 {
     private readonly ILogger<MockPeftIntegration>? _logger;
-    private readonly Random _random = new();
+    private readonly IRandomProvider _random;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MockPeftIntegration"/> class.
     /// </summary>
     /// <param name="logger">Optional logger.</param>
-    public MockPeftIntegration(ILogger<MockPeftIntegration>? logger = null)
+    /// <param name="randomProvider">The random provider to use. Defaults to <see cref="CryptoRandomProvider.Instance"/>.</param>
+    public MockPeftIntegration(ILogger<MockPeftIntegration>? logger = null, IRandomProvider? randomProvider = null)
     {
         _logger = logger;
+        _random = randomProvider ?? CryptoRandomProvider.Instance;
     }
 
     /// <inheritdoc/>

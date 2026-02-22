@@ -4,7 +4,9 @@
 
 namespace Ouroboros.Genetic.Core;
 
+using Ouroboros.Core.Randomness;
 using Ouroboros.Genetic.Abstractions;
+using Ouroboros.Providers.Random;
 
 /// <summary>
 /// Implements mutation for genetic algorithms.
@@ -13,20 +15,21 @@ using Ouroboros.Genetic.Abstractions;
 /// <typeparam name="TGene">The type of gene in the chromosomes.</typeparam>
 public sealed class Mutation<TGene>
 {
-    private readonly Random random;
+    private readonly IRandomProvider random;
     private readonly double mutationRate;
     private readonly Func<TGene, TGene> mutateGene;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Mutation{TGene}"/> class.
+    /// Initializes a new instance of the <see cref="Mutation{TGene}"/> class
+    /// using the provided <see cref="IRandomProvider"/>.
     /// </summary>
     /// <param name="mutationRate">The probability of mutating each gene (0.0 to 1.0).</param>
     /// <param name="mutateGene">Function that mutates a single gene.</param>
-    /// <param name="seed">Optional seed for reproducibility.</param>
+    /// <param name="randomProvider">The random provider to use. Defaults to <see cref="CryptoRandomProvider.Instance"/>.</param>
     public Mutation(
         double mutationRate,
         Func<TGene, TGene> mutateGene,
-        int? seed = null)
+        IRandomProvider? randomProvider = null)
     {
         if (mutationRate < 0 || mutationRate > 1)
         {
@@ -35,7 +38,22 @@ public sealed class Mutation<TGene>
 
         this.mutationRate = mutationRate;
         this.mutateGene = mutateGene ?? throw new ArgumentNullException(nameof(mutateGene));
-        this.random = seed.HasValue ? new Random(seed.Value) : new Random();
+        this.random = randomProvider ?? CryptoRandomProvider.Instance;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Mutation{TGene}"/> class
+    /// using a seeded <see cref="SeededRandomProvider"/> for reproducible results.
+    /// </summary>
+    /// <param name="mutationRate">The probability of mutating each gene (0.0 to 1.0).</param>
+    /// <param name="mutateGene">Function that mutates a single gene.</param>
+    /// <param name="seed">Seed value for reproducible randomness.</param>
+    public Mutation(
+        double mutationRate,
+        Func<TGene, TGene> mutateGene,
+        int seed)
+        : this(mutationRate, mutateGene, new SeededRandomProvider(seed))
+    {
     }
 
     /// <summary>

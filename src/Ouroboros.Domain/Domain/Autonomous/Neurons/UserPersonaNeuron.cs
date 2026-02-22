@@ -1,5 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
+using Ouroboros.Core.Randomness;
+using Ouroboros.Providers.Random;
 
 namespace Ouroboros.Domain.Autonomous.Neurons;
 
@@ -13,7 +15,7 @@ public sealed class UserPersonaNeuron : Neuron
     private readonly List<TrainingInteraction> _interactions = [];
     private readonly List<string> _conversationHistory = [];
     private readonly Queue<string> _pendingQuestions = new();
-    private readonly Random _random = new();
+    private readonly IRandomProvider _random = CryptoRandomProvider.Instance;
 
     private UserPersonaConfig _config = new();
     private bool _isTrainingActive;

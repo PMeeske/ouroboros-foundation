@@ -4,7 +4,9 @@
 
 using System.Collections.Concurrent;
 using Ouroboros.Abstractions;
+using Ouroboros.Core.Randomness;
 using Ouroboros.Domain.Environment;
+using Ouroboros.Providers.Random;
 
 namespace Ouroboros.Domain.Reinforcement;
 
@@ -15,15 +17,16 @@ namespace Ouroboros.Domain.Reinforcement;
 public sealed class EpsilonGreedyPolicy : IPolicy
 {
     private readonly double epsilon;
-    private readonly Random random;
+    private readonly IRandomProvider random;
     private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, double>> qValues;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="EpsilonGreedyPolicy"/> class.
+    /// Initializes a new instance of the <see cref="EpsilonGreedyPolicy"/> class
+    /// using the provided <see cref="IRandomProvider"/>.
     /// </summary>
-    /// <param name="epsilon">Exploration rate (0-1)</param>
-    /// <param name="seed">Random seed for reproducibility</param>
-    public EpsilonGreedyPolicy(double epsilon = 0.1, int? seed = null)
+    /// <param name="epsilon">Exploration rate (0-1).</param>
+    /// <param name="randomProvider">The random provider to use. Defaults to <see cref="CryptoRandomProvider.Instance"/>.</param>
+    public EpsilonGreedyPolicy(double epsilon = 0.1, IRandomProvider? randomProvider = null)
     {
         if (epsilon < 0.0 || epsilon > 1.0)
         {
@@ -31,8 +34,19 @@ public sealed class EpsilonGreedyPolicy : IPolicy
         }
 
         this.epsilon = epsilon;
-        this.random = seed.HasValue ? new Random(seed.Value) : new Random();
+        this.random = randomProvider ?? CryptoRandomProvider.Instance;
         this.qValues = new ConcurrentDictionary<string, ConcurrentDictionary<string, double>>();
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EpsilonGreedyPolicy"/> class
+    /// using a seeded <see cref="SeededRandomProvider"/> for reproducible results.
+    /// </summary>
+    /// <param name="epsilon">Exploration rate (0-1).</param>
+    /// <param name="seed">Seed value for reproducible randomness.</param>
+    public EpsilonGreedyPolicy(double epsilon, int seed)
+        : this(epsilon, new SeededRandomProvider(seed))
+    {
     }
 
     /// <inheritdoc/>

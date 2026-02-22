@@ -4,7 +4,9 @@
 
 namespace Ouroboros.Genetic.Core;
 
+using Ouroboros.Core.Randomness;
 using Ouroboros.Genetic.Abstractions;
+using Ouroboros.Providers.Random;
 
 /// <summary>
 /// Implements the main evolution engine for genetic algorithms.
@@ -20,7 +22,7 @@ public sealed class EvolutionEngine<TChromosome> : IEvolutionEngine<TChromosome>
     private readonly EvolutionCrossover crossover;
     private readonly EvolutionMutation mutation;
     private readonly Func<TChromosome, TChromosome, double, Result<TChromosome>> crossoverFunc;
-    private readonly Func<TChromosome, Random, Result<TChromosome>> mutationFunc;
+    private readonly Func<TChromosome, IRandomProvider, Result<TChromosome>> mutationFunc;
     private readonly double elitismRate;
 
     /// <summary>
@@ -36,7 +38,7 @@ public sealed class EvolutionEngine<TChromosome> : IEvolutionEngine<TChromosome>
     public EvolutionEngine(
         IEvolutionFitnessFunction<TChromosome> fitnessFunction,
         Func<TChromosome, TChromosome, double, Result<TChromosome>> crossoverFunc,
-        Func<TChromosome, Random, Result<TChromosome>> mutationFunc,
+        Func<TChromosome, IRandomProvider, Result<TChromosome>> mutationFunc,
         double crossoverRate = 0.8,
         double mutationRate = 0.1,
         double elitismRate = 0.1,
@@ -50,9 +52,10 @@ public sealed class EvolutionEngine<TChromosome> : IEvolutionEngine<TChromosome>
         this.fitnessFunction = fitnessFunction ?? throw new ArgumentNullException(nameof(fitnessFunction));
         this.crossoverFunc = crossoverFunc ?? throw new ArgumentNullException(nameof(crossoverFunc));
         this.mutationFunc = mutationFunc ?? throw new ArgumentNullException(nameof(mutationFunc));
-        this.selection = new EvolutionRouletteWheelSelection<TChromosome>(seed);
-        this.crossover = new EvolutionCrossover(crossoverRate, seed);
-        this.mutation = new EvolutionMutation(mutationRate, seed);
+        IRandomProvider? randomProvider = seed.HasValue ? new SeededRandomProvider(seed.Value) : null;
+        this.selection = new EvolutionRouletteWheelSelection<TChromosome>(randomProvider);
+        this.crossover = new EvolutionCrossover(crossoverRate, randomProvider);
+        this.mutation = new EvolutionMutation(mutationRate, randomProvider);
         this.elitismRate = elitismRate;
     }
 

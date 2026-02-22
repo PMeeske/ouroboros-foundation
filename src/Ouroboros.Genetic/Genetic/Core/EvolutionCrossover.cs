@@ -4,7 +4,9 @@
 
 namespace Ouroboros.Genetic.Core;
 
+using Ouroboros.Core.Randomness;
 using Ouroboros.Genetic.Abstractions;
+using Ouroboros.Providers.Random;
 
 /// <summary>
 /// Implements uniform crossover for genetic algorithms.
@@ -13,15 +15,16 @@ using Ouroboros.Genetic.Abstractions;
 /// </summary>
 public sealed class EvolutionCrossover
 {
-    private readonly Random random;
+    private readonly IRandomProvider random;
     private readonly double crossoverRate;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="EvolutionCrossover"/> class.
+    /// Initializes a new instance of the <see cref="EvolutionCrossover"/> class
+    /// using the provided <see cref="IRandomProvider"/>.
     /// </summary>
     /// <param name="crossoverRate">The probability of crossover occurring (0.0 to 1.0).</param>
-    /// <param name="seed">Optional seed for reproducible randomness.</param>
-    public EvolutionCrossover(double crossoverRate = 0.8, int? seed = null)
+    /// <param name="randomProvider">The random provider to use. Defaults to <see cref="CryptoRandomProvider.Instance"/>.</param>
+    public EvolutionCrossover(double crossoverRate = 0.8, IRandomProvider? randomProvider = null)
     {
         if (crossoverRate < 0.0 || crossoverRate > 1.0)
         {
@@ -29,7 +32,18 @@ public sealed class EvolutionCrossover
         }
 
         this.crossoverRate = crossoverRate;
-        this.random = seed.HasValue ? new Random(seed.Value) : new Random();
+        this.random = randomProvider ?? CryptoRandomProvider.Instance;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EvolutionCrossover"/> class
+    /// using a seeded <see cref="SeededRandomProvider"/> for reproducible results.
+    /// </summary>
+    /// <param name="crossoverRate">The probability of crossover occurring (0.0 to 1.0).</param>
+    /// <param name="seed">Seed value for reproducible randomness.</param>
+    public EvolutionCrossover(double crossoverRate, int seed)
+        : this(crossoverRate, new SeededRandomProvider(seed))
+    {
     }
 
     /// <summary>

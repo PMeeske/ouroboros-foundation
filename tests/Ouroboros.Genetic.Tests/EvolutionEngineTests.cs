@@ -23,7 +23,7 @@ public class EvolutionEngineTests
         Func<SimpleChromosome, SimpleChromosome, double, Result<SimpleChromosome>> crossoverFunc =
             (p1, p2, ratio) => Result<SimpleChromosome>.Success(new SimpleChromosome(15.0));
 
-        Func<SimpleChromosome, Random, Result<SimpleChromosome>> mutationFunc =
+        Func<SimpleChromosome, Ouroboros.Providers.Random.IRandomProvider, Result<SimpleChromosome>> mutationFunc =
             (c, random) => Result<SimpleChromosome>.Success(new SimpleChromosome(c.Value + 1));
 
         // Act & Assert
@@ -56,7 +56,7 @@ public class EvolutionEngineTests
                 return Result<SimpleChromosome>.Success(new SimpleChromosome(newValue));
             };
 
-        Func<SimpleChromosome, Random, Result<SimpleChromosome>> mutationFunc =
+        Func<SimpleChromosome, Ouroboros.Providers.Random.IRandomProvider, Result<SimpleChromosome>> mutationFunc =
             (c, random) =>
             {
                 var delta = (random.NextDouble() - 0.5) * 10.0;
@@ -101,7 +101,7 @@ public class EvolutionEngineTests
         Func<SimpleChromosome, SimpleChromosome, double, Result<SimpleChromosome>> crossoverFunc =
             (p1, p2, ratio) => Result<SimpleChromosome>.Success(new SimpleChromosome(15.0));
 
-        Func<SimpleChromosome, Random, Result<SimpleChromosome>> mutationFunc =
+        Func<SimpleChromosome, Ouroboros.Providers.Random.IRandomProvider, Result<SimpleChromosome>> mutationFunc =
             (c, random) => Result<SimpleChromosome>.Success(new SimpleChromosome(c.Value + 1));
 
         var engine = new EvolutionEngine<SimpleChromosome>(
@@ -126,7 +126,7 @@ public class EvolutionEngineTests
         Func<SimpleChromosome, SimpleChromosome, double, Result<SimpleChromosome>> crossoverFunc =
             (p1, p2, ratio) => Result<SimpleChromosome>.Success(new SimpleChromosome(15.0));
 
-        Func<SimpleChromosome, Random, Result<SimpleChromosome>> mutationFunc =
+        Func<SimpleChromosome, Ouroboros.Providers.Random.IRandomProvider, Result<SimpleChromosome>> mutationFunc =
             (c, random) => Result<SimpleChromosome>.Success(new SimpleChromosome(c.Value + 1));
 
         var engine = new EvolutionEngine<SimpleChromosome>(
@@ -153,7 +153,7 @@ public class EvolutionEngineTests
         Func<SimpleChromosome, SimpleChromosome, double, Result<SimpleChromosome>> crossoverFunc =
             (p1, p2, ratio) => Result<SimpleChromosome>.Success(new SimpleChromosome(15.0));
 
-        Func<SimpleChromosome, Random, Result<SimpleChromosome>> mutationFunc =
+        Func<SimpleChromosome, Ouroboros.Providers.Random.IRandomProvider, Result<SimpleChromosome>> mutationFunc =
             (c, random) => Result<SimpleChromosome>.Success(new SimpleChromosome(c.Value + 1));
 
         var engine = new EvolutionEngine<SimpleChromosome>(
@@ -180,7 +180,7 @@ public class EvolutionEngineTests
         Func<SimpleChromosome, SimpleChromosome, double, Result<SimpleChromosome>> crossoverFunc =
             (p1, p2, ratio) => Result<SimpleChromosome>.Success(new SimpleChromosome(15.0));
 
-        Func<SimpleChromosome, Random, Result<SimpleChromosome>> mutationFunc =
+        Func<SimpleChromosome, Ouroboros.Providers.Random.IRandomProvider, Result<SimpleChromosome>> mutationFunc =
             (c, random) => Result<SimpleChromosome>.Success(new SimpleChromosome(c.Value + 1));
 
         var engine = new EvolutionEngine<SimpleChromosome>(
@@ -208,7 +208,7 @@ public class EvolutionEngineTests
         Func<SimpleChromosome, SimpleChromosome, double, Result<SimpleChromosome>> crossoverFunc =
             (p1, p2, ratio) => Result<SimpleChromosome>.Success(new SimpleChromosome(15.0));
 
-        Func<SimpleChromosome, Random, Result<SimpleChromosome>> mutationFunc =
+        Func<SimpleChromosome, Ouroboros.Providers.Random.IRandomProvider, Result<SimpleChromosome>> mutationFunc =
             (c, random) => Result<SimpleChromosome>.Success(new SimpleChromosome(c.Value + 1));
 
         var engine = new EvolutionEngine<SimpleChromosome>(
@@ -237,7 +237,7 @@ public class EvolutionEngineTests
                 return Result<SimpleChromosome>.Success(new SimpleChromosome(newValue));
             };
 
-        Func<SimpleChromosome, Random, Result<SimpleChromosome>> mutationFunc =
+        Func<SimpleChromosome, Ouroboros.Providers.Random.IRandomProvider, Result<SimpleChromosome>> mutationFunc =
             (c, random) =>
             {
                 var delta = (random.NextDouble() - 0.5) * 5.0;

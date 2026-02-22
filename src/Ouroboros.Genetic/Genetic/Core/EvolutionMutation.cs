@@ -4,7 +4,9 @@
 
 namespace Ouroboros.Genetic.Core;
 
+using Ouroboros.Core.Randomness;
 using Ouroboros.Genetic.Abstractions;
+using Ouroboros.Providers.Random;
 
 /// <summary>
 /// Implements mutation operations for genetic algorithms.
@@ -12,15 +14,16 @@ using Ouroboros.Genetic.Abstractions;
 /// </summary>
 public sealed class EvolutionMutation
 {
-    private readonly Random random;
+    private readonly IRandomProvider random;
     private readonly double mutationRate;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="EvolutionMutation"/> class.
+    /// Initializes a new instance of the <see cref="EvolutionMutation"/> class
+    /// using the provided <see cref="IRandomProvider"/>.
     /// </summary>
     /// <param name="mutationRate">The probability of mutation occurring (0.0 to 1.0).</param>
-    /// <param name="seed">Optional seed for reproducible randomness.</param>
-    public EvolutionMutation(double mutationRate = 0.1, int? seed = null)
+    /// <param name="randomProvider">The random provider to use. Defaults to <see cref="CryptoRandomProvider.Instance"/>.</param>
+    public EvolutionMutation(double mutationRate = 0.1, IRandomProvider? randomProvider = null)
     {
         if (mutationRate < 0.0 || mutationRate > 1.0)
         {
@@ -28,7 +31,18 @@ public sealed class EvolutionMutation
         }
 
         this.mutationRate = mutationRate;
-        this.random = seed.HasValue ? new Random(seed.Value) : new Random();
+        this.random = randomProvider ?? CryptoRandomProvider.Instance;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EvolutionMutation"/> class
+    /// using a seeded <see cref="SeededRandomProvider"/> for reproducible results.
+    /// </summary>
+    /// <param name="mutationRate">The probability of mutation occurring (0.0 to 1.0).</param>
+    /// <param name="seed">Seed value for reproducible randomness.</param>
+    public EvolutionMutation(double mutationRate, int seed)
+        : this(mutationRate, new SeededRandomProvider(seed))
+    {
     }
 
     /// <summary>
@@ -40,7 +54,7 @@ public sealed class EvolutionMutation
     /// <returns>A Result containing the mutated chromosome or an error message.</returns>
     public Result<TChromosome> Mutate<TChromosome>(
         TChromosome chromosome,
-        Func<TChromosome, Random, Result<TChromosome>> mutationFunc)
+        Func<TChromosome, IRandomProvider, Result<TChromosome>> mutationFunc)
         where TChromosome : IChromosome
     {
         if (chromosome == null)
@@ -68,7 +82,7 @@ public sealed class EvolutionMutation
     /// <returns>A Result containing the mutated population or an error message.</returns>
     public async Task<Result<EvolutionPopulation<TChromosome>>> MutatePopulationAsync<TChromosome>(
         EvolutionPopulation<TChromosome> population,
-        Func<TChromosome, Random, Result<TChromosome>> mutationFunc)
+        Func<TChromosome, IRandomProvider, Result<TChromosome>> mutationFunc)
         where TChromosome : IChromosome
     {
         if (population == null)

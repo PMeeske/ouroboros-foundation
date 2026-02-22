@@ -162,6 +162,7 @@
         <Compile Include="Providers\SpeechToText\IStreamingSttService.cs" />
         <Compile Include="Providers\LoadBalancing\IProviderLoadBalancer.cs" />
         <Compile Include="Providers\LoadBalancing\IProviderSelectionStrategy.cs" />
+        <Compile Include="Providers\Random\IRandomProvider.cs" />
         <Compile Include="Providers\Kubernetes\IKubernetesMcpClient.cs" />
         <Compile Include="Providers\Kubernetes\KubernetesPodInfo.cs" />
         <Compile Include="Providers\DuckDuckGo\IDuckDuckGoMcpClient.cs" />

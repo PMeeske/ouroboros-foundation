@@ -3,6 +3,8 @@
 // </copyright>
 
 using Ouroboros.Abstractions;
+using Ouroboros.Core.Randomness;
+using Ouroboros.Providers.Random;
 
 namespace Ouroboros.Domain.MultiAgent;
 
@@ -628,7 +630,7 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
     private async Task<Result<Unit, string>> SynchronizeGossipAsync(List<AgentId> agents, CancellationToken ct)
     {
         // Gossip protocol - probabilistic propagation
-        var random = new Random();
+        IRandomProvider random = CryptoRandomProvider.Instance;
         var conversationId = Guid.NewGuid();
 
         foreach (var sender in agents)

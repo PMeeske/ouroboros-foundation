@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Diagnostics;
+using Ouroboros.Core.Randomness;
 
 namespace Ouroboros.Domain.Benchmarks;
 
@@ -379,7 +380,7 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
         // Simulate task execution with varying difficulty
         await Task.Delay(10, ct);
 
-        var random = new Random(taskId.GetHashCode());
+        var random = new SeededRandomProvider(taskId.GetHashCode());
         var difficulty = random.Next(3) switch
         {
             0 => "easy",
@@ -416,7 +417,7 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
         // Simulate MMLU subject test execution
         await Task.Delay(50, ct);
 
-        var random = new Random(subject.GetHashCode());
+        var random = new SeededRandomProvider(subject.GetHashCode());
         var questionCount = random.Next(50, 100);
         var score = 0.65 + (random.NextDouble() * 0.2); // Target 70%+
 
@@ -430,7 +431,7 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
         // Simulate continual learning with retention measurement
         await Task.Delay(100, ct);
 
-        var random = new Random(sequence.Name.GetHashCode());
+        var random = new SeededRandomProvider(sequence.Name.GetHashCode());
         var initialAccuracy = 0.85 + (random.NextDouble() * 0.1);
         var finalAccuracy = sequence.MeasureRetention ? 0.75 + (random.NextDouble() * 0.1) : initialAccuracy;
         var retentionScore = finalAccuracy / initialAccuracy; // Target 80%+ retention
@@ -446,7 +447,7 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
         await Task.Delay(50, ct);
 
         var tasks = new List<TaskResult>();
-        var random = new Random((int)dimension);
+        var random = new SeededRandomProvider((int)dimension);
 
         // Generate tasks based on dimension
         var taskCount = 10;
