@@ -3,6 +3,9 @@ namespace Ouroboros.Core.LawsOfForm;
 using Ouroboros.Core.Randomness;
 using Ouroboros.Providers.Random;
 
+using Ouroboros.Core.Randomness;
+using Ouroboros.Providers.Random;
+
 /// <summary>
 /// Represents a dream state - a form in superposition of all possible phases.
 /// This is the state of maximum creative potential, before observation collapses
