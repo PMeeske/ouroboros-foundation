@@ -150,7 +150,11 @@ public readonly struct ContextualStepDefinition<TIn, TOut, TContext>
     /// <param name="context">The context value.</param>
     /// <returns>The output value paired with accumulated log entries.</returns>
     public (TOut result, List<string> logs) Invoke(TIn input, TContext context)
-        => Task.Run(() => _compiled(input, context)).GetAwaiter().GetResult();
+    {
+        // Copy to a local so the lambda does not capture 'this' (not allowed in structs).
+        var compiled = _compiled;
+        return Task.Run(() => compiled(input, context)).GetAwaiter().GetResult();
+    }
 
     /// <summary>
     /// Collapses the definition to a pure step by binding the context, retaining the log output.
