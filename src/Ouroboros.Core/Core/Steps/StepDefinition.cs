@@ -1,5 +1,5 @@
-// <copyright file="StepDefinition.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="StepDefinition.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 namespace Ouroboros.Core.Steps;
@@ -12,75 +12,80 @@ namespace Ouroboros.Core.Steps;
 /// <typeparam name="TOut">Output type.</typeparam>
 public readonly struct StepDefinition<TIn, TOut>
 {
-    private readonly Step<TIn, TOut> compiled;
+    private readonly Step<TIn, TOut> _compiled;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="StepDefinition{TIn, TOut}"/> struct.
-    /// Create definition from an asynchronous step.
+    /// Initializes a new instance of the <see cref="StepDefinition{TIn, TOut}"/> struct
+    /// from an asynchronous step.
     /// </summary>
+    /// <param name="step">The async step to wrap.</param>
     public StepDefinition(Step<TIn, TOut> step)
     {
-        this.compiled = step ?? throw new ArgumentNullException(nameof(step));
+        ArgumentNullException.ThrowIfNull(step);
+        _compiled = step;
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="StepDefinition{TIn, TOut}"/> struct.
-    /// Create definition from a synchronous function.
+    /// Initializes a new instance of the <see cref="StepDefinition{TIn, TOut}"/> struct
+    /// from a synchronous function.
     /// </summary>
+    /// <param name="func">The synchronous function to wrap.</param>
     public StepDefinition(Func<TIn, TOut> func)
-        : this(async input => await Task.FromResult(func(input)).ConfigureAwait(false))
     {
+        ArgumentNullException.ThrowIfNull(func);
+        _compiled = input => Task.FromResult(func(input));
     }
 
     /// <summary>
-    /// Compose with another step, returning a new definition representing the appended pipeline.
+    /// Composes with another step, returning a new definition representing the appended pipeline.
     /// </summary>
-    /// <returns></returns>
+    /// <typeparam name="TNext">The output type of the composed pipeline.</typeparam>
+    /// <param name="next">The step to append.</param>
+    /// <returns>A new definition representing the composed pipeline.</returns>
     public StepDefinition<TIn, TNext> Pipe<TNext>(Step<TOut, TNext> next)
     {
-        if (next is null)
-        {
-            throw new ArgumentNullException(nameof(next));
-        }
-
-        Step<TIn, TOut> current = this.compiled;
+        ArgumentNullException.ThrowIfNull(next);
+        Step<TIn, TOut> current = _compiled;
         return new StepDefinition<TIn, TNext>(async input =>
         {
-            TOut? mid = await current(input).ConfigureAwait(false);
+            TOut mid = await current(input).ConfigureAwait(false);
             return await next(mid).ConfigureAwait(false);
         });
     }
 
     /// <summary>
-    /// Compose with a synchronous function.
+    /// Composes with a synchronous function.
     /// </summary>
-    /// <returns></returns>
+    /// <typeparam name="TNext">The output type of the composed pipeline.</typeparam>
+    /// <param name="func">The synchronous function to append.</param>
+    /// <returns>A new definition representing the composed pipeline.</returns>
     public StepDefinition<TIn, TNext> Pipe<TNext>(Func<TOut, TNext> func)
     {
-        if (func is null)
-        {
-            throw new ArgumentNullException(nameof(func));
-        }
-
-        Step<TOut, TNext> next = async value => await Task.FromResult(func(value)).ConfigureAwait(false);
-        return this.Pipe(next);
+        ArgumentNullException.ThrowIfNull(func);
+        return Pipe<TNext>(value => Task.FromResult(func(value)));
     }
 
     /// <summary>
-    /// Build the composed step.
+    /// Builds the composed step delegate.
     /// </summary>
-    /// <returns></returns>
-    public Step<TIn, TOut> Build() => this.compiled;
+    /// <returns>The underlying <see cref="Step{TIn, TOut}"/> delegate.</returns>
+    public Step<TIn, TOut> Build() => _compiled;
 
     /// <summary>
     /// Operator syntax sugar to mirror the old DSL pipeline semantics.
     /// </summary>
+    /// <param name="definition">The current definition.</param>
+    /// <param name="next">The step to append.</param>
+    /// <returns>A new definition with <paramref name="next"/> appended.</returns>
     public static StepDefinition<TIn, TOut> operator |(StepDefinition<TIn, TOut> definition, Step<TOut, TOut> next)
         => definition.Pipe(next);
 
     /// <summary>
-    /// Operator overload for synchronous functions.
+    /// Operator overload for appending synchronous functions.
     /// </summary>
+    /// <param name="definition">The current definition.</param>
+    /// <param name="func">The synchronous function to append.</param>
+    /// <returns>A new definition with <paramref name="func"/> appended.</returns>
     public static StepDefinition<TIn, TOut> operator |(StepDefinition<TIn, TOut> definition, Func<TOut, TOut> func)
         => definition.Pipe(func);
 }
