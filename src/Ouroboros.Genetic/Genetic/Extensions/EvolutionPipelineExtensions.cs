@@ -6,6 +6,7 @@ namespace Ouroboros.Genetic.Extensions;
 
 using Ouroboros.Genetic.Abstractions;
 using Ouroboros.Genetic.Core;
+using Ouroboros.Providers.Random;
 
 /// <summary>
 /// Extension methods for integrating the evolution engine into pipeline composition.
@@ -73,7 +74,7 @@ public static class EvolutionPipelineExtensions
         this Step<TIn, EvolutionPopulation<TChromosome>> step,
         IEvolutionFitnessFunction<TChromosome> fitnessFunction,
         Func<TChromosome, TChromosome, double, Result<TChromosome>> crossoverFunc,
-        Func<TChromosome, Random, Result<TChromosome>> mutationFunc,
+        Func<TChromosome, IRandomProvider, Result<TChromosome>> mutationFunc,
         int generations,
         double crossoverRate = 0.8,
         double mutationRate = 0.1,
