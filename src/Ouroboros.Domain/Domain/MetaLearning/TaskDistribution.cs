@@ -4,6 +4,9 @@
 
 namespace Ouroboros.Domain.MetaLearning;
 
+using Ouroboros.Core.Randomness;
+using Ouroboros.Providers.Random;
+
 /// <summary>
 /// Represents a distribution over tasks for meta-learning.
 /// Used to sample diverse tasks during meta-training.
@@ -14,7 +17,7 @@ namespace Ouroboros.Domain.MetaLearning;
 public sealed record TaskDistribution(
     string Name,
     Dictionary<string, object> Parameters,
-    Func<Random, SynthesisTask> Sampler)
+    Func<IRandomProvider, SynthesisTask> Sampler)
 {
     /// <summary>
     /// Creates a simple uniform distribution over a fixed set of tasks.
@@ -77,24 +80,31 @@ public sealed record TaskDistribution(
     }
 
     /// <summary>
-    /// Samples a task from this distribution.
+    /// Samples a task from this distribution using the provided random provider.
     /// </summary>
-    /// <param name="random">Random number generator.</param>
+    /// <param name="random">The random provider to use for sampling.</param>
     /// <returns>A sampled task.</returns>
-    public SynthesisTask Sample(Random random) => Sampler(random);
+    public SynthesisTask Sample(IRandomProvider random) => Sampler(random);
+
+    /// <summary>
+    /// Samples a task from this distribution using the default cryptographic random provider.
+    /// </summary>
+    /// <returns>A sampled task.</returns>
+    public SynthesisTask Sample() => Sampler(CryptoRandomProvider.Instance);
 
     /// <summary>
     /// Samples multiple tasks from this distribution.
     /// </summary>
     /// <param name="count">Number of tasks to sample.</param>
-    /// <param name="random">Random number generator.</param>
+    /// <param name="random">The random provider to use. Defaults to <see cref="CryptoRandomProvider.Instance"/>.</param>
     /// <returns>List of sampled tasks.</returns>
-    public List<SynthesisTask> SampleBatch(int count, Random random)
+    public List<SynthesisTask> SampleBatch(int count, IRandomProvider? random = null)
     {
+        var provider = random ?? CryptoRandomProvider.Instance;
         var tasks = new List<SynthesisTask>(count);
         for (var i = 0; i < count; i++)
         {
-            tasks.Add(Sample(random));
+            tasks.Add(Sample(provider));
         }
 
         return tasks;

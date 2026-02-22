@@ -38,7 +38,7 @@ public class MutationTests
         var chromosome = new SimpleChromosome(10.0, fitness: 0.5);
         var mutation = new EvolutionMutation(1.0, seed: 42); // Always mutate
 
-        Func<SimpleChromosome, Random, Result<SimpleChromosome>> mutationFunc =
+        Func<SimpleChromosome, Ouroboros.Providers.Random.IRandomProvider, Result<SimpleChromosome>> mutationFunc =
             (c, random) =>
             {
                 var newValue = c.Value + random.NextDouble();
@@ -60,7 +60,7 @@ public class MutationTests
         // Arrange
         var mutation = new EvolutionMutation();
 
-        Func<SimpleChromosome, Random, Result<SimpleChromosome>> mutationFunc =
+        Func<SimpleChromosome, Ouroboros.Providers.Random.IRandomProvider, Result<SimpleChromosome>> mutationFunc =
             (c, random) => Result<SimpleChromosome>.Success(new SimpleChromosome(15.0));
 
         // Act
@@ -78,7 +78,7 @@ public class MutationTests
         var chromosome = new SimpleChromosome(10.0, fitness: 0.5);
         var mutation = new EvolutionMutation(0.0); // Never mutate
 
-        Func<SimpleChromosome, Random, Result<SimpleChromosome>> mutationFunc =
+        Func<SimpleChromosome, Ouroboros.Providers.Random.IRandomProvider, Result<SimpleChromosome>> mutationFunc =
             (c, random) => Result<SimpleChromosome>.Success(new SimpleChromosome(999.0));
 
         // Act
@@ -97,7 +97,7 @@ public class MutationTests
         var mutation1 = new EvolutionMutation(1.0, seed: 42);
         var mutation2 = new EvolutionMutation(1.0, seed: 42);
 
-        Func<SimpleChromosome, Random, Result<SimpleChromosome>> mutationFunc =
+        Func<SimpleChromosome, Ouroboros.Providers.Random.IRandomProvider, Result<SimpleChromosome>> mutationFunc =
             (c, random) =>
             {
                 var newValue = c.Value + random.NextDouble();
@@ -125,7 +125,7 @@ public class MutationTests
         var population = new EvolutionPopulation<SimpleChromosome>(chromosomes);
         var mutation = new EvolutionMutation(1.0, seed: 42); // Always mutate
 
-        Func<SimpleChromosome, Random, Result<SimpleChromosome>> mutationFunc =
+        Func<SimpleChromosome, Ouroboros.Providers.Random.IRandomProvider, Result<SimpleChromosome>> mutationFunc =
             (c, random) =>
             {
                 var newValue = c.Value + 10.0;
@@ -147,7 +147,7 @@ public class MutationTests
         // Arrange
         var mutation = new EvolutionMutation();
 
-        Func<SimpleChromosome, Random, Result<SimpleChromosome>> mutationFunc =
+        Func<SimpleChromosome, Ouroboros.Providers.Random.IRandomProvider, Result<SimpleChromosome>> mutationFunc =
             (c, random) => Result<SimpleChromosome>.Success(new SimpleChromosome(15.0));
 
         // Act
@@ -166,7 +166,7 @@ public class MutationTests
         var population = new EvolutionPopulation<SimpleChromosome>(chromosomes);
         var mutation = new EvolutionMutation(1.0);
 
-        Func<SimpleChromosome, Random, Result<SimpleChromosome>> failingFunc =
+        Func<SimpleChromosome, Ouroboros.Providers.Random.IRandomProvider, Result<SimpleChromosome>> failingFunc =
             (c, random) => Result<SimpleChromosome>.Failure("Mutation failed");
 
         // Act

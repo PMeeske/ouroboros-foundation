@@ -4,7 +4,9 @@
 
 namespace Ouroboros.Genetic.Core;
 
+using Ouroboros.Core.Randomness;
 using Ouroboros.Genetic.Abstractions;
+using Ouroboros.Providers.Random;
 
 /// <summary>
 /// Standard genetic algorithm implementation using selection, crossover, and mutation.
@@ -43,9 +45,10 @@ public sealed class GeneticAlgorithm<TGene> : IGeneticAlgorithm<TGene>
         }
 
         this.elitismRate = elitismRate;
-        this.selection = new RouletteWheelSelection<TGene>(seed);
-        this.crossover = new UniformCrossover<TGene>(crossoverRate, seed);
-        this.mutation = new Mutation<TGene>(mutationRate, mutateGene, seed);
+        IRandomProvider? randomProvider = seed.HasValue ? new SeededRandomProvider(seed.Value) : null;
+        this.selection = new RouletteWheelSelection<TGene>(randomProvider);
+        this.crossover = new UniformCrossover<TGene>(crossoverRate, randomProvider);
+        this.mutation = new Mutation<TGene>(mutationRate, mutateGene, randomProvider);
     }
 
     /// <inheritdoc/>

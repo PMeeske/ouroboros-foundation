@@ -1,5 +1,8 @@
 ﻿namespace Ouroboros.Core.LawsOfForm;
 
+using Ouroboros.Core.Randomness;
+using Ouroboros.Providers.Random;
+
 /// <summary>
 /// Represents a dream state - a form in superposition of all possible phases.
 /// This is the state of maximum creative potential, before observation collapses
@@ -13,7 +16,17 @@
 /// </summary>
 public sealed class Dream
 {
-    private readonly Random random = new();
+    private readonly IRandomProvider random;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="Dream"/> class
+    /// using the provided <see cref="IRandomProvider"/>.
+    /// </summary>
+    /// <param name="randomProvider">The random provider to use. Defaults to <see cref="CryptoRandomProvider.Instance"/>.</param>
+    public Dream(IRandomProvider? randomProvider = null)
+    {
+        this.random = randomProvider ?? CryptoRandomProvider.Instance;
+    }
 
     /// <summary>
     /// Observes the dream, collapsing it to a definite form.

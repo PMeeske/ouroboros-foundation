@@ -5,6 +5,7 @@
 namespace Ouroboros.Tests.Genetic;
 
 using FluentAssertions;
+using Ouroboros.Core.Randomness;
 using Ouroboros.Core.Steps;
 using Ouroboros.Genetic.Abstractions;
 using Ouroboros.Genetic.Core;
@@ -56,10 +57,7 @@ public class GeneticPipelineExtensionsTests
 
         // Mutate by randomly adjusting multiplier
         Func<int, int> mutateGene = multiplier =>
-        {
-            var random = new Random();
-            return multiplier + random.Next(-1, 2); // -1, 0, or 1
-        };
+            multiplier + CryptoRandomProvider.Instance.Next(-1, 2); // -1, 0, or 1
 
         // Initial population of multipliers
         var initialPopulation = new List<IChromosome<int>>
@@ -142,10 +140,7 @@ public class GeneticPipelineExtensionsTests
 
         // Mutate tuple genes
         Func<(int a, int b), (int a, int b)> mutateGene = genes =>
-        {
-            var random = new Random();
-            return (genes.a + random.Next(-1, 2), genes.b + random.Next(-1, 2));
-        };
+            (genes.a + CryptoRandomProvider.Instance.Next(-1, 2), genes.b + CryptoRandomProvider.Instance.Next(-1, 2));
 
         // Initial population
         var initialPopulation = new List<IChromosome<(int, int)>>

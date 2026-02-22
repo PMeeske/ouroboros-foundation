@@ -4,7 +4,9 @@
 
 namespace Ouroboros.Genetic.Core;
 
+using Ouroboros.Core.Randomness;
 using Ouroboros.Genetic.Abstractions;
+using Ouroboros.Providers.Random;
 
 /// <summary>
 /// Implements roulette wheel selection (fitness-proportionate selection) for the evolution engine.
@@ -14,15 +16,26 @@ using Ouroboros.Genetic.Abstractions;
 public sealed class EvolutionRouletteWheelSelection<TChromosome>
     where TChromosome : IChromosome
 {
-    private readonly Random random;
+    private readonly IRandomProvider random;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="EvolutionRouletteWheelSelection{TChromosome}"/> class.
+    /// Initializes a new instance of the <see cref="EvolutionRouletteWheelSelection{TChromosome}"/> class
+    /// using the provided <see cref="IRandomProvider"/>.
     /// </summary>
-    /// <param name="seed">Optional seed for reproducible randomness.</param>
-    public EvolutionRouletteWheelSelection(int? seed = null)
+    /// <param name="randomProvider">The random provider to use. Defaults to <see cref="CryptoRandomProvider.Instance"/>.</param>
+    public EvolutionRouletteWheelSelection(IRandomProvider? randomProvider = null)
     {
-        this.random = seed.HasValue ? new Random(seed.Value) : new Random();
+        this.random = randomProvider ?? CryptoRandomProvider.Instance;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EvolutionRouletteWheelSelection{TChromosome}"/> class
+    /// using a seeded <see cref="SeededRandomProvider"/> for reproducible results.
+    /// </summary>
+    /// <param name="seed">Seed value for reproducible randomness.</param>
+    public EvolutionRouletteWheelSelection(int seed)
+        : this(new SeededRandomProvider(seed))
+    {
     }
 
     /// <summary>

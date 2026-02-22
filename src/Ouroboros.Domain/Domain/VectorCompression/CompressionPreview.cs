@@ -13,7 +13,14 @@ public sealed record CompressionPreview(
     int QuantizedDCTSize)
 {
     /// <summary>Best compression ratio achievable.</summary>
-    public double BestCompressionRatio => (double)OriginalSizeBytes / Math.Min(DCTCompressedSize, Math.Min(FFTCompressedSize, QuantizedDCTSize));
+    public double BestCompressionRatio
+    {
+        get
+        {
+            int minCompressedSize = Math.Min(DCTCompressedSize, Math.Min(FFTCompressedSize, QuantizedDCTSize));
+            return minCompressedSize > 0 ? (double)OriginalSizeBytes / minCompressedSize : 0.0;
+        }
+    }
 
     /// <summary>Recommended method based on size/quality tradeoff.</summary>
     public CompressionMethod RecommendedMethod

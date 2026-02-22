@@ -4,6 +4,8 @@
 
 namespace Ouroboros.Domain.MetaLearning;
 
+using Ouroboros.Providers.Random;
+
 /// <summary>
 /// Represents a family of related tasks for meta-learning.
 /// Tasks within a family share common structure but differ in specifics.
@@ -55,7 +57,7 @@ public sealed record TaskFamily(
     /// <param name="batchSize">Number of tasks to sample.</param>
     /// <param name="random">Random number generator.</param>
     /// <returns>List of sampled training tasks.</returns>
-    public List<SynthesisTask> SampleTrainingBatch(int batchSize, Random random) =>
+    public List<SynthesisTask> SampleTrainingBatch(int batchSize, IRandomProvider? random = null) =>
         Distribution.SampleBatch(batchSize, random);
 
     /// <summary>

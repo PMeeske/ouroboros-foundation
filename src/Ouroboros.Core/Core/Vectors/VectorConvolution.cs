@@ -4,6 +4,7 @@
 
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using Ouroboros.Core.Randomness;
 
 namespace Ouroboros.Core.Vectors;
 
@@ -137,7 +138,7 @@ public static class VectorConvolution
         if (targetDimension <= thought.Length)
             throw new ArgumentException("Target dimension must be larger than source");
 
-        var random = new Random(seed);
+        var random = new SeededRandomProvider(seed);
         int sourceDim = thought.Length;
         var result = new float[targetDimension];
 
