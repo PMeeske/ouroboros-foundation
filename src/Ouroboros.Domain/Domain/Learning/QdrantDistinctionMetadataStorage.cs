@@ -4,6 +4,7 @@
 
 using Microsoft.Extensions.Logging;
 using Ouroboros.Abstractions;
+using Ouroboros.Core.Configuration;
 using Ouroboros.Core.Learning;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
@@ -15,15 +16,33 @@ namespace Ouroboros.Domain.Learning;
 /// </summary>
 public sealed class QdrantDistinctionMetadataStorage
 {
-    private const string CollectionName = "distinction_states";
+    private readonly string _collectionName;
     private readonly QdrantClient _client;
     private readonly ILogger<QdrantDistinctionMetadataStorage> _logger;
+
+    /// <summary>
+    /// Initializes a new instance using the DI-provided client and collection registry.
+    /// </summary>
+    /// <param name="client">Shared Qdrant client from DI.</param>
+    /// <param name="registry">Collection registry for role-based resolution.</param>
+    /// <param name="logger">Logger instance.</param>
+    public QdrantDistinctionMetadataStorage(
+        QdrantClient client,
+        IQdrantCollectionRegistry registry,
+        ILogger<QdrantDistinctionMetadataStorage> logger)
+    {
+        _client = client ?? throw new ArgumentNullException(nameof(client));
+        ArgumentNullException.ThrowIfNull(registry);
+        _collectionName = registry.GetCollectionName(QdrantCollectionRole.DistinctionStates);
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="QdrantDistinctionMetadataStorage"/> class.
     /// </summary>
     /// <param name="connectionString">Qdrant connection string.</param>
     /// <param name="logger">Logger instance.</param>
+    [Obsolete("Use the constructor accepting QdrantClient + IQdrantCollectionRegistry from DI.")]
     public QdrantDistinctionMetadataStorage(
         string connectionString,
         ILogger<QdrantDistinctionMetadataStorage> logger)
@@ -34,11 +53,12 @@ public sealed class QdrantDistinctionMetadataStorage
         }
 
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _collectionName = "distinction_states";
 
         // Parse connection string
         var uri = new Uri(connectionString);
         var host = uri.Host;
-        var port = uri.Port > 0 ? uri.Port : 6333; // Default Qdrant port
+        var port = uri.Port > 0 ? uri.Port : 6334; // Fixed: use gRPC port
         var useHttps = uri.Scheme == "https";
 
         _client = new QdrantClient(host, port, useHttps);
@@ -56,6 +76,7 @@ public sealed class QdrantDistinctionMetadataStorage
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _collectionName = "distinction_states";
     }
 
     /// <summary>
@@ -95,7 +116,7 @@ public sealed class QdrantDistinctionMetadataStorage
                 Payload = { payload }
             };
 
-            await _client.UpsertAsync(CollectionName, new[] { point }, cancellationToken: ct);
+            await _client.UpsertAsync(_collectionName, new[] { point }, cancellationToken: ct);
 
             _logger.LogInformation("Stored metadata for distinction {Id}", weights.Id);
             return Result<Unit, string>.Success(Unit.Value);
@@ -151,7 +172,7 @@ public sealed class QdrantDistinctionMetadataStorage
             var pointId = BitConverter.ToUInt64(id.Value.ToByteArray(), 0);
 
             await _client.DeleteAsync(
-                CollectionName,
+                _collectionName,
                 new[] { new PointId { Num = pointId } },
                 cancellationToken: ct);
 
@@ -180,7 +201,7 @@ public sealed class QdrantDistinctionMetadataStorage
             var pointId = BitConverter.ToUInt64(id.Value.ToByteArray(), 0);
 
             var points = await _client.RetrieveAsync(
-                CollectionName,
+                _collectionName,
                 new[] { new PointId { Num = pointId } },
                 withPayload: true,
                 cancellationToken: ct);
@@ -207,17 +228,17 @@ public sealed class QdrantDistinctionMetadataStorage
     {
         try
         {
-            var exists = await _client.CollectionExistsAsync(CollectionName, ct);
+            var exists = await _client.CollectionExistsAsync(_collectionName, ct);
 
             if (!exists)
             {
                 await _client.CreateCollectionAsync(
-                    CollectionName,
+                    _collectionName,
                     new VectorParams { Size = (ulong)vectorDimension, Distance = Distance.Cosine },
                     cancellationToken: ct);
 
                 _logger.LogInformation("Created collection {Collection} with dimension {Dimension}",
-                    CollectionName, vectorDimension);
+                    _collectionName, vectorDimension);
             }
         }
         catch (Exception ex)
