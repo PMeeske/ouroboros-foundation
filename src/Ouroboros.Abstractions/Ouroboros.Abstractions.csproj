@@ -122,6 +122,11 @@
         <Compile Include="Agent\MetaAI\Affect\IHomeostasisPolicy.cs" />
         <Compile Include="Agent\MetaAI\Affect\AffectiveState.cs" />
         <Compile Include="Agent\MetaAI\SelfModel\IPredictiveMonitor.cs" />
+        <Compile Include="Agent\Dispatch\ICommand.cs" />
+        <Compile Include="Agent\Dispatch\ICommandHandler.cs" />
+        <Compile Include="Agent\Dispatch\IDispatcher.cs" />
+        <Compile Include="Agent\Dispatch\IQuery.cs" />
+        <Compile Include="Agent\Dispatch\IQueryHandler.cs" />
         <Compile Include="Agent\TheoryOfMind\ITheoryOfMind.cs" />
         <Compile Include="Agent\NeuralSymbolic\ISymbolicKnowledgeBase.cs" />
         <Compile Include="Agent\TemporalReasoning\ITemporalReasoner.cs" />
