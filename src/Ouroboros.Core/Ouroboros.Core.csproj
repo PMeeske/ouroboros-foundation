@@ -35,11 +35,13 @@
     <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
   </ItemGroup>
 
-  <!-- Temporarily exclude LangChain integration files until API alignment is completed -->
+  <!-- LangChain integration files re-included after API alignment -->
+  <!--
   <ItemGroup>
     <Compile Remove="Core\LangChain\LangChainIntegration.cs" />
     <Compile Remove="Core\LangChain\LangChainConversationPipeline.cs" />
   </ItemGroup>
+  -->
   <ItemGroup>
     <ProjectReference Include="..\Ouroboros.Abstractions\Ouroboros.Abstractions.csproj" />
   </ItemGroup>
