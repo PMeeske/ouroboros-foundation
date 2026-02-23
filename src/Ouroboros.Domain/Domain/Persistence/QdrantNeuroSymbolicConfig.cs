@@ -3,6 +3,7 @@
 /// <summary>
 /// Configuration for the neuro-symbolic thought store.
 /// </summary>
+[Obsolete("Use QdrantSettings + IQdrantCollectionRegistry from DI instead.")]
 /// <param name="Endpoint">Qdrant server endpoint.</param>
 /// <param name="ThoughtsCollection">Collection for thought nodes.</param>
 /// <param name="RelationsCollection">Collection for symbolic relations between thoughts.</param>
