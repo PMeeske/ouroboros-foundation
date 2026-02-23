@@ -2,6 +2,7 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using Ouroboros.Core.Configuration;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
 
@@ -13,10 +14,10 @@ namespace Ouroboros.Domain.Vectors;
 /// </summary>
 public sealed class QdrantCollectionAdmin : IAsyncDisposable
 {
-    private const string MetadataCollectionName = "ouroboros_collection_metadata";
     private const int DefaultVectorSize = 768; // nomic-embed-text
 
     private readonly QdrantClient _client;
+    private readonly IQdrantCollectionRegistry? _registry;
     private readonly string _endpoint;
     private readonly bool _disposeClient;
     private readonly Dictionary<string, CollectionInfo> _collectionCache = new();
@@ -63,9 +64,23 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
     };
 
     /// <summary>
+    /// Initializes a new instance using the DI-provided client and collection registry.
+    /// </summary>
+    /// <param name="client">Shared Qdrant client from DI.</param>
+    /// <param name="registry">Collection registry for role-based resolution.</param>
+    public QdrantCollectionAdmin(QdrantClient client, IQdrantCollectionRegistry registry)
+    {
+        _client = client ?? throw new ArgumentNullException(nameof(client));
+        _registry = registry ?? throw new ArgumentNullException(nameof(registry));
+        _endpoint = "di-managed";
+        _disposeClient = false;
+    }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="QdrantCollectionAdmin"/> class.
     /// </summary>
     /// <param name="endpoint">Qdrant endpoint (e.g., "http://localhost:6333").</param>
+    [Obsolete("Use the constructor accepting QdrantClient + IQdrantCollectionRegistry from DI.")]
     public QdrantCollectionAdmin(string endpoint = "http://localhost:6333")
     {
         _endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
@@ -96,13 +111,52 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
     {
         if (_initialized) return;
 
-        // Load existing links
-        _collectionLinks.AddRange(DefaultLinks);
+        // Load existing links — prefer registry-driven links when available
+        if (_registry != null)
+        {
+            _collectionLinks.AddRange(GetDefaultLinksFromRegistry());
+        }
+        else
+        {
+            _collectionLinks.AddRange(DefaultLinks);
+        }
 
         // Scan existing collections
         await RefreshCollectionCacheAsync(ct);
 
         _initialized = true;
+    }
+
+    /// <summary>
+    /// Gets known collections using the registry when available, falling back to static defaults.
+    /// </summary>
+    public IReadOnlyDictionary<string, string> GetKnownCollections()
+    {
+        if (_registry == null) return KnownCollections;
+
+        var mappings = _registry.GetAllMappings();
+        return mappings.ToDictionary(
+            kvp => kvp.Value,
+            kvp => KnownCollections.GetValueOrDefault(kvp.Value, kvp.Key.ToString()));
+    }
+
+    private IReadOnlyList<CollectionLink> GetDefaultLinksFromRegistry()
+    {
+        string R(QdrantCollectionRole role) =>
+            _registry?.GetCollectionName(role)
+            ?? QdrantCollectionRegistry.Defaults.GetValueOrDefault(role, role.ToString());
+
+        return new List<CollectionLink>
+        {
+            new(R(QdrantCollectionRole.NeuroThoughts), R(QdrantCollectionRole.ThoughtRelations), CollectionLink.Types.Indexes, 1.0, "Thoughts indexed by relations"),
+            new(R(QdrantCollectionRole.NeuroThoughts), R(QdrantCollectionRole.ThoughtResults), CollectionLink.Types.Extends, 1.0, "Thoughts extend to results"),
+            new(R(QdrantCollectionRole.Skills), R(QdrantCollectionRole.ToolPatterns), CollectionLink.Types.RelatedTo, 0.8, "Skills inform tool patterns"),
+            new(R(QdrantCollectionRole.Conversations), R(QdrantCollectionRole.NeuroThoughts), CollectionLink.Types.DependsOn, 0.9, "Conversations feed thoughts"),
+            new(R(QdrantCollectionRole.Personalities), R(QdrantCollectionRole.Persons), CollectionLink.Types.RelatedTo, 0.7, "Personalities relate to persons"),
+            new(R(QdrantCollectionRole.SelfIndex), R(QdrantCollectionRole.NeuroThoughts), CollectionLink.Types.Aggregates, 1.0, "Self-index aggregates thoughts"),
+            new(R(QdrantCollectionRole.Core), R(QdrantCollectionRole.FullCore), CollectionLink.Types.PartOf, 1.0, "Core is part of fullcore"),
+            new(R(QdrantCollectionRole.Codebase), R(QdrantCollectionRole.FullCore), CollectionLink.Types.PartOf, 1.0, "Codebase is part of fullcore"),
+        };
     }
 
     /// <summary>
@@ -130,7 +184,7 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
             var distance = info.Config?.Params?.VectorsConfig?.Params?.Distance ?? Distance.Cosine;
             var status = info.Status;
 
-            KnownCollections.TryGetValue(collectionName, out var purpose);
+            GetKnownCollections().TryGetValue(collectionName, out var purpose);
             var links = _collectionLinks
                 .Where(l => l.SourceCollection == collectionName || l.TargetCollection == collectionName)
                 .Select(l => l.SourceCollection == collectionName ? l.TargetCollection : l.SourceCollection)

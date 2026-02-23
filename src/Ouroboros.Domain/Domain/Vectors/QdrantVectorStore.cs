@@ -5,6 +5,7 @@
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 using Microsoft.Extensions.Logging;
+using Ouroboros.Core.Configuration;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
 using static Qdrant.Client.Grpc.Conditions;
@@ -27,11 +28,32 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
     private int? _vectorDimension;
 
     /// <summary>
+    /// Initializes a new instance using the DI-provided client and collection registry.
+    /// </summary>
+    /// <param name="client">Shared Qdrant client from DI.</param>
+    /// <param name="registry">Collection registry for role-based resolution.</param>
+    /// <param name="logger">Optional logger instance.</param>
+    /// <param name="role">Collection role to resolve (default: PipelineVectors).</param>
+    public QdrantVectorStore(
+        QdrantClient client,
+        IQdrantCollectionRegistry registry,
+        ILogger? logger = null,
+        QdrantCollectionRole role = QdrantCollectionRole.PipelineVectors)
+    {
+        _client = client ?? throw new ArgumentNullException(nameof(client));
+        ArgumentNullException.ThrowIfNull(registry);
+        _collectionName = registry.GetCollectionName(role);
+        _logger = logger;
+        _disposeClient = false;
+    }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="QdrantVectorStore"/> class.
     /// </summary>
     /// <param name="connectionString">Qdrant connection string (e.g., "http://localhost:6333").</param>
     /// <param name="collectionName">Name of the collection to use.</param>
     /// <param name="logger">Optional logger instance.</param>
+    [Obsolete("Use the constructor accepting QdrantClient + IQdrantCollectionRegistry from DI.")]
     public QdrantVectorStore(string connectionString, string collectionName = "pipeline_vectors", ILogger? logger = null)
     {
         if (string.IsNullOrWhiteSpace(connectionString))

@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Text.Json;
+using Ouroboros.Core.Configuration;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
 
@@ -22,10 +23,36 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
     private bool _disposed;
 
     /// <summary>
+    /// Initializes a new instance using the DI-provided client and collection registry.
+    /// </summary>
+    /// <param name="client">Shared Qdrant client from DI.</param>
+    /// <param name="registry">Collection registry for role-based resolution.</param>
+    /// <param name="settings">Qdrant settings for vector size.</param>
+    /// <param name="embeddingFunc">Function to generate embeddings for thoughts.</param>
+    public QdrantNeuroSymbolicThoughtStore(
+        QdrantClient client,
+        IQdrantCollectionRegistry registry,
+        QdrantSettings settings,
+        Func<string, Task<float[]>>? embeddingFunc = null)
+    {
+        _client = client ?? throw new ArgumentNullException(nameof(client));
+        ArgumentNullException.ThrowIfNull(registry);
+        ArgumentNullException.ThrowIfNull(settings);
+        _embeddingFunc = embeddingFunc;
+        _config = new QdrantNeuroSymbolicConfig(
+            Endpoint: settings.GrpcEndpoint,
+            ThoughtsCollection: registry.GetCollectionName(QdrantCollectionRole.NeuroThoughts),
+            RelationsCollection: registry.GetCollectionName(QdrantCollectionRole.ThoughtRelations),
+            ResultsCollection: registry.GetCollectionName(QdrantCollectionRole.ThoughtResults),
+            VectorSize: settings.DefaultVectorSize);
+    }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="QdrantNeuroSymbolicThoughtStore"/> class.
     /// </summary>
     /// <param name="config">Configuration for the store.</param>
     /// <param name="embeddingFunc">Function to generate embeddings for thoughts.</param>
+    [Obsolete("Use the constructor accepting QdrantClient + IQdrantCollectionRegistry from DI.")]
     public QdrantNeuroSymbolicThoughtStore(
         QdrantNeuroSymbolicConfig config,
         Func<string, Task<float[]>>? embeddingFunc = null)

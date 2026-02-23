@@ -15,6 +15,6 @@ public static class VectorStoreFactoryExtensions
         this PipelineConfiguration config,
         ILogger? logger = null)
     {
-        return new VectorStoreFactory(config.VectorStore, logger);
+        return new VectorStoreFactory(config.VectorStore, logger: logger);
     }
 }
