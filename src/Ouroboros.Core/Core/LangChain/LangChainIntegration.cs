@@ -2,6 +2,13 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using LangChain.Chains.HelperChains;
+using LangChain.Chains.LLM;
+using LangChain.Prompts;
+using LangChain.Prompts.Base;
+using LangChain.Providers;
+using LangChain.Schema;
+
 namespace Ouroboros.Core.LangChain;
 /// <summary>
 /// Integration layer that bridges LangChain chains with the monadic pipeline system.

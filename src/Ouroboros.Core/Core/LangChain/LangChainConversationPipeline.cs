@@ -2,6 +2,9 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using LangChain.Prompts;
+using LangChain.Providers;
+
 namespace Ouroboros.Core.LangChain;
 /// <summary>
 /// LangChain-integrated conversation pipeline that properly uses official LangChain chains
