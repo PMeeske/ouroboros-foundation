@@ -1,6 +1,7 @@
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 using Ouroboros.Core.Configuration;
 using Microsoft.Extensions.Logging;
+using Qdrant.Client;
 
 namespace Ouroboros.Domain.Vectors;
 
@@ -11,15 +12,26 @@ public class VectorStoreFactory
 {
     private readonly VectorStoreConfiguration _config;
     private readonly ILogger? _logger;
+    private readonly QdrantClient? _qdrantClient;
+    private readonly IQdrantCollectionRegistry? _collectionRegistry;
 
     /// <summary>
-    /// Initializes a new vector store factory.
+    /// Initializes a new vector store factory with DI-provided Qdrant infrastructure.
     /// </summary>
-    public VectorStoreFactory(VectorStoreConfiguration config, ILogger? logger = null)
+    public VectorStoreFactory(
+        VectorStoreConfiguration config,
+        QdrantClient? qdrantClient = null,
+        IQdrantCollectionRegistry? collectionRegistry = null,
+        ILogger? logger = null)
     {
         _config = config ?? throw new ArgumentNullException(nameof(config));
+        _qdrantClient = qdrantClient;
+        _collectionRegistry = collectionRegistry;
         _logger = logger;
     }
+
+    // Old (config, logger) constructor removed — the primary constructor
+    // with optional QdrantClient/IQdrantCollectionRegistry covers all cases.
 
     /// <summary>
     /// Creates a vector store based on the configured type.
@@ -45,6 +57,14 @@ public class VectorStoreFactory
 
     private IVectorStore CreateQdrantStore()
     {
+        // Prefer DI-provided client + registry
+        if (_qdrantClient != null && _collectionRegistry != null)
+        {
+            _logger?.LogInformation("Creating Qdrant vector store using DI-provided client");
+            return new QdrantVectorStore(_qdrantClient, _collectionRegistry, _logger);
+        }
+
+        // Fallback to connection-string-based creation
         if (string.IsNullOrEmpty(_config.ConnectionString))
         {
             throw new InvalidOperationException("Connection string is required for Qdrant vector store");
@@ -53,7 +73,9 @@ public class VectorStoreFactory
         _logger?.LogInformation("Creating Qdrant vector store with connection: {Connection}",
             MaskConnectionString(_config.ConnectionString));
 
+#pragma warning disable CS0618 // Obsolete
         return new QdrantVectorStore(_config.ConnectionString, _config.DefaultCollection, _logger);
+#pragma warning restore CS0618
     }
 
     private IVectorStore CreatePineconeStore()
