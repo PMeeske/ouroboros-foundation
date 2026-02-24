@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Collections.Concurrent;
+using System.Text;
 using System.Threading.Channels;
 
 namespace Ouroboros.Domain.Autonomous;
@@ -127,10 +128,10 @@ public sealed class VoiceSideChannel : IAsyncDisposable
     /// </summary>
     public PersonaVoice GetVoice(string? personaName)
     {
-        var name = personaName ?? _defaultPersona;
-        return _voices.TryGetValue(name, out var voice)
+        string name = personaName ?? _defaultPersona;
+        return _voices.TryGetValue(name, out PersonaVoice? voice)
             ? voice
-            : _voices.TryGetValue(_defaultPersona, out var defaultVoice)
+            : _voices.TryGetValue(_defaultPersona, out PersonaVoice? defaultVoice)
                 ? defaultVoice
                 : DefaultVoices["Ouroboros"];
     }
@@ -150,7 +151,7 @@ public sealed class VoiceSideChannel : IAsyncDisposable
     {
         if (string.IsNullOrWhiteSpace(text)) return;
 
-        var message = new VoiceMessage(SanitizeForSpeech(text), persona ?? _defaultPersona, priority);
+        VoiceMessage message = new VoiceMessage(SanitizeForSpeech(text), persona ?? _defaultPersona, priority);
 
         if (!_enabled || _synthesizer == null)
         {
@@ -173,11 +174,11 @@ public sealed class VoiceSideChannel : IAsyncDisposable
         if (!_enabled || _synthesizer == null) return;
 
         // First do basic sanitization (emojis, code blocks, etc.)
-        var sanitized = SanitizeForSpeech(text);
+        string sanitized = SanitizeForSpeech(text);
         if (string.IsNullOrWhiteSpace(sanitized)) return;
 
         // Store original for reference - the full text remains the system truth
-        var originalForVoice = sanitized;
+        string originalForVoice = sanitized;
 
         // If LLM sanitizer is available and enabled, use it for natural condensation
         // Note: This only affects what is SPOKEN, not what is saved to memory/history
@@ -185,7 +186,7 @@ public sealed class VoiceSideChannel : IAsyncDisposable
         {
             try
             {
-                var llmSanitized = await SanitizeWithLlmAsync(sanitized, ct);
+                string llmSanitized = await SanitizeWithLlmAsync(sanitized, ct);
                 if (!string.IsNullOrWhiteSpace(llmSanitized))
                 {
                     // Show the condensed voice version (original is preserved in system)
@@ -202,12 +203,12 @@ public sealed class VoiceSideChannel : IAsyncDisposable
             }
         }
 
-        var personaName = persona ?? _defaultPersona;
+        string personaName = persona ?? _defaultPersona;
 
         // Initialize SpeechQueue synthesizer if needed
         SpeechQueue.Instance.SetSynthesizer(async (t, p, c) =>
         {
-            var voice = GetVoice(p);
+            PersonaVoice voice = GetVoice(p);
             await _synthesizer(t, voice, c);
         });
 
@@ -222,7 +223,7 @@ public sealed class VoiceSideChannel : IAsyncDisposable
     {
         if (_llmSanitizer == null) return text;
 
-        var prompt = $@"Convert this text into a brief, natural spoken response. Rules:
+        string prompt = $@"Convert this text into a brief, natural spoken response. Rules:
 - Keep it under 2-3 sentences unless the content is complex
 - Remove technical details, URLs, file paths
 - Make it conversational and easy to listen to
@@ -246,7 +247,7 @@ Voice-friendly version:";
         if (string.IsNullOrWhiteSpace(text)) return text;
 
         // Remove persona tags like [AutoUser], [Ouroboros-A], [coordinator] etc.
-        var sanitized = System.Text.RegularExpressions.Regex.Replace(text, @"\[[^\]]+\]\s*", "");
+        string sanitized = System.Text.RegularExpressions.Regex.Replace(text, @"\[[^\]]+\]\s*", "");
 
         // Condense URLs to just "link" - handles http, https, and www URLs
         sanitized = System.Text.RegularExpressions.Regex.Replace(
@@ -263,8 +264,8 @@ Voice-friendly version:";
         sanitized = System.Text.RegularExpressions.Regex.Replace(sanitized, @"`[^`]+`", " ");
 
         // Remove emojis - keep only ASCII printable characters and common extended Latin
-        var sb = new System.Text.StringBuilder();
-        foreach (var c in sanitized)
+        StringBuilder sb = new System.Text.StringBuilder();
+        foreach (char c in sanitized)
         {
             // Keep ASCII printable (32-126) and extended Latin (192-255)
             if ((c >= 32 && c <= 126) || (c >= 192 && c <= 255))
@@ -288,7 +289,7 @@ Voice-friendly version:";
     {
         if (string.IsNullOrWhiteSpace(text)) return;
 
-        var message = new VoiceMessage(text, persona ?? _defaultPersona, VoicePriority.Critical, Interrupt: true);
+        VoiceMessage message = new VoiceMessage(text, persona ?? _defaultPersona, VoicePriority.Critical, Interrupt: true);
 
         if (!_enabled || _synthesizer == null)
         {
@@ -297,7 +298,7 @@ Voice-friendly version:";
         }
 
         // For interrupts, clear the queue first
-        while (_channel.Reader.TryRead(out var skipped))
+        while (_channel.Reader.TryRead(out VoiceMessage? skipped))
         {
             MessageSkipped?.Invoke(this, skipped);
         }
@@ -310,7 +311,7 @@ Voice-friendly version:";
     /// </summary>
     public async Task DrainAsync(TimeSpan? timeout = null)
     {
-        var deadline = DateTime.UtcNow + (timeout ?? TimeSpan.FromSeconds(30));
+        DateTime deadline = DateTime.UtcNow + (timeout ?? TimeSpan.FromSeconds(30));
 
         while (_channel.Reader.Count > 0 && DateTime.UtcNow < deadline)
         {
@@ -322,7 +323,7 @@ Voice-friendly version:";
     {
         try
         {
-            await foreach (var message in _channel.Reader.ReadAllAsync(ct))
+            await foreach (VoiceMessage message in _channel.Reader.ReadAllAsync(ct))
             {
                 if (!_enabled || _synthesizer == null)
                 {
@@ -332,7 +333,7 @@ Voice-friendly version:";
 
                 try
                 {
-                    var voice = GetVoice(message.PersonaName);
+                    PersonaVoice voice = GetVoice(message.PersonaName);
                     await _synthesizer(message.Text, voice, ct);
                     MessageSpoken?.Invoke(this, message);
                 }

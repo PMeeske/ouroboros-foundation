@@ -32,14 +32,14 @@ public sealed record ErrorPattern(
             }
 
             // Weight frequency and recency
-            var frequencyScore = Math.Min(1.0, this.Frequency / 10.0);
-            var now = DateTime.UtcNow;
-            var avgRecency = this.Examples
+            double frequencyScore = Math.Min(1.0, this.Frequency / 10.0);
+            DateTime now = DateTime.UtcNow;
+            double avgRecency = this.Examples
                 .Select(e => (now - e.Timestamp).TotalDays)
                 .Average();
 
             // Recent errors are more severe
-            var recencyScore = Math.Max(0.0, 1.0 - (avgRecency / 30.0));
+            double recencyScore = Math.Max(0.0, 1.0 - (avgRecency / 30.0));
 
             return (frequencyScore * 0.7) + (recencyScore * 0.3);
         }

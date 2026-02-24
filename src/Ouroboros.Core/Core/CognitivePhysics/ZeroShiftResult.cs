@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.CognitivePhysics;
+namespace Ouroboros.Core.CognitivePhysics;
 
 /// <summary>
 /// Result of a ZeroShift context transition operation.

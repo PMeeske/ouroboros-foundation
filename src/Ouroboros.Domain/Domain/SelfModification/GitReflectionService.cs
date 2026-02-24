@@ -267,14 +267,14 @@ public sealed class GitReflectionService : IDisposable
         sb.AppendLine("╠═══════════════════════════════════════════════════════════════╣");
 
         // Group by directory
-        var byDir = files
+        IOrderedEnumerable<IGrouping<string, RepoFileInfo>> byDir = files
             .GroupBy(f => Path.GetDirectoryName(f.RelativePath) ?? "root")
             .OrderBy(g => g.Key);
 
         int totalLines = 0;
         int totalFiles = 0;
 
-        foreach (var group in byDir)
+        foreach (IGrouping<string, RepoFileInfo>? group in byDir)
         {
             int dirLines = group.Sum(f => f.LineCount);
             totalLines += dirLines;

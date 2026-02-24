@@ -31,7 +31,7 @@ public sealed class AtomSpace : IAtomSpace
         // Index expressions by their head symbol
         if (atom is Expression expr && expr.Children.Count > 0 && expr.Children[0] is Symbol headSym)
         {
-            var bag = symbolIndex.GetOrAdd(headSym.Name, _ => new ConcurrentBag<Expression>());
+            ConcurrentBag<Expression> bag = symbolIndex.GetOrAdd(headSym.Name, _ => new ConcurrentBag<Expression>());
             bag.Add(expr);
         }
 
@@ -41,8 +41,8 @@ public sealed class AtomSpace : IAtomSpace
     /// <inheritdoc/>
     public int AddRange(IEnumerable<Atom> atomsToAdd)
     {
-        var count = 0;
-        foreach (var atom in atomsToAdd)
+        int count = 0;
+        foreach (Atom atom in atomsToAdd)
         {
             if (Add(atom))
             {
@@ -86,7 +86,7 @@ public sealed class AtomSpace : IAtomSpace
         if (pattern is Expression patternExpr && patternExpr.Children.Count > 0 && patternExpr.Children[0] is Symbol headSym)
         {
             // Look up indexed expressions with the same head
-            candidates = symbolIndex.TryGetValue(headSym.Name, out var indexed)
+            candidates = symbolIndex.TryGetValue(headSym.Name, out ConcurrentBag<Expression>? indexed)
                 ? indexed.Cast<Atom>()
                 : All();
         }
@@ -96,9 +96,9 @@ public sealed class AtomSpace : IAtomSpace
         }
 
         // Try to unify pattern with each candidate
-        foreach (var candidate in candidates)
+        foreach (Atom candidate in candidates)
         {
-            var unifyResult = Unifier.Unify(pattern, candidate);
+            Substitution? unifyResult = Unifier.Unify(pattern, candidate);
             if (unifyResult is not null)
             {
                 yield return (candidate, unifyResult);

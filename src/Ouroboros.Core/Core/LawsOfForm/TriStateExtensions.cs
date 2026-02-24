@@ -25,7 +25,7 @@ public static class TriStateExtensions
     /// </remarks>
     public static bool ResolveChain(bool systemDefault, params TriState[] states)
     {
-        foreach (var state in states)
+        foreach (TriState state in states)
         {
             if (state != TriState.Imaginary)
             {

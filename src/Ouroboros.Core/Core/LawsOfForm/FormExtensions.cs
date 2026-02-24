@@ -102,7 +102,7 @@ public static class FormExtensions
             return Form.Mark;
         }
 
-        var result = forms[0];
+        Form result = forms[0];
         for (int i = 1; i < forms.Length; i++)
         {
             result = result.And(forms[i]);
@@ -126,7 +126,7 @@ public static class FormExtensions
             return Form.Void;
         }
 
-        var result = forms[0];
+        Form result = forms[0];
         for (int i = 1; i < forms.Length; i++)
         {
             result = result.Or(forms[i]);
@@ -156,7 +156,7 @@ public static class FormExtensions
         double voidWeight = 0;
         bool hasImaginary = false;
 
-        foreach (var (opinion, weight) in opinions)
+        foreach ((Form opinion, double weight) in opinions)
         {
             totalWeight += weight;
 

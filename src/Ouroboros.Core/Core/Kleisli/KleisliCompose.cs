@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Kleisli;
+namespace Ouroboros.Core.Kleisli;
 
 /// <summary>
 /// Represents Kleisli composition as a higher-order function.

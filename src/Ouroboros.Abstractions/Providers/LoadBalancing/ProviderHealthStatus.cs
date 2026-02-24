@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Providers.LoadBalancing;
+namespace Ouroboros.Providers.LoadBalancing;
 
 /// <summary>
 /// Health status of a provider including performance metrics and availability.

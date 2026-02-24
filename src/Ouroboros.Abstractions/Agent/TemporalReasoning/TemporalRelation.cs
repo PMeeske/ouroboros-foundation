@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent.TemporalReasoning;
+namespace Ouroboros.Agent.TemporalReasoning;
 
 /// <summary>
 /// Represents a temporal relation between two events (Allen's interval algebra) — simplified canonical form.

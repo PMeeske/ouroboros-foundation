@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent.MetaAI.MetaLearning;
+namespace Ouroboros.Agent.MetaAI.MetaLearning;
 
 /// <summary>
 /// Represents a recorded learning episode for meta-learning analysis.

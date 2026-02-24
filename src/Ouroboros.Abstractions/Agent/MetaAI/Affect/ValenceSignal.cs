@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent.MetaAI.Affect;
+namespace Ouroboros.Agent.MetaAI.Affect;
 
 /// <summary>
 /// Represents a valence signal measurement.

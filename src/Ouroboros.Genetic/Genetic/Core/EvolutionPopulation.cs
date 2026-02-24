@@ -80,7 +80,7 @@ public sealed class EvolutionPopulation<TChromosome>
     /// <returns>A new EvolutionPopulation with the added chromosome.</returns>
     public EvolutionPopulation<TChromosome> Add(TChromosome chromosome)
     {
-        var newList = this.chromosomes.Append(chromosome);
+        IEnumerable<TChromosome> newList = this.chromosomes.Append(chromosome);
         return new EvolutionPopulation<TChromosome>(newList);
     }
 
@@ -90,7 +90,7 @@ public sealed class EvolutionPopulation<TChromosome>
     /// <returns>A new sorted EvolutionPopulation.</returns>
     public EvolutionPopulation<TChromosome> SortByFitness()
     {
-        var sorted = this.chromosomes.OrderByDescending(c => c.Fitness);
+        IOrderedEnumerable<TChromosome> sorted = this.chromosomes.OrderByDescending(c => c.Fitness);
         return new EvolutionPopulation<TChromosome>(sorted);
     }
 
@@ -101,7 +101,7 @@ public sealed class EvolutionPopulation<TChromosome>
     /// <returns>A new EvolutionPopulation with the top chromosomes.</returns>
     public EvolutionPopulation<TChromosome> Take(int count)
     {
-        var topChromosomes = this.chromosomes
+        IEnumerable<TChromosome> topChromosomes = this.chromosomes
             .OrderByDescending(c => c.Fitness)
             .Take(count);
         return new EvolutionPopulation<TChromosome>(topChromosomes);

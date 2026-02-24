@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent.TemporalReasoning;
+namespace Ouroboros.Agent.TemporalReasoning;
 
 /// <summary>
 /// Represents a timeline constructed from a set of temporal events.

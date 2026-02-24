@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Hyperon;
+namespace Ouroboros.Core.Hyperon;
 
 /// <summary>
 /// Represents an S-expression (list of atoms) in the atom space.
@@ -16,9 +16,9 @@ public sealed record Expression(ImmutableList<Atom> Children) : Atom
             return "()";
         }
 
-        var sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.Append('(');
-        for (var i = 0; i < Children.Count; i++)
+        for (int i = 0; i < Children.Count; i++)
         {
             if (i > 0)
             {
@@ -74,7 +74,7 @@ public sealed record Expression(ImmutableList<Atom> Children) : Atom
             return false;
         }
 
-        for (var i = 0; i < Children.Count; i++)
+        for (int i = 0; i < Children.Count; i++)
         {
             if (!Children[i].Equals(other.Children[i]))
             {
@@ -88,8 +88,8 @@ public sealed record Expression(ImmutableList<Atom> Children) : Atom
     /// <inheritdoc/>
     public override int GetHashCode()
     {
-        var hash = new HashCode();
-        foreach (var child in Children)
+        HashCode hash = new HashCode();
+        foreach (Atom child in Children)
         {
             hash.Add(child);
         }

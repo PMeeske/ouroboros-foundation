@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.EmbodiedInteraction;
+namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Limitation or constraint of the virtual self.

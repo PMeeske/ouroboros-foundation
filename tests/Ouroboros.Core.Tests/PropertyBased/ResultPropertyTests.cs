@@ -25,8 +25,8 @@ public class ResultPropertyTests
     {
         // return a >>= f ≡ f a
         Func<int, Result<int, string>> f = x => Result<int, string>.Success(x * 2);
-        var left = Result<int, string>.Success(a).Bind(f);
-        var right = f(a);
+        Result<int, string> left = Result<int, string>.Success(a).Bind(f);
+        Result<int, string> right = f(a);
 
         return (left.IsSuccess == right.IsSuccess &&
                 (!left.IsSuccess || left.Value == right.Value));
@@ -46,8 +46,8 @@ public class ResultPropertyTests
             ? Result<int, string>.Success(x * 2)
             : Result<int, string>.Failure("negative value");
 
-        var left = Result<int, string>.Success(a).Bind(f);
-        var right = f(a);
+        Result<int, string> left = Result<int, string>.Success(a).Bind(f);
+        Result<int, string> right = f(a);
 
         return (left.IsSuccess == right.IsSuccess &&
                 (left.IsFailure || left.Value == right.Value) &&
@@ -66,11 +66,11 @@ public class ResultPropertyTests
     public bool Result_RightIdentity_HoldsForAllResults(bool isSuccess, int value, string error)
     {
         // m >>= return ≡ m
-        var m = isSuccess
+        Result<int, string> m = isSuccess
             ? Result<int, string>.Success(value)
             : Result<int, string>.Failure(error ?? "error");
 
-        var result = m.Bind(x => Result<int, string>.Success(x));
+        Result<int, string> result = m.Bind(x => Result<int, string>.Success(x));
 
         return (result.IsSuccess == m.IsSuccess &&
                 (result.IsFailure || result.Value == m.Value) &&
@@ -87,12 +87,12 @@ public class ResultPropertyTests
     public bool Result_Associativity_HoldsForAllInts(int a)
     {
         // (m >>= f) >>= g ≡ m >>= (\x -> f x >>= g)
-        var m = Result<int, string>.Success(a);
+        Result<int, string> m = Result<int, string>.Success(a);
         Func<int, Result<int, string>> f = x => Result<int, string>.Success(x * 2);
         Func<int, Result<int, string>> g = x => Result<int, string>.Success(x + 3);
 
-        var left = m.Bind(f).Bind(g);
-        var right = m.Bind(x => f(x).Bind(g));
+        Result<int, string> left = m.Bind(f).Bind(g);
+        Result<int, string> right = m.Bind(x => f(x).Bind(g));
 
         return (left.IsSuccess == right.IsSuccess &&
                 (!left.IsSuccess || left.Value == right.Value));
@@ -108,7 +108,7 @@ public class ResultPropertyTests
     public bool Result_Associativity_WithFailurePropagation_HoldsForAllInts(int a)
     {
         // (m >>= f) >>= g ≡ m >>= (\x -> f x >>= g)
-        var m = Result<int, string>.Success(a);
+        Result<int, string> m = Result<int, string>.Success(a);
         Func<int, Result<int, string>> f = x => x % 2 == 0
             ? Result<int, string>.Success(x / 2)
             : Result<int, string>.Failure("odd number");
@@ -116,8 +116,8 @@ public class ResultPropertyTests
             ? Result<int, string>.Success(x + 10)
             : Result<int, string>.Failure("non-positive");
 
-        var left = m.Bind(f).Bind(g);
-        var right = m.Bind(x => f(x).Bind(g));
+        Result<int, string> left = m.Bind(f).Bind(g);
+        Result<int, string> right = m.Bind(x => f(x).Bind(g));
 
         return (left.IsSuccess == right.IsSuccess &&
                 (left.IsFailure || left.Value == right.Value) &&
@@ -134,12 +134,12 @@ public class ResultPropertyTests
     public bool Result_Associativity_WithFailure_HoldsForAllErrors(string errorMsg)
     {
         // (m >>= f) >>= g ≡ m >>= (\x -> f x >>= g)
-        var m = Result<int, string>.Failure(errorMsg ?? "error");
+        Result<int, string> m = Result<int, string>.Failure(errorMsg ?? "error");
         Func<int, Result<int, string>> f = x => Result<int, string>.Success(x * 2);
         Func<int, Result<int, string>> g = x => Result<int, string>.Success(x + 3);
 
-        var left = m.Bind(f).Bind(g);
-        var right = m.Bind(x => f(x).Bind(g));
+        Result<int, string> left = m.Bind(f).Bind(g);
+        Result<int, string> right = m.Bind(x => f(x).Bind(g));
 
         return (left.IsFailure && right.IsFailure &&
                 left.Error == right.Error);
@@ -155,11 +155,11 @@ public class ResultPropertyTests
     public bool Result_Map_PreservesSuccess_ForAllInts(int a)
     {
         // Success(a).Map(f) ≡ Success(f(a))
-        var result = Result<int, string>.Success(a);
+        Result<int, string> result = Result<int, string>.Success(a);
         Func<int, int> f = x => x * 3 + 7;
 
-        var mapped = result.Map(f);
-        var expected = Result<int, string>.Success(f(a));
+        Result<int, string> mapped = result.Map(f);
+        Result<int, string> expected = Result<int, string>.Success(f(a));
 
         return (mapped.IsSuccess == expected.IsSuccess &&
                 mapped.Value == expected.Value);
@@ -175,10 +175,10 @@ public class ResultPropertyTests
     public bool Result_Map_PreservesFailure_ForAllErrors(string errorMsg)
     {
         // Failure(e).Map(f) ≡ Failure(e)
-        var result = Result<int, string>.Failure(errorMsg ?? "error");
+        Result<int, string> result = Result<int, string>.Failure(errorMsg ?? "error");
         Func<int, int> f = x => x * 3 + 7;
 
-        var mapped = result.Map(f);
+        Result<int, string> mapped = result.Map(f);
 
         return (mapped.IsFailure && mapped.Error == (errorMsg ?? "error"));
     }
@@ -195,11 +195,11 @@ public class ResultPropertyTests
     public bool Result_FunctorLaw_Identity_HoldsForAllResults(bool isSuccess, int value, string error)
     {
         // fmap id ≡ id
-        var result = isSuccess
+        Result<int, string> result = isSuccess
             ? Result<int, string>.Success(value)
             : Result<int, string>.Failure(error ?? "error");
         Func<int, int> identity = x => x;
-        var mapped = result.Map(identity);
+        Result<int, string> mapped = result.Map(identity);
 
         return (mapped.IsSuccess == result.IsSuccess &&
                 (mapped.IsFailure || mapped.Value == result.Value) &&
@@ -218,14 +218,14 @@ public class ResultPropertyTests
     public bool Result_FunctorLaw_Composition_HoldsForAllResults(bool isSuccess, int value, string error)
     {
         // fmap (g . f) ≡ fmap g . fmap f
-        var result = isSuccess
+        Result<int, string> result = isSuccess
             ? Result<int, string>.Success(value)
             : Result<int, string>.Failure(error ?? "error");
         Func<int, int> f = x => x * 2;
         Func<int, int> g = x => x + 10;
 
-        var left = result.Map(f).Map(g);
-        var right = result.Map(x => g(f(x)));
+        Result<int, string> left = result.Map(f).Map(g);
+        Result<int, string> right = result.Map(x => g(f(x)));
 
         return (left.IsSuccess == right.IsSuccess &&
                 (left.IsFailure || left.Value == right.Value) &&
@@ -244,13 +244,13 @@ public class ResultPropertyTests
     public bool Result_MapBindRelationship_HoldsForAllResults(bool isSuccess, int value, string error)
     {
         // fmap f ≡ (>>= return . f)
-        var result = isSuccess
+        Result<int, string> result = isSuccess
             ? Result<int, string>.Success(value)
             : Result<int, string>.Failure(error ?? "error");
         Func<int, int> f = x => x * 3 + 7;
 
-        var mappedResult = result.Map(f);
-        var bindResult = result.Bind(x => Result<int, string>.Success(f(x)));
+        Result<int, string> mappedResult = result.Map(f);
+        Result<int, string> bindResult = result.Bind(x => Result<int, string>.Success(f(x)));
 
         return (mappedResult.IsSuccess == bindResult.IsSuccess &&
                 (mappedResult.IsFailure || mappedResult.Value == bindResult.Value) &&

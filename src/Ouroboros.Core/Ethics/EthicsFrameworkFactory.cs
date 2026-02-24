@@ -16,8 +16,8 @@ public static class EthicsFrameworkFactory
     /// <returns>A configured ethics framework instance.</returns>
     public static IEthicsFramework CreateDefault()
     {
-        var auditLog = new InMemoryEthicsAuditLog();
-        var reasoner = new BasicEthicalReasoner();
+        InMemoryEthicsAuditLog auditLog = new InMemoryEthicsAuditLog();
+        BasicEthicalReasoner reasoner = new BasicEthicalReasoner();
         return new ImmutableEthicsFramework(auditLog, reasoner);
     }
 
@@ -29,7 +29,7 @@ public static class EthicsFrameworkFactory
     public static IEthicsFramework CreateWithAuditLog(IEthicsAuditLog auditLog)
     {
         ArgumentNullException.ThrowIfNull(auditLog);
-        var reasoner = new BasicEthicalReasoner();
+        BasicEthicalReasoner reasoner = new BasicEthicalReasoner();
         return new ImmutableEthicsFramework(auditLog, reasoner);
     }
 

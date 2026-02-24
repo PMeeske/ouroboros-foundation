@@ -42,27 +42,27 @@ public static class DecisionPipeline
             throw new ArgumentNullException(nameof(criteria));
         }
 
-        var criteriaList = criteria as List<Func<TInput, AuditableDecision<TInput>>> ?? criteria.ToList();
+        List<Func<TInput, AuditableDecision<TInput>>> criteriaList = criteria as List<Func<TInput, AuditableDecision<TInput>>> ?? criteria.ToList();
         if (criteriaList.Count == 0)
         {
             throw new ArgumentException("At least one criterion must be provided", nameof(criteria));
         }
 
-        var decisions = criteriaList.Select(criterion => criterion(input)).ToList();
-        var allEvidence = decisions.SelectMany(d => d.Evidence).ToList();
+        List<AuditableDecision<TInput>> decisions = criteriaList.Select(criterion => criterion(input)).ToList();
+        List<Evidence> allEvidence = decisions.SelectMany(d => d.Evidence).ToList();
 
         // Combine all states using AND logic
-        var combinedState = decisions
+        Form combinedState = decisions
             .Select(d => d.State)
             .Aggregate(Form.Mark, (acc, state) => acc.And(state));
 
-        var reasonings = decisions.Select((d, i) => $"Criterion {i + 1}: {d.Reasoning}").ToList();
-        var combinedReasoning = string.Join(" | ", reasonings);
+        List<string> reasonings = decisions.Select((d, i) => $"Criterion {i + 1}: {d.Reasoning}").ToList();
+        string combinedReasoning = string.Join(" | ", reasonings);
 
         // If all criteria passed (Mark), apply the transformation
         if (combinedState == Form.Mark)
         {
-            var output = onAllPass(input);
+            TOutput? output = onAllPass(input);
             return AuditableDecision<TOutput>.Approve(
                 output,
                 $"All {decisions.Count} criteria passed. {combinedReasoning}",
@@ -72,7 +72,7 @@ public static class DecisionPipeline
         // If any criterion is inconclusive (Imaginary)
         if (combinedState == Form.Imaginary)
         {
-            var maxPhase = decisions
+            double maxPhase = decisions
                 .Where(d => d.ConfidencePhase.HasValue)
                 .Select(d => d.ConfidencePhase!.Value)
                 .DefaultIfEmpty(0.5)
@@ -85,7 +85,7 @@ public static class DecisionPipeline
         }
 
         // Otherwise, at least one criterion failed (Void)
-        var failedCriteria = decisions
+        List<string> failedCriteria = decisions
             .Select((d, i) => new { Index = i, Decision = d })
             .Where(x => x.Decision.State == Form.Void)
             .Select(x => $"Criterion {x.Index + 1}")
@@ -113,27 +113,27 @@ public static class DecisionPipeline
             throw new ArgumentNullException(nameof(criteria));
         }
 
-        var criteriaList = criteria as List<Func<TInput, AuditableDecision<TInput>>> ?? criteria.ToList();
+        List<Func<TInput, AuditableDecision<TInput>>> criteriaList = criteria as List<Func<TInput, AuditableDecision<TInput>>> ?? criteria.ToList();
         if (criteriaList.Count == 0)
         {
             throw new ArgumentException("At least one criterion must be provided", nameof(criteria));
         }
 
-        var decisions = criteriaList.Select(criterion => criterion(input)).ToList();
-        var allEvidence = decisions.SelectMany(d => d.Evidence).ToList();
+        List<AuditableDecision<TInput>> decisions = criteriaList.Select(criterion => criterion(input)).ToList();
+        List<Evidence> allEvidence = decisions.SelectMany(d => d.Evidence).ToList();
 
         // Combine all states using OR logic
-        var combinedState = decisions
+        Form combinedState = decisions
             .Select(d => d.State)
             .Aggregate(Form.Void, (acc, state) => acc.Or(state));
 
-        var reasonings = decisions.Select((d, i) => $"Criterion {i + 1}: {d.Reasoning}").ToList();
-        var combinedReasoning = string.Join(" | ", reasonings);
+        List<string> reasonings = decisions.Select((d, i) => $"Criterion {i + 1}: {d.Reasoning}").ToList();
+        string combinedReasoning = string.Join(" | ", reasonings);
 
         // If at least one criterion passed (Mark)
         if (combinedState == Form.Mark)
         {
-            var passedCriteria = decisions
+            List<string> passedCriteria = decisions
                 .Select((d, i) => new { Index = i, Decision = d })
                 .Where(x => x.Decision.State == Form.Mark)
                 .Select(x => $"Criterion {x.Index + 1}")
@@ -148,7 +148,7 @@ public static class DecisionPipeline
         // If any criterion is inconclusive (Imaginary) and none passed
         if (combinedState == Form.Imaginary)
         {
-            var maxPhase = decisions
+            double maxPhase = decisions
                 .Where(d => d.ConfidencePhase.HasValue)
                 .Select(d => d.ConfidencePhase!.Value)
                 .DefaultIfEmpty(0.5)
@@ -178,9 +178,9 @@ public static class DecisionPipeline
         AuditableDecision<T> initial,
         params Func<T, AuditableDecision<T>>[] steps)
     {
-        var current = initial;
+        AuditableDecision<T> current = initial;
 
-        foreach (var step in steps)
+        foreach (Func<T, AuditableDecision<T>> step in steps)
         {
             // Stop if current decision is not approved
             if (current.State != Form.Mark || current.Value is null)
@@ -188,11 +188,11 @@ public static class DecisionPipeline
                 return current;
             }
 
-            var next = step(current.Value!);
-            var combinedEvidence = current.Evidence.Concat(next.Evidence).ToList();
+            AuditableDecision<T> next = step(current.Value!);
+            List<Evidence> combinedEvidence = current.Evidence.Concat(next.Evidence).ToList();
 
             // Combine states
-            var combinedState = current.State.And(next.State);
+            Form combinedState = current.State.And(next.State);
 
             if (combinedState == Form.Mark && next.Value is not null)
             {

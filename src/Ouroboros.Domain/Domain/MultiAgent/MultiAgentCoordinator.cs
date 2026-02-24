@@ -54,7 +54,7 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
 
         try
         {
-            var targetAgents = recipients.Type switch
+            List<AgentId> targetAgents = recipients.Type switch
             {
                 GroupType.Broadcast => recipients.Members,
                 GroupType.RoundRobin => new List<AgentId> { this.SelectRoundRobinAgent(recipients) },
@@ -62,9 +62,9 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
                 _ => throw new InvalidOperationException($"Unknown group type: {recipients.Type}"),
             };
 
-            foreach (var agentId in targetAgents)
+            foreach (AgentId agentId in targetAgents)
             {
-                var result = await this.messageQueue.EnqueueAsync(agentId, message, ct);
+                Result<Unit, string> result = await this.messageQueue.EnqueueAsync(agentId, message, ct);
                 if (result.IsFailure)
                 {
                     return Result<Unit, string>.Failure($"Failed to send message to {agentId.Name}: {result.Error}");
@@ -104,7 +104,7 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
         try
         {
             // Decompose goal into tasks (simplified - in real implementation would use LLM)
-            var tasks = this.DecomposeGoalIntoTasks(goal);
+            List<string> tasks = this.DecomposeGoalIntoTasks(goal);
 
             return strategy switch
             {
@@ -146,7 +146,7 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
         try
         {
             // Collect votes from agents (simplified - in real implementation would query agents)
-            var votes = await this.CollectVotesAsync(voters, proposal, ct);
+            Dictionary<AgentId, Vote> votes = await this.CollectVotesAsync(voters, proposal, ct);
 
             return protocol switch
             {
@@ -220,10 +220,10 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
         try
         {
             // Get capabilities for all participants
-            var capabilities = new List<AgentCapabilities>();
-            foreach (var agentId in participants)
+            List<AgentCapabilities> capabilities = new List<AgentCapabilities>();
+            foreach (AgentId agentId in participants)
             {
-                var capResult = await this.agentRegistry.GetAgentCapabilitiesAsync(agentId);
+                Result<AgentCapabilities, string> capResult = await this.agentRegistry.GetAgentCapabilitiesAsync(agentId);
                 if (capResult.IsFailure)
                 {
                     return Result<CollaborativePlan, string>.Failure($"Failed to get capabilities for {agentId.Name}: {capResult.Error}");
@@ -233,24 +233,24 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
             }
 
             // Decompose goal into tasks
-            var tasks = this.DecomposeGoalIntoTasks(goal);
+            List<string> tasks = this.DecomposeGoalIntoTasks(goal);
 
             // Allocate tasks using skill-based strategy
-            var allocationResult = await this.AllocateSkillBasedAsync(tasks, capabilities, ct);
+            Result<Dictionary<AgentId, TaskAssignment>, string> allocationResult = await this.AllocateSkillBasedAsync(tasks, capabilities, ct);
             if (allocationResult.IsFailure)
             {
                 return Result<CollaborativePlan, string>.Failure($"Failed to allocate tasks: {allocationResult.Error}");
             }
 
-            var assignments = allocationResult.Value.Values.ToList();
+            List<TaskAssignment> assignments = allocationResult.Value.Values.ToList();
 
             // Identify dependencies between tasks
-            var dependencies = this.IdentifyDependencies(assignments);
+            List<Dependency> dependencies = this.IdentifyDependencies(assignments);
 
             // Estimate duration based on parallel task execution
-            var duration = this.EstimateDuration(assignments, dependencies);
+            TimeSpan duration = this.EstimateDuration(assignments, dependencies);
 
-            var plan = new CollaborativePlan(goal, assignments, dependencies, duration);
+            CollaborativePlan plan = new CollaborativePlan(goal, assignments, dependencies, duration);
             return Result<CollaborativePlan, string>.Success(plan);
         }
         catch (Exception ex)
@@ -263,13 +263,13 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
 
     private AgentId SelectRoundRobinAgent(AgentGroup recipients)
     {
-        var key = recipients.Name;
+        string key = recipients.Name;
         if (!this.roundRobinCounters.ContainsKey(key))
         {
             this.roundRobinCounters[key] = 0;
         }
 
-        var index = this.roundRobinCounters[key] % recipients.Members.Count;
+        int index = this.roundRobinCounters[key] % recipients.Members.Count;
         this.roundRobinCounters[key]++;
         return recipients.Members[index];
     }
@@ -279,9 +279,9 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
         AgentId? leastLoaded = null;
         double minLoad = double.MaxValue;
 
-        foreach (var agentId in agents)
+        foreach (AgentId agentId in agents)
         {
-            var capResult = await this.agentRegistry.GetAgentCapabilitiesAsync(agentId);
+            Result<AgentCapabilities, string> capResult = await this.agentRegistry.GetAgentCapabilitiesAsync(agentId);
             if (capResult.IsSuccess && capResult.Value.IsAvailable)
             {
                 if (capResult.Value.CurrentLoad < minLoad)
@@ -312,8 +312,8 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
         List<string> tasks,
         List<AgentCapabilities> agents)
     {
-        var assignments = new Dictionary<AgentId, TaskAssignment>();
-        var availableAgents = agents.Where(a => a.IsAvailable).ToList();
+        Dictionary<AgentId, TaskAssignment> assignments = new Dictionary<AgentId, TaskAssignment>();
+        List<AgentCapabilities> availableAgents = agents.Where(a => a.IsAvailable).ToList();
 
         if (availableAgents.Count == 0)
         {
@@ -322,8 +322,8 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
 
         for (int i = 0; i < tasks.Count; i++)
         {
-            var agent = availableAgents[i % availableAgents.Count];
-            var assignment = new TaskAssignment(
+            AgentCapabilities agent = availableAgents[i % availableAgents.Count];
+            TaskAssignment assignment = new TaskAssignment(
                 TaskDescription: tasks[i],
                 AssignedTo: agent.Id,
                 Deadline: DateTime.UtcNow.AddHours(1),
@@ -340,18 +340,18 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
         List<AgentCapabilities> agents,
         CancellationToken ct)
     {
-        var assignments = new Dictionary<AgentId, TaskAssignment>();
-        var availableAgents = agents.Where(a => a.IsAvailable).ToList();
+        Dictionary<AgentId, TaskAssignment> assignments = new Dictionary<AgentId, TaskAssignment>();
+        List<AgentCapabilities> availableAgents = agents.Where(a => a.IsAvailable).ToList();
 
         if (availableAgents.Count == 0)
         {
             return Task.FromResult(Result<Dictionary<AgentId, TaskAssignment>, string>.Failure("No available agents"));
         }
 
-        foreach (var task in tasks)
+        foreach (string task in tasks)
         {
             // Find agent with best skill match (simplified - checks if any skill keyword matches)
-            var bestAgent = availableAgents
+            AgentCapabilities bestAgent = availableAgents
                 .Select(a => new
                 {
                     Agent = a,
@@ -362,7 +362,7 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
                 .ThenBy(x => x.Agent.CurrentLoad)
                 .First().Agent;
 
-            var assignment = new TaskAssignment(
+            TaskAssignment assignment = new TaskAssignment(
                 TaskDescription: task,
                 AssignedTo: bestAgent.Id,
                 Deadline: DateTime.UtcNow.AddHours(2),
@@ -380,8 +380,8 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
         List<AgentCapabilities> agents,
         CancellationToken ct)
     {
-        var assignments = new Dictionary<AgentId, TaskAssignment>();
-        var availableAgents = agents.Where(a => a.IsAvailable).ToList();
+        Dictionary<AgentId, TaskAssignment> assignments = new Dictionary<AgentId, TaskAssignment>();
+        List<AgentCapabilities> availableAgents = agents.Where(a => a.IsAvailable).ToList();
 
         if (availableAgents.Count == 0)
         {
@@ -389,13 +389,13 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
         }
 
         // Sort agents by current load
-        var sortedAgents = availableAgents.OrderBy(a => a.CurrentLoad).ToList();
+        List<AgentCapabilities> sortedAgents = availableAgents.OrderBy(a => a.CurrentLoad).ToList();
 
-        foreach (var task in tasks)
+        foreach (string task in tasks)
         {
             // Assign to least loaded agent
-            var agent = sortedAgents.First();
-            var assignment = new TaskAssignment(
+            AgentCapabilities agent = sortedAgents.First();
+            TaskAssignment assignment = new TaskAssignment(
                 TaskDescription: task,
                 AssignedTo: agent.Id,
                 Deadline: DateTime.UtcNow.AddHours(1),
@@ -405,7 +405,7 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
             assignments[agent.Id] = assignment;
 
             // Update load for next iteration (simplified)
-            var updatedAgent = agent with { CurrentLoad = agent.CurrentLoad + 0.1 };
+            AgentCapabilities updatedAgent = agent with { CurrentLoad = agent.CurrentLoad + 0.1 };
             sortedAgents.Remove(agent);
             sortedAgents.Add(updatedAgent);
             sortedAgents = sortedAgents.OrderBy(a => a.CurrentLoad).ToList();
@@ -419,8 +419,8 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
         List<AgentCapabilities> agents,
         CancellationToken ct)
     {
-        var assignments = new Dictionary<AgentId, TaskAssignment>();
-        var availableAgents = agents.Where(a => a.IsAvailable).ToList();
+        Dictionary<AgentId, TaskAssignment> assignments = new Dictionary<AgentId, TaskAssignment>();
+        List<AgentCapabilities> availableAgents = agents.Where(a => a.IsAvailable).ToList();
 
         if (availableAgents.Count == 0)
         {
@@ -428,7 +428,7 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
         }
 
         // Simplified auction: agent "bids" based on skill match and current load
-        foreach (var task in tasks)
+        foreach (string task in tasks)
         {
             var bestBid = availableAgents
                 .Select(a => new
@@ -439,7 +439,7 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
                 .OrderByDescending(x => x.Bid)
                 .First();
 
-            var assignment = new TaskAssignment(
+            TaskAssignment assignment = new TaskAssignment(
                 TaskDescription: task,
                 AssignedTo: bestBid.Agent.Id,
                 Deadline: DateTime.UtcNow.AddHours(1),
@@ -455,7 +455,7 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
     private double CalculateBid(AgentCapabilities agent, string task)
     {
         // Bid calculation: skill match score - current load
-        var skillScore = agent.Skills.Count(skill =>
+        double skillScore = agent.Skills.Count(skill =>
             task.Contains(skill, StringComparison.OrdinalIgnoreCase)) / (double)Math.Max(1, agent.Skills.Count);
         return skillScore - agent.CurrentLoad;
     }
@@ -465,17 +465,17 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
         string proposal,
         CancellationToken ct)
     {
-        var votes = new Dictionary<AgentId, Vote>();
+        Dictionary<AgentId, Vote> votes = new Dictionary<AgentId, Vote>();
 
         // Simplified voting - in production would query actual agents
         // For now, simulate votes based on agent capabilities
-        foreach (var voterId in voters)
+        foreach (AgentId voterId in voters)
         {
-            var capResult = await this.agentRegistry.GetAgentCapabilitiesAsync(voterId);
+            Result<AgentCapabilities, string> capResult = await this.agentRegistry.GetAgentCapabilitiesAsync(voterId);
 
             // Simulate vote (simplified - random for demo)
-            var inFavor = capResult.IsSuccess;
-            var confidence = capResult.IsSuccess ? 0.8 : 0.3;
+            bool inFavor = capResult.IsSuccess;
+            double confidence = capResult.IsSuccess ? 0.8 : 0.3;
 
             votes[voterId] = new Vote(
                 Voter: voterId,
@@ -489,32 +489,32 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
 
     private Result<Decision, string> ApplyMajorityProtocol(string proposal, Dictionary<AgentId, Vote> votes)
     {
-        var totalVotes = votes.Count;
-        var votesInFavor = votes.Values.Count(v => v.InFavor);
-        var accepted = votesInFavor > totalVotes / 2.0;
-        var consensusScore = votesInFavor / (double)totalVotes;
+        int totalVotes = votes.Count;
+        int votesInFavor = votes.Values.Count(v => v.InFavor);
+        bool accepted = votesInFavor > totalVotes / 2.0;
+        double consensusScore = votesInFavor / (double)totalVotes;
 
-        var decision = new Decision(proposal, accepted, votes, consensusScore);
+        Decision decision = new Decision(proposal, accepted, votes, consensusScore);
         return Result<Decision, string>.Success(decision);
     }
 
     private Result<Decision, string> ApplyUnanimousProtocol(string proposal, Dictionary<AgentId, Vote> votes)
     {
-        var accepted = votes.Values.All(v => v.InFavor);
-        var consensusScore = accepted ? 1.0 : 0.0;
+        bool accepted = votes.Values.All(v => v.InFavor);
+        double consensusScore = accepted ? 1.0 : 0.0;
 
-        var decision = new Decision(proposal, accepted, votes, consensusScore);
+        Decision decision = new Decision(proposal, accepted, votes, consensusScore);
         return Result<Decision, string>.Success(decision);
     }
 
     private Result<Decision, string> ApplyWeightedProtocol(string proposal, Dictionary<AgentId, Vote> votes)
     {
-        var totalWeight = votes.Values.Sum(v => v.Confidence);
-        var weightedInFavor = votes.Values.Where(v => v.InFavor).Sum(v => v.Confidence);
-        var consensusScore = totalWeight > 0 ? weightedInFavor / totalWeight : 0.0;
-        var accepted = consensusScore > 0.5;
+        double totalWeight = votes.Values.Sum(v => v.Confidence);
+        double weightedInFavor = votes.Values.Where(v => v.InFavor).Sum(v => v.Confidence);
+        double consensusScore = totalWeight > 0 ? weightedInFavor / totalWeight : 0.0;
+        bool accepted = consensusScore > 0.5;
 
-        var decision = new Decision(proposal, accepted, votes, consensusScore);
+        Decision decision = new Decision(proposal, accepted, votes, consensusScore);
         return Result<Decision, string>.Success(decision);
     }
 
@@ -524,25 +524,25 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
         CancellationToken ct)
     {
         // Simplified Raft implementation - requires majority for leader election/commit
-        var totalVotes = votes.Count;
-        var votesInFavor = votes.Values.Count(v => v.InFavor);
-        var quorum = (totalVotes / 2) + 1;
-        var accepted = votesInFavor >= quorum;
-        var consensusScore = votesInFavor / (double)totalVotes;
+        int totalVotes = votes.Count;
+        int votesInFavor = votes.Values.Count(v => v.InFavor);
+        int quorum = (totalVotes / 2) + 1;
+        bool accepted = votesInFavor >= quorum;
+        double consensusScore = votesInFavor / (double)totalVotes;
 
-        var decision = new Decision(proposal, accepted, votes, consensusScore);
+        Decision decision = new Decision(proposal, accepted, votes, consensusScore);
         return Task.FromResult(Result<Decision, string>.Success(decision));
     }
 
     private async Task<Result<Unit, string>> SynchronizeFullAsync(List<AgentId> agents, CancellationToken ct)
     {
         // Full knowledge synchronization - broadcast all knowledge to all agents
-        var conversationId = Guid.NewGuid();
-        foreach (var sender in agents)
+        Guid conversationId = Guid.NewGuid();
+        foreach (AgentId sender in agents)
         {
-            foreach (var receiver in agents.Where(a => a != sender))
+            foreach (AgentId? receiver in agents.Where(a => a != sender))
             {
-                var message = new Message(
+                Message message = new Message(
                     Sender: sender,
                     Recipient: receiver,
                     Type: MessageType.Knowledge,
@@ -550,7 +550,7 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
                     Timestamp: DateTime.UtcNow,
                     ConversationId: conversationId);
 
-                var result = await this.messageQueue.EnqueueAsync(receiver, message, ct);
+                Result<Unit, string> result = await this.messageQueue.EnqueueAsync(receiver, message, ct);
                 if (result.IsFailure)
                 {
                     return Result<Unit, string>.Failure($"Failed to sync knowledge: {result.Error}");
@@ -564,12 +564,12 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
     private async Task<Result<Unit, string>> SynchronizeIncrementalAsync(List<AgentId> agents, CancellationToken ct)
     {
         // Incremental synchronization - only sync new knowledge
-        var conversationId = Guid.NewGuid();
-        foreach (var sender in agents)
+        Guid conversationId = Guid.NewGuid();
+        foreach (AgentId sender in agents)
         {
-            foreach (var receiver in agents.Where(a => a != sender))
+            foreach (AgentId? receiver in agents.Where(a => a != sender))
             {
-                var message = new Message(
+                Message message = new Message(
                     Sender: sender,
                     Recipient: receiver,
                     Type: MessageType.Knowledge,
@@ -577,7 +577,7 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
                     Timestamp: DateTime.UtcNow,
                     ConversationId: conversationId);
 
-                var result = await this.messageQueue.EnqueueAsync(receiver, message, ct);
+                Result<Unit, string> result = await this.messageQueue.EnqueueAsync(receiver, message, ct);
                 if (result.IsFailure)
                 {
                     return Result<Unit, string>.Failure($"Failed to sync knowledge: {result.Error}");
@@ -591,23 +591,23 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
     private async Task<Result<Unit, string>> SynchronizeSelectiveAsync(List<AgentId> agents, CancellationToken ct)
     {
         // Selective synchronization - only sync relevant knowledge
-        var conversationId = Guid.NewGuid();
-        foreach (var sender in agents)
+        Guid conversationId = Guid.NewGuid();
+        foreach (AgentId sender in agents)
         {
-            var capResult = await this.agentRegistry.GetAgentCapabilitiesAsync(sender);
+            Result<AgentCapabilities, string> capResult = await this.agentRegistry.GetAgentCapabilitiesAsync(sender);
             if (capResult.IsFailure)
             {
                 continue;
             }
 
             // Find agents with similar skills
-            foreach (var receiver in agents.Where(a => a != sender))
+            foreach (AgentId? receiver in agents.Where(a => a != sender))
             {
-                var receiverCap = await this.agentRegistry.GetAgentCapabilitiesAsync(receiver);
+                Result<AgentCapabilities, string> receiverCap = await this.agentRegistry.GetAgentCapabilitiesAsync(receiver);
                 if (receiverCap.IsSuccess &&
                     capResult.Value.Skills.Intersect(receiverCap.Value.Skills).Any())
                 {
-                    var message = new Message(
+                    Message message = new Message(
                         Sender: sender,
                         Recipient: receiver,
                         Type: MessageType.Knowledge,
@@ -615,7 +615,7 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
                         Timestamp: DateTime.UtcNow,
                         ConversationId: conversationId);
 
-                    var result = await this.messageQueue.EnqueueAsync(receiver, message, ct);
+                    Result<Unit, string> result = await this.messageQueue.EnqueueAsync(receiver, message, ct);
                     if (result.IsFailure)
                     {
                         return Result<Unit, string>.Failure($"Failed to sync knowledge: {result.Error}");
@@ -631,19 +631,19 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
     {
         // Gossip protocol - probabilistic propagation
         IRandomProvider random = CryptoRandomProvider.Instance;
-        var conversationId = Guid.NewGuid();
+        Guid conversationId = Guid.NewGuid();
 
-        foreach (var sender in agents)
+        foreach (AgentId sender in agents)
         {
             // Each agent gossips to a random subset of other agents
-            var targets = agents.Where(a => a != sender)
+            List<AgentId> targets = agents.Where(a => a != sender)
                 .OrderBy(x => random.Next(int.MaxValue))
                 .Take(Math.Max(1, agents.Count / 3))
                 .ToList();
 
-            foreach (var receiver in targets)
+            foreach (AgentId? receiver in targets)
             {
-                var message = new Message(
+                Message message = new Message(
                     Sender: sender,
                     Recipient: receiver,
                     Type: MessageType.Knowledge,
@@ -651,7 +651,7 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
                     Timestamp: DateTime.UtcNow,
                     ConversationId: conversationId);
 
-                var result = await this.messageQueue.EnqueueAsync(receiver, message, ct);
+                Result<Unit, string> result = await this.messageQueue.EnqueueAsync(receiver, message, ct);
                 if (result.IsFailure)
                 {
                     return Result<Unit, string>.Failure($"Failed to sync knowledge: {result.Error}");
@@ -664,13 +664,13 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
 
     private List<Dependency> IdentifyDependencies(List<TaskAssignment> assignments)
     {
-        var dependencies = new List<Dependency>();
+        List<Dependency> dependencies = new List<Dependency>();
 
         // Simple dependency detection based on task descriptions
         for (int i = 0; i < assignments.Count - 1; i++)
         {
-            var taskA = assignments[i].TaskDescription;
-            var taskB = assignments[i + 1].TaskDescription;
+            string taskA = assignments[i].TaskDescription;
+            string taskB = assignments[i + 1].TaskDescription;
 
             // If taskB follows taskA sequentially, create dependency
             if (taskA.StartsWith("Analyze") && taskB.StartsWith("Plan"))
@@ -694,11 +694,11 @@ public sealed class MultiAgentCoordinator : IMultiAgentCoordinator
     {
         // Simplified duration estimation
         // In a real implementation, would analyze critical path through dependency graph
-        var tasksPerAgent = assignments.GroupBy(a => a.AssignedTo).Count();
-        var estimatedHoursPerTask = 0.5;
-        var parallelization = Math.Max(1, tasksPerAgent);
+        int tasksPerAgent = assignments.GroupBy(a => a.AssignedTo).Count();
+        double estimatedHoursPerTask = 0.5;
+        int parallelization = Math.Max(1, tasksPerAgent);
 
-        var totalHours = (assignments.Count * estimatedHoursPerTask) / parallelization;
+        double totalHours = (assignments.Count * estimatedHoursPerTask) / parallelization;
         return TimeSpan.FromHours(Math.Max(0.5, totalHours));
     }
 

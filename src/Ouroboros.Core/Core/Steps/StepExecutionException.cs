@@ -55,7 +55,7 @@ public class StepExecutionException : Exception
     {
         get
         {
-            var baseMessage = base.Message;
+            string baseMessage = base.Message;
             return $"StepExecutionException in {StepType.Name}: {baseMessage}\nInput: {InputValue}";
         }
     }

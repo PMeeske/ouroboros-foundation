@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Hyperon;
+namespace Ouroboros.Core.Hyperon;
 
 /// <summary>
 /// Types of distinction events that can occur.

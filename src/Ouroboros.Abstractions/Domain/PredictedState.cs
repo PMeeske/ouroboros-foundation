@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Abstractions.Domain;
+namespace Ouroboros.Abstractions.Domain;
 
 /// <summary>
 /// Represents a predicted future state.

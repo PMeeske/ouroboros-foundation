@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent;
+namespace Ouroboros.Agent;
 
 /// <summary>
 /// Retry configuration for orchestrator operations.

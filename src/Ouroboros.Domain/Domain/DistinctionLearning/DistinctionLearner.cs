@@ -41,10 +41,10 @@ public sealed class DistinctionLearner : IDistinctionLearner
         try
         {
             // Extract distinction from observation
-            var distinctionId = Guid.NewGuid().ToString();
-            var fitness = CalculateFitness(observation, stage);
+            string distinctionId = Guid.NewGuid().ToString();
+            double fitness = CalculateFitness(observation, stage);
 
-            var distinction = new ActiveDistinction(
+            ActiveDistinction distinction = new ActiveDistinction(
                 Id: distinctionId,
                 Content: observation.Content,
                 Fitness: fitness,
@@ -52,9 +52,9 @@ public sealed class DistinctionLearner : IDistinctionLearner
                 LearnedAtStage: stage);
 
             // Update epistemic certainty based on observation
-            var newCertainty = UpdateCertainty(currentState.EpistemicCertainty, observation.PriorCertainty, fitness);
+            double newCertainty = UpdateCertainty(currentState.EpistemicCertainty, observation.PriorCertainty, fitness);
 
-            var newState = currentState
+            DistinctionState newState = currentState
                 .WithDistinction(distinction)
                 .WithCertainty(newCertainty);
 
@@ -84,10 +84,10 @@ public sealed class DistinctionLearner : IDistinctionLearner
         try
         {
             // At Recognition stage, boost certainty of related distinctions
-            var recognitionBoost = 0.1;
-            var newCertainty = Math.Min(1.0, currentState.EpistemicCertainty + recognitionBoost);
+            double recognitionBoost = 0.1;
+            double newCertainty = Math.Min(1.0, currentState.EpistemicCertainty + recognitionBoost);
 
-            var newState = currentState
+            DistinctionState newState = currentState
                 .WithCertainty(newCertainty)
                 .NextCycle();
 
@@ -113,14 +113,14 @@ public sealed class DistinctionLearner : IDistinctionLearner
     {
         try
         {
-            var listResult = await _storage.ListWeightsAsync(ct);
+            Result<List<DistinctionWeightMetadata>, string> listResult = await _storage.ListWeightsAsync(ct);
             if (listResult.IsFailure)
             {
                 return Result<Unit, string>.Failure($"Failed to list weights: {listResult.Error}");
             }
 
-            var weights = listResult.Value;
-            var toDissolve = strategy switch
+            List<DistinctionWeightMetadata> weights = listResult.Value;
+            List<DistinctionWeightMetadata> toDissolve = strategy switch
             {
                 DissolutionStrategy.FitnessThreshold => weights.Where(w => !w.IsDissolved && w.Fitness < DistinctionLearningConstants.DefaultFitnessThreshold).ToList(),
                 DissolutionStrategy.OldestFirst => weights.Where(w => !w.IsDissolved).OrderBy(w => w.CreatedAt).Take(10).ToList(),
@@ -129,9 +129,9 @@ public sealed class DistinctionLearner : IDistinctionLearner
                 _ => new List<DistinctionWeightMetadata>()
             };
 
-            foreach (var weight in toDissolve)
+            foreach (DistinctionWeightMetadata weight in toDissolve)
             {
-                var dissolveResult = await _storage.DissolveWeightsAsync(weight.Path, ct);
+                Result<Unit, string> dissolveResult = await _storage.DissolveWeightsAsync(weight.Path, ct);
                 if (dissolveResult.IsFailure)
                 {
                     _logger?.LogWarning("Failed to dissolve {Id}: {Error}", weight.Id, dissolveResult.Error);
@@ -162,7 +162,7 @@ public sealed class DistinctionLearner : IDistinctionLearner
 
         try
         {
-            var observationList = observations.ToList();
+            List<Observation> observationList = observations.ToList();
             if (!observationList.Any())
             {
                 return Result<double, string>.Success(0.0);
@@ -170,10 +170,10 @@ public sealed class DistinctionLearner : IDistinctionLearner
 
             // Calculate fitness based on match rate and weighted certainty:
             // Fitness = (proportion of observations containing distinction) * (average certainty of matching observations)
-            var matchCount = 0;
-            var totalCertainty = 0.0;
+            int matchCount = 0;
+            double totalCertainty = 0.0;
 
-            foreach (var obs in observationList)
+            foreach (Observation? obs in observationList)
             {
                 if (obs.Content.Contains(distinction, StringComparison.OrdinalIgnoreCase))
                 {
@@ -183,9 +183,9 @@ public sealed class DistinctionLearner : IDistinctionLearner
             }
 
             // Fitness = (match rate * average certainty)
-            var matchRate = (double)matchCount / observationList.Count;
-            var avgCertainty = matchCount > 0 ? totalCertainty / matchCount : 0.0;
-            var fitness = matchRate * avgCertainty;
+            double matchRate = (double)matchCount / observationList.Count;
+            double avgCertainty = matchCount > 0 ? totalCertainty / matchCount : 0.0;
+            double fitness = matchRate * avgCertainty;
 
             _logger?.LogDebug(
                 "Evaluated fitness for distinction '{Distinction}': {Fitness} (matches: {Matches}/{Total})",
@@ -206,11 +206,11 @@ public sealed class DistinctionLearner : IDistinctionLearner
     private static double CalculateFitness(Observation observation, string stage)
     {
         // Base fitness on content length and prior certainty
-        var contentFactor = Math.Min(1.0, observation.Content.Length / 100.0);
-        var certaintyFactor = observation.PriorCertainty;
+        double contentFactor = Math.Min(1.0, observation.Content.Length / 100.0);
+        double certaintyFactor = observation.PriorCertainty;
 
         // Boost fitness for Recognition stage
-        var stageFactor = stage == "Recognition" ? 1.2 : 1.0;
+        double stageFactor = stage == "Recognition" ? 1.2 : 1.0;
 
         return Math.Min(1.0, (contentFactor + certaintyFactor) / 2.0 * stageFactor);
     }

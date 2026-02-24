@@ -49,22 +49,22 @@ public sealed class EthicsEnforcementWrapper<TAction, TResult> : IActionExecutor
         try
         {
             // Convert action to ProposedAction for ethical evaluation
-            var proposedAction = _actionConverter(action);
+            ProposedAction proposedAction = _actionConverter(action);
 
             // Evaluate action ethically
-            var evaluationResult = await _ethicsFramework.EvaluateActionAsync(proposedAction, _context, ct);
+            Result<EthicalClearance, string> evaluationResult = await _ethicsFramework.EvaluateActionAsync(proposedAction, _context, ct);
 
             if (evaluationResult.IsFailure)
             {
                 return Result<TResult, string>.Failure($"Ethics evaluation failed: {evaluationResult.Error}");
             }
 
-            var clearance = evaluationResult.Value;
+            EthicalClearance clearance = evaluationResult.Value;
 
             // Block execution if not permitted
             if (!clearance.IsPermitted)
             {
-                var reason = clearance.Level == EthicalClearanceLevel.Denied
+                string reason = clearance.Level == EthicalClearanceLevel.Denied
                     ? $"Action blocked due to ethical violations: {clearance.Reasoning}"
                     : $"Action requires human approval: {clearance.Reasoning}";
 

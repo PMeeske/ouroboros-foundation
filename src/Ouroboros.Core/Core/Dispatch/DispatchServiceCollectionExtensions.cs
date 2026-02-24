@@ -34,7 +34,7 @@ public static class DispatchServiceCollectionExtensions
             assemblies = [Assembly.GetCallingAssembly()];
         }
 
-        foreach (var assembly in assemblies)
+        foreach (Assembly assembly in assemblies)
         {
             RegisterHandlersFromAssembly(services, assembly);
         }
@@ -44,27 +44,27 @@ public static class DispatchServiceCollectionExtensions
 
     private static void RegisterHandlersFromAssembly(IServiceCollection services, Assembly assembly)
     {
-        var handlerInterfaces = new[]
+        Type[] handlerInterfaces = new[]
         {
             typeof(ICommandHandler<,>),
             typeof(IQueryHandler<,>),
         };
 
-        foreach (var type in assembly.GetTypes())
+        foreach (Type type in assembly.GetTypes())
         {
             if (type.IsAbstract || type.IsInterface)
             {
                 continue;
             }
 
-            foreach (var iface in type.GetInterfaces())
+            foreach (Type iface in type.GetInterfaces())
             {
                 if (!iface.IsGenericType)
                 {
                     continue;
                 }
 
-                var genericDef = iface.GetGenericTypeDefinition();
+                Type genericDef = iface.GetGenericTypeDefinition();
                 if (Array.Exists(handlerInterfaces, h => h == genericDef))
                 {
                     services.TryAddTransient(iface, type);

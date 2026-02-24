@@ -57,7 +57,7 @@ public sealed class CodeReflectionNeuron : Neuron
                 break;
 
             case "reflection.request":
-                var status = await _gitService!.GetStatusAsync(ct);
+                string status = await _gitService!.GetStatusAsync(ct);
                 SendResponse(message, new { GitStatus = status, Service = "active" });
                 break;
         }
@@ -78,7 +78,7 @@ public sealed class CodeReflectionNeuron : Neuron
     {
         try
         {
-            var status = await _gitService!.GetStatusAsync(ct);
+            string status = await _gitService!.GetStatusAsync(ct);
 
             // If there are uncommitted changes, notify
             if (status.Contains("modified") || status.Contains("new file"))
@@ -102,14 +102,14 @@ public sealed class CodeReflectionNeuron : Neuron
 
     private async Task HandleCodeAnalyzeAsync(NeuronMessage message, CancellationToken ct)
     {
-        var filePath = message.Payload?.ToString() ?? "";
+        string filePath = message.Payload?.ToString() ?? "";
         if (string.IsNullOrEmpty(filePath))
         {
             SendResponse(message, new { Error = "File path required" });
             return;
         }
 
-        var analysis = await _gitService!.AnalyzeFileAsync(filePath, ct);
+        CodeAnalysis analysis = await _gitService!.AnalyzeFileAsync(filePath, ct);
         SendResponse(message, analysis);
 
         // If issues found, propose fixes
@@ -126,8 +126,8 @@ public sealed class CodeReflectionNeuron : Neuron
 
     private async Task HandleCodeSearchAsync(NeuronMessage message, CancellationToken ct)
     {
-        var query = message.Payload?.ToString() ?? "";
-        var results = await _gitService!.SearchCodeAsync(query, false, ct);
+        string query = message.Payload?.ToString() ?? "";
+        IReadOnlyList<(string File, int Line, string Content)> results = await _gitService!.SearchCodeAsync(query, false, ct);
 
         SendResponse(message, new
         {
@@ -140,17 +140,17 @@ public sealed class CodeReflectionNeuron : Neuron
     private async Task HandleSelfModifyAsync(NeuronMessage message, CancellationToken ct)
     {
         // Self-modification requires explicit approval through intention bus
-        var payload = message.Payload as JsonElement? ?? JsonSerializer.Deserialize<JsonElement>(message.Payload?.ToString() ?? "{}");
+        JsonElement payload = message.Payload as JsonElement? ?? JsonSerializer.Deserialize<JsonElement>(message.Payload?.ToString() ?? "{}");
 
-        if (payload.TryGetProperty("file", out var fileProp) &&
-            payload.TryGetProperty("description", out var descProp) &&
-            payload.TryGetProperty("old_code", out var oldProp) &&
-            payload.TryGetProperty("new_code", out var newProp))
+        if (payload.TryGetProperty("file", out JsonElement fileProp) &&
+            payload.TryGetProperty("description", out JsonElement descProp) &&
+            payload.TryGetProperty("old_code", out JsonElement oldProp) &&
+            payload.TryGetProperty("new_code", out JsonElement newProp))
         {
             ProposeIntention(
                 $"Code Modification: {descProp.GetString()}",
                 $"I want to modify {fileProp.GetString()}: {descProp.GetString()}",
-                payload.TryGetProperty("rationale", out var ratProp) ? ratProp.GetString() ?? "Improve code" : "Improve code",
+                payload.TryGetProperty("rationale", out JsonElement ratProp) ? ratProp.GetString() ?? "Improve code" : "Improve code",
                 IntentionCategory.CodeModification,
                 new IntentionAction
                 {

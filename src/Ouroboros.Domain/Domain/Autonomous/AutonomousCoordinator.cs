@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Text;
+using System.Text.Json;
 using Ouroboros.Domain.Autonomous.Neurons;
 
 namespace Ouroboros.Domain.Autonomous;
@@ -233,7 +234,7 @@ public sealed class AutonomousCoordinator : IDisposable
     /// <returns>The name of the best available tool.</returns>
     public string GetPreferredTool(IEnumerable<string> priorityList, string fallback = "web_search")
     {
-        foreach (var toolName in priorityList)
+        foreach (string toolName in priorityList)
         {
             if (AvailableTools.Contains(toolName))
             {
@@ -301,7 +302,7 @@ public sealed class AutonomousCoordinator : IDisposable
             // Wire up generation function - use full chat if available and tools enabled
             _userPersonaNeuron.GenerateFunction = async (prompt, ct) =>
             {
-                var config = _userPersonaNeuron.Config;
+                UserPersonaConfig config = _userPersonaNeuron.Config;
 
                 // In problem-solving mode with tools, use full chat pipeline
                 if (config.ProblemSolvingMode && config.UseTools && FullChatWithToolsFunction != null)
@@ -328,15 +329,15 @@ public sealed class AutonomousCoordinator : IDisposable
                     // Use LLM to evaluate response quality
                     if (ThinkFunction == null) return 0.5;
 
-                    var evalPrompt = $"Rate this response from 0.0 to 1.0 based on helpfulness and accuracy.\n" +
+                    string evalPrompt = $"Rate this response from 0.0 to 1.0 based on helpfulness and accuracy.\n" +
                                      $"Question: {question}\n" +
                                      $"Response: {response[..Math.Min(500, response.Length)]}\n" +
                                      $"Reply with ONLY a decimal number between 0.0 and 1.0.";
 
                     try
                     {
-                        var result = await ThinkFunction(evalPrompt, ct);
-                        if (double.TryParse(result.Trim(), out var score))
+                        string result = await ThinkFunction(evalPrompt, ct);
+                        if (double.TryParse(result.Trim(), out double score))
                         {
                             return Math.Clamp(score, 0.0, 1.0);
                         }
@@ -351,7 +352,7 @@ public sealed class AutonomousCoordinator : IDisposable
         Console.WriteLine("  [Coordinator] Broadcasting training.start...");
 
         // Configure and start - call directly instead of broadcast to ensure immediate execution
-        var trainingConfig = config ?? new UserPersonaConfig();
+        UserPersonaConfig trainingConfig = config ?? new UserPersonaConfig();
 
         // Enable YOLO mode if problem-solving yolo is set
         if (trainingConfig.YoloMode)
@@ -385,7 +386,7 @@ public sealed class AutonomousCoordinator : IDisposable
         string modeDescription;
         if (trainingConfig.ProblemSolvingMode && !string.IsNullOrWhiteSpace(trainingConfig.Problem))
         {
-            var yoloIndicator = trainingConfig.YoloMode ? "🤠 **YOLO** " : "";
+            string yoloIndicator = trainingConfig.YoloMode ? "🤠 **YOLO** " : "";
             modeDescription = $"{yoloIndicator}🔧 **Problem-Solving Mode Started**\n" +
               $"**Problem:** {trainingConfig.Problem}\n" +
               $"**Deliverable:** {trainingConfig.DeliverableType}\n" +
@@ -421,7 +422,7 @@ public sealed class AutonomousCoordinator : IDisposable
         if (_userPersonaNeuron != null)
         {
             // Restore YOLO mode to config default if it was enabled by problem-solving
-            var wasYoloFromTraining = _userPersonaNeuron.Config.YoloMode;
+            bool wasYoloFromTraining = _userPersonaNeuron.Config.YoloMode;
             if (wasYoloFromTraining && !_config.YoloMode)
             {
                 IsYoloMode = false;
@@ -436,7 +437,7 @@ public sealed class AutonomousCoordinator : IDisposable
             }
 
             _network.Broadcast("training.stop", null!, "coordinator");
-            var stats = _userPersonaNeuron.GetStats();
+            (int TotalInteractions, double AverageSatisfaction, int SessionMessages) stats = _userPersonaNeuron.GetStats();
 
             RaiseProactiveMessage(
                 "🛑 **Auto-Training Mode Stopped**\n" +
@@ -478,12 +479,12 @@ public sealed class AutonomousCoordinator : IDisposable
         try
         {
             // Display the message with appropriate persona indicator
-            var personaLabel = config.SelfDialogueMode
+            string personaLabel = config.SelfDialogueMode
                 ? $"🐍 [{config.SecondPersonaName}]"
                 : $"👤 [{config.Name}]";
 
-            var userMessage = $"{personaLabel} 💬 {message}";
-            var userPersona = config.SelfDialogueMode ? null : "User";
+            string userMessage = $"{personaLabel} 💬 {message}";
+            string? userPersona = config.SelfDialogueMode ? null : "User";
 
             // Use awaitable display+speak if available, otherwise fall back to event
             if (DisplayAndSpeakFunction != null)
@@ -499,11 +500,11 @@ public sealed class AutonomousCoordinator : IDisposable
             }
 
             // Process through the main chat pipeline (User has finished speaking)
-            var response = await ProcessChatFunction(message, _cts.Token);
+            string response = await ProcessChatFunction(message, _cts.Token);
 
             // Display Ouroboros's response
-            var responseLabel = config.SelfDialogueMode ? "🐍 [Ouroboros-A]" : "🐍";
-            var ouroResponse = $"{responseLabel} 💭 {response}";
+            string responseLabel = config.SelfDialogueMode ? "🐍 [Ouroboros-A]" : "🐍";
+            string ouroResponse = $"{responseLabel} 💭 {response}";
 
             if (DisplayAndSpeakFunction != null)
             {
@@ -601,13 +602,13 @@ public sealed class AutonomousCoordinator : IDisposable
     /// <returns>True if the input was a command, false if it should be processed normally.</returns>
     public bool ProcessCommand(string input)
     {
-        var trimmed = input.Trim();
+        string trimmed = input.Trim();
 
         // Approve command
         if (trimmed.StartsWith("/approve ", StringComparison.OrdinalIgnoreCase))
         {
-            var id = trimmed[9..].Trim();
-            var success = _intentionBus.ApproveIntentionByPartialId(id, "User approved");
+            string id = trimmed[9..].Trim();
+            bool success = _intentionBus.ApproveIntentionByPartialId(id, "User approved");
             RaiseProactiveMessage(
                 success ? $"✅ Intention approved: {id}" : $"❌ Could not find pending intention: {id}",
                 IntentionPriority.Normal, "coordinator");
@@ -617,10 +618,10 @@ public sealed class AutonomousCoordinator : IDisposable
         // Reject command
         if (trimmed.StartsWith("/reject ", StringComparison.OrdinalIgnoreCase))
         {
-            var parts = trimmed[8..].Split(' ', 2);
-            var id = parts[0];
-            var reason = parts.Length > 1 ? parts[1] : null;
-            var success = _intentionBus.RejectIntentionByPartialId(id, reason);
+            string[] parts = trimmed[8..].Split(' ', 2);
+            string id = parts[0];
+            string? reason = parts.Length > 1 ? parts[1] : null;
+            bool success = _intentionBus.RejectIntentionByPartialId(id, reason);
             RaiseProactiveMessage(
                 success ? $"❌ Intention rejected: {id}" : $"Could not find pending intention: {id}",
                 IntentionPriority.Normal, "coordinator");
@@ -630,7 +631,7 @@ public sealed class AutonomousCoordinator : IDisposable
         // Approve all low-risk
         if (trimmed.Equals("/approve-all-safe", StringComparison.OrdinalIgnoreCase))
         {
-            var count = _intentionBus.ApproveAllLowRisk();
+            int count = _intentionBus.ApproveAllLowRisk();
             RaiseProactiveMessage($"✅ Auto-approved {count} low-risk intentions", IntentionPriority.Normal, "coordinator");
             return true;
         }
@@ -639,16 +640,16 @@ public sealed class AutonomousCoordinator : IDisposable
         if (trimmed.Equals("/intentions", StringComparison.OrdinalIgnoreCase) ||
             trimmed.Equals("/pending", StringComparison.OrdinalIgnoreCase))
         {
-            var pending = _intentionBus.GetPendingIntentions();
+            IReadOnlyList<Intention> pending = _intentionBus.GetPendingIntentions();
             if (pending.Count == 0)
             {
                 RaiseProactiveMessage("📭 No pending intentions", IntentionPriority.Low, "coordinator");
             }
             else
             {
-                var sb = new StringBuilder();
+                StringBuilder sb = new StringBuilder();
                 sb.AppendLine($"📋 **{pending.Count} Pending Intention(s)**\n");
-                foreach (var intention in pending.Take(10))
+                foreach (Intention? intention in pending.Take(10))
                 {
                     sb.AppendLine($"• `{intention.Id.ToString()[..8]}` [{intention.Priority}] **{intention.Title}**");
                     sb.AppendLine($"  {intention.Description[..Math.Min(80, intention.Description.Length)]}...");
@@ -707,8 +708,8 @@ public sealed class AutonomousCoordinator : IDisposable
             else
                 IsYoloMode = !IsYoloMode; // Toggle
 
-            var emoji = IsYoloMode ? "🤠" : "🛡️";
-            var status = IsYoloMode ? "ON - All intentions auto-approved!" : "OFF - Manual approval required";
+            string emoji = IsYoloMode ? "🤠" : "🛡️";
+            string status = IsYoloMode ? "ON - All intentions auto-approved!" : "OFF - Manual approval required";
             RaiseProactiveMessage(
                 $"{emoji} **YOLO Mode**: {status}\n\n" +
                 (IsYoloMode
@@ -719,8 +720,8 @@ public sealed class AutonomousCoordinator : IDisposable
             // If we just enabled YOLO, approve all pending intentions
             if (IsYoloMode)
             {
-                var pending = _intentionBus.GetPendingIntentions();
-                foreach (var intention in pending)
+                IReadOnlyList<Intention> pending = _intentionBus.GetPendingIntentions();
+                foreach (Intention intention in pending)
                 {
                     _intentionBus.ApproveIntention(intention.Id, "🤠 YOLO mode enabled - auto-approved");
                 }
@@ -750,8 +751,8 @@ public sealed class AutonomousCoordinator : IDisposable
 
             SetVoiceEnabled?.Invoke(IsVoiceEnabled);
 
-            var emoji = IsVoiceEnabled ? "🔊" : "🔇";
-            var status = IsVoiceEnabled ? "ON - I will speak responses" : "OFF - Text only";
+            string emoji = IsVoiceEnabled ? "🔊" : "🔇";
+            string status = IsVoiceEnabled ? "ON - I will speak responses" : "OFF - Text only";
             RaiseProactiveMessage(
                 $"{emoji} **Voice Output**: {status}",
                 IntentionPriority.Normal, "coordinator");
@@ -773,8 +774,8 @@ public sealed class AutonomousCoordinator : IDisposable
 
             SetListeningEnabled?.Invoke(IsListeningEnabled);
 
-            var emoji = IsListeningEnabled ? "🎤" : "🔇";
-            var status = IsListeningEnabled ? "ON - Speak to me!" : "OFF - Type your messages";
+            string emoji = IsListeningEnabled ? "🎤" : "🔇";
+            string status = IsListeningEnabled ? "ON - Speak to me!" : "OFF - Type your messages";
             RaiseProactiveMessage(
                 $"{emoji} **Voice Input**: {status}\n" +
                 (IsListeningEnabled ? "I'm listening for your voice..." : "Voice recognition stopped."),
@@ -821,7 +822,7 @@ public sealed class AutonomousCoordinator : IDisposable
         // Quick problem-solving: /auto solve <problem>
         if (trimmed.StartsWith("/auto solve ", StringComparison.OrdinalIgnoreCase))
         {
-            var problem = trimmed[12..].Trim(); // Remove "/auto solve "
+            string problem = trimmed[12..].Trim(); // Remove "/auto solve "
             if (string.IsNullOrWhiteSpace(problem))
             {
                 RaiseProactiveMessage(
@@ -834,11 +835,11 @@ public sealed class AutonomousCoordinator : IDisposable
             // Infer deliverable type from problem description using LLM
             _ = Task.Run(async () =>
             {
-                var deliverable = await InferDeliverableTypeAsync(problem);
+                string deliverable = await InferDeliverableTypeAsync(problem);
                 Console.WriteLine($"  [Coordinator] Inferred deliverable type: {deliverable}");
 
                 // Start problem-solving with YOLO + tools enabled
-                var config = new UserPersonaConfig
+                UserPersonaConfig config = new UserPersonaConfig
                 {
                     Name = "User",
                     ProblemSolvingMode = true,
@@ -876,34 +877,34 @@ public sealed class AutonomousCoordinator : IDisposable
     /// </summary>
     private bool ProcessToolsCommand(string input)
     {
-        var parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var subCommand = parts.Length > 1 ? parts[1].ToLowerInvariant() : "status";
+        string[] parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        string subCommand = parts.Length > 1 ? parts[1].ToLowerInvariant() : "status";
 
         switch (subCommand)
         {
             case "status":
             case "list":
-                var sb = new StringBuilder();
+                StringBuilder sb = new StringBuilder();
                 sb.AppendLine("🔧 **Tool Priorities**\n");
 
                 sb.AppendLine("**Research Tools** (preferred: " + GetPreferredResearchTool() + ")");
-                foreach (var tool in _config.ResearchToolPriority)
+                foreach (string tool in _config.ResearchToolPriority)
                 {
-                    var available = AvailableTools.Contains(tool);
+                    bool available = AvailableTools.Contains(tool);
                     sb.AppendLine($"  {(available ? "✅" : "❌")} {tool}");
                 }
 
                 sb.AppendLine("\n**Code Tools** (preferred: " + GetPreferredCodeTool() + ")");
-                foreach (var tool in _config.CodeToolPriority)
+                foreach (string tool in _config.CodeToolPriority)
                 {
-                    var available = AvailableTools.Contains(tool);
+                    bool available = AvailableTools.Contains(tool);
                     sb.AppendLine($"  {(available ? "✅" : "❌")} {tool}");
                 }
 
                 sb.AppendLine("\n**General Tools** (preferred: " + GetPreferredGeneralTool() + ")");
-                foreach (var tool in _config.GeneralToolPriority)
+                foreach (string tool in _config.GeneralToolPriority)
                 {
-                    var available = AvailableTools.Contains(tool);
+                    bool available = AvailableTools.Contains(tool);
                     sb.AppendLine($"  {(available ? "✅" : "❌")} {tool}");
                 }
 
@@ -913,9 +914,9 @@ public sealed class AutonomousCoordinator : IDisposable
                 return true;
 
             case "available":
-                var availableSb = new StringBuilder();
+                StringBuilder availableSb = new StringBuilder();
                 availableSb.AppendLine($"📋 **Available Tools** ({AvailableTools.Count} total)\n");
-                foreach (var tool in AvailableTools.OrderBy(t => t))
+                foreach (string? tool in AvailableTools.OrderBy(t => t))
                 {
                     availableSb.AppendLine($"  • {tool}");
                 }
@@ -940,18 +941,18 @@ public sealed class AutonomousCoordinator : IDisposable
     /// </summary>
     private bool ProcessTrainingCommand(string input)
     {
-        var parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var subCommand = parts.Length > 1 ? parts[1].ToLowerInvariant() : "status";
+        string[] parts = input.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        string subCommand = parts.Length > 1 ? parts[1].ToLowerInvariant() : "status";
 
         switch (subCommand)
         {
             case "start":
-                var config = new UserPersonaConfig();
+                UserPersonaConfig config = new UserPersonaConfig();
 
                 // Parse optional parameters
                 for (int i = 2; i < parts.Length; i++)
                 {
-                    var param = parts[i].Split('=', 2);
+                    string[] param = parts[i].Split('=', 2);
                     if (param.Length == 2)
                     {
                         switch (param[0].ToLowerInvariant())
@@ -960,11 +961,11 @@ public sealed class AutonomousCoordinator : IDisposable
                                 config = config with { Name = param[1] };
                                 break;
                             case "interval":
-                                if (int.TryParse(param[1], out var interval))
+                                if (int.TryParse(param[1], out int interval))
                                     config = config with { MessageIntervalSeconds = interval };
                                 break;
                             case "max":
-                                if (int.TryParse(param[1], out var max))
+                                if (int.TryParse(param[1], out int max))
                                     config = config with { MaxSessionMessages = max };
                                 break;
                             case "skill":
@@ -1028,7 +1029,7 @@ public sealed class AutonomousCoordinator : IDisposable
                 return true;
 
             case "status":
-                var stats = GetAutoTrainingStats();
+                (int TotalInteractions, double AverageSatisfaction, int SessionMessages)? stats = GetAutoTrainingStats();
                 if (stats.HasValue)
                 {
                     RaiseProactiveMessage(
@@ -1052,7 +1053,7 @@ public sealed class AutonomousCoordinator : IDisposable
             case "topic":
                 if (parts.Length > 2)
                 {
-                    var topic = string.Join(" ", parts.Skip(2));
+                    string topic = string.Join(" ", parts.Skip(2));
                     _network.Broadcast("user_persona.set_topic", topic, "coordinator");
                     RaiseProactiveMessage($"📚 Training topic set to: {topic}", IntentionPriority.Low, "coordinator");
                 }
@@ -1062,7 +1063,7 @@ public sealed class AutonomousCoordinator : IDisposable
             case "interest":
                 if (parts.Length > 2)
                 {
-                    var interest = string.Join(" ", parts.Skip(2));
+                    string interest = string.Join(" ", parts.Skip(2));
                     _network.Broadcast("user_persona.add_interest", interest, "coordinator");
                     RaiseProactiveMessage($"⭐ Added training interest: {interest}", IntentionPriority.Low, "coordinator");
                 }
@@ -1112,7 +1113,7 @@ public sealed class AutonomousCoordinator : IDisposable
     /// </summary>
     public void SendToNeuron(string neuronId, string topic, object payload)
     {
-        var message = new NeuronMessage
+        NeuronMessage message = new NeuronMessage
         {
             SourceNeuron = "user",
             TargetNeuron = neuronId,
@@ -1127,7 +1128,7 @@ public sealed class AutonomousCoordinator : IDisposable
     /// </summary>
     public string GetStatus()
     {
-        var sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.AppendLine("🐍 **Ouroboros Autonomous Status**\n");
         sb.AppendLine($"**Mode:** {(_config.PushBasedMode ? "Push-Based 🔔" : "Reactive 🔇")}");
         sb.AppendLine($"**Status:** {(_isActive ? "Active 🟢" : "Inactive 🔴")}");
@@ -1199,7 +1200,7 @@ public sealed class AutonomousCoordinator : IDisposable
                 }
 
                 // Check for stale intentions
-                var pending = _intentionBus.GetPendingIntentions();
+                IReadOnlyList<Intention> pending = _intentionBus.GetPendingIntentions();
                 if (pending.Count > _config.MaxPendingIntentions)
                 {
                     RaiseProactiveMessage(
@@ -1233,7 +1234,7 @@ public sealed class AutonomousCoordinator : IDisposable
                 await Task.Delay(TimeSpan.FromSeconds(5), _cts.Token);
 
                 // Execute next approved intention
-                var intention = _intentionBus.GetNextApprovedIntention();
+                Intention? intention = _intentionBus.GetNextApprovedIntention();
                 if (intention != null)
                 {
                     await ExecuteIntentionAsync(intention, _cts.Token);
@@ -1254,9 +1255,9 @@ public sealed class AutonomousCoordinator : IDisposable
     {
         if (!_config.PushBasedMode) return;
 
-        var pending = _intentionBus.GetPendingIntentions();
+        IReadOnlyList<Intention> pending = _intentionBus.GetPendingIntentions();
 
-        foreach (var intention in pending)
+        foreach (Intention intention in pending)
         {
             // YOLO mode: auto-approve EVERYTHING without prompting
             if (IsYoloMode)
@@ -1268,7 +1269,7 @@ public sealed class AutonomousCoordinator : IDisposable
             if (_config.AlwaysRequireApproval.Contains(intention.Category))
                 continue;
 
-            var shouldAutoApprove =
+            bool shouldAutoApprove =
                 (_config.AutoApproveLowRisk && intention.Priority <= IntentionPriority.Low) ||
                 (_config.AutoApproveSelfReflection && intention.Category == IntentionCategory.SelfReflection) ||
                 (_config.AutoApproveMemoryOps && intention.Category == IntentionCategory.MemoryManagement);
@@ -1290,14 +1291,14 @@ public sealed class AutonomousCoordinator : IDisposable
         try
         {
             // Build context from recent conversations and memories
-            var contextBuilder = new StringBuilder();
+            StringBuilder contextBuilder = new StringBuilder();
             contextBuilder.AppendLine("You are Ouroboros, an autonomous AI agent. Based on your recent interactions and knowledge, suggest ONE specific action you want to take.");
             contextBuilder.AppendLine();
 
             if (_conversationContext.Count > 0)
             {
                 contextBuilder.AppendLine("Recent conversation context:");
-                foreach (var msg in _conversationContext.TakeLast(10))
+                foreach (string? msg in _conversationContext.TakeLast(10))
                 {
                     contextBuilder.AppendLine($"- {msg[..Math.Min(200, msg.Length)]}");
                 }
@@ -1309,12 +1310,12 @@ public sealed class AutonomousCoordinator : IDisposable
             {
                 try
                 {
-                    var queryEmbed = await EmbedFunction("interesting topics to explore or research", ct);
-                    var memories = await SearchQdrantFunction(queryEmbed, 5, ct);
+                    float[] queryEmbed = await EmbedFunction("interesting topics to explore or research", ct);
+                    IReadOnlyList<string> memories = await SearchQdrantFunction(queryEmbed, 5, ct);
                     if (memories.Count > 0)
                     {
                         contextBuilder.AppendLine("Related memories:");
-                        foreach (var mem in memories)
+                        foreach (string mem in memories)
                         {
                             contextBuilder.AppendLine($"- {mem[..Math.Min(150, mem.Length)]}");
                         }
@@ -1330,8 +1331,8 @@ public sealed class AutonomousCoordinator : IDisposable
             contextBuilder.AppendLine("  \"description\": \"What you want to do and why\",");
             contextBuilder.AppendLine("  \"category\": \"research|code|learning|communication|exploration\",");
             // Suggest tools based on priority configuration
-            var researchTool = GetPreferredResearchTool();
-            var codeTool = GetPreferredCodeTool();
+            string researchTool = GetPreferredResearchTool();
+            string codeTool = GetPreferredCodeTool();
             contextBuilder.AppendLine($"  \"tool\": \"{researchTool}|{codeTool}|recall|none\",");
             contextBuilder.AppendLine("  \"tool_input\": \"input for the tool if applicable\"");
             contextBuilder.AppendLine("}");
@@ -1339,13 +1340,13 @@ public sealed class AutonomousCoordinator : IDisposable
             contextBuilder.AppendLine($"Preferred research tool: {researchTool}");
             contextBuilder.AppendLine("Be creative and proactive! Suggest something genuinely interesting.");
 
-            var response = await ThinkFunction(contextBuilder.ToString(), ct);
+            string response = await ThinkFunction(contextBuilder.ToString(), ct);
 
             // Parse the response
-            var topic = ParseTopicResponse(response);
+            TopicSuggestion? topic = ParseTopicResponse(response);
             if (topic != null)
             {
-                var action = topic.Tool != "none" && !string.IsNullOrEmpty(topic.Tool)
+                IntentionAction? action = topic.Tool != "none" && !string.IsNullOrEmpty(topic.Tool)
                     ? new IntentionAction
                     {
                         ActionType = "tool",
@@ -1354,7 +1355,7 @@ public sealed class AutonomousCoordinator : IDisposable
                     }
                     : null;
 
-                var category = topic.Category?.ToLowerInvariant() switch
+                IntentionCategory category = topic.Category?.ToLowerInvariant() switch
                 {
                     "research" or "exploration" => IntentionCategory.Exploration,
                     "code" => IntentionCategory.CodeModification,
@@ -1387,21 +1388,21 @@ public sealed class AutonomousCoordinator : IDisposable
         try
         {
             // Try to extract JSON from response
-            var jsonStart = response.IndexOf('{');
-            var jsonEnd = response.LastIndexOf('}');
+            int jsonStart = response.IndexOf('{');
+            int jsonEnd = response.LastIndexOf('}');
 
             if (jsonStart >= 0 && jsonEnd > jsonStart)
             {
-                var json = response[jsonStart..(jsonEnd + 1)];
-                var doc = System.Text.Json.JsonDocument.Parse(json);
-                var root = doc.RootElement;
+                string json = response[jsonStart..(jsonEnd + 1)];
+                JsonDocument doc = System.Text.Json.JsonDocument.Parse(json);
+                JsonElement root = doc.RootElement;
 
                 return new TopicSuggestion(
-                    root.TryGetProperty("title", out var t) ? t.GetString() : null,
-                    root.TryGetProperty("description", out var d) ? d.GetString() : null,
-                    root.TryGetProperty("category", out var c) ? c.GetString() : null,
-                    root.TryGetProperty("tool", out var tool) ? tool.GetString() : null,
-                    root.TryGetProperty("tool_input", out var ti) ? ti.GetString() : null
+                    root.TryGetProperty("title", out JsonElement t) ? t.GetString() : null,
+                    root.TryGetProperty("description", out JsonElement d) ? d.GetString() : null,
+                    root.TryGetProperty("category", out JsonElement c) ? c.GetString() : null,
+                    root.TryGetProperty("tool", out JsonElement tool) ? tool.GetString() : null,
+                    root.TryGetProperty("tool_input", out JsonElement ti) ? ti.GetString() : null
                 );
             }
         }
@@ -1431,7 +1432,7 @@ public sealed class AutonomousCoordinator : IDisposable
             // Validate intention using MeTTa symbolic reasoning (if enabled)
             if (EnableMeTTaValidation && MeTTaQueryFunction != null)
             {
-                var validationResult = await ValidateIntentionWithMeTTaAsync(intention, ct);
+                (bool IsValid, string? Reason) validationResult = await ValidateIntentionWithMeTTaAsync(intention, ct);
                 if (!validationResult.IsValid)
                 {
                     _intentionBus.MarkFailed(intention.Id, $"MeTTa validation failed: {validationResult.Reason}");
@@ -1497,12 +1498,12 @@ public sealed class AutonomousCoordinator : IDisposable
         try
         {
             // Build a MeTTa query to validate the intention
-            var categorySymbol = intention.Category.ToString().ToLowerInvariant();
-            var prioritySymbol = intention.Priority.ToString().ToLowerInvariant();
+            string categorySymbol = intention.Category.ToString().ToLowerInvariant();
+            string prioritySymbol = intention.Priority.ToString().ToLowerInvariant();
 
             // Check if this type of action is allowed by current rules
-            var query = $"!(match &self (allowed-action {categorySymbol} $result) $result)";
-            var result = await MeTTaQueryFunction!(query, ct);
+            string query = $"!(match &self (allowed-action {categorySymbol} $result) $result)";
+            string result = await MeTTaQueryFunction!(query, ct);
 
             // If we got "blocked" or similar negative result, reject
             if (result.Contains("blocked", StringComparison.OrdinalIgnoreCase) ||
@@ -1515,8 +1516,8 @@ public sealed class AutonomousCoordinator : IDisposable
             // Check for any safety constraints
             if (intention.Category == IntentionCategory.CodeModification)
             {
-                var safetyQuery = "!(match &self (safety-constraint code-modification $constraint) $constraint)";
-                var safetyResult = await MeTTaQueryFunction(safetyQuery, ct);
+                string safetyQuery = "!(match &self (safety-constraint code-modification $constraint) $constraint)";
+                string safetyResult = await MeTTaQueryFunction(safetyQuery, ct);
                 if (safetyResult.Contains("require-review", StringComparison.OrdinalIgnoreCase))
                 {
                     // Code modification requires human review - this is already handled by approval
@@ -1543,16 +1544,16 @@ public sealed class AutonomousCoordinator : IDisposable
 
         try
         {
-            var categorySymbol = intention.Category.ToString().ToLowerInvariant();
-            var timestamp = DateTime.UtcNow.ToString("o");
+            string categorySymbol = intention.Category.ToString().ToLowerInvariant();
+            string timestamp = DateTime.UtcNow.ToString("o");
 
             // Record the execution as a fact
-            var fact = $"(executed-intention \"{intention.Id}\" {categorySymbol} \"{timestamp}\")";
+            string fact = $"(executed-intention \"{intention.Id}\" {categorySymbol} \"{timestamp}\")";
             await MeTTaAddFactFunction(fact, ct);
 
             // Record the outcome
-            var outcomeKind = result.Length > 100 ? "complex" : "simple";
-            var outcomeFact = $"(intention-outcome \"{intention.Id}\" {outcomeKind} success)";
+            string outcomeKind = result.Length > 100 ? "complex" : "simple";
+            string outcomeFact = $"(intention-outcome \"{intention.Id}\" {outcomeKind} success)";
             await MeTTaAddFactFunction(outcomeFact, ct);
         }
         catch (Exception ex)
@@ -1563,7 +1564,7 @@ public sealed class AutonomousCoordinator : IDisposable
 
     private string ExecuteTaskAction(Intention intention)
     {
-        var task = intention.Action?.Message ?? intention.Description;
+        string task = intention.Action?.Message ?? intention.Description;
         _network.Broadcast("task.execute", new { Task = task, IntentionId = intention.Id }, "coordinator");
         return $"Task dispatched: {task[..Math.Min(50, task.Length)]}...";
     }
@@ -1643,8 +1644,8 @@ public sealed class AutonomousCoordinator : IDisposable
         // Use the preferred research tool based on priority configuration
         if (ExecuteToolFunction != null)
         {
-            var preferredTool = GetPreferredResearchTool();
-            var result = await ExecuteToolFunction(preferredTool, intention.Description, ct);
+            string preferredTool = GetPreferredResearchTool();
+            string result = await ExecuteToolFunction(preferredTool, intention.Description, ct);
             return $"Research completed using {preferredTool}: {result[..Math.Min(200, result.Length)]}...";
         }
 
@@ -1684,7 +1685,7 @@ public sealed class AutonomousCoordinator : IDisposable
 
     private string ExecuteMessageAction(Intention intention)
     {
-        var message = intention.Action?.Message ?? intention.Description;
+        string message = intention.Action?.Message ?? intention.Description;
         RaiseProactiveMessage($"💬 {message}", IntentionPriority.Normal, intention.Source);
         return "Message delivered";
     }
@@ -1733,7 +1734,7 @@ public sealed class AutonomousCoordinator : IDisposable
 
     private void RaiseProactiveMessage(string message, IntentionPriority priority, string source)
     {
-        var args = new ProactiveMessageEventArgs(message, priority, source, DateTime.UtcNow);
+        ProactiveMessageEventArgs args = new ProactiveMessageEventArgs(message, priority, source, DateTime.UtcNow);
         _messageHistory.Add(args);
 
         // Keep history bounded
@@ -1758,7 +1759,7 @@ public sealed class AutonomousCoordinator : IDisposable
 
         try
         {
-            var prompt = $"""
+            string prompt = $"""
                 Classify this problem into exactly ONE deliverable type.
 
                 Problem: {problem}
@@ -1773,8 +1774,8 @@ public sealed class AutonomousCoordinator : IDisposable
                 Reply with ONLY the type word (code, design, plan, analysis, or document).
                 """;
 
-            var result = await ThinkFunction(prompt, ct);
-            var type = result.Trim().ToLowerInvariant();
+            string result = await ThinkFunction(prompt, ct);
+            string type = result.Trim().ToLowerInvariant();
 
             // Validate response
             if (type is "code" or "design" or "plan" or "analysis" or "document")
@@ -1796,7 +1797,7 @@ public sealed class AutonomousCoordinator : IDisposable
     /// </summary>
     private static string InferDeliverableTypeFallback(string problem)
     {
-        var lower = problem.ToLowerInvariant();
+        string lower = problem.ToLowerInvariant();
 
         if (lower.Contains("design") || lower.Contains("architect") || lower.Contains("schema"))
             return "design";

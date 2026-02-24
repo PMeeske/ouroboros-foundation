@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Providers.Docker;
+namespace Ouroboros.Providers.Docker;
 
 /// <summary>
 /// Represents a Docker network.

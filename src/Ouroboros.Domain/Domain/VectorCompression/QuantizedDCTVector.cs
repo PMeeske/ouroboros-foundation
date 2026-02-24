@@ -16,8 +16,8 @@ public sealed record QuantizedDCTVector(
     /// <summary>Serializes to bytes.</summary>
     public byte[] ToBytes()
     {
-        using var ms = new MemoryStream();
-        using var writer = new BinaryWriter(ms);
+        using MemoryStream ms = new MemoryStream();
+        using BinaryWriter writer = new BinaryWriter(ms);
 
         writer.Write(OriginalLength);
         writer.Write(BitsPerCoefficient);
@@ -32,15 +32,15 @@ public sealed record QuantizedDCTVector(
     /// <summary>Deserializes from bytes.</summary>
     public static QuantizedDCTVector FromBytes(byte[] data)
     {
-        using var ms = new MemoryStream(data);
-        using var reader = new BinaryReader(ms);
+        using MemoryStream ms = new MemoryStream(data);
+        using BinaryReader reader = new BinaryReader(ms);
 
         int origLen = reader.ReadInt32();
         int bits = reader.ReadInt32();
         float min = reader.ReadSingle();
         float max = reader.ReadSingle();
         int qLen = reader.ReadInt32();
-        var quantized = reader.ReadBytes(qLen);
+        byte[] quantized = reader.ReadBytes(qLen);
 
         return new QuantizedDCTVector(quantized, min, max, origLen, bits);
     }

@@ -56,10 +56,10 @@ public sealed class QdrantDistinctionMetadataStorage
         _collectionName = "distinction_states";
 
         // Parse connection string
-        var uri = new Uri(connectionString);
-        var host = uri.Host;
-        var port = uri.Port > 0 ? uri.Port : 6334; // Fixed: use gRPC port
-        var useHttps = uri.Scheme == "https";
+        Uri uri = new Uri(connectionString);
+        string host = uri.Host;
+        int port = uri.Port > 0 ? uri.Port : 6334; // Fixed: use gRPC port
+        bool useHttps = uri.Scheme == "https";
 
         _client = new QdrantClient(host, port, useHttps);
         _logger.LogInformation("Initialized Qdrant metadata storage: {Host}:{Port}", host, port);
@@ -95,9 +95,9 @@ public sealed class QdrantDistinctionMetadataStorage
         {
             await EnsureCollectionExistsAsync(weights.Embedding.Length, ct);
 
-            var pointId = BitConverter.ToUInt64(weights.Id.Value.ToByteArray(), 0);
+            ulong pointId = BitConverter.ToUInt64(weights.Id.Value.ToByteArray(), 0);
 
-            var payload = new Dictionary<string, Value>
+            Dictionary<string, Value> payload = new Dictionary<string, Value>
             {
                 ["id"] = weights.Id.ToString(),
                 ["circumstance"] = weights.Circumstance,
@@ -109,7 +109,7 @@ public sealed class QdrantDistinctionMetadataStorage
                 ["dissolved_at"] = string.Empty
             };
 
-            var point = new PointStruct
+            PointStruct point = new PointStruct
             {
                 Id = new PointId { Num = pointId },
                 Vectors = weights.Embedding,
@@ -169,7 +169,7 @@ public sealed class QdrantDistinctionMetadataStorage
         {
             // For simplicity, we'll delete and note this in logs
             // In a production system, you might want to update the payload
-            var pointId = BitConverter.ToUInt64(id.Value.ToByteArray(), 0);
+            ulong pointId = BitConverter.ToUInt64(id.Value.ToByteArray(), 0);
 
             await _client.DeleteAsync(
                 _collectionName,
@@ -198,9 +198,9 @@ public sealed class QdrantDistinctionMetadataStorage
     {
         try
         {
-            var pointId = BitConverter.ToUInt64(id.Value.ToByteArray(), 0);
+            ulong pointId = BitConverter.ToUInt64(id.Value.ToByteArray(), 0);
 
-            var points = await _client.RetrieveAsync(
+            IReadOnlyList<RetrievedPoint> points = await _client.RetrieveAsync(
                 _collectionName,
                 new[] { new PointId { Num = pointId } },
                 withPayload: true,
@@ -211,8 +211,8 @@ public sealed class QdrantDistinctionMetadataStorage
                 return Result<DistinctionMetadata, string>.Failure($"Distinction {id} not found");
             }
 
-            var point = points[0];
-            var metadata = PayloadToMetadata(id, point.Payload);
+            RetrievedPoint point = points[0];
+            DistinctionMetadata metadata = PayloadToMetadata(id, point.Payload);
 
             _logger.LogInformation("Retrieved metadata for distinction {Id}", id);
             return Result<DistinctionMetadata, string>.Success(metadata);
@@ -228,7 +228,7 @@ public sealed class QdrantDistinctionMetadataStorage
     {
         try
         {
-            var exists = await _client.CollectionExistsAsync(_collectionName, ct);
+            bool exists = await _client.CollectionExistsAsync(_collectionName, ct);
 
             if (!exists)
             {
@@ -249,17 +249,17 @@ public sealed class QdrantDistinctionMetadataStorage
 
     private DistinctionMetadata PayloadToMetadata(DistinctionId id, IDictionary<string, Value> payload)
     {
-        var circumstance = payload.TryGetValue("circumstance", out var c) ? c.StringValue : string.Empty;
-        var storagePath = payload.TryGetValue("storage_path", out var sp) ? sp.StringValue : string.Empty;
-        var learnedAtStage = payload.TryGetValue("learned_at_stage", out var stage)
+        string circumstance = payload.TryGetValue("circumstance", out Value? c) ? c.StringValue : string.Empty;
+        string storagePath = payload.TryGetValue("storage_path", out Value? sp) ? sp.StringValue : string.Empty;
+        int learnedAtStage = payload.TryGetValue("learned_at_stage", out Value? stage)
             ? (int)stage.IntegerValue
             : 1; // Default to Distinction stage
-        var fitness = payload.TryGetValue("fitness", out var f) ? f.DoubleValue : 0.0;
-        var isDissolved = payload.TryGetValue("is_dissolved", out var dissolved) && dissolved.BoolValue;
-        var createdAt = payload.TryGetValue("created_at", out var ca)
+        double fitness = payload.TryGetValue("fitness", out Value? f) ? f.DoubleValue : 0.0;
+        bool isDissolved = payload.TryGetValue("is_dissolved", out Value? dissolved) && dissolved.BoolValue;
+        DateTime createdAt = payload.TryGetValue("created_at", out Value? ca)
             ? DateTime.Parse(ca.StringValue)
             : DateTime.UtcNow;
-        var dissolvedAt = payload.TryGetValue("dissolved_at", out var da) && !string.IsNullOrEmpty(da.StringValue)
+        DateTime? dissolvedAt = payload.TryGetValue("dissolved_at", out Value? da) && !string.IsNullOrEmpty(da.StringValue)
             ? DateTime.Parse(da.StringValue)
             : (DateTime?)null;
 

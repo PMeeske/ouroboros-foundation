@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.LawsOfForm;
+namespace Ouroboros.Core.LawsOfForm;
 
 /// <summary>
 /// Represents a continuous wave form in the imaginary domain.

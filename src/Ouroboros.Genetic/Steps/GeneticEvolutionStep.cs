@@ -46,7 +46,7 @@ public sealed class GeneticEvolutionStep<TIn, TOut, TGene>
         return async input =>
         {
             // Evolve to find the best configuration
-            var evolutionResult = await this.algorithm.EvolveAsync(initialPopulation, generations, cancellationToken);
+            Result<IChromosome<TGene>, string> evolutionResult = await this.algorithm.EvolveAsync(initialPopulation, generations, cancellationToken);
             
             if (evolutionResult.IsFailure)
             {
@@ -54,8 +54,8 @@ public sealed class GeneticEvolutionStep<TIn, TOut, TGene>
             }
 
             // Extract the best gene configuration
-            var bestChromosome = evolutionResult.Value;
-            var bestGene = bestChromosome.Genes.FirstOrDefault();
+            IChromosome<TGene> bestChromosome = evolutionResult.Value;
+            TGene? bestGene = bestChromosome.Genes.FirstOrDefault();
             
             if (bestGene == null)
             {
@@ -63,11 +63,11 @@ public sealed class GeneticEvolutionStep<TIn, TOut, TGene>
             }
 
             // Create and execute the step with the best configuration
-            var optimizedStep = this.stepFactory(bestGene);
+            Step<TIn, TOut> optimizedStep = this.stepFactory(bestGene);
             
             try
             {
-                var output = await optimizedStep(input);
+                TOut? output = await optimizedStep(input);
                 return Result<TOut, string>.Success(output);
             }
             catch (Exception ex)
@@ -92,7 +92,7 @@ public sealed class GeneticEvolutionStep<TIn, TOut, TGene>
         return async input =>
         {
             // Evolve to find the best configuration
-            var evolutionResult = await this.algorithm.EvolveAsync(initialPopulation, generations, cancellationToken);
+            Result<IChromosome<TGene>, string> evolutionResult = await this.algorithm.EvolveAsync(initialPopulation, generations, cancellationToken);
             
             if (evolutionResult.IsFailure)
             {
@@ -100,8 +100,8 @@ public sealed class GeneticEvolutionStep<TIn, TOut, TGene>
             }
 
             // Extract the best gene configuration
-            var bestChromosome = evolutionResult.Value;
-            var bestGene = bestChromosome.Genes.FirstOrDefault();
+            IChromosome<TGene> bestChromosome = evolutionResult.Value;
+            TGene? bestGene = bestChromosome.Genes.FirstOrDefault();
             
             if (bestGene == null)
             {
@@ -109,11 +109,11 @@ public sealed class GeneticEvolutionStep<TIn, TOut, TGene>
             }
 
             // Create and execute the step with the best configuration
-            var optimizedStep = this.stepFactory(bestGene);
+            Step<TIn, TOut> optimizedStep = this.stepFactory(bestGene);
             
             try
             {
-                var output = await optimizedStep(input);
+                TOut? output = await optimizedStep(input);
                 return Result<(IChromosome<TGene>, TOut), string>.Success((bestChromosome, output));
             }
             catch (Exception ex)

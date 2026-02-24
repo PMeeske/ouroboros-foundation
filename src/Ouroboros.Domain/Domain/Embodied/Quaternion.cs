@@ -31,7 +31,7 @@ public sealed record Quaternion(float X, float Y, float Z, float W)
     /// <returns>Normalized quaternion</returns>
     public Quaternion Normalized()
     {
-        var mag = this.Magnitude();
+        float mag = this.Magnitude();
         return mag > 0
             ? new Quaternion(this.X / mag, this.Y / mag, this.Z / mag, this.W / mag)
             : Identity;

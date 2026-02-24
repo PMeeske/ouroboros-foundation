@@ -67,7 +67,7 @@ public sealed class EvolutionRouletteWheelSelection<TChromosome>
         var spinValue = this.random.NextDouble() * totalFitness;
         var currentSum = 0.0;
 
-        foreach (var chromosome in population.Chromosomes)
+        foreach (TChromosome chromosome in population.Chromosomes)
         {
             currentSum += chromosome.Fitness + offset;
             if (currentSum >= spinValue)
@@ -93,11 +93,11 @@ public sealed class EvolutionRouletteWheelSelection<TChromosome>
             return Result<List<TChromosome>>.Failure("Count must be non-negative");
         }
 
-        var selected = new List<TChromosome>();
+        List<TChromosome> selected = new List<TChromosome>();
 
         for (int i = 0; i < count; i++)
         {
-            var selectionResult = this.Select(population);
+            Result<TChromosome> selectionResult = this.Select(population);
             if (selectionResult.IsFailure)
             {
                 return Result<List<TChromosome>>.Failure(selectionResult.Error);

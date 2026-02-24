@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Monads;
+namespace Ouroboros.Core.Monads;
 
 /// <summary>
 /// Extension methods for AsyncKleisli arrows.
@@ -191,9 +191,9 @@ public static class AsyncKleisliExtensions
         IAsyncEnumerable<TMid> source,
         AsyncKleisli<TMid, TOut> selector)
     {
-        await foreach (var item in source.ConfigureAwait(false))
+        await foreach (TMid? item in source.ConfigureAwait(false))
         {
-            await foreach (var result in selector(item).ConfigureAwait(false))
+            await foreach (TOut? result in selector(item).ConfigureAwait(false))
             {
                 yield return result;
             }
@@ -205,9 +205,9 @@ public static class AsyncKleisliExtensions
         Func<TMid, IAsyncEnumerable<TOut>> selector,
         Func<TMid, TOut, TOut> resultSelector)
     {
-        await foreach (var mid in source.ConfigureAwait(false))
+        await foreach (TMid? mid in source.ConfigureAwait(false))
         {
-            await foreach (var item in selector(mid).ConfigureAwait(false))
+            await foreach (TOut? item in selector(mid).ConfigureAwait(false))
             {
                 yield return resultSelector(mid, item);
             }
@@ -218,7 +218,7 @@ public static class AsyncKleisliExtensions
         IAsyncEnumerable<TIn> source,
         Func<TIn, TOut> selector)
     {
-        await foreach (var item in source.ConfigureAwait(false))
+        await foreach (TIn? item in source.ConfigureAwait(false))
         {
             yield return selector(item);
         }
@@ -228,7 +228,7 @@ public static class AsyncKleisliExtensions
         IAsyncEnumerable<TIn> source,
         Func<TIn, Task<TOut>> selector)
     {
-        await foreach (var item in source.ConfigureAwait(false))
+        await foreach (TIn? item in source.ConfigureAwait(false))
         {
             yield return await selector(item).ConfigureAwait(false);
         }
@@ -238,17 +238,17 @@ public static class AsyncKleisliExtensions
         IAsyncEnumerable<T> first,
         IAsyncEnumerable<T> second)
     {
-        var firstEnumerator = first.GetAsyncEnumerator();
-        var secondEnumerator = second.GetAsyncEnumerator();
-        
+        IAsyncEnumerator<T> firstEnumerator = first.GetAsyncEnumerator();
+        IAsyncEnumerator<T> secondEnumerator = second.GetAsyncEnumerator();
+
         try
         {
-            var firstTask = firstEnumerator.MoveNextAsync();
-            var secondTask = secondEnumerator.MoveNextAsync();
-            
-            var firstActive = true;
-            var secondActive = true;
-            
+            ValueTask<bool> firstTask = firstEnumerator.MoveNextAsync();
+            ValueTask<bool> secondTask = secondEnumerator.MoveNextAsync();
+
+            bool firstActive = true;
+            bool secondActive = true;
+
             while (firstActive || secondActive)
             {
                 if (firstActive && firstTask.IsCompleted)
@@ -263,7 +263,7 @@ public static class AsyncKleisliExtensions
                         firstActive = false;
                     }
                 }
-                
+
                 if (secondActive && secondTask.IsCompleted)
                 {
                     if (await secondTask.ConfigureAwait(false))
@@ -276,12 +276,12 @@ public static class AsyncKleisliExtensions
                         secondActive = false;
                     }
                 }
-                
+
                 if (firstActive && !firstTask.IsCompleted)
                 {
                     await Task.Yield();
                 }
-                
+
                 if (secondActive && !secondTask.IsCompleted)
                 {
                     await Task.Yield();
@@ -299,7 +299,7 @@ public static class AsyncKleisliExtensions
         IAsyncEnumerable<T> source,
         Func<T, bool> predicate)
     {
-        await foreach (var item in source.ConfigureAwait(false))
+        await foreach (T? item in source.ConfigureAwait(false))
         {
             if (predicate(item))
             {
@@ -312,7 +312,7 @@ public static class AsyncKleisliExtensions
         IAsyncEnumerable<T> source,
         Func<T, Task<bool>> predicate)
     {
-        await foreach (var item in source.ConfigureAwait(false))
+        await foreach (T? item in source.ConfigureAwait(false))
         {
             if (await predicate(item).ConfigureAwait(false))
             {
@@ -325,8 +325,8 @@ public static class AsyncKleisliExtensions
         IAsyncEnumerable<T> source,
         int count)
     {
-        var taken = 0;
-        await foreach (var item in source.ConfigureAwait(false))
+        int taken = 0;
+        await foreach (T? item in source.ConfigureAwait(false))
         {
             if (taken >= count)
             {
@@ -340,8 +340,8 @@ public static class AsyncKleisliExtensions
 
     private static async IAsyncEnumerable<T> DistinctAsync<T>(IAsyncEnumerable<T> source)
     {
-        var seen = new HashSet<T>();
-        await foreach (var item in source.ConfigureAwait(false))
+        HashSet<T> seen = new HashSet<T>();
+        await foreach (T? item in source.ConfigureAwait(false))
         {
             if (seen.Add(item))
             {

@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Memory;
+namespace Ouroboros.Core.Memory;
 
 /// <summary>
 /// Kleisli arrows for memory-aware operations

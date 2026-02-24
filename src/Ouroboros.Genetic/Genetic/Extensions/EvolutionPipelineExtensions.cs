@@ -32,7 +32,7 @@ public static class EvolutionPipelineExtensions
         int generations)
         where TChromosome : IChromosome
     {
-        var evolutionStep = GeneticEvolutionStep.CreateEvolutionStep(engine, generations);
+        Step<EvolutionPopulation<TChromosome>, Result<TChromosome>> evolutionStep = GeneticEvolutionStep.CreateEvolutionStep(engine, generations);
         return step.Then(evolutionStep);
     }
 
@@ -51,7 +51,7 @@ public static class EvolutionPipelineExtensions
         int generations)
         where TChromosome : IChromosome
     {
-        var evolutionStep = GeneticEvolutionStep.CreatePopulationEvolutionStep(engine, generations);
+        Step<EvolutionPopulation<TChromosome>, Result<EvolutionPopulation<TChromosome>>> evolutionStep = GeneticEvolutionStep.CreatePopulationEvolutionStep(engine, generations);
         return step.Then(evolutionStep);
     }
 
@@ -81,7 +81,7 @@ public static class EvolutionPipelineExtensions
         double elitismRate = 0.1)
         where TChromosome : IChromosome
     {
-        var engine = new EvolutionEngine<TChromosome>(
+        EvolutionEngine<TChromosome> engine = new EvolutionEngine<TChromosome>(
             fitnessFunction,
             crossoverFunc,
             mutationFunc,

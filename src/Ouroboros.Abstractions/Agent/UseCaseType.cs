@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent;
+namespace Ouroboros.Agent;
 
 /// <summary>
 /// Primary use case types for model selection.

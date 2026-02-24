@@ -23,7 +23,7 @@ public sealed record DistinctionId(Guid Value)
     /// <returns>A distinction ID if parsing succeeds, otherwise None.</returns>
     public static Option<DistinctionId> FromString(string value)
     {
-        if (Guid.TryParse(value, out var guid))
+        if (Guid.TryParse(value, out Guid guid))
         {
             return Option<DistinctionId>.Some(new DistinctionId(guid));
         }

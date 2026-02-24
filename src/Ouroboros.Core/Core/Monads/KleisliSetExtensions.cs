@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Monads;
+namespace Ouroboros.Core.Monads;
 
 /// <summary>
 /// Extension methods for KleisliSet arrows.

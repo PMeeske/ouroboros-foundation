@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Ethics;
+namespace Ouroboros.Core.Ethics;
 
 /// <summary>
 /// Represents an immutable audit entry for ethical evaluations.
@@ -43,6 +43,6 @@ public sealed record EthicsAuditEntry
     /// <summary>
     /// Gets additional context data for this audit entry.
     /// </summary>
-    public IReadOnlyDictionary<string, object> Context { get; init; } = 
+    public IReadOnlyDictionary<string, object> Context { get; init; } =
         new Dictionary<string, object>();
 }

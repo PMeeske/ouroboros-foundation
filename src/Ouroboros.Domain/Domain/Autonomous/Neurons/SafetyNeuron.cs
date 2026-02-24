@@ -32,12 +32,12 @@ public sealed class SafetyNeuron : Neuron
     protected override Task ProcessMessageAsync(NeuronMessage message, CancellationToken ct)
     {
         // Monitor all messages for safety concerns
-        var payload = message.Payload?.ToString() ?? "";
+        string payload = message.Payload?.ToString() ?? "";
 
         // Check for dangerous patterns
         if (ContainsDangerousPattern(payload))
         {
-            var violation = $"[{DateTime.UtcNow:HH:mm:ss}] Potential unsafe operation from {message.SourceNeuron}: {message.Topic}";
+            string violation = $"[{DateTime.UtcNow:HH:mm:ss}] Potential unsafe operation from {message.SourceNeuron}: {message.Topic}";
             _violations.Add(violation);
 
             // Alert other neurons
@@ -68,7 +68,7 @@ public sealed class SafetyNeuron : Neuron
 
     private static bool ContainsDangerousPattern(string content)
     {
-        var dangerousPatterns = new[]
+        string[] dangerousPatterns = new[]
         {
             "rm -rf /",
             "format c:",

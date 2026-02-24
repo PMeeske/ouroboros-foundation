@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Hyperon;
+namespace Ouroboros.Core.Hyperon;
 
 /// <summary>
 /// Represents a symbol (named constant) in the atom space.

@@ -94,7 +94,7 @@ public sealed record Affordance(
     /// </summary>
     public bool CanBeUsedBy(IReadOnlySet<string> agentCapabilities)
     {
-        foreach (var required in RequiredCapabilities)
+        foreach (string required in RequiredCapabilities)
         {
             if (!agentCapabilities.Contains(required))
             {

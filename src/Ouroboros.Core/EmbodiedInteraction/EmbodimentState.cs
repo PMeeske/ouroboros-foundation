@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.EmbodiedInteraction;
+namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Represents the agent's virtual embodiment state.

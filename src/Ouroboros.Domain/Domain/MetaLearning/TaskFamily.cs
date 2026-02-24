@@ -43,10 +43,10 @@ public sealed record TaskFamily(
             throw new ArgumentException("Validation split must be between 0 and 1", nameof(validationSplit));
         }
 
-        var splitIndex = (int)(allTasks.Count * (1 - validationSplit));
-        var trainingTasks = allTasks.Take(splitIndex).ToList();
-        var validationTasks = allTasks.Skip(splitIndex).ToList();
-        var distribution = TaskDistribution.Uniform(trainingTasks);
+        int splitIndex = (int)(allTasks.Count * (1 - validationSplit));
+        List<SynthesisTask> trainingTasks = allTasks.Take(splitIndex).ToList();
+        List<SynthesisTask> validationTasks = allTasks.Skip(splitIndex).ToList();
+        TaskDistribution distribution = TaskDistribution.Uniform(trainingTasks);
 
         return new TaskFamily(domain, trainingTasks, validationTasks, distribution);
     }

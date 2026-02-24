@@ -46,11 +46,11 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
 
         try
         {
-            var filePath = Path.Combine(_config.StoragePath, $"{id}.weights");
+            string filePath = Path.Combine(_config.StoragePath, $"{id}.weights");
             await File.WriteAllBytesAsync(filePath, weights, ct);
 
             // Update metadata with actual file path
-            var updatedMetadata = metadata with { Path = filePath };
+            DistinctionWeightMetadata updatedMetadata = metadata with { Path = filePath };
             await UpdateMetadataAsync(updatedMetadata, ct);
 
             _logger?.LogDebug("Stored weights {Id} at {Path}", id, filePath);
@@ -72,13 +72,13 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
 
         try
         {
-            var filePath = Path.Combine(_config.StoragePath, $"{id}.weights");
+            string filePath = Path.Combine(_config.StoragePath, $"{id}.weights");
             if (!File.Exists(filePath))
             {
                 return Result<byte[], string>.Failure($"Weights file not found: {id}");
             }
 
-            var weights = await File.ReadAllBytesAsync(filePath, ct);
+            byte[] weights = await File.ReadAllBytesAsync(filePath, ct);
             return Result<byte[], string>.Success(weights);
         }
         catch (Exception ex)
@@ -101,8 +101,8 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
                 return Result<List<DistinctionWeightMetadata>, string>.Success(new List<DistinctionWeightMetadata>());
             }
 
-            var json = await File.ReadAllTextAsync(_metadataPath, ct);
-            var metadata = JsonSerializer.Deserialize<List<DistinctionWeightMetadata>>(json)
+            string json = await File.ReadAllTextAsync(_metadataPath, ct);
+            List<DistinctionWeightMetadata> metadata = JsonSerializer.Deserialize<List<DistinctionWeightMetadata>>(json)
                 ?? new List<DistinctionWeightMetadata>();
 
             return Result<List<DistinctionWeightMetadata>, string>.Success(metadata);
@@ -124,18 +124,18 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
         try
         {
             // Move file to .dissolved extension
-            var dissolvedPath = path + ".dissolved";
+            string dissolvedPath = path + ".dissolved";
             if (File.Exists(path))
             {
                 File.Move(path, dissolvedPath, overwrite: true);
             }
 
             // Update metadata
-            var listResult = await ListWeightsAsync(ct);
+            Result<List<DistinctionWeightMetadata>, string> listResult = await ListWeightsAsync(ct);
             if (listResult.IsSuccess)
             {
-                var allMetadata = listResult.Value;
-                var updated = allMetadata.Select(m =>
+                List<DistinctionWeightMetadata> allMetadata = listResult.Value;
+                List<DistinctionWeightMetadata> updated = allMetadata.Select(m =>
                     m.Path == path ? m with { IsDissolved = true, Path = dissolvedPath } : m).ToList();
 
                 await SaveMetadataAsync(updated, ct);
@@ -157,8 +157,8 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
     {
         try
         {
-            var files = Directory.GetFiles(_config.StoragePath, "*.weights");
-            var totalSize = files.Sum(f => new FileInfo(f).Length);
+            string[] files = Directory.GetFiles(_config.StoragePath, "*.weights");
+            long totalSize = files.Sum(f => new FileInfo(f).Length);
 
             return Result<long, string>.Success(totalSize);
         }
@@ -171,11 +171,11 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
 
     private async Task UpdateMetadataAsync(DistinctionWeightMetadata metadata, CancellationToken ct)
     {
-        var listResult = await ListWeightsAsync(ct);
-        var allMetadata = listResult.IsSuccess ? listResult.Value : new List<DistinctionWeightMetadata>();
+        Result<List<DistinctionWeightMetadata>, string> listResult = await ListWeightsAsync(ct);
+        List<DistinctionWeightMetadata> allMetadata = listResult.IsSuccess ? listResult.Value : new List<DistinctionWeightMetadata>();
 
         // Add or update metadata
-        var existing = allMetadata.FindIndex(m => m.Id == metadata.Id);
+        int existing = allMetadata.FindIndex(m => m.Id == metadata.Id);
         if (existing >= 0)
         {
             allMetadata[existing] = metadata;
@@ -190,7 +190,7 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
 
     private async Task SaveMetadataAsync(List<DistinctionWeightMetadata> metadata, CancellationToken ct)
     {
-        var json = JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true });
+        string json = JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true });
         await File.WriteAllTextAsync(_metadataPath, json, ct);
     }
 }

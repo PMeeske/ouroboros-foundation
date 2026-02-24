@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Ethics;
+namespace Ouroboros.Core.Ethics;
 
 /// <summary>
 /// Interface for action executors that can be wrapped with ethics enforcement.

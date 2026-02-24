@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.LawsOfForm;
+namespace Ouroboros.Core.LawsOfForm;
 
 /// <summary>
 /// Represents a factual claim extracted from text.

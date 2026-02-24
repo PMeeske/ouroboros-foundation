@@ -65,7 +65,7 @@ public sealed class RouletteWheelSelection<TGene>
         double randomValue = this.random.NextDouble() * totalFitness;
         double cumulativeFitness = 0;
 
-        foreach (var chromosome in population.Chromosomes)
+        foreach (IChromosome<TGene> chromosome in population.Chromosomes)
         {
             cumulativeFitness += chromosome.Fitness + offset;
             if (cumulativeFitness >= randomValue)
@@ -91,7 +91,7 @@ public sealed class RouletteWheelSelection<TGene>
             throw new ArgumentException("Count must be non-negative", nameof(count));
         }
 
-        var selected = new List<IChromosome<TGene>>(count);
+        List<IChromosome<TGene>> selected = new List<IChromosome<TGene>>(count);
         for (int i = 0; i < count; i++)
         {
             selected.Add(Select(population));

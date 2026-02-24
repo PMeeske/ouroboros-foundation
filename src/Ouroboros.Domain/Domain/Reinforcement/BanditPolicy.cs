@@ -42,14 +42,14 @@ public sealed class BanditPolicy : IPolicy
 
         // UCB selection: argmax_a [Q(a) + c * sqrt(ln(N) / n(a))]
         EnvironmentAction? bestAction = null;
-        var bestUcb = double.NegativeInfinity;
+        double bestUcb = double.NegativeInfinity;
 
-        var totalTrialsSnapshot = this.totalTrials;
+        int totalTrialsSnapshot = this.totalTrials;
 
-        foreach (var action in availableActions)
+        foreach (EnvironmentAction action in availableActions)
         {
-            var actionKey = this.GetActionKey(action);
-            var stats = this.actionStats.GetOrAdd(actionKey, _ => new ActionStats());
+            string actionKey = this.GetActionKey(action);
+            ActionStats stats = this.actionStats.GetOrAdd(actionKey, _ => new ActionStats());
 
             double ucbValue;
             if (stats.Count == 0)
@@ -59,8 +59,8 @@ public sealed class BanditPolicy : IPolicy
             }
             else
             {
-                var exploitation = stats.AverageReward;
-                var exploration = this.explorationFactor * Math.Sqrt(Math.Log(totalTrialsSnapshot + 1) / stats.Count);
+                double exploitation = stats.AverageReward;
+                double exploration = this.explorationFactor * Math.Sqrt(Math.Log(totalTrialsSnapshot + 1) / stats.Count);
                 ucbValue = exploitation + exploration;
             }
 
@@ -81,8 +81,8 @@ public sealed class BanditPolicy : IPolicy
         Observation observation,
         CancellationToken cancellationToken = default)
     {
-        var actionKey = this.GetActionKey(action);
-        var stats = this.actionStats.GetOrAdd(actionKey, _ => new ActionStats());
+        string actionKey = this.GetActionKey(action);
+        ActionStats stats = this.actionStats.GetOrAdd(actionKey, _ => new ActionStats());
 
         // Update running average
         stats.Update(observation.Reward);
@@ -98,8 +98,8 @@ public sealed class BanditPolicy : IPolicy
             return action.ActionType;
         }
 
-        var keys = action.Parameters.Keys.OrderBy(k => k);
-        var values = keys.Select(k => $"{k}:{action.Parameters[k]}");
+        IOrderedEnumerable<string> keys = action.Parameters.Keys.OrderBy(k => k);
+        IEnumerable<string> values = keys.Select(k => $"{k}:{action.Parameters[k]}");
         return $"{action.ActionType}({string.Join(",", values)})";
     }
 

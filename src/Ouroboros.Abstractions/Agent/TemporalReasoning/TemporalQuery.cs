@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent.TemporalReasoning;
+namespace Ouroboros.Agent.TemporalReasoning;
 
 /// <summary>
 /// Parameters for querying temporal events.

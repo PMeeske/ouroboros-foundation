@@ -22,13 +22,13 @@ public sealed record DCTCompressedVector(
     /// <summary>Serializes to bytes.</summary>
     public byte[] ToBytes()
     {
-        using var ms = new MemoryStream();
-        using var writer = new BinaryWriter(ms);
+        using MemoryStream ms = new MemoryStream();
+        using BinaryWriter writer = new BinaryWriter(ms);
 
         writer.Write(OriginalLength);
         writer.Write(Coefficients.Length);
 
-        foreach (var c in Coefficients)
+        foreach (float c in Coefficients)
             writer.Write(c);
 
         return ms.ToArray();
@@ -37,13 +37,13 @@ public sealed record DCTCompressedVector(
     /// <summary>Deserializes from bytes.</summary>
     public static DCTCompressedVector FromBytes(byte[] data)
     {
-        using var ms = new MemoryStream(data);
-        using var reader = new BinaryReader(ms);
+        using MemoryStream ms = new MemoryStream(data);
+        using BinaryReader reader = new BinaryReader(ms);
 
         int origLen = reader.ReadInt32();
         int coeffLen = reader.ReadInt32();
 
-        var coeffs = new float[coeffLen];
+        float[] coeffs = new float[coeffLen];
         for (int i = 0; i < coeffLen; i++)
             coeffs[i] = reader.ReadSingle();
 

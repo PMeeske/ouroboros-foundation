@@ -63,9 +63,9 @@ public sealed class Mutation<TGene>
     /// <returns>A mutated chromosome.</returns>
     public IChromosome<TGene> Mutate(IChromosome<TGene> chromosome)
     {
-        var mutatedGenes = new List<TGene>(chromosome.Genes.Count);
+        List<TGene> mutatedGenes = new List<TGene>(chromosome.Genes.Count);
 
-        foreach (var gene in chromosome.Genes)
+        foreach (TGene? gene in chromosome.Genes)
         {
             if (this.random.NextDouble() < this.mutationRate)
             {
@@ -87,7 +87,7 @@ public sealed class Mutation<TGene>
     /// <returns>A new population with mutated chromosomes.</returns>
     public Population<TGene> MutatePopulation(Population<TGene> population)
     {
-        var mutatedChromosomes = population.Chromosomes
+        List<IChromosome<TGene>> mutatedChromosomes = population.Chromosomes
             .Select(Mutate)
             .ToList();
 

@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.EmbodiedInteraction;
+namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Capability that the virtual self possesses.

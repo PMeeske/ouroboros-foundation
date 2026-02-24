@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.EmbodiedInteraction;
+namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Unified perception event from any sensor.

@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Providers.Firecrawl;
+namespace Ouroboros.Providers.Firecrawl;
 
 /// <summary>
 /// A search result with scraped content.

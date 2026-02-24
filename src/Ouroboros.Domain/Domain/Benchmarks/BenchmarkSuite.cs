@@ -31,9 +31,9 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
 
         try
         {
-            var stopwatch = Stopwatch.StartNew();
-            var results = new List<TaskResult>();
-            var subScores = new Dictionary<string, double>();
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            List<TaskResult> results = new List<TaskResult>();
+            Dictionary<string, double> subScores = new Dictionary<string, double>();
 
             // Generate ARC tasks (abstract reasoning challenges)
             for (int i = 0; i < taskCount; i++)
@@ -43,10 +43,10 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
                     return Result<BenchmarkReport, string>.Failure("Benchmark cancelled");
                 }
 
-                var taskStopwatch = Stopwatch.StartNew();
+                Stopwatch taskStopwatch = Stopwatch.StartNew();
 
                 // Simulate ARC task execution (placeholder implementation)
-                var taskResult = await this.ExecuteARCTaskAsync($"arc-task-{i}", ct);
+                (bool success, double score, string? error, string difficulty, string patternType) taskResult = await this.ExecuteARCTaskAsync($"arc-task-{i}", ct);
                 taskStopwatch.Stop();
 
                 results.Add(new TaskResult(
@@ -66,22 +66,22 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
             stopwatch.Stop();
 
             // Calculate overall score
-            var successfulResults = results.Where(r => r.Success).ToList();
-            var overallScore = successfulResults.Any()
+            List<TaskResult> successfulResults = results.Where(r => r.Success).ToList();
+            double overallScore = successfulResults.Any()
                 ? successfulResults.Average(r => r.Score)
                 : 0.0;
 
             // Calculate sub-scores by pattern type
-            var patternGroups = results
+            IEnumerable<IGrouping<string, TaskResult>> patternGroups = results
                 .Where(r => r.Success)
                 .GroupBy(r => (string)r.Metadata["pattern_type"]);
 
-            foreach (var group in patternGroups)
+            foreach (IGrouping<string, TaskResult> group in patternGroups)
             {
                 subScores[group.Key] = group.Average(r => r.Score);
             }
 
-            var report = new BenchmarkReport(
+            BenchmarkReport report = new BenchmarkReport(
                 BenchmarkName: "ARC-AGI-2",
                 OverallScore: overallScore,
                 SubScores: subScores,
@@ -115,21 +115,21 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
 
         try
         {
-            var stopwatch = Stopwatch.StartNew();
-            var results = new List<TaskResult>();
-            var subScores = new Dictionary<string, double>();
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            List<TaskResult> results = new List<TaskResult>();
+            Dictionary<string, double> subScores = new Dictionary<string, double>();
 
-            foreach (var subject in subjects)
+            foreach (string subject in subjects)
             {
                 if (ct.IsCancellationRequested)
                 {
                     return Result<BenchmarkReport, string>.Failure("Benchmark cancelled");
                 }
 
-                var subjectStopwatch = Stopwatch.StartNew();
+                Stopwatch subjectStopwatch = Stopwatch.StartNew();
 
                 // Execute MMLU tasks for this subject
-                var subjectResult = await this.ExecuteMMLUSubjectAsync(subject, ct);
+                (bool success, double score, string? error, int questionCount) subjectResult = await this.ExecuteMMLUSubjectAsync(subject, ct);
                 subjectStopwatch.Stop();
 
                 results.Add(new TaskResult(
@@ -154,9 +154,9 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
             stopwatch.Stop();
 
             // Calculate overall score
-            var overallScore = subScores.Any() ? subScores.Values.Average() : 0.0;
+            double overallScore = subScores.Any() ? subScores.Values.Average() : 0.0;
 
-            var report = new BenchmarkReport(
+            BenchmarkReport report = new BenchmarkReport(
                 BenchmarkName: "MMLU",
                 OverallScore: overallScore,
                 SubScores: subScores,
@@ -190,21 +190,21 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
 
         try
         {
-            var stopwatch = Stopwatch.StartNew();
-            var results = new List<TaskResult>();
-            var subScores = new Dictionary<string, double>();
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            List<TaskResult> results = new List<TaskResult>();
+            Dictionary<string, double> subScores = new Dictionary<string, double>();
 
-            foreach (var sequence in sequences)
+            foreach (TaskSequence sequence in sequences)
             {
                 if (ct.IsCancellationRequested)
                 {
                     return Result<BenchmarkReport, string>.Failure("Benchmark cancelled");
                 }
 
-                var sequenceStopwatch = Stopwatch.StartNew();
+                Stopwatch sequenceStopwatch = Stopwatch.StartNew();
 
                 // Execute continual learning sequence
-                var sequenceResult = await this.ExecuteContinualLearningSequenceAsync(sequence, ct);
+                (bool success, double retentionScore, string? error, double initialAccuracy, double finalAccuracy) sequenceResult = await this.ExecuteContinualLearningSequenceAsync(sequence, ct);
                 sequenceStopwatch.Stop();
 
                 results.Add(new TaskResult(
@@ -231,9 +231,9 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
             stopwatch.Stop();
 
             // Calculate overall retention score
-            var overallScore = subScores.Any() ? subScores.Values.Average() : 0.0;
+            double overallScore = subScores.Any() ? subScores.Values.Average() : 0.0;
 
-            var report = new BenchmarkReport(
+            BenchmarkReport report = new BenchmarkReport(
                 BenchmarkName: "Continual Learning",
                 OverallScore: overallScore,
                 SubScores: subScores,
@@ -261,20 +261,20 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
     {
         try
         {
-            var stopwatch = Stopwatch.StartNew();
-            var results = new List<TaskResult>();
-            var subScores = new Dictionary<string, double>();
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            List<TaskResult> results = new List<TaskResult>();
+            Dictionary<string, double> subScores = new Dictionary<string, double>();
 
             // Execute dimension-specific tasks
-            var dimensionResult = await this.ExecuteCognitiveDimensionAsync(dimension, ct);
+            (List<TaskResult> tasks, string? error) dimensionResult = await this.ExecuteCognitiveDimensionAsync(dimension, ct);
             stopwatch.Stop();
 
-            foreach (var task in dimensionResult.tasks)
+            foreach (TaskResult task in dimensionResult.tasks)
             {
                 results.Add(task);
                 if (task.Success && task.Metadata.ContainsKey("category"))
                 {
-                    var category = (string)task.Metadata["category"];
+                    string category = (string)task.Metadata["category"];
                     if (!subScores.ContainsKey(category))
                     {
                         subScores[category] = 0;
@@ -284,11 +284,11 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
                 }
             }
 
-            var overallScore = results.Where(r => r.Success).Any()
+            double overallScore = results.Where(r => r.Success).Any()
                 ? results.Where(r => r.Success).Average(r => r.Score)
                 : 0.0;
 
-            var report = new BenchmarkReport(
+            BenchmarkReport report = new BenchmarkReport(
                 BenchmarkName: $"Cognitive: {dimension}",
                 OverallScore: overallScore,
                 SubScores: subScores,
@@ -314,18 +314,18 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
     {
         try
         {
-            var benchmarkResults = new Dictionary<string, BenchmarkReport>();
+            Dictionary<string, BenchmarkReport> benchmarkResults = new Dictionary<string, BenchmarkReport>();
 
             // Run ARC benchmark
-            var arcResult = await this.RunARCBenchmarkAsync(50, ct);
+            Result<BenchmarkReport, string> arcResult = await this.RunARCBenchmarkAsync(50, ct);
             if (arcResult.IsSuccess)
             {
                 benchmarkResults["ARC-AGI-2"] = arcResult.Value;
             }
 
             // Run MMLU benchmark with sample subjects
-            var mMLUSubjects = new List<string> { "mathematics", "physics", "computer_science", "history" };
-            var mMLUResult = await this.RunMMLUBenchmarkAsync(mMLUSubjects, ct);
+            List<string> mMLUSubjects = new List<string> { "mathematics", "physics", "computer_science", "history" };
+            Result<BenchmarkReport, string> mMLUResult = await this.RunMMLUBenchmarkAsync(mMLUSubjects, ct);
             if (mMLUResult.IsSuccess)
             {
                 benchmarkResults["MMLU"] = mMLUResult.Value;
@@ -339,7 +339,7 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
                     return Result<ComprehensiveReport, string>.Failure("Full evaluation cancelled");
                 }
 
-                var cognitiveResult = await this.RunCognitiveBenchmarkAsync(dimension, ct);
+                Result<BenchmarkReport, string> cognitiveResult = await this.RunCognitiveBenchmarkAsync(dimension, ct);
                 if (cognitiveResult.IsSuccess)
                 {
                     benchmarkResults[$"Cognitive-{dimension}"] = cognitiveResult.Value;
@@ -347,16 +347,16 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
             }
 
             // Calculate overall score
-            var overallScore = benchmarkResults.Values.Any()
+            double overallScore = benchmarkResults.Values.Any()
                 ? benchmarkResults.Values.Average(r => r.OverallScore)
                 : 0.0;
 
             // Analyze strengths and weaknesses
-            var strengths = this.IdentifyStrengths(benchmarkResults);
-            var weaknesses = this.IdentifyWeaknesses(benchmarkResults);
-            var recommendations = this.GenerateRecommendations(strengths, weaknesses);
+            List<string> strengths = this.IdentifyStrengths(benchmarkResults);
+            List<string> weaknesses = this.IdentifyWeaknesses(benchmarkResults);
+            List<string> recommendations = this.GenerateRecommendations(strengths, weaknesses);
 
-            var report = new ComprehensiveReport(
+            ComprehensiveReport report = new ComprehensiveReport(
                 BenchmarkResults: benchmarkResults,
                 OverallScore: overallScore,
                 Strengths: strengths,
@@ -380,15 +380,15 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
         // Simulate task execution with varying difficulty
         await Task.Delay(10, ct);
 
-        var random = new SeededRandomProvider(taskId.GetHashCode());
-        var difficulty = random.Next(3) switch
+        SeededRandomProvider random = new SeededRandomProvider(taskId.GetHashCode());
+        string difficulty = random.Next(3) switch
         {
             0 => "easy",
             1 => "medium",
             _ => "hard",
         };
 
-        var patternType = random.Next(4) switch
+        string patternType = random.Next(4) switch
         {
             0 => "rotation",
             1 => "scaling",
@@ -397,15 +397,15 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
         };
 
         // Simulate varying success based on difficulty
-        var baseScore = difficulty switch
+        double baseScore = difficulty switch
         {
             "easy" => 0.7,
             "medium" => 0.4,
             _ => 0.15,
         };
 
-        var score = Math.Max(0, Math.Min(1.0, baseScore + (random.NextDouble() * 0.2 - 0.1)));
-        var success = score > 0.5;
+        double score = Math.Max(0, Math.Min(1.0, baseScore + (random.NextDouble() * 0.2 - 0.1)));
+        bool success = score > 0.5;
 
         return (success, score, success ? null : "Task failed", difficulty, patternType);
     }
@@ -417,9 +417,9 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
         // Simulate MMLU subject test execution
         await Task.Delay(50, ct);
 
-        var random = new SeededRandomProvider(subject.GetHashCode());
-        var questionCount = random.Next(50, 100);
-        var score = 0.65 + (random.NextDouble() * 0.2); // Target 70%+
+        SeededRandomProvider random = new SeededRandomProvider(subject.GetHashCode());
+        int questionCount = random.Next(50, 100);
+        double score = 0.65 + (random.NextDouble() * 0.2); // Target 70%+
 
         return (true, score, null, questionCount);
     }
@@ -431,10 +431,10 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
         // Simulate continual learning with retention measurement
         await Task.Delay(100, ct);
 
-        var random = new SeededRandomProvider(sequence.Name.GetHashCode());
-        var initialAccuracy = 0.85 + (random.NextDouble() * 0.1);
-        var finalAccuracy = sequence.MeasureRetention ? 0.75 + (random.NextDouble() * 0.1) : initialAccuracy;
-        var retentionScore = finalAccuracy / initialAccuracy; // Target 80%+ retention
+        SeededRandomProvider random = new SeededRandomProvider(sequence.Name.GetHashCode());
+        double initialAccuracy = 0.85 + (random.NextDouble() * 0.1);
+        double finalAccuracy = sequence.MeasureRetention ? 0.75 + (random.NextDouble() * 0.1) : initialAccuracy;
+        double retentionScore = finalAccuracy / initialAccuracy; // Target 80%+ retention
 
         return (true, retentionScore, null, initialAccuracy, finalAccuracy);
     }
@@ -446,14 +446,14 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
         // Simulate cognitive dimension testing
         await Task.Delay(50, ct);
 
-        var tasks = new List<TaskResult>();
-        var random = new SeededRandomProvider((int)dimension);
+        List<TaskResult> tasks = new List<TaskResult>();
+        SeededRandomProvider random = new SeededRandomProvider((int)dimension);
 
         // Generate tasks based on dimension
-        var taskCount = 10;
+        int taskCount = 10;
         for (int i = 0; i < taskCount; i++)
         {
-            var score = this.GetDimensionBaseScore(dimension) + (random.NextDouble() * 0.2 - 0.1);
+            double score = this.GetDimensionBaseScore(dimension) + (random.NextDouble() * 0.2 - 0.1);
             score = Math.Max(0, Math.Min(1.0, score));
 
             tasks.Add(new TaskResult(
@@ -501,9 +501,9 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
 
     private List<string> IdentifyStrengths(Dictionary<string, BenchmarkReport> results)
     {
-        var strengths = new List<string>();
+        List<string> strengths = new List<string>();
 
-        foreach (var (name, report) in results)
+        foreach ((string? name, BenchmarkReport? report) in results)
         {
             if (report.OverallScore >= 0.7)
             {
@@ -521,9 +521,9 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
 
     private List<string> IdentifyWeaknesses(Dictionary<string, BenchmarkReport> results)
     {
-        var weaknesses = new List<string>();
+        List<string> weaknesses = new List<string>();
 
-        foreach (var (name, report) in results)
+        foreach ((string? name, BenchmarkReport? report) in results)
         {
             if (report.OverallScore < 0.5)
             {
@@ -541,7 +541,7 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
 
     private List<string> GenerateRecommendations(List<string> strengths, List<string> weaknesses)
     {
-        var recommendations = new List<string>();
+        List<string> recommendations = new List<string>();
 
         if (weaknesses.Any(w => w.Contains("ARC")))
         {

@@ -164,7 +164,7 @@ public sealed class IntentionBus : IDisposable
         TimeSpan? expiresIn = null,
         string? target = null)
     {
-        var intention = new Intention
+        Intention intention = new Intention
         {
             Title = title,
             Description = description,
@@ -202,10 +202,10 @@ public sealed class IntentionBus : IDisposable
     /// </summary>
     public bool ApproveIntention(Guid id, string? comment = null)
     {
-        if (!_intentions.TryGetValue(id, out var intention)) return false;
+        if (!_intentions.TryGetValue(id, out Intention? intention)) return false;
         if (intention.Status != IntentionStatus.Pending) return false;
 
-        var updated = intention with
+        Intention updated = intention with
         {
             Status = IntentionStatus.Approved,
             ActedAt = DateTime.UtcNow,
@@ -222,7 +222,7 @@ public sealed class IntentionBus : IDisposable
     /// </summary>
     public bool ApproveIntentionByPartialId(string partialId, string? comment = null)
     {
-        var intention = _intentions.Values.FirstOrDefault(i =>
+        Intention? intention = _intentions.Values.FirstOrDefault(i =>
             i.Id.ToString().StartsWith(partialId, StringComparison.OrdinalIgnoreCase) &&
             i.Status == IntentionStatus.Pending);
 
@@ -234,10 +234,10 @@ public sealed class IntentionBus : IDisposable
     /// </summary>
     public bool RejectIntention(Guid id, string? reason = null)
     {
-        if (!_intentions.TryGetValue(id, out var intention)) return false;
+        if (!_intentions.TryGetValue(id, out Intention? intention)) return false;
         if (intention.Status != IntentionStatus.Pending) return false;
 
-        var updated = intention with
+        Intention updated = intention with
         {
             Status = IntentionStatus.Rejected,
             ActedAt = DateTime.UtcNow,
@@ -254,7 +254,7 @@ public sealed class IntentionBus : IDisposable
     /// </summary>
     public bool RejectIntentionByPartialId(string partialId, string? reason = null)
     {
-        var intention = _intentions.Values.FirstOrDefault(i =>
+        Intention? intention = _intentions.Values.FirstOrDefault(i =>
             i.Id.ToString().StartsWith(partialId, StringComparison.OrdinalIgnoreCase) &&
             i.Status == IntentionStatus.Pending);
 
@@ -278,10 +278,10 @@ public sealed class IntentionBus : IDisposable
     /// </summary>
     public bool MarkExecuting(Guid id)
     {
-        if (!_intentions.TryGetValue(id, out var intention)) return false;
+        if (!_intentions.TryGetValue(id, out Intention? intention)) return false;
         if (intention.Status != IntentionStatus.Approved) return false;
 
-        var updated = intention with { Status = IntentionStatus.Executing };
+        Intention updated = intention with { Status = IntentionStatus.Executing };
         _intentions[id] = updated;
         _intentionEvents.OnNext(new IntentionEvent(updated, intention.Status, IntentionStatus.Executing, DateTime.UtcNow));
         return true;
@@ -292,10 +292,10 @@ public sealed class IntentionBus : IDisposable
     /// </summary>
     public bool MarkCompleted(Guid id, string result)
     {
-        if (!_intentions.TryGetValue(id, out var intention)) return false;
+        if (!_intentions.TryGetValue(id, out Intention? intention)) return false;
         if (intention.Status != IntentionStatus.Executing) return false;
 
-        var updated = intention with
+        Intention updated = intention with
         {
             Status = IntentionStatus.Completed,
             ExecutionResult = result,
@@ -313,9 +313,9 @@ public sealed class IntentionBus : IDisposable
     /// </summary>
     public bool MarkFailed(Guid id, string error)
     {
-        if (!_intentions.TryGetValue(id, out var intention)) return false;
+        if (!_intentions.TryGetValue(id, out Intention? intention)) return false;
 
-        var updated = intention with
+        Intention updated = intention with
         {
             Status = IntentionStatus.Failed,
             ExecutionResult = $"FAILED: {error}",
@@ -333,7 +333,7 @@ public sealed class IntentionBus : IDisposable
     /// </summary>
     public int ApproveAllLowRisk()
     {
-        var lowRisk = _intentions.Values
+        List<Intention> lowRisk = _intentions.Values
             .Where(i => i.Status == IntentionStatus.Pending &&
                         (i.Category == IntentionCategory.SelfReflection ||
                          i.Category == IntentionCategory.Learning ||
@@ -341,7 +341,7 @@ public sealed class IntentionBus : IDisposable
                         i.Priority <= IntentionPriority.Normal)
             .ToList();
 
-        foreach (var intention in lowRisk)
+        foreach (Intention? intention in lowRisk)
         {
             ApproveIntention(intention.Id, "Auto-approved as low-risk");
         }
@@ -357,16 +357,16 @@ public sealed class IntentionBus : IDisposable
             {
                 await Task.Delay(TimeSpan.FromSeconds(30), _cts.Token);
 
-                var now = DateTime.UtcNow;
-                var expired = _intentions.Values
+                DateTime now = DateTime.UtcNow;
+                List<Intention> expired = _intentions.Values
                     .Where(i => i.Status == IntentionStatus.Pending &&
                                 i.ExpiresAt.HasValue &&
                                 i.ExpiresAt.Value < now)
                     .ToList();
 
-                foreach (var intention in expired)
+                foreach (Intention? intention in expired)
                 {
-                    var updated = intention with { Status = IntentionStatus.Expired };
+                    Intention updated = intention with { Status = IntentionStatus.Expired };
                     _intentions[intention.Id] = updated;
                     _intentionEvents.OnNext(new IntentionEvent(updated, intention.Status, IntentionStatus.Expired, now));
                 }
@@ -383,11 +383,11 @@ public sealed class IntentionBus : IDisposable
     /// </summary>
     public string GetSummary()
     {
-        var pending = _intentions.Values.Count(i => i.Status == IntentionStatus.Pending);
-        var approved = _intentions.Values.Count(i => i.Status == IntentionStatus.Approved);
-        var completed = _intentions.Values.Count(i => i.Status == IntentionStatus.Completed);
-        var rejected = _intentions.Values.Count(i => i.Status == IntentionStatus.Rejected);
-        var failed = _intentions.Values.Count(i => i.Status == IntentionStatus.Failed);
+        int pending = _intentions.Values.Count(i => i.Status == IntentionStatus.Pending);
+        int approved = _intentions.Values.Count(i => i.Status == IntentionStatus.Approved);
+        int completed = _intentions.Values.Count(i => i.Status == IntentionStatus.Completed);
+        int rejected = _intentions.Values.Count(i => i.Status == IntentionStatus.Rejected);
+        int failed = _intentions.Values.Count(i => i.Status == IntentionStatus.Failed);
 
         return $"📊 **IntentionBus Status**\n" +
                $"  Pending: {pending}, Approved: {approved}, Completed: {completed}\n" +

@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Ethics;
+namespace Ouroboros.Core.Ethics;
 
 /// <summary>
 /// A homeostasis event raised when the system's ethical balance shifts.

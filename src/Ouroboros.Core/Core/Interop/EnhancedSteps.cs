@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Interop;
+namespace Ouroboros.Core.Interop;
 
 /// <summary>
 /// Enhanced step examples integrating with our monadic operations

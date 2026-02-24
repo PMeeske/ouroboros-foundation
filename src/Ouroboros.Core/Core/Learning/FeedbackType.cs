@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Learning;
+namespace Ouroboros.Core.Learning;
 
 /// <summary>
 /// Types of feedback signals for continual learning.

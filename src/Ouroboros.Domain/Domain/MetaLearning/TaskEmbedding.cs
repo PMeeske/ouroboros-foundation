@@ -29,11 +29,11 @@ public sealed record TaskEmbedding(
             throw new ArgumentException("Vectors must have the same dimension", nameof(other));
         }
 
-        var dotProduct = 0.0;
-        var normA = 0.0;
-        var normB = 0.0;
+        double dotProduct = 0.0;
+        double normA = 0.0;
+        double normB = 0.0;
 
-        for (var i = 0; i < Vector.Length; i++)
+        for (int i = 0; i < Vector.Length; i++)
         {
             dotProduct += Vector[i] * other.Vector[i];
             normA += Vector[i] * Vector[i];
@@ -45,7 +45,7 @@ public sealed record TaskEmbedding(
             return 0;
         }
 
-        var similarity = dotProduct / (Math.Sqrt(normA) * Math.Sqrt(normB));
+        double similarity = dotProduct / (Math.Sqrt(normA) * Math.Sqrt(normB));
 
         // Clamp to [0, 1] range due to floating-point precision errors
         return Math.Min(1.0, Math.Max(0.0, similarity));
@@ -64,10 +64,10 @@ public sealed record TaskEmbedding(
             throw new ArgumentException("Vectors must have the same dimension", nameof(other));
         }
 
-        var sumSquares = 0.0;
-        for (var i = 0; i < Vector.Length; i++)
+        double sumSquares = 0.0;
+        for (int i = 0; i < Vector.Length; i++)
         {
-            var diff = Vector[i] - other.Vector[i];
+            float diff = Vector[i] - other.Vector[i];
             sumSquares += diff * diff;
         }
 
@@ -89,9 +89,9 @@ public sealed record TaskEmbedding(
         Dictionary<string, double> characteristics,
         string description)
     {
-        var vector = new float[characteristics.Count];
-        var i = 0;
-        foreach (var value in characteristics.Values)
+        float[] vector = new float[characteristics.Count];
+        int i = 0;
+        foreach (double value in characteristics.Values)
         {
             vector[i++] = (float)value;
         }

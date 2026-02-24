@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent;
+namespace Ouroboros.Agent;
 
 /// <summary>
 /// Performance metrics for model/tool execution tracking.

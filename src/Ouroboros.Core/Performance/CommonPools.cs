@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Performance;
+namespace Ouroboros.Core.Performance;
 
 /// <summary>
 /// Pre-configured object pools for common types.

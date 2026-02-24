@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Diagnostics;
+namespace Ouroboros.Diagnostics;
 
 /// <summary>
 /// Represents a collected metric with metadata.

@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Security.Authentication;
+namespace Ouroboros.Core.Security.Authentication;
 
 /// <summary>
 /// Result of an authentication attempt.

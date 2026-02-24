@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.LawsOfForm;
+namespace Ouroboros.Core.LawsOfForm;
 
 /// <summary>
 /// Represents a piece of evidence in a decision trail.

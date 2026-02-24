@@ -35,12 +35,12 @@ public class KleisliPropertyTests
             Task.FromResult(Result<int, string>.Success(x - 5));
 
         // Left: (f >=> g) >=> h
-        var leftComposed = await ComposeKleisliResult(
+        Result<int, string> leftComposed = await ComposeKleisliResult(
             ComposeKleisliResult(f, g),
             h)(input);
 
         // Right: f >=> (g >=> h)
-        var rightComposed = await ComposeKleisliResult(
+        Result<int, string> rightComposed = await ComposeKleisliResult(
             f,
             ComposeKleisliResult(g, h))(input);
 
@@ -74,12 +74,12 @@ public class KleisliPropertyTests
                 : Result<int, string>.Failure("odd number"));
 
         // Left: (f >=> g) >=> h
-        var leftComposed = await ComposeKleisliResult(
+        Result<int, string> leftComposed = await ComposeKleisliResult(
             ComposeKleisliResult(f, g),
             h)(input);
 
         // Right: f >=> (g >=> h)
-        var rightComposed = await ComposeKleisliResult(
+        Result<int, string> rightComposed = await ComposeKleisliResult(
             f,
             ComposeKleisliResult(g, h))(input);
 
@@ -104,8 +104,8 @@ public class KleisliPropertyTests
         KleisliResult<int, int, string> f = x =>
             Task.FromResult(Result<int, string>.Success(x * 3 + 7));
 
-        var composed = await ComposeKleisliResult(identity, f)(input);
-        var direct = await f(input);
+        Result<int, string> composed = await ComposeKleisliResult(identity, f)(input);
+        Result<int, string> direct = await f(input);
 
         return (composed.IsSuccess == direct.IsSuccess &&
                 composed.Value == direct.Value);
@@ -127,8 +127,8 @@ public class KleisliPropertyTests
         KleisliResult<int, int, string> identity = x =>
             Task.FromResult(Result<int, string>.Success(x));
 
-        var composed = await ComposeKleisliResult(f, identity)(input);
-        var direct = await f(input);
+        Result<int, string> composed = await ComposeKleisliResult(f, identity)(input);
+        Result<int, string> direct = await f(input);
 
         return (composed.IsSuccess == direct.IsSuccess &&
                 composed.Value == direct.Value);
@@ -152,8 +152,8 @@ public class KleisliPropertyTests
                 ? Result<int, string>.Success(x * 2)
                 : Result<int, string>.Failure("negative"));
 
-        var composed = await ComposeKleisliResult(identity, f)(input);
-        var direct = await f(input);
+        Result<int, string> composed = await ComposeKleisliResult(identity, f)(input);
+        Result<int, string> direct = await f(input);
 
         return (composed.IsSuccess == direct.IsSuccess &&
                 (composed.IsFailure || composed.Value == direct.Value) &&
@@ -178,8 +178,8 @@ public class KleisliPropertyTests
         KleisliResult<int, int, string> identity = x =>
             Task.FromResult(Result<int, string>.Success(x));
 
-        var composed = await ComposeKleisliResult(f, identity)(input);
-        var direct = await f(input);
+        Result<int, string> composed = await ComposeKleisliResult(f, identity)(input);
+        Result<int, string> direct = await f(input);
 
         return (composed.IsSuccess == direct.IsSuccess &&
                 (composed.IsFailure || composed.Value == direct.Value) &&
@@ -203,7 +203,7 @@ public class KleisliPropertyTests
     {
         return async input =>
         {
-            var firstResult = await f(input);
+            Result<TMid, TError> firstResult = await f(input);
             if (firstResult.IsFailure)
             {
                 return Result<TOut, TError>.Failure(firstResult.Error);

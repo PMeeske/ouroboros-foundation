@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Providers.LoadBalancing;
+namespace Ouroboros.Providers.LoadBalancing;
 
 /// <summary>
 /// Result of provider selection including the selected provider and reasoning.

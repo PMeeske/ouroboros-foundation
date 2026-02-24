@@ -21,7 +21,7 @@ public static class MeTTaDSLBridge
     {
         try
         {
-            var atom = ConvertNode(node);
+            Atom atom = ConvertNode(node);
             return Result<Atom, string>.Success(atom);
         }
         catch (Exception ex)
@@ -39,7 +39,7 @@ public static class MeTTaDSLBridge
     {
         try
         {
-            var node = ConvertAtom(atom);
+            ASTNode node = ConvertAtom(atom);
             return Result<ASTNode, string>.Success(node);
         }
         catch (Exception ex)
@@ -80,8 +80,8 @@ public static class MeTTaDSLBridge
     public static Atom TypeRuleToMeTTa(TypeRule typeRule)
     {
         // Create a MeTTa atom for type rule: (: ruleName (-> inputTypes... outputType))
-        var inputTypeAtoms = typeRule.InputTypes.Select(Atom.Sym).ToList();
-        var arrowExpr = Atom.Expr(ImmutableList<Atom>.Empty
+        List<Symbol> inputTypeAtoms = typeRule.InputTypes.Select(Atom.Sym).ToList();
+        Expression arrowExpr = Atom.Expr(ImmutableList<Atom>.Empty
             .Add(Atom.Sym("->"))
             .AddRange(inputTypeAtoms)
             .Add(Atom.Sym(typeRule.OutputType)));
@@ -99,16 +99,16 @@ public static class MeTTaDSLBridge
     /// <returns>A list of MeTTa atoms representing the DSL.</returns>
     public static List<Atom> DSLToMeTTa(DomainSpecificLanguage dsl)
     {
-        var atoms = new List<Atom>();
+        List<Atom> atoms = new List<Atom>();
 
         // Add primitives
-        foreach (var primitive in dsl.Primitives)
+        foreach (Primitive primitive in dsl.Primitives)
         {
             atoms.Add(PrimitiveToMeTTa(primitive));
         }
 
         // Add type rules
-        foreach (var typeRule in dsl.TypeRules)
+        foreach (TypeRule typeRule in dsl.TypeRules)
         {
             atoms.Add(TypeRuleToMeTTa(typeRule));
         }
@@ -130,7 +130,7 @@ public static class MeTTaDSLBridge
     private static Atom ConvertApplication(ASTNode node)
     {
         // Convert application to S-expression
-        var children = new List<Atom> { Atom.Sym(node.Value) };
+        List<Atom> children = new List<Atom> { Atom.Sym(node.Value) };
         children.AddRange(node.Children.Select(ConvertNode));
         return Atom.Expr(children.ToImmutableList());
     }
@@ -153,15 +153,15 @@ public static class MeTTaDSLBridge
             return new ASTNode("Primitive", "()", new List<ASTNode>());
         }
 
-        var head = expr.Head();
+        Option<Atom> head = expr.Head();
         if (head.HasValue && head.Value is Symbol sym)
         {
-            var children = expr.Tail().Select(ConvertAtom).ToList();
+            List<ASTNode> children = expr.Tail().Select(ConvertAtom).ToList();
             return new ASTNode("Apply", sym.Name, children);
         }
 
         // Fallback: convert all children
-        var allChildren = expr.Children.Select(ConvertAtom).ToList();
+        List<ASTNode> allChildren = expr.Children.Select(ConvertAtom).ToList();
         return new ASTNode("Apply", "expr", allChildren);
     }
 }

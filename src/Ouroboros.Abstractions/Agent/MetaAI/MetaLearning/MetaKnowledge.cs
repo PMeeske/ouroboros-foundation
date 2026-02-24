@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent.MetaAI.MetaLearning;
+namespace Ouroboros.Agent.MetaAI.MetaLearning;
 
 /// <summary>
 /// Represents transferable meta-knowledge extracted from learning history.

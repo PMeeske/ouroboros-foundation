@@ -37,7 +37,7 @@ public sealed class CommunicationNeuron : Neuron
         {
             case "user.notify":
             case "notification.send":
-                var notification = message.Payload?.ToString();
+                string? notification = message.Payload?.ToString();
                 if (!string.IsNullOrEmpty(notification))
                 {
                     OnUserMessage?.Invoke(notification, message.Priority);
@@ -46,7 +46,7 @@ public sealed class CommunicationNeuron : Neuron
 
             case "share.insight":
                 // Another neuron wants to share something with the user
-                var insight = message.Payload?.ToString();
+                string? insight = message.Payload?.ToString();
                 if (!string.IsNullOrEmpty(insight))
                 {
                     ProposeIntention(

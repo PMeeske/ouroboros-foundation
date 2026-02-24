@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Synthesis;
+namespace Ouroboros.Core.Synthesis;
 
 /// <summary>
 /// Represents an input-output example for program synthesis.

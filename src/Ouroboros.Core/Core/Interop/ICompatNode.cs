@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Interop;
+namespace Ouroboros.Core.Interop;
 
 /// <summary>
 /// Compatible node interface for interop with various pipeline systems

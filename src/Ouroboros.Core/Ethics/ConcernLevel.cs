@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Ethics;
+namespace Ouroboros.Core.Ethics;
 
 /// <summary>
 /// Severity levels for ethical concerns.

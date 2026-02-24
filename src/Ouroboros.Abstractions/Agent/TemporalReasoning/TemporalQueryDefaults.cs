@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent.TemporalReasoning;
+namespace Ouroboros.Agent.TemporalReasoning;
 
 /// <summary>
 /// Default configuration values for temporal queries.

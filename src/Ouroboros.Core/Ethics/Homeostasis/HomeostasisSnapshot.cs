@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Ethics;
+namespace Ouroboros.Core.Ethics;
 
 /// <summary>
 /// A snapshot of the system's ethical homeostasis at a point in time.

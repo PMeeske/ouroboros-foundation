@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Synthesis;
+namespace Ouroboros.Core.Synthesis;
 
 /// <summary>
 /// Represents a synthesis task with examples and a DSL.

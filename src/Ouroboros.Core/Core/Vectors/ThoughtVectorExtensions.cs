@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Vectors;
+namespace Ouroboros.Core.Vectors;
 
 /// <summary>
 /// Extension methods for thought vector operations.

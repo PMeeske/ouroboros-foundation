@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent.MetaAI.SelfModel;
+namespace Ouroboros.Agent.MetaAI.SelfModel;
 
 /// <summary>
 /// Represents a forecast made by the agent.

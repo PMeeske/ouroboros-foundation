@@ -7,6 +7,7 @@ using Ouroboros.Abstractions;
 namespace Ouroboros.Domain.Learning;
 
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Ouroboros.Core.Learning;
 using Ouroboros.Core.Monads;
@@ -53,7 +54,7 @@ public sealed class InMemoryDistinctionWeightsRepository : IDistinctionWeightsRe
         DistinctionId id,
         CancellationToken ct = default)
     {
-        if (_storage.TryGetValue(id, out var weights))
+        if (_storage.TryGetValue(id, out DistinctionWeights? weights))
         {
             return Task.FromResult(Result<DistinctionWeights, string>.Success(weights));
         }
@@ -70,7 +71,7 @@ public sealed class InMemoryDistinctionWeightsRepository : IDistinctionWeightsRe
         try
         {
             // Simple cosine similarity search
-            var results = _storage.Values
+            List<DistinctionWeights> results = _storage.Values
                 .Select(w => (Weights: w, Similarity: CosineSimilarity(embedding, w.Embedding)))
                 .OrderByDescending(x => x.Similarity)
                 .Take(topK)
@@ -106,9 +107,9 @@ public sealed class InMemoryDistinctionWeightsRepository : IDistinctionWeightsRe
         double newFitness,
         CancellationToken ct = default)
     {
-        if (_storage.TryGetValue(id, out var weights))
+        if (_storage.TryGetValue(id, out DistinctionWeights? weights))
         {
-            var updated = weights with { Fitness = newFitness, LastUpdatedAt = DateTime.UtcNow };
+            DistinctionWeights updated = weights with { Fitness = newFitness, LastUpdatedAt = DateTime.UtcNow };
             _storage[id] = updated;
             _logger?.LogDebug("Updated fitness for {Id} to {Fitness}", id, newFitness);
             return Task.FromResult(Result<Unit, string>.Success(Unit.Value));
@@ -135,7 +136,7 @@ public sealed class InMemoryDistinctionWeightsRepository : IDistinctionWeightsRe
             normB += b[i] * b[i];
         }
 
-        var denominator = Math.Sqrt(normA) * Math.Sqrt(normB);
+        double denominator = Math.Sqrt(normA) * Math.Sqrt(normB);
         return denominator == 0 ? 0 : dotProduct / denominator;
     }
 }

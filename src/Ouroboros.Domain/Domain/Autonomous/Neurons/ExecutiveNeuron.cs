@@ -45,7 +45,7 @@ public sealed class ExecutiveNeuron : Neuron
         switch (message.Topic)
         {
             case "goal.add":
-                var goalText = message.Payload?.ToString();
+                string? goalText = message.Payload?.ToString();
                 if (!string.IsNullOrEmpty(goalText))
                 {
                     _currentGoals.Add(goalText);
@@ -54,7 +54,7 @@ public sealed class ExecutiveNeuron : Neuron
                 break;
 
             case "task.queue":
-                var taskText = message.Payload?.ToString();
+                string? taskText = message.Payload?.ToString();
                 if (!string.IsNullOrEmpty(taskText))
                 {
                     _taskQueue.Enqueue(taskText);
@@ -85,7 +85,7 @@ public sealed class ExecutiveNeuron : Neuron
         }
 
         // Process task queue
-        if (_taskQueue.TryDequeue(out var task))
+        if (_taskQueue.TryDequeue(out string? task))
         {
             ProposeIntention(
                 $"Execute Task: {task[..Math.Min(50, task.Length)]}",

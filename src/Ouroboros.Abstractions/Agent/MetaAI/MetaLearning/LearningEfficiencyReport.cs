@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent.MetaAI.MetaLearning;
+namespace Ouroboros.Agent.MetaAI.MetaLearning;
 
 /// <summary>
 /// Report on learning efficiency and bottlenecks.

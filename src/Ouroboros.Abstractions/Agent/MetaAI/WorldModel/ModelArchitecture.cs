@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent.MetaAI.WorldModel;
+namespace Ouroboros.Agent.MetaAI.WorldModel;
 
 /// <summary>
 /// Supported model architectures for world model learning.

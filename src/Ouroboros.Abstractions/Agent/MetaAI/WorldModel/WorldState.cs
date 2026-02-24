@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent.MetaAI.WorldModel;
+namespace Ouroboros.Agent.MetaAI.WorldModel;
 
 /// <summary>
 /// Represents a state in the world model.

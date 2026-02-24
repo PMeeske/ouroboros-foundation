@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.EmbodiedInteraction;
+namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Represents the virtual body schema - the agent's model of its own embodiment.
@@ -52,7 +52,7 @@ public sealed record VirtualSelfState(
     /// </summary>
     public VirtualSelfState WithSensorActive(SensorModality sensor)
     {
-        var newSensors = new HashSet<SensorModality>(ActiveSensors) { sensor };
+        HashSet<SensorModality> newSensors = new HashSet<SensorModality>(ActiveSensors) { sensor };
         return this with { ActiveSensors = newSensors, LastActiveAt = DateTime.UtcNow };
     }
 
@@ -61,7 +61,7 @@ public sealed record VirtualSelfState(
     /// </summary>
     public VirtualSelfState WithSensorInactive(SensorModality sensor)
     {
-        var newSensors = new HashSet<SensorModality>(ActiveSensors);
+        HashSet<SensorModality> newSensors = new HashSet<SensorModality>(ActiveSensors);
         newSensors.Remove(sensor);
         return this with { ActiveSensors = newSensors, LastActiveAt = DateTime.UtcNow };
     }

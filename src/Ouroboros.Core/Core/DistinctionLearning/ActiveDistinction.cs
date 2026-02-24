@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.DistinctionLearning;
+namespace Ouroboros.Core.DistinctionLearning;
 
 /// <summary>
 /// Represents an active distinction being tracked.

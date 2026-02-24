@@ -43,7 +43,7 @@ namespace Ouroboros.Core.Tracing
         public async Task<Result<Activity, string>> StartActivity(string name, Dictionary<string, object>? tags = null)
         {
             if (!_isEnabled) return Result<Activity, string>.Failure("Tracing is disabled");
-            var activity = DistributedTracing.StartActivity(name, tags: tags?.ToDictionary(kv => kv.Key, kv => (object?)kv.Value));
+            Activity? activity = DistributedTracing.StartActivity(name, tags: tags?.ToDictionary(kv => kv.Key, kv => (object?)kv.Value));
             if (activity == null) return Result<Activity, string>.Failure("Failed to start activity");
             _currentActivity = activity;
             return Result<Activity, string>.Success(activity);
@@ -65,7 +65,7 @@ namespace Ouroboros.Core.Tracing
 
         public async Task<Result<Unit, string>> SetStatus(Activity activity, string status, string description)
         {
-            var statusCode = status == "Ok" ? ActivityStatusCode.Ok : ActivityStatusCode.Error;
+            ActivityStatusCode statusCode = status == "Ok" ? ActivityStatusCode.Ok : ActivityStatusCode.Error;
             activity.SetStatus(statusCode, description);
             return Result<Unit, string>.Success(Unit.Value);
         }
@@ -78,13 +78,13 @@ namespace Ouroboros.Core.Tracing
 
         public Option<string> GetTraceId(Activity activity)
         {
-            var id = activity.TraceId.ToString();
+            string id = activity.TraceId.ToString();
             return string.IsNullOrEmpty(id) ? Option<string>.None() : Option<string>.Some(id);
         }
 
         public Option<string> GetSpanId(Activity activity)
         {
-            var id = activity.SpanId.ToString();
+            string id = activity.SpanId.ToString();
             return string.IsNullOrEmpty(id) ? Option<string>.None() : Option<string>.Some(id);
         }
 
@@ -95,9 +95,9 @@ namespace Ouroboros.Core.Tracing
 
         public async Task<Result<Activity, string>> TraceToolExecution(string toolName, string input)
         {
-            var result = await StartActivity($"ToolExecution-{toolName}");
+            Result<Activity, string> result = await StartActivity($"ToolExecution-{toolName}");
             if (result.IsFailure) return result;
-            var activity = result.Value;
+            Activity activity = result.Value;
             activity.SetTag("tool.name", toolName);
             activity.SetTag("tool.input", input);
             return Result<Activity, string>.Success(activity);
@@ -105,18 +105,18 @@ namespace Ouroboros.Core.Tracing
 
         public async Task<Result<Activity, string>> TracePipelineExecution(string pipelineName)
         {
-            var result = await StartActivity($"PipelineExecution-{pipelineName}");
+            Result<Activity, string> result = await StartActivity($"PipelineExecution-{pipelineName}");
             if (result.IsFailure) return result;
-            var activity = result.Value;
+            Activity activity = result.Value;
             activity.SetTag("pipeline.name", pipelineName);
             return Result<Activity, string>.Success(activity);
         }
 
         public async Task<Result<Activity, string>> TraceLlmRequest(string model, int maxTokens)
         {
-            var result = await StartActivity("llm.request");
+            Result<Activity, string> result = await StartActivity("llm.request");
             if (result.IsFailure) return result;
-            var activity = result.Value;
+            Activity activity = result.Value;
             activity.SetTag("llm.model", model);
             activity.SetTag("llm.max_tokens", maxTokens);
             return Result<Activity, string>.Success(activity);
@@ -124,9 +124,9 @@ namespace Ouroboros.Core.Tracing
 
         public async Task<Result<Activity, string>> TraceVectorOperation(string operation, int dimension)
         {
-            var result = await StartActivity($"VectorOperation-{operation}");
+            Result<Activity, string> result = await StartActivity($"VectorOperation-{operation}");
             if (result.IsFailure) return result;
-            var activity = result.Value;
+            Activity activity = result.Value;
             activity.SetTag("vector.operation", operation);
             activity.SetTag("vector.dimension", dimension);
             return Result<Activity, string>.Success(activity);

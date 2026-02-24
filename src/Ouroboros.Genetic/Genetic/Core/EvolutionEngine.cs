@@ -4,6 +4,7 @@
 
 namespace Ouroboros.Genetic.Core;
 
+using System.Collections.Generic;
 using Ouroboros.Core.Randomness;
 using Ouroboros.Genetic.Abstractions;
 using Ouroboros.Providers.Random;
@@ -79,10 +80,10 @@ public sealed class EvolutionEngine<TChromosome> : IEvolutionEngine<TChromosome>
             return Result<EvolutionPopulation<TChromosome>>.Failure("Initial population cannot be empty");
         }
 
-        var currentPopulation = initialPopulation;
+        EvolutionPopulation<TChromosome> currentPopulation = initialPopulation;
 
         // Evaluate initial population fitness
-        var evaluatedPopulation = await this.EvaluatePopulationAsync(currentPopulation);
+        Result<EvolutionPopulation<TChromosome>> evaluatedPopulation = await this.EvaluatePopulationAsync(currentPopulation);
         if (evaluatedPopulation.IsFailure)
         {
             return Result<EvolutionPopulation<TChromosome>>.Failure($"Initial fitness evaluation failed: {evaluatedPopulation.Error}");
@@ -93,7 +94,7 @@ public sealed class EvolutionEngine<TChromosome> : IEvolutionEngine<TChromosome>
         // Evolve for specified generations
         for (int generation = 0; generation < generations; generation++)
         {
-            var nextGenResult = await this.EvolveGenerationAsync(currentPopulation, generation + 1);
+            Result<EvolutionPopulation<TChromosome>> nextGenResult = await this.EvolveGenerationAsync(currentPopulation, generation + 1);
             if (nextGenResult.IsFailure)
             {
                 return Result<EvolutionPopulation<TChromosome>>.Failure($"Evolution failed at generation {generation + 1}: {nextGenResult.Error}");
@@ -122,36 +123,36 @@ public sealed class EvolutionEngine<TChromosome> : IEvolutionEngine<TChromosome>
         var newPopulationSize = currentPopulation.Size - eliteCount;
 
         // Preserve elite chromosomes
-        var sortedPopulation = currentPopulation.SortByFitness();
-        var elites = sortedPopulation.Take(eliteCount).Chromosomes.ToList();
+        EvolutionPopulation<TChromosome> sortedPopulation = currentPopulation.SortByFitness();
+        List<TChromosome> elites = sortedPopulation.Take(eliteCount).Chromosomes.ToList();
 
         // Generate new offspring
-        var offspring = new List<TChromosome>();
+        List<TChromosome> offspring = new List<TChromosome>();
 
         while (offspring.Count < newPopulationSize)
         {
             // Select parents
-            var parent1Result = this.selection.Select(currentPopulation);
+            Result<TChromosome> parent1Result = this.selection.Select(currentPopulation);
             if (parent1Result.IsFailure)
             {
                 return Result<EvolutionPopulation<TChromosome>>.Failure($"Parent selection failed: {parent1Result.Error}");
             }
 
-            var parent2Result = this.selection.Select(currentPopulation);
+            Result<TChromosome> parent2Result = this.selection.Select(currentPopulation);
             if (parent2Result.IsFailure)
             {
                 return Result<EvolutionPopulation<TChromosome>>.Failure($"Parent selection failed: {parent2Result.Error}");
             }
 
             // Crossover
-            var crossoverResult = this.crossover.Crossover(parent1Result.Value, parent2Result.Value, this.crossoverFunc);
+            Result<TChromosome> crossoverResult = this.crossover.Crossover(parent1Result.Value, parent2Result.Value, this.crossoverFunc);
             if (crossoverResult.IsFailure)
             {
                 return Result<EvolutionPopulation<TChromosome>>.Failure($"Crossover failed: {crossoverResult.Error}");
             }
 
             // Mutation
-            var mutationResult = this.mutation.Mutate(crossoverResult.Value, this.mutationFunc);
+            Result<TChromosome> mutationResult = this.mutation.Mutate(crossoverResult.Value, this.mutationFunc);
             if (mutationResult.IsFailure)
             {
                 return Result<EvolutionPopulation<TChromosome>>.Failure($"Mutation failed: {mutationResult.Error}");
@@ -161,8 +162,8 @@ public sealed class EvolutionEngine<TChromosome> : IEvolutionEngine<TChromosome>
         }
 
         // Combine elites and offspring
-        var newChromosomes = elites.Concat(offspring);
-        var newPopulation = new EvolutionPopulation<TChromosome>(newChromosomes);
+        IEnumerable<TChromosome> newChromosomes = elites.Concat(offspring);
+        EvolutionPopulation<TChromosome> newPopulation = new EvolutionPopulation<TChromosome>(newChromosomes);
 
         // Evaluate fitness of new population
         return await this.EvaluatePopulationAsync(newPopulation);
@@ -174,17 +175,17 @@ public sealed class EvolutionEngine<TChromosome> : IEvolutionEngine<TChromosome>
     private async Task<Result<EvolutionPopulation<TChromosome>>> EvaluatePopulationAsync(
         EvolutionPopulation<TChromosome> population)
     {
-        var evaluatedChromosomes = new List<TChromosome>();
+        List<TChromosome> evaluatedChromosomes = new List<TChromosome>();
 
-        foreach (var chromosome in population.Chromosomes)
+        foreach (TChromosome chromosome in population.Chromosomes)
         {
-            var fitnessResult = await this.fitnessFunction.EvaluateAsync(chromosome);
+            Result<double> fitnessResult = await this.fitnessFunction.EvaluateAsync(chromosome);
             if (fitnessResult.IsFailure)
             {
                 return Result<EvolutionPopulation<TChromosome>>.Failure($"Fitness evaluation failed for chromosome {chromosome.Id}: {fitnessResult.Error}");
             }
 
-            var updatedChromosome = (TChromosome)chromosome.WithFitness(fitnessResult.Value);
+            TChromosome updatedChromosome = (TChromosome)chromosome.WithFitness(fitnessResult.Value);
             evaluatedChromosomes.Add(updatedChromosome);
         }
 

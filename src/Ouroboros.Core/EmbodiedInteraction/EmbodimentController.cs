@@ -73,7 +73,7 @@ public sealed class EmbodimentController : IDisposable
         _audioSensors[id] = sensor;
 
         // Subscribe to sensor transcriptions and convert to unified perceptions
-        var sub = sensor.Transcriptions
+        IDisposable sub = sensor.Transcriptions
             .Select(t => new UnifiedPerception(
                 id,
                 SensorModality.Audio,
@@ -103,7 +103,7 @@ public sealed class EmbodimentController : IDisposable
         _visualSensors[id] = sensor;
 
         // Subscribe to sensor analysis results and convert to unified perceptions
-        var sub = sensor.AnalysisResults
+        IDisposable sub = sensor.AnalysisResults
             .Select(v => new UnifiedPerception(
                 id,
                 SensorModality.Visual,
@@ -146,23 +146,23 @@ public sealed class EmbodimentController : IDisposable
         try
         {
             // Start all audio sensors
-            foreach (var (id, sensor) in _audioSensors)
+            foreach ((string? id, AudioSensor? sensor) in _audioSensors)
             {
-                var result = await sensor.StartListeningAsync(ct);
+                Result<Unit, string> result = await sensor.StartListeningAsync(ct);
                 if (!result.IsSuccess)
                     return Result<Unit, string>.Failure($"Failed to start audio sensor {id}: {result.Error}");
             }
 
             // Start all visual sensors
-            foreach (var (id, sensor) in _visualSensors)
+            foreach ((string? id, VisualSensor? sensor) in _visualSensors)
             {
-                var result = sensor.StartObserving();
+                Result<Unit, string> result = sensor.StartObserving();
                 if (!result.IsSuccess)
                     return Result<Unit, string>.Failure($"Failed to start visual sensor {id}: {result.Error}");
             }
 
             // Subscribe perceptions to virtual self
-            var perceptionSub = _perceptions
+            IDisposable perceptionSub = _perceptions
                 .Subscribe(p =>
                 {
                     // VirtualSelf has specific methods for each perception type
@@ -220,10 +220,10 @@ public sealed class EmbodimentController : IDisposable
         {
             _virtualSelf.SetState(EmbodimentState.Dormant);
 
-            foreach (var sensor in _audioSensors.Values)
+            foreach (AudioSensor sensor in _audioSensors.Values)
                 await sensor.StopListeningAsync(ct);
 
-            foreach (var sensor in _visualSensors.Values)
+            foreach (VisualSensor sensor in _visualSensors.Values)
                 sensor.StopObserving();
 
             _isRunning = false;
@@ -247,7 +247,7 @@ public sealed class EmbodimentController : IDisposable
             return new ActionResult(request, false, "Controller is disposed");
         }
 
-        var start = DateTime.UtcNow;
+        DateTime start = DateTime.UtcNow;
 
         try
         {
@@ -279,7 +279,7 @@ public sealed class EmbodimentController : IDisposable
         string? actuatorId = null,
         CancellationToken ct = default)
     {
-        var actuator = actuatorId != null
+        VoiceActuator? actuator = actuatorId != null
             ? _voiceActuators.GetValueOrDefault(actuatorId)
             : _voiceActuators.Values.FirstOrDefault();
 
@@ -302,7 +302,7 @@ public sealed class EmbodimentController : IDisposable
         try
         {
             // Wait for fused perception from VirtualSelf
-            var fused = await _virtualSelf.FusedPerceptions
+            FusedPerception? fused = await _virtualSelf.FusedPerceptions
                 .Timeout(timeout)
                 .FirstOrDefaultAsync()
                 .ToTask(ct);
@@ -327,7 +327,7 @@ public sealed class EmbodimentController : IDisposable
     /// </summary>
     public void OnTextInput(string text, string source = "user")
     {
-        var perception = new TextPerception(
+        TextPerception perception = new TextPerception(
             Guid.NewGuid(),
             DateTime.UtcNow,
             1.0,
@@ -346,18 +346,18 @@ public sealed class EmbodimentController : IDisposable
         ActionRequest request,
         CancellationToken ct)
     {
-        var start = DateTime.UtcNow;
+        DateTime start = DateTime.UtcNow;
 
-        var actuator = _voiceActuators.GetValueOrDefault(request.TargetActuator)
+        VoiceActuator? actuator = _voiceActuators.GetValueOrDefault(request.TargetActuator)
             ?? _voiceActuators.Values.FirstOrDefault();
 
         if (actuator == null)
             return new ActionResult(request, false, "No voice actuator found");
 
-        var text = request.Content?.ToString() ?? string.Empty;
-        var emotion = request.Parameters?.GetValueOrDefault("emotion")?.ToString();
+        string text = request.Content?.ToString() ?? string.Empty;
+        string? emotion = request.Parameters?.GetValueOrDefault("emotion")?.ToString();
 
-        var result = await actuator.SpeakAsync(text, emotion, ct);
+        Result<SynthesizedSpeech, string> result = await actuator.SpeakAsync(text, emotion, ct);
 
         return new ActionResult(
             request,
@@ -374,16 +374,16 @@ public sealed class EmbodimentController : IDisposable
         if (_disposed) return;
         _disposed = true;
 
-        foreach (var sub in _subscriptions)
+        foreach (IDisposable sub in _subscriptions)
             sub.Dispose();
 
-        foreach (var sensor in _audioSensors.Values)
+        foreach (AudioSensor sensor in _audioSensors.Values)
             sensor.Dispose();
 
-        foreach (var sensor in _visualSensors.Values)
+        foreach (VisualSensor sensor in _visualSensors.Values)
             sensor.Dispose();
 
-        foreach (var actuator in _voiceActuators.Values)
+        foreach (VoiceActuator actuator in _voiceActuators.Values)
             actuator.Dispose();
 
         _perceptions.OnCompleted();

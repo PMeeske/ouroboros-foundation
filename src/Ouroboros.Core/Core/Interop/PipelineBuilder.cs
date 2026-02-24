@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Interop;
+namespace Ouroboros.Core.Interop;
 
 /// <summary>
 /// Fluent pipeline builder for enhanced composition

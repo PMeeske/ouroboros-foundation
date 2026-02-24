@@ -34,7 +34,7 @@ public static class GeneticEvolutionStep
             }
 
             // Evolve the population
-            var evolutionResult = await engine.EvolveAsync(initialPopulation, generations);
+            Result<EvolutionPopulation<TChromosome>> evolutionResult = await engine.EvolveAsync(initialPopulation, generations);
 
             if (evolutionResult.IsFailure)
             {
@@ -42,7 +42,7 @@ public static class GeneticEvolutionStep
             }
 
             // Get the best chromosome
-            var bestOption = engine.GetBest(evolutionResult.Value);
+            Option<TChromosome> bestOption = engine.GetBest(evolutionResult.Value);
 
             if (bestOption.HasValue)
             {
@@ -94,21 +94,21 @@ public static class GeneticEvolutionStep
         return async input =>
         {
             // Create initial population
-            var populationResult = populationFactory(input);
+            Result<EvolutionPopulation<TChromosome>> populationResult = populationFactory(input);
             if (populationResult.IsFailure)
             {
                 return Result<TChromosome>.Failure($"Population creation failed: {populationResult.Error}");
             }
 
             // Evolve
-            var evolutionResult = await engine.EvolveAsync(populationResult.Value, generations);
+            Result<EvolutionPopulation<TChromosome>> evolutionResult = await engine.EvolveAsync(populationResult.Value, generations);
             if (evolutionResult.IsFailure)
             {
                 return Result<TChromosome>.Failure(evolutionResult.Error);
             }
 
             // Get best
-            var bestOption = engine.GetBest(evolutionResult.Value);
+            Option<TChromosome> bestOption = engine.GetBest(evolutionResult.Value);
 
             if (bestOption.HasValue)
             {

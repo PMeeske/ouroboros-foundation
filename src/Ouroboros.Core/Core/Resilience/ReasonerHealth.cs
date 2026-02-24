@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Resilience;
+namespace Ouroboros.Core.Resilience;
 
 /// <summary>
 /// Represents the health status of the reasoning system.

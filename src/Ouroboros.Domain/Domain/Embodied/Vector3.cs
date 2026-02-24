@@ -45,7 +45,7 @@ public sealed record Vector3(float X, float Y, float Z)
     /// <returns>Normalized vector</returns>
     public Vector3 Normalized()
     {
-        var mag = this.Magnitude();
+        float mag = this.Magnitude();
         return mag > 0 ? new Vector3(this.X / mag, this.Y / mag, this.Z / mag) : Zero;
     }
 

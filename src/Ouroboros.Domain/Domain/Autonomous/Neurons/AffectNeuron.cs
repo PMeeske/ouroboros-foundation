@@ -95,8 +95,8 @@ public sealed class AffectNeuron : Neuron
     {
         if (payload is JsonElement json)
         {
-            if (json.TryGetProperty("arousal", out var a)) _arousal = Math.Clamp(a.GetDouble(), -1, 1);
-            if (json.TryGetProperty("valence", out var v)) _valence = Math.Clamp(v.GetDouble(), -1, 1);
+            if (json.TryGetProperty("arousal", out JsonElement a)) _arousal = Math.Clamp(a.GetDouble(), -1, 1);
+            if (json.TryGetProperty("valence", out JsonElement v)) _valence = Math.Clamp(v.GetDouble(), -1, 1);
         }
 
         UpdateDominantEmotion();

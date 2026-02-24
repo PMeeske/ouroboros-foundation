@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Interop;
+namespace Ouroboros.Core.Interop;
 
 /// <summary>
 /// Enhanced compatibility interop with monadic integration

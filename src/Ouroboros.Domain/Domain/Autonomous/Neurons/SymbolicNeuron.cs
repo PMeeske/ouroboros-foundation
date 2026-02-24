@@ -48,7 +48,7 @@ public sealed class SymbolicNeuron : Neuron
         switch (message.Topic)
         {
             case "metta.fact":
-                var fact = message.Payload?.ToString();
+                string? fact = message.Payload?.ToString();
                 if (!string.IsNullOrEmpty(fact))
                 {
                     _facts.Add(fact);
@@ -64,7 +64,7 @@ public sealed class SymbolicNeuron : Neuron
                 break;
 
             case "metta.rule":
-                var rule = message.Payload?.ToString();
+                string? rule = message.Payload?.ToString();
                 if (!string.IsNullOrEmpty(rule))
                 {
                     _rules.Add(rule);
@@ -79,33 +79,33 @@ public sealed class SymbolicNeuron : Neuron
 
             case "metta.query":
                 // Execute symbolic query
-                var query = message.Payload?.ToString() ?? "";
-                var result = await ExecuteSymbolicQueryAsync(query, ct);
+                string query = message.Payload?.ToString() ?? "";
+                string result = await ExecuteSymbolicQueryAsync(query, ct);
                 SendResponse(message, new { Query = query, Result = result });
                 break;
 
             case "reasoning.request":
                 // Request symbolic reasoning support
-                var context = message.Payload?.ToString() ?? "";
-                var reasoning = await PerformSymbolicReasoningAsync(context, ct);
+                string context = message.Payload?.ToString() ?? "";
+                object reasoning = await PerformSymbolicReasoningAsync(context, ct);
                 SendResponse(message, reasoning);
                 break;
 
             case "dag.verify":
                 // Verify DAG constraints
-                var verifyPayload = message.Payload as dynamic;
-                var branchName = verifyPayload?.BranchName?.ToString() ?? "main";
-                var constraint = verifyPayload?.Constraint?.ToString() ?? "acyclic";
-                var verifyResult = await VerifyDagConstraintAsync(branchName, constraint, ct);
+                dynamic? verifyPayload = message.Payload as dynamic;
+                dynamic branchName = verifyPayload?.BranchName?.ToString() ?? "main";
+                dynamic constraint = verifyPayload?.Constraint?.ToString() ?? "acyclic";
+                dynamic verifyResult = await VerifyDagConstraintAsync(branchName, constraint, ct);
                 SendResponse(message, new { BranchName = branchName, Constraint = constraint, IsValid = verifyResult });
                 break;
 
             case "dag.facts":
                 // Receive DAG facts from reification
-                var dagFacts = message.Payload as IEnumerable<string>;
+                IEnumerable<string>? dagFacts = message.Payload as IEnumerable<string>;
                 if (dagFacts != null)
                 {
-                    foreach (var dagFact in dagFacts)
+                    foreach (string dagFact in dagFacts)
                     {
                         if (!string.IsNullOrEmpty(dagFact))
                         {
@@ -142,7 +142,7 @@ public sealed class SymbolicNeuron : Neuron
         }
 
         // Fallback: simplified symbolic query
-        var matchingFacts = _facts
+        List<string> matchingFacts = _facts
             .Where(f => f.Contains(query, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
@@ -161,7 +161,7 @@ public sealed class SymbolicNeuron : Neuron
             try
             {
                 // Query for relevant facts about the context
-                var relevantQuery = $"!(match &self ($rel \"{context}\" $obj) ($rel $obj))";
+                string relevantQuery = $"!(match &self ($rel \"{context}\" $obj) ($rel $obj))";
                 mettaResult = await MeTTaQueryFunction(relevantQuery, ct);
             }
             catch
@@ -190,14 +190,14 @@ public sealed class SymbolicNeuron : Neuron
         try
         {
             // Build constraint query based on type
-            var query = constraint.ToLowerInvariant() switch
+            string query = constraint.ToLowerInvariant() switch
             {
                 "acyclic" => $"!(and (BelongsToBranch $e1 (Branch \"{branchName}\")) (Acyclic $e1 $e1))",
                 "valid-ordering" => $"!(and (Before $e1 $e2) (EventAtIndex $e1 $i1) (EventAtIndex $e2 $i2) (< $i1 $i2))",
                 _ => $"!(CheckConstraint \"{constraint}\" (Branch \"{branchName}\"))"
             };
 
-            var result = await MeTTaQueryFunction(query, ct);
+            string result = await MeTTaQueryFunction(query, ct);
 
             // Empty or true-like result means constraint is satisfied
             return string.IsNullOrWhiteSpace(result) ||

@@ -67,8 +67,8 @@ public sealed record BodySchema
     /// </summary>
     public BodySchema WithSensor(SensorDescriptor sensor)
     {
-        var newSensors = _sensors.SetItem(sensor.Id, sensor);
-        var newCapabilities = _capabilities.Union(sensor.Capabilities);
+        ImmutableDictionary<string, SensorDescriptor> newSensors = _sensors.SetItem(sensor.Id, sensor);
+        ImmutableHashSet<Capability> newCapabilities = _capabilities.Union(sensor.Capabilities);
         return new BodySchema(newSensors, _actuators, newCapabilities, _limitations);
     }
 
@@ -77,8 +77,8 @@ public sealed record BodySchema
     /// </summary>
     public BodySchema WithActuator(ActuatorDescriptor actuator)
     {
-        var newActuators = _actuators.SetItem(actuator.Id, actuator);
-        var newCapabilities = _capabilities.Union(actuator.Capabilities);
+        ImmutableDictionary<string, ActuatorDescriptor> newActuators = _actuators.SetItem(actuator.Id, actuator);
+        ImmutableHashSet<Capability> newCapabilities = _capabilities.Union(actuator.Capabilities);
         return new BodySchema(_sensors, newActuators, newCapabilities, _limitations);
     }
 
@@ -105,11 +105,11 @@ public sealed record BodySchema
     {
         if (!_sensors.ContainsKey(sensorId)) return this;
 
-        var sensor = _sensors[sensorId];
-        var newSensors = _sensors.Remove(sensorId);
+        SensorDescriptor sensor = _sensors[sensorId];
+        ImmutableDictionary<string, SensorDescriptor> newSensors = _sensors.Remove(sensorId);
 
         // Recompute capabilities from remaining sensors and actuators
-        var remainingCaps = ComputeCapabilities(newSensors.Values, _actuators.Values);
+        ImmutableHashSet<Capability> remainingCaps = ComputeCapabilities(newSensors.Values, _actuators.Values);
         return new BodySchema(newSensors, _actuators, remainingCaps, _limitations);
     }
 
@@ -120,8 +120,8 @@ public sealed record BodySchema
     {
         if (!_actuators.ContainsKey(actuatorId)) return this;
 
-        var newActuators = _actuators.Remove(actuatorId);
-        var remainingCaps = ComputeCapabilities(_sensors.Values, newActuators.Values);
+        ImmutableDictionary<string, ActuatorDescriptor> newActuators = _actuators.Remove(actuatorId);
+        ImmutableHashSet<Capability> remainingCaps = ComputeCapabilities(_sensors.Values, newActuators.Values);
         return new BodySchema(_sensors, newActuators, remainingCaps, _limitations);
     }
 
@@ -135,7 +135,7 @@ public sealed record BodySchema
     /// Gets a sensor by ID.
     /// </summary>
     public Option<SensorDescriptor> GetSensor(string id) =>
-        _sensors.TryGetValue(id, out var sensor)
+        _sensors.TryGetValue(id, out SensorDescriptor? sensor)
             ? Option<SensorDescriptor>.Some(sensor)
             : Option<SensorDescriptor>.None();
 
@@ -143,7 +143,7 @@ public sealed record BodySchema
     /// Gets an actuator by ID.
     /// </summary>
     public Option<ActuatorDescriptor> GetActuator(string id) =>
-        _actuators.TryGetValue(id, out var actuator)
+        _actuators.TryGetValue(id, out ActuatorDescriptor? actuator)
             ? Option<ActuatorDescriptor>.Some(actuator)
             : Option<ActuatorDescriptor>.None();
 
@@ -176,12 +176,12 @@ public sealed record BodySchema
     /// </summary>
     public string DescribeSelf()
     {
-        var parts = new List<string> { "I am an AI assistant with the following embodiment:" };
+        List<string> parts = new List<string> { "I am an AI assistant with the following embodiment:" };
 
         if (_sensors.Any())
         {
             parts.Add("\nSensors:");
-            foreach (var sensor in _sensors.Values.Where(s => s.IsActive))
+            foreach (SensorDescriptor? sensor in _sensors.Values.Where(s => s.IsActive))
             {
                 parts.Add($"  - {sensor.Name} ({sensor.Modality}): {string.Join(", ", sensor.Capabilities)}");
             }
@@ -190,7 +190,7 @@ public sealed record BodySchema
         if (_actuators.Any())
         {
             parts.Add("\nActuators:");
-            foreach (var actuator in _actuators.Values.Where(a => a.IsActive))
+            foreach (ActuatorDescriptor? actuator in _actuators.Values.Where(a => a.IsActive))
             {
                 parts.Add($"  - {actuator.Name} ({actuator.Modality}): {string.Join(", ", actuator.Capabilities)}");
             }
@@ -204,7 +204,7 @@ public sealed record BodySchema
         if (_limitations.Any())
         {
             parts.Add("\nLimitations:");
-            foreach (var limitation in _limitations)
+            foreach (Limitation limitation in _limitations)
             {
                 parts.Add($"  - {limitation.Type}: {limitation.Description}");
             }
@@ -245,12 +245,12 @@ public sealed record BodySchema
         IEnumerable<SensorDescriptor> sensors,
         IEnumerable<ActuatorDescriptor> actuators)
     {
-        var caps = ImmutableHashSet<Capability>.Empty;
+        ImmutableHashSet<Capability> caps = ImmutableHashSet<Capability>.Empty;
 
-        foreach (var s in sensors.Where(s => s.IsActive))
+        foreach (SensorDescriptor? s in sensors.Where(s => s.IsActive))
             caps = caps.Union(s.Capabilities);
 
-        foreach (var a in actuators.Where(a => a.IsActive))
+        foreach (ActuatorDescriptor? a in actuators.Where(a => a.IsActive))
             caps = caps.Union(a.Capabilities);
 
         return caps;

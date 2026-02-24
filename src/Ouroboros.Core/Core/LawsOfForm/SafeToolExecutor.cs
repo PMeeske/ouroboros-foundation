@@ -4,6 +4,7 @@
 
 namespace Ouroboros.Core.LawsOfForm;
 
+using Ouroboros.Abstractions.Monads;
 using Ouroboros.Core.Monads;
 
 /// <summary>
@@ -80,17 +81,17 @@ public sealed class SafeToolExecutor
         ArgumentNullException.ThrowIfNull(context);
 
         // Evaluate all criteria
-        var evidence = new List<Evidence>();
-        var criteriaForms = new List<Form>();
+        List<Evidence> evidence = new List<Evidence>();
+        List<Form> criteriaForms = new List<Form>();
 
-        foreach (var criterion in this.criteria)
+        foreach (SafetyCriterion criterion in this.criteria)
         {
             try
             {
-                var form = criterion.Evaluate(toolCall, context);
+                Form form = criterion.Evaluate(toolCall, context);
                 criteriaForms.Add(form);
 
-                var description = form.Match(
+                string description = form.Match(
                     onMark: () => $"{criterion.Name} passed",
                     onVoid: () => $"{criterion.Name} failed",
                     onImaginary: () => $"{criterion.Name} uncertain");
@@ -109,7 +110,7 @@ public sealed class SafeToolExecutor
         }
 
         // Combine all criteria using AND logic (all must pass)
-        var overallCertainty = FormExtensions.All(criteriaForms.ToArray());
+        Form overallCertainty = FormExtensions.All(criteriaForms.ToArray());
 
         // Handle each certainty state
         return await overallCertainty.Match(
@@ -123,12 +124,12 @@ public sealed class SafeToolExecutor
         ExecutionContext context,
         List<Evidence> evidence)
     {
-        var startTime = DateTime.UtcNow;
+        DateTime startTime = DateTime.UtcNow;
 
         try
         {
             // Look up the tool
-            var toolOption = this.toolLookup.GetTool(toolCall.ToolName);
+            Option<IToolExecutor> toolOption = this.toolLookup.GetTool(toolCall.ToolName);
 
             if (!toolOption.HasValue)
             {
@@ -139,13 +140,13 @@ public sealed class SafeToolExecutor
             }
 
             // Execute the tool
-            var tool = toolOption.Value!;
-            var result = await tool.InvokeAsync(toolCall.Arguments);
+            IToolExecutor tool = toolOption.Value!;
+            Result<string, string> result = await tool.InvokeAsync(toolCall.Arguments);
 
-            var duration = DateTime.UtcNow - startTime;
+            TimeSpan duration = DateTime.UtcNow - startTime;
 
             // Convert Result to ToolResult
-            var toolResult = result.Match(
+            ToolResult toolResult = result.Match(
                 onSuccess: output => ToolResult.Success(output, toolCall, duration),
                 onFailure: error => ToolResult.Failure(error, toolCall, duration));
 
@@ -159,8 +160,8 @@ public sealed class SafeToolExecutor
         }
         catch (Exception ex)
         {
-            var duration = DateTime.UtcNow - startTime;
-            var toolResult = ToolResult.Failure(ex.Message, toolCall, duration);
+            TimeSpan duration = DateTime.UtcNow - startTime;
+            ToolResult toolResult = ToolResult.Failure(ex.Message, toolCall, duration);
 
             return AuditableDecision<ToolResult>.Reject(
                 $"Tool execution failed: {ex.Message}",
@@ -173,12 +174,12 @@ public sealed class SafeToolExecutor
         ToolCall toolCall,
         List<Evidence> evidence)
     {
-        var failedCriteria = evidence
+        List<string> failedCriteria = evidence
             .Where(e => e.Evaluation.IsVoid())
             .Select(e => e.CriterionName)
             .ToList();
 
-        var reasoning = $"Safety criteria failed: {string.Join(", ", failedCriteria)}";
+        string reasoning = $"Safety criteria failed: {string.Join(", ", failedCriteria)}";
 
         return AuditableDecision<ToolResult>.Reject(
             "Tool execution blocked by safety criteria",
@@ -191,12 +192,12 @@ public sealed class SafeToolExecutor
         ExecutionContext context,
         List<Evidence> evidence)
     {
-        var uncertainCriteria = evidence
+        List<string> uncertainCriteria = evidence
             .Where(e => e.Evaluation.IsImaginary())
             .Select(e => e.CriterionName)
             .ToList();
 
-        var reasoning = $"Uncertain criteria: {string.Join(", ", uncertainCriteria)}";
+        string reasoning = $"Uncertain criteria: {string.Join(", ", uncertainCriteria)}";
 
         if (this.uncertaintyHandler == null)
         {
@@ -210,7 +211,7 @@ public sealed class SafeToolExecutor
         try
         {
             // Invoke the uncertainty handler
-            var approved = await this.uncertaintyHandler(toolCall, context);
+            bool approved = await this.uncertaintyHandler(toolCall, context);
 
             if (approved)
             {

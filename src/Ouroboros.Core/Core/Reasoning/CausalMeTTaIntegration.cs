@@ -4,6 +4,7 @@
 
 namespace Ouroboros.Core.Reasoning;
 
+using System.Collections.Generic;
 using System.Text;
 using Ouroboros.Core.Monads;
 
@@ -28,7 +29,7 @@ public static class CausalMeTTaIntegration
 
         try
         {
-            var sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
 
             // Add space declaration
             sb.AppendLine(";; Causal Graph Representation in MeTTa");
@@ -37,9 +38,9 @@ public static class CausalMeTTaIntegration
 
             // Convert variables to MeTTa atoms
             sb.AppendLine(";; Variables");
-            foreach (var variable in graph.Variables)
+            foreach (Variable variable in graph.Variables)
             {
-                var typeStr = variable.Type.ToString().ToLower();
+                string typeStr = variable.Type.ToString().ToLower();
                 sb.AppendLine($"(: {variable.Name} {typeStr}-variable)");
                 sb.AppendLine($"(variable {variable.Name})");
             }
@@ -48,9 +49,9 @@ public static class CausalMeTTaIntegration
 
             // Convert edges to causal relations
             sb.AppendLine(";; Causal Edges");
-            foreach (var edge in graph.Edges)
+            foreach (CausalEdge edge in graph.Edges)
             {
-                var edgeTypeStr = edge.Type.ToString().ToLower();
+                string edgeTypeStr = edge.Type.ToString().ToLower();
                 sb.AppendLine($"(causes {edge.Cause} {edge.Effect} {edge.Strength} {edgeTypeStr})");
             }
 
@@ -112,7 +113,7 @@ public static class CausalMeTTaIntegration
     /// <returns>A MeTTa query string.</returns>
     public static string GenerateDSeparationQuery(string x, string y, List<string> conditioningSet)
     {
-        var condSet = string.Join(" ", conditioningSet);
+        string condSet = string.Join(" ", conditioningSet);
         return $"!(d-separated {x} {y} ({condSet}))";
     }
 
@@ -138,7 +139,7 @@ public static class CausalMeTTaIntegration
     /// <returns>A MeTTa query string.</returns>
     public static string GenerateCounterfactualQuery(string intervention, string outcome, Observation factual)
     {
-        var factualStr = string.Join(" ", factual.Values.Select(kv => $"({kv.Key} {kv.Value})"));
+        string factualStr = string.Join(" ", factual.Values.Select(kv => $"({kv.Key} {kv.Value})"));
         return $"!(counterfactual {outcome} (do {intervention}) (observed {factualStr}))";
     }
 
@@ -150,7 +151,7 @@ public static class CausalMeTTaIntegration
     /// <returns>MeTTa rule definitions.</returns>
     public static string GeneratePathFindingRules(CausalGraph graph)
     {
-        var sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
         sb.AppendLine(";; Path Finding Rules");
         sb.AppendLine("(: path (-> Variable Variable (List Variable)))");
@@ -184,7 +185,7 @@ public static class CausalMeTTaIntegration
     /// <returns>MeTTa rule definitions.</returns>
     public static string GenerateEffectComputationRules(CausalGraph graph)
     {
-        var sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
         sb.AppendLine(";; Causal Effect Computation Rules");
         sb.AppendLine("(: total-effect (-> Variable Variable Number))");
@@ -228,14 +229,14 @@ public static class CausalMeTTaIntegration
 
         try
         {
-            var sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
 
             sb.AppendLine(";; Causal Explanation in MeTTa");
             sb.AppendLine($"(explanation {explanation.Effect}");
 
             // Add attributions
             sb.AppendLine("  (attributions");
-            foreach (var attribution in explanation.Attributions)
+            foreach (KeyValuePair<string, double> attribution in explanation.Attributions)
             {
                 sb.AppendLine($"    ({attribution.Key} {attribution.Value:F3})");
             }
@@ -244,9 +245,9 @@ public static class CausalMeTTaIntegration
 
             // Add causal paths
             sb.AppendLine("  (causal-paths");
-            foreach (var path in explanation.CausalPaths)
+            foreach (CausalPath path in explanation.CausalPaths)
             {
-                var pathVars = string.Join(" ", path.Variables);
+                string pathVars = string.Join(" ", path.Variables);
                 sb.AppendLine($"    (path ({pathVars}) {path.TotalEffect:F3} {path.IsDirect})");
             }
 
@@ -268,7 +269,7 @@ public static class CausalMeTTaIntegration
     /// <returns>MeTTa rule definitions for intervention planning.</returns>
     public static string GenerateInterventionPlanningRules()
     {
-        var sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
         sb.AppendLine(";; Intervention Planning Rules");
         sb.AppendLine("(: best-intervention (-> Variable (List Variable) Intervention))");

@@ -94,7 +94,7 @@ public abstract class Neuron : IDisposable
     protected void SendMessage(string topic, object payload, string? targetNeuron = null,
         IntentionPriority priority = IntentionPriority.Normal, bool expectsResponse = false)
     {
-        var message = new NeuronMessage
+        NeuronMessage message = new NeuronMessage
         {
             SourceNeuron = Id,
             TargetNeuron = targetNeuron,
@@ -113,7 +113,7 @@ public abstract class Neuron : IDisposable
     /// </summary>
     protected void SendResponse(NeuronMessage request, object payload)
     {
-        var response = new NeuronMessage
+        NeuronMessage response = new NeuronMessage
         {
             SourceNeuron = Id,
             TargetNeuron = request.SourceNeuron,
@@ -168,7 +168,7 @@ public abstract class Neuron : IDisposable
             try
             {
                 // Process queued messages
-                while (_messageQueue.TryDequeue(out var message))
+                while (_messageQueue.TryDequeue(out NeuronMessage? message))
                 {
                     try
                     {

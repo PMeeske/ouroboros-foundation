@@ -39,8 +39,8 @@ public sealed record DistinctionWeights(
     /// <returns>Updated distinction weights with new fitness.</returns>
     public DistinctionWeights UpdateFitness(bool correct, double alpha = 0.3)
     {
-        var newScore = correct ? 1.0 : 0.0;
-        var updatedFitness = (alpha * newScore) + ((1.0 - alpha) * this.Fitness);
+        double newScore = correct ? 1.0 : 0.0;
+        double updatedFitness = (alpha * newScore) + ((1.0 - alpha) * this.Fitness);
         return this with
         {
             Fitness = updatedFitness,

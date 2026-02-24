@@ -18,7 +18,7 @@ public class ObsoleteInterfaceTests
     public void IEthicsGate_InterfaceIsAccessible()
     {
         // Verify the obsolete interface type exists and is accessible
-        var interfaceType = typeof(IEthicsGate);
+        Type interfaceType = typeof(IEthicsGate);
         
         interfaceType.Should().NotBeNull();
         interfaceType.IsInterface.Should().BeTrue();
@@ -29,7 +29,7 @@ public class ObsoleteInterfaceTests
     public void IEmbeddingProvider_InterfaceIsAccessible()
     {
         // Verify the obsolete interface type exists and is accessible
-        var interfaceType = typeof(IEmbeddingProvider);
+        Type interfaceType = typeof(IEmbeddingProvider);
         
         interfaceType.Should().NotBeNull();
         interfaceType.IsInterface.Should().BeTrue();
@@ -40,7 +40,7 @@ public class ObsoleteInterfaceTests
     public void IVisionModel_InterfaceIsAccessible()
     {
         // Verify the obsolete interface type exists and is accessible
-        var interfaceType = typeof(IVisionModel);
+        Type interfaceType = typeof(IVisionModel);
         
         interfaceType.Should().NotBeNull();
         interfaceType.IsInterface.Should().BeTrue();
@@ -52,8 +52,8 @@ public class ObsoleteInterfaceTests
     {
         // Verify that implementations of obsolete interfaces still work
         // This ensures backward compatibility
-        
-        var gate = new PermissiveEthicsGate();
+
+        PermissiveEthicsGate gate = new PermissiveEthicsGate();
         
         gate.Should().NotBeNull();
         gate.Should().BeAssignableTo<IEthicsGate>();
@@ -63,9 +63,9 @@ public class ObsoleteInterfaceTests
     public async Task PermissiveEthicsGate_FunctionsCorrectly()
     {
         // Verify that obsolete interface implementations still function
-        
-        var gate = new PermissiveEthicsGate();
-        var result = await gate.EvaluateAsync("from", "to");
+
+        PermissiveEthicsGate gate = new PermissiveEthicsGate();
+        EthicsGateResult result = await gate.EvaluateAsync("from", "to");
         
         result.Should().NotBeNull();
         result.IsAllowed.Should().BeTrue();
@@ -75,8 +75,8 @@ public class ObsoleteInterfaceTests
     public void EthicsGateResult_CanBeCreated()
     {
         // Verify that types related to obsolete interfaces still work
-        
-        var result = EthicsGateResult.Allow("test reason");
+
+        EthicsGateResult result = EthicsGateResult.Allow("test reason");
         
         result.Should().NotBeNull();
         result.IsAllowed.Should().BeTrue();

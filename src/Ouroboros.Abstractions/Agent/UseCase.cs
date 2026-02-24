@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent;
+namespace Ouroboros.Agent;
 
 /// <summary>
 /// Use case classification derived from prompt analysis.

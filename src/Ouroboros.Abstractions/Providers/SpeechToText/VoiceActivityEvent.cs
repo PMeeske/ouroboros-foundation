@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Providers.SpeechToText;
+namespace Ouroboros.Providers.SpeechToText;
 
 /// <summary>
 /// Voice activity detection event.

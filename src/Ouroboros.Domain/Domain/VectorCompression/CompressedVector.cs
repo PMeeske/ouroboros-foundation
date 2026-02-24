@@ -30,17 +30,17 @@ public sealed record CompressedVector(
     /// </summary>
     public byte[] ToBytes()
     {
-        using var ms = new MemoryStream();
-        using var writer = new BinaryWriter(ms);
+        using MemoryStream ms = new MemoryStream();
+        using BinaryWriter writer = new BinaryWriter(ms);
 
         writer.Write(OriginalLength);
         writer.Write((int)Strategy);
         writer.Write(Indices.Length);
 
-        foreach (var idx in Indices)
+        foreach (int idx in Indices)
             writer.Write(idx);
 
-        foreach (var comp in Components)
+        foreach (float comp in Components)
             writer.Write(comp);
 
         return ms.ToArray();
@@ -51,18 +51,18 @@ public sealed record CompressedVector(
     /// </summary>
     public static CompressedVector FromBytes(byte[] data)
     {
-        using var ms = new MemoryStream(data);
-        using var reader = new BinaryReader(ms);
+        using MemoryStream ms = new MemoryStream(data);
+        using BinaryReader reader = new BinaryReader(ms);
 
         int origLen = reader.ReadInt32();
-        var strategy = (FourierVectorCompressor.CompressionStrategy)reader.ReadInt32();
+        FourierVectorCompressor.CompressionStrategy strategy = (FourierVectorCompressor.CompressionStrategy)reader.ReadInt32();
         int indexCount = reader.ReadInt32();
 
-        var indices = new int[indexCount];
+        int[] indices = new int[indexCount];
         for (int i = 0; i < indexCount; i++)
             indices[i] = reader.ReadInt32();
 
-        var components = new float[indexCount * 2];
+        float[] components = new float[indexCount * 2];
         for (int i = 0; i < components.Length; i++)
             components[i] = reader.ReadSingle();
 

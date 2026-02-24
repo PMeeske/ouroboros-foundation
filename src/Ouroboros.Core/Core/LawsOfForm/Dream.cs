@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.LawsOfForm;
+namespace Ouroboros.Core.LawsOfForm;
 
 using Ouroboros.Core.Randomness;
 using Ouroboros.Providers.Random;
@@ -35,7 +35,7 @@ public sealed class Dream
     /// <returns>A random form (Void, Mark, or Imaginary with random phase).</returns>
     public Form Observe()
     {
-        var choice = this.random.Next(3);
+        int choice = this.random.Next(3);
         return choice switch
         {
             0 => Form.Void,
@@ -51,7 +51,7 @@ public sealed class Dream
     /// <returns>A form influenced by the bias.</returns>
     public Form ObserveWithBias(double bias)
     {
-        var roll = this.random.NextDouble();
+        double roll = this.random.NextDouble();
         if (roll < bias)
         {
             return Form.Mark;

@@ -2,6 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+
 namespace Ouroboros.Core.LawsOfForm;
 
 /// <summary>
@@ -276,7 +277,7 @@ public sealed record AuditableDecision<T>
     /// <returns>A new decision with the added evidence.</returns>
     public AuditableDecision<T> WithEvidence(Evidence evidence)
     {
-        var newEvidence = new List<Evidence>(this.EvidenceTrail) { evidence };
+        List<Evidence> newEvidence = new List<Evidence>(this.EvidenceTrail) { evidence };
         return this with { EvidenceTrail = newEvidence };
     }
 
@@ -288,7 +289,7 @@ public sealed record AuditableDecision<T>
     /// <returns>A new decision with the added metadata.</returns>
     public AuditableDecision<T> WithMetadata(string key, string value)
     {
-        var newMetadata = new Dictionary<string, string>(this.Metadata)
+        Dictionary<string, string> newMetadata = new Dictionary<string, string>(this.Metadata)
         {
             [key] = value
         };
@@ -301,13 +302,13 @@ public sealed record AuditableDecision<T>
     /// <returns>A formatted audit log entry.</returns>
     public string ToAuditEntry()
     {
-        var sb = new System.Text.StringBuilder();
+        StringBuilder sb = new System.Text.StringBuilder();
         sb.AppendLine($"[{this.Timestamp:O}] Decision: {this.Certainty}");
         sb.AppendLine($"Result: {(this.Result.IsSuccess ? "Success" : "Failure")}");
         sb.AppendLine($"Reasoning: {this.Reasoning}");
         sb.AppendLine("Evidence Trail:");
 
-        foreach (var evidence in this.EvidenceTrail)
+        foreach (Evidence evidence in this.EvidenceTrail)
         {
             sb.AppendLine($"  - {evidence.CriterionName}: {evidence.Evaluation} ({evidence.Description})");
         }
@@ -315,7 +316,7 @@ public sealed record AuditableDecision<T>
         if (this.Metadata.Count > 0)
         {
             sb.AppendLine("Metadata:");
-            foreach (var (key, value) in this.Metadata)
+            foreach ((string? key, string? value) in this.Metadata)
             {
                 sb.AppendLine($"  - {key}: {value}");
             }

@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Synthesis;
+namespace Ouroboros.Core.Synthesis;
 
 /// <summary>
 /// Compression strategy for library learning.

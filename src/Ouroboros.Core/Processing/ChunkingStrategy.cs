@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Processing;
+namespace Ouroboros.Core.Processing;
 
 /// <summary>
 /// Defines the chunking strategy for processing large contexts.

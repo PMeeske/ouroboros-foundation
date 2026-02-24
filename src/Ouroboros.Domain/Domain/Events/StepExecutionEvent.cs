@@ -68,9 +68,9 @@ public sealed record StepExecutionEvent(
     /// </summary>
     public string GetSynopsis()
     {
-        var args = !string.IsNullOrEmpty(Arguments) ? $"({Arguments})" : "";
-        var status = Success ? "✓" : $"✗ {Error}";
-        var duration = DurationMs.HasValue ? $" [{DurationMs}ms]" : "";
+        string args = !string.IsNullOrEmpty(Arguments) ? $"({Arguments})" : "";
+        string status = Success ? "✓" : $"✗ {Error}";
+        string duration = DurationMs.HasValue ? $" [{DurationMs}ms]" : "";
         return $"{TokenName}{args}{duration} {status}";
     }
 }

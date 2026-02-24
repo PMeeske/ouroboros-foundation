@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Reasoning;
+namespace Ouroboros.Core.Reasoning;
 
 /// <summary>
 /// Defines the type of probability distribution.

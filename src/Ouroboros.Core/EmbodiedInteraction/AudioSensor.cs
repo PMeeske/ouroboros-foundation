@@ -155,7 +155,7 @@ public sealed class AudioSensor : IDisposable
 
         try
         {
-            var chunk = new AudioChunk(
+            AudioChunk chunk = new AudioChunk(
                 audioData,
                 _config.SampleRate,
                 _config.Channels,
@@ -191,7 +191,7 @@ public sealed class AudioSensor : IDisposable
     {
         if (_disposed) return Result<TranscriptionResult, string>.Failure("Sensor is disposed");
 
-        var result = await _sttModel.TranscribeAsync(filePath, _config.Language, ct);
+        Result<TranscriptionResult, string> result = await _sttModel.TranscribeAsync(filePath, _config.Language, ct);
 
         if (result.IsSuccess)
         {

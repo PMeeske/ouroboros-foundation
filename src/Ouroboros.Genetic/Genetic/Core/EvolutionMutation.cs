@@ -90,11 +90,11 @@ public sealed class EvolutionMutation
             return Result<EvolutionPopulation<TChromosome>>.Failure("Population cannot be null");
         }
 
-        var mutatedChromosomes = new List<TChromosome>();
+        List<TChromosome> mutatedChromosomes = new List<TChromosome>();
 
-        foreach (var chromosome in population.Chromosomes)
+        foreach (TChromosome chromosome in population.Chromosomes)
         {
-            var mutationResult = this.Mutate(chromosome, mutationFunc);
+            Result<TChromosome> mutationResult = this.Mutate(chromosome, mutationFunc);
             if (mutationResult.IsFailure)
             {
                 return Result<EvolutionPopulation<TChromosome>>.Failure($"Mutation failed: {mutationResult.Error}");
@@ -103,7 +103,7 @@ public sealed class EvolutionMutation
             mutatedChromosomes.Add(mutationResult.Value);
         }
 
-        var newPopulation = new EvolutionPopulation<TChromosome>(mutatedChromosomes);
+        EvolutionPopulation<TChromosome> newPopulation = new EvolutionPopulation<TChromosome>(mutatedChromosomes);
         return Result<EvolutionPopulation<TChromosome>>.Success(newPopulation);
     }
 

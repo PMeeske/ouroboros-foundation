@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Providers.SpeechToText;
+namespace Ouroboros.Providers.SpeechToText;
 
 /// <summary>
 /// A streaming transcription session for interactive audio input.

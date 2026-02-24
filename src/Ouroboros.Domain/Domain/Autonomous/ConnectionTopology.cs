@@ -45,7 +45,7 @@ public sealed class ConnectionTopology
     /// <returns>The connection weight, or 1.0 if no connection exists.</returns>
     public double GetWeight(string sourceId, string targetId)
     {
-        if (_connections.TryGetValue((sourceId, targetId), out var connection))
+        if (_connections.TryGetValue((sourceId, targetId), out WeightedConnection? connection))
         {
             return connection.Weight;
         }
@@ -61,7 +61,7 @@ public sealed class ConnectionTopology
     /// <returns>The connection if it exists, otherwise null.</returns>
     public WeightedConnection? GetConnection(string sourceId, string targetId)
     {
-        _connections.TryGetValue((sourceId, targetId), out var connection);
+        _connections.TryGetValue((sourceId, targetId), out WeightedConnection? connection);
         return connection;
     }
 
@@ -98,7 +98,7 @@ public sealed class ConnectionTopology
     /// <param name="targetActive">Whether the target neuron is active.</param>
     public void ApplyHebbianUpdate(string sourceId, string targetId, bool sourceActive, bool targetActive)
     {
-        if (_connections.TryGetValue((sourceId, targetId), out var connection))
+        if (_connections.TryGetValue((sourceId, targetId), out WeightedConnection? connection))
         {
             connection.HebbianUpdate(sourceActive, targetActive);
         }
@@ -126,7 +126,7 @@ public sealed class ConnectionTopology
     /// <param name="inhibitionStrength">The inhibition strength (default: -0.5, clamped to [-1.0, 0.0]).</param>
     public void AddInhibition(string sourceId, string targetId, double inhibitionStrength = -0.5)
     {
-        var clampedStrength = Math.Clamp(inhibitionStrength, -1.0, 0.0);
+        double clampedStrength = Math.Clamp(inhibitionStrength, -1.0, 0.0);
         SetConnection(sourceId, targetId, clampedStrength);
     }
 

@@ -100,7 +100,7 @@ public sealed class EmbodimentAggregate : IDisposable
         }
 
         // Subscribe to provider perceptions
-        var perceptionSub = provider.Perceptions
+        IDisposable perceptionSub = provider.Perceptions
             .Subscribe(perception =>
             {
                 _unifiedPerceptions.OnNext(perception);
@@ -116,7 +116,7 @@ public sealed class EmbodimentAggregate : IDisposable
             });
 
         // Subscribe to provider events
-        var eventSub = provider.Events
+        IDisposable eventSub = provider.Events
             .Subscribe(providerEvent =>
             {
                 HandleProviderEvent(provider.ProviderId, providerEvent);
@@ -152,7 +152,7 @@ public sealed class EmbodimentAggregate : IDisposable
     {
         if (_disposed) return Result<EmbodimentAggregate>.Failure("Aggregate is disposed");
 
-        if (!_providers.TryRemove(providerId, out var provider))
+        if (!_providers.TryRemove(providerId, out IEmbodimentProvider? provider))
         {
             return Result<EmbodimentAggregate>.Failure($"Provider '{providerId}' not found");
         }
@@ -163,18 +163,18 @@ public sealed class EmbodimentAggregate : IDisposable
 
         // Remove associated sensors and actuators - collect keys first to avoid
         // modifying collection during iteration
-        var sensorKeysToRemove = _activeSensors.Keys
+        string[] sensorKeysToRemove = _activeSensors.Keys
             .Where(k => k.StartsWith($"{providerId}:", StringComparison.Ordinal))
             .ToArray();
-        foreach (var key in sensorKeysToRemove)
+        foreach (string? key in sensorKeysToRemove)
         {
             _activeSensors.TryRemove(key, out _);
         }
 
-        var actuatorKeysToRemove = _activeActuators.Keys
+        string[] actuatorKeysToRemove = _activeActuators.Keys
             .Where(k => k.StartsWith($"{providerId}:", StringComparison.Ordinal))
             .ToArray();
-        foreach (var key in actuatorKeysToRemove)
+        foreach (string? key in actuatorKeysToRemove)
         {
             _activeActuators.TryRemove(key, out _);
         }
@@ -204,14 +204,14 @@ public sealed class EmbodimentAggregate : IDisposable
 
         UpdateState(_state with { Status = AggregateStatus.Activating });
 
-        var aggregateCapabilities = EmbodimentCapabilities.None;
-        var errors = new List<string>();
+        EmbodimentCapabilities aggregateCapabilities = EmbodimentCapabilities.None;
+        List<string> errors = new List<string>();
 
-        foreach (var (providerId, provider) in _providers)
+        foreach ((string? providerId, IEmbodimentProvider? provider) in _providers)
         {
             try
             {
-                var connectResult = await provider.ConnectAsync(ct);
+                Result<EmbodimentCapabilities> connectResult = await provider.ConnectAsync(ct);
                 if (connectResult.IsSuccess)
                 {
                     aggregateCapabilities |= connectResult.Value;
@@ -273,7 +273,7 @@ public sealed class EmbodimentAggregate : IDisposable
 
         UpdateState(_state with { Status = AggregateStatus.Deactivating });
 
-        foreach (var (_, provider) in _providers)
+        foreach ((string _, IEmbodimentProvider? provider) in _providers)
         {
             await provider.DisconnectAsync(ct);
         }
@@ -307,26 +307,26 @@ public sealed class EmbodimentAggregate : IDisposable
     {
         if (_disposed) return Result<SensorInfo>.Failure("Aggregate is disposed");
 
-        var (providerId, localSensorId) = ParseResourceId(sensorId);
-        if (!_providers.TryGetValue(providerId, out var provider))
+        (string? providerId, string? localSensorId) = ParseResourceId(sensorId);
+        if (!_providers.TryGetValue(providerId, out IEmbodimentProvider? provider))
         {
             return Result<SensorInfo>.Failure($"Provider '{providerId}' not found");
         }
 
-        var result = await provider.ActivateSensorAsync(localSensorId, ct);
+        Result<Unit> result = await provider.ActivateSensorAsync(localSensorId, ct);
         if (result.IsFailure)
         {
             return Result<SensorInfo>.Failure(result.Error);
         }
 
         // Update local state
-        var sensorsResult = await provider.GetSensorsAsync(ct);
+        Result<IReadOnlyList<SensorInfo>> sensorsResult = await provider.GetSensorsAsync(ct);
         if (sensorsResult.IsSuccess)
         {
-            var sensor = sensorsResult.Value.FirstOrDefault(s => s.SensorId == localSensorId);
+            SensorInfo? sensor = sensorsResult.Value.FirstOrDefault(s => s.SensorId == localSensorId);
             if (sensor != null)
             {
-                var fullId = $"{providerId}:{localSensorId}";
+                string fullId = $"{providerId}:{localSensorId}";
                 _activeSensors[fullId] = sensor;
 
                 RaiseDomainEvent(new EmbodimentDomainEvent(
@@ -357,13 +357,13 @@ public sealed class EmbodimentAggregate : IDisposable
     {
         if (_disposed) return Result<Unit>.Failure("Aggregate is disposed");
 
-        var (providerId, localSensorId) = ParseResourceId(sensorId);
-        if (!_providers.TryGetValue(providerId, out var provider))
+        (string? providerId, string? localSensorId) = ParseResourceId(sensorId);
+        if (!_providers.TryGetValue(providerId, out IEmbodimentProvider? provider))
         {
             return Result<Unit>.Failure($"Provider '{providerId}' not found");
         }
 
-        var result = await provider.DeactivateSensorAsync(localSensorId, ct);
+        Result<Unit> result = await provider.DeactivateSensorAsync(localSensorId, ct);
         if (result.IsSuccess)
         {
             _activeSensors.TryRemove(sensorId, out _);
@@ -389,8 +389,8 @@ public sealed class EmbodimentAggregate : IDisposable
     {
         if (_disposed) return Result<PerceptionData>.Failure("Aggregate is disposed");
 
-        var (providerId, localSensorId) = ParseResourceId(sensorId);
-        if (!_providers.TryGetValue(providerId, out var provider))
+        (string? providerId, string? localSensorId) = ParseResourceId(sensorId);
+        if (!_providers.TryGetValue(providerId, out IEmbodimentProvider? provider))
         {
             return Result<PerceptionData>.Failure($"Provider '{providerId}' not found");
         }
@@ -412,13 +412,13 @@ public sealed class EmbodimentAggregate : IDisposable
     {
         if (_disposed) return Result<ActionOutcome>.Failure("Aggregate is disposed");
 
-        var (providerId, localActuatorId) = ParseResourceId(actuatorId);
-        if (!_providers.TryGetValue(providerId, out var provider))
+        (string? providerId, string? localActuatorId) = ParseResourceId(actuatorId);
+        if (!_providers.TryGetValue(providerId, out IEmbodimentProvider? provider))
         {
             return Result<ActionOutcome>.Failure($"Provider '{providerId}' not found");
         }
 
-        var result = await provider.ExecuteActionAsync(localActuatorId, action, ct);
+        Result<ActionOutcome> result = await provider.ExecuteActionAsync(localActuatorId, action, ct);
 
         if (result.IsSuccess)
         {
@@ -442,13 +442,13 @@ public sealed class EmbodimentAggregate : IDisposable
     /// <returns>A BodySchema representing the aggregate's embodiment.</returns>
     public BodySchema ToBodySchema()
     {
-        var schema = new BodySchema()
+        BodySchema schema = new BodySchema()
             .WithCapability(Capability.Reasoning)
             .WithCapability(Capability.Remembering);
 
-        foreach (var (id, sensor) in _activeSensors)
+        foreach ((string? id, SensorInfo? sensor) in _activeSensors)
         {
-            var capabilities = sensor.Modality switch
+            HashSet<Capability> capabilities = sensor.Modality switch
             {
                 SensorModality.Audio => new HashSet<Capability> { Capability.Hearing },
                 SensorModality.Visual => new HashSet<Capability> { Capability.Seeing },
@@ -465,9 +465,9 @@ public sealed class EmbodimentAggregate : IDisposable
                 sensor.Properties));
         }
 
-        foreach (var (id, actuator) in _activeActuators)
+        foreach ((string? id, ActuatorInfo? actuator) in _activeActuators)
         {
-            var capabilities = actuator.Modality switch
+            HashSet<Capability> capabilities = actuator.Modality switch
             {
                 ActuatorModality.Voice => new HashSet<Capability> { Capability.Speaking },
                 ActuatorModality.Text => new HashSet<Capability> { Capability.Writing },
@@ -491,12 +491,12 @@ public sealed class EmbodimentAggregate : IDisposable
         IEmbodimentProvider provider,
         CancellationToken ct)
     {
-        var sensorsResult = await provider.GetSensorsAsync(ct);
+        Result<IReadOnlyList<SensorInfo>> sensorsResult = await provider.GetSensorsAsync(ct);
         if (sensorsResult.IsSuccess)
         {
-            foreach (var sensor in sensorsResult.Value)
+            foreach (SensorInfo sensor in sensorsResult.Value)
             {
-                var fullId = $"{providerId}:{sensor.SensorId}";
+                string fullId = $"{providerId}:{sensor.SensorId}";
                 if (sensor.IsActive)
                 {
                     _activeSensors[fullId] = sensor;
@@ -504,12 +504,12 @@ public sealed class EmbodimentAggregate : IDisposable
             }
         }
 
-        var actuatorsResult = await provider.GetActuatorsAsync(ct);
+        Result<IReadOnlyList<ActuatorInfo>> actuatorsResult = await provider.GetActuatorsAsync(ct);
         if (actuatorsResult.IsSuccess)
         {
-            foreach (var actuator in actuatorsResult.Value)
+            foreach (ActuatorInfo actuator in actuatorsResult.Value)
             {
-                var fullId = $"{providerId}:{actuator.ActuatorId}";
+                string fullId = $"{providerId}:{actuator.ActuatorId}";
                 if (actuator.IsActive)
                 {
                     _activeActuators[fullId] = actuator;
@@ -520,7 +520,7 @@ public sealed class EmbodimentAggregate : IDisposable
 
     private void HandleProviderEvent(string providerId, EmbodimentProviderEvent providerEvent)
     {
-        var domainEventType = providerEvent.EventType switch
+        EmbodimentDomainEventType domainEventType = providerEvent.EventType switch
         {
             EmbodimentProviderEventType.Connected => EmbodimentDomainEventType.ProviderConnected,
             EmbodimentProviderEventType.Disconnected => EmbodimentDomainEventType.ProviderDisconnected,
@@ -530,10 +530,10 @@ public sealed class EmbodimentAggregate : IDisposable
             _ => EmbodimentDomainEventType.StateChanged
         };
 
-        var details = new Dictionary<string, object> { ["providerId"] = providerId };
+        Dictionary<string, object> details = new Dictionary<string, object> { ["providerId"] = providerId };
         if (providerEvent.Details != null)
         {
-            foreach (var (key, value) in providerEvent.Details)
+            foreach ((string? key, object? value) in providerEvent.Details)
             {
                 details[key] = value;
             }
@@ -544,8 +544,8 @@ public sealed class EmbodimentAggregate : IDisposable
 
     private void UpdateAggregateCapabilities()
     {
-        var capabilities = EmbodimentCapabilities.None;
-        foreach (var provider in _providers.Values.Where(p => p.IsConnected))
+        EmbodimentCapabilities capabilities = EmbodimentCapabilities.None;
+        foreach (IEmbodimentProvider? provider in _providers.Values.Where(p => p.IsConnected))
         {
             // We'd need to track capabilities per provider
             // For now, just update based on active sensors/actuators
@@ -570,7 +570,7 @@ public sealed class EmbodimentAggregate : IDisposable
 
     private static (string ProviderId, string ResourceId) ParseResourceId(string fullId)
     {
-        var parts = fullId.Split(':', 2);
+        string[] parts = fullId.Split(':', 2);
         return parts.Length == 2 ? (parts[0], parts[1]) : (fullId, fullId);
     }
 
@@ -582,12 +582,12 @@ public sealed class EmbodimentAggregate : IDisposable
         if (_disposed) return;
         _disposed = true;
 
-        foreach (var sub in _subscriptions)
+        foreach (IDisposable sub in _subscriptions)
         {
             sub.Dispose();
         }
 
-        foreach (var provider in _providers.Values)
+        foreach (IEmbodimentProvider provider in _providers.Values)
         {
             provider.Dispose();
         }

@@ -88,7 +88,7 @@ public sealed class QdrantCollectionRegistry : IQdrantCollectionRegistry
         _logger = logger;
 
         // Seed with defaults
-        foreach (var (role, name) in Defaults)
+        foreach ((QdrantCollectionRole role, string? name) in Defaults)
         {
             _mappings[role] = name;
         }
@@ -106,7 +106,7 @@ public sealed class QdrantCollectionRegistry : IQdrantCollectionRegistry
         // Apply any overrides from configuration
         if (overrides?.Value?.Overrides != null)
         {
-            foreach (var (role, name) in overrides.Value.Overrides)
+            foreach ((QdrantCollectionRole role, string? name) in overrides.Value.Overrides)
             {
                 if (!string.IsNullOrWhiteSpace(name))
                 {
@@ -121,7 +121,7 @@ public sealed class QdrantCollectionRegistry : IQdrantCollectionRegistry
     /// <inheritdoc/>
     public string GetCollectionName(QdrantCollectionRole role)
     {
-        if (_mappings.TryGetValue(role, out var name))
+        if (_mappings.TryGetValue(role, out string? name))
             return name;
 
         throw new KeyNotFoundException(
@@ -132,7 +132,7 @@ public sealed class QdrantCollectionRegistry : IQdrantCollectionRegistry
     /// <inheritdoc/>
     public bool TryGetCollectionName(QdrantCollectionRole role, out string? collectionName)
     {
-        if (_mappings.TryGetValue(role, out var name))
+        if (_mappings.TryGetValue(role, out string? name))
         {
             collectionName = name;
             return true;
@@ -153,13 +153,13 @@ public sealed class QdrantCollectionRegistry : IQdrantCollectionRegistry
     {
         try
         {
-            var collections = await _client.ListCollectionsAsync(ct);
-            var discoveredCount = 0;
+            IReadOnlyList<string> collections = await _client.ListCollectionsAsync(ct);
+            int discoveredCount = 0;
 
-            foreach (var collectionName in collections)
+            foreach (string collectionName in collections)
             {
                 // Check if this collection is already mapped via reverse lookup
-                if (DefaultReverseLookup.TryGetValue(collectionName, out var role))
+                if (DefaultReverseLookup.TryGetValue(collectionName, out QdrantCollectionRole role))
                 {
                     // Confirm the default mapping
                     _mappings[role] = collectionName;
@@ -168,7 +168,7 @@ public sealed class QdrantCollectionRegistry : IQdrantCollectionRegistry
                 else
                 {
                     // Try to infer role from naming convention
-                    var inferredRole = InferRoleFromName(collectionName);
+                    QdrantCollectionRole? inferredRole = InferRoleFromName(collectionName);
                     if (inferredRole != null && !_mappings.ContainsKey(inferredRole.Value))
                     {
                         _mappings[inferredRole.Value] = collectionName;
@@ -203,7 +203,7 @@ public sealed class QdrantCollectionRegistry : IQdrantCollectionRegistry
     /// </summary>
     private static QdrantCollectionRole? InferRoleFromName(string collectionName)
     {
-        var lower = collectionName.ToLowerInvariant();
+        string lower = collectionName.ToLowerInvariant();
         return lower switch
         {
             _ when lower.Contains("thought") && lower.Contains("relation") => QdrantCollectionRole.ThoughtRelations,

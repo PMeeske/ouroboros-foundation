@@ -62,7 +62,7 @@ public sealed class MemoryNeuron : Neuron
                 break;
 
             case "learning.fact":
-                var fact = message.Payload?.ToString();
+                string? fact = message.Payload?.ToString();
                 if (!string.IsNullOrEmpty(fact))
                 {
                     _recentMemories.Add(fact);
@@ -71,7 +71,7 @@ public sealed class MemoryNeuron : Neuron
                     // Auto-store if we have embedding capability
                     if (EmbedFunction != null && StoreFunction != null)
                     {
-                        var embedding = await EmbedFunction(fact, ct);
+                        float[] embedding = await EmbedFunction(fact, ct);
                         await StoreFunction("fact", fact, embedding, ct);
                     }
                 }
@@ -109,16 +109,16 @@ public sealed class MemoryNeuron : Neuron
     {
         try
         {
-            var payload = message.Payload as JsonElement? ?? JsonSerializer.Deserialize<JsonElement>(message.Payload?.ToString() ?? "{}");
+            JsonElement payload = message.Payload as JsonElement? ?? JsonSerializer.Deserialize<JsonElement>(message.Payload?.ToString() ?? "{}");
 
-            if (payload.TryGetProperty("content", out var contentProp))
+            if (payload.TryGetProperty("content", out JsonElement contentProp))
             {
-                var content = contentProp.GetString() ?? "";
-                var category = payload.TryGetProperty("category", out var catProp) ? catProp.GetString() ?? "general" : "general";
+                string content = contentProp.GetString() ?? "";
+                string category = payload.TryGetProperty("category", out JsonElement catProp) ? catProp.GetString() ?? "general" : "general";
 
                 if (EmbedFunction != null && StoreFunction != null)
                 {
-                    var embedding = await EmbedFunction(content, ct);
+                    float[] embedding = await EmbedFunction(content, ct);
                     await StoreFunction(category, content, embedding, ct);
                     _memoryCount++;
 
@@ -136,18 +136,18 @@ public sealed class MemoryNeuron : Neuron
     {
         try
         {
-            var query = message.Payload?.ToString() ?? "";
+            string query = message.Payload?.ToString() ?? "";
 
             if (EmbedFunction != null && SearchFunction != null)
             {
-                var embedding = await EmbedFunction(query, ct);
-                var results = await SearchFunction(embedding, 5, ct);
+                float[] embedding = await EmbedFunction(query, ct);
+                IReadOnlyList<string> results = await SearchFunction(embedding, 5, ct);
                 SendResponse(message, new { Query = query, Results = results });
             }
             else
             {
                 // Fallback to recent memories search
-                var matches = _recentMemories
+                List<string> matches = _recentMemories
                     .Where(m => m.Contains(query, StringComparison.OrdinalIgnoreCase))
                     .Take(5)
                     .ToList();

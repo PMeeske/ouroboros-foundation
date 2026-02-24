@@ -62,15 +62,15 @@ public sealed class OuroborosMemoryManager : IAsyncDisposable
         await _admin.InitializeAsync(ct);
 
         // Ensure all memory layer collections exist
-        foreach (var mapping in _layerMappings.Values)
+        foreach (MemoryLayerMapping mapping in _layerMappings.Values)
         {
-            foreach (var collection in mapping.Collections)
+            foreach (string collection in mapping.Collections)
             {
-                var info = await _admin.GetCollectionInfoAsync(collection, ct);
+                CollectionInfo? info = await _admin.GetCollectionInfoAsync(collection, ct);
                 if (info == null)
                 {
                     // Create missing collection
-                    QdrantCollectionAdmin.KnownCollections.TryGetValue(collection, out var purpose);
+                    QdrantCollectionAdmin.KnownCollections.TryGetValue(collection, out string? purpose);
                     await _admin.CreateCollectionAsync(collection, purpose: purpose ?? mapping.Description, ct: ct);
                 }
             }
@@ -86,16 +86,16 @@ public sealed class OuroborosMemoryManager : IAsyncDisposable
         bool autoHeal = false,
         CancellationToken ct = default)
     {
-        var healthReports = await _admin.HealthCheckAsync(ct: ct);
-        var unhealthyCollections = healthReports.Where(r => !r.IsHealthy).ToList();
-        var healedCollections = new List<string>();
+        IReadOnlyList<CollectionHealthReport> healthReports = await _admin.HealthCheckAsync(ct: ct);
+        List<CollectionHealthReport> unhealthyCollections = healthReports.Where(r => !r.IsHealthy).ToList();
+        List<string> healedCollections = new List<string>();
 
         if (autoHeal && unhealthyCollections.Any())
         {
             healedCollections = (await _admin.AutoHealDimensionMismatchesAsync(ct: ct)).ToList();
         }
 
-        var stats = await _admin.GetMemoryStatisticsAsync(ct);
+        MemoryStatistics stats = await _admin.GetMemoryStatisticsAsync(ct);
 
         return new MemoryHealthReport(
             healthReports.Count(r => r.IsHealthy),
@@ -110,7 +110,7 @@ public sealed class OuroborosMemoryManager : IAsyncDisposable
     /// </summary>
     public IReadOnlyList<string> GetCollectionsForLayer(MemoryLayer layer)
     {
-        return _layerMappings.TryGetValue(layer, out var mapping)
+        return _layerMappings.TryGetValue(layer, out MemoryLayerMapping? mapping)
             ? mapping.Collections
             : Array.Empty<string>();
     }
@@ -120,7 +120,7 @@ public sealed class OuroborosMemoryManager : IAsyncDisposable
     /// </summary>
     public MemoryLayer? GetLayerForCollection(string collectionName)
     {
-        foreach (var (layer, mapping) in _layerMappings)
+        foreach ((MemoryLayer layer, MemoryLayerMapping? mapping) in _layerMappings)
         {
             if (mapping.Collections.Contains(collectionName))
             {
@@ -143,7 +143,7 @@ public sealed class OuroborosMemoryManager : IAsyncDisposable
     /// </summary>
     public async Task<long> GetTotalMemoryVectorsAsync(CancellationToken ct = default)
     {
-        var stats = await _admin.GetMemoryStatisticsAsync(ct);
+        MemoryStatistics stats = await _admin.GetMemoryStatisticsAsync(ct);
         return stats.TotalVectors;
     }
 
@@ -152,12 +152,12 @@ public sealed class OuroborosMemoryManager : IAsyncDisposable
     /// </summary>
     public async Task<long> GetLayerVectorCountAsync(MemoryLayer layer, CancellationToken ct = default)
     {
-        var collections = GetCollectionsForLayer(layer);
+        IReadOnlyList<string> collections = GetCollectionsForLayer(layer);
         long total = 0;
 
-        foreach (var collection in collections)
+        foreach (string collection in collections)
         {
-            var info = await _admin.GetCollectionInfoAsync(collection, ct);
+            CollectionInfo? info = await _admin.GetCollectionInfoAsync(collection, ct);
             if (info != null)
             {
                 total += (long)info.PointsCount;
@@ -177,16 +177,16 @@ public sealed class OuroborosMemoryManager : IAsyncDisposable
     {
         if (!confirmed) return false;
 
-        var collections = GetCollectionsForLayer(layer);
-        var success = true;
+        IReadOnlyList<string> collections = GetCollectionsForLayer(layer);
+        bool success = true;
 
-        foreach (var collection in collections)
+        foreach (string collection in collections)
         {
-            var deleted = await _admin.DeleteCollectionAsync(collection, ct);
+            bool deleted = await _admin.DeleteCollectionAsync(collection, ct);
             if (deleted)
             {
                 // Recreate empty collection
-                QdrantCollectionAdmin.KnownCollections.TryGetValue(collection, out var purpose);
+                QdrantCollectionAdmin.KnownCollections.TryGetValue(collection, out string? purpose);
                 await _admin.CreateCollectionAsync(collection, purpose: purpose, ct: ct);
             }
             else
@@ -203,12 +203,12 @@ public sealed class OuroborosMemoryManager : IAsyncDisposable
     /// </summary>
     public async Task<MemorySnapshot> CreateSnapshotAsync(CancellationToken ct = default)
     {
-        var collections = await _admin.GetAllCollectionsAsync(ct);
-        var stats = await _admin.GetMemoryStatisticsAsync(ct);
-        var links = _admin.CollectionLinks;
+        IReadOnlyList<CollectionInfo> collections = await _admin.GetAllCollectionsAsync(ct);
+        MemoryStatistics stats = await _admin.GetMemoryStatisticsAsync(ct);
+        IReadOnlyList<CollectionLink> links = _admin.CollectionLinks;
 
-        var layerStats = new Dictionary<MemoryLayer, long>();
-        foreach (var layer in Enum.GetValues<MemoryLayer>())
+        Dictionary<MemoryLayer, long> layerStats = new Dictionary<MemoryLayer, long>();
+        foreach (MemoryLayer layer in Enum.GetValues<MemoryLayer>())
         {
             layerStats[layer] = await GetLayerVectorCountAsync(layer, ct);
         }

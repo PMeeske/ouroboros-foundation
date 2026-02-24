@@ -64,7 +64,7 @@ public sealed class VirtualSelf : IDisposable
     {
         if (_disposed) return Result<VirtualSelfState, string>.Failure("Virtual self is disposed");
 
-        var newState = _stateSubject.Value.WithSensorActive(modality);
+        VirtualSelfState newState = _stateSubject.Value.WithSensorActive(modality);
         _stateSubject.OnNext(newState);
         return Result<VirtualSelfState, string>.Success(newState);
     }
@@ -76,7 +76,7 @@ public sealed class VirtualSelf : IDisposable
     {
         if (_disposed) return Result<VirtualSelfState, string>.Failure("Virtual self is disposed");
 
-        var newState = _stateSubject.Value.WithSensorInactive(modality);
+        VirtualSelfState newState = _stateSubject.Value.WithSensorInactive(modality);
         _stateSubject.OnNext(newState);
         return Result<VirtualSelfState, string>.Success(newState);
     }
@@ -96,7 +96,7 @@ public sealed class VirtualSelf : IDisposable
     public void FocusAttention(SensorModality modality, string target, double intensity = 1.0)
     {
         if (_disposed) return;
-        var focus = new AttentionFocus(modality, target, intensity, DateTime.UtcNow);
+        AttentionFocus focus = new AttentionFocus(modality, target, intensity, DateTime.UtcNow);
         _stateSubject.OnNext(_stateSubject.Value.WithAttention(focus));
     }
 
@@ -112,7 +112,7 @@ public sealed class VirtualSelf : IDisposable
     {
         if (_disposed) return;
 
-        var perception = new AudioPerception(
+        AudioPerception perception = new AudioPerception(
             Guid.NewGuid(),
             DateTime.UtcNow,
             confidence,
@@ -139,7 +139,7 @@ public sealed class VirtualSelf : IDisposable
     {
         if (_disposed) return;
 
-        var perception = new VisualPerception(
+        VisualPerception perception = new VisualPerception(
             Guid.NewGuid(),
             DateTime.UtcNow,
             confidence,
@@ -160,7 +160,7 @@ public sealed class VirtualSelf : IDisposable
     {
         if (_disposed) return;
 
-        var perception = new TextPerception(
+        TextPerception perception = new TextPerception(
             Guid.NewGuid(),
             DateTime.UtcNow,
             confidence,
@@ -198,22 +198,22 @@ public sealed class VirtualSelf : IDisposable
         {
             if (_perceptionBuffer.Count == 0) return;
 
-            var cutoff = DateTime.UtcNow - _fusionWindow;
+            DateTime cutoff = DateTime.UtcNow - _fusionWindow;
             toFuse = _perceptionBuffer.Where(p => p.Timestamp >= cutoff).ToList();
             _perceptionBuffer.Clear();
         }
 
         if (toFuse.Count == 0) return;
 
-        var audioPerceptions = toFuse.OfType<AudioPerception>().ToList();
-        var visualPerceptions = toFuse.OfType<VisualPerception>().ToList();
-        var textPerceptions = toFuse.OfType<TextPerception>().ToList();
+        List<AudioPerception> audioPerceptions = toFuse.OfType<AudioPerception>().ToList();
+        List<VisualPerception> visualPerceptions = toFuse.OfType<VisualPerception>().ToList();
+        List<TextPerception> textPerceptions = toFuse.OfType<TextPerception>().ToList();
 
         // Build integrated understanding
-        var understanding = BuildIntegratedUnderstanding(audioPerceptions, visualPerceptions, textPerceptions);
-        var avgConfidence = toFuse.Average(p => p.Confidence);
+        string understanding = BuildIntegratedUnderstanding(audioPerceptions, visualPerceptions, textPerceptions);
+        double avgConfidence = toFuse.Average(p => p.Confidence);
 
-        var fused = new FusedPerception(
+        FusedPerception fused = new FusedPerception(
             Guid.NewGuid(),
             DateTime.UtcNow,
             audioPerceptions,
@@ -242,11 +242,11 @@ public sealed class VirtualSelf : IDisposable
         IReadOnlyList<VisualPerception> visual,
         IReadOnlyList<TextPerception> text)
     {
-        var parts = new List<string>();
+        List<string> parts = new List<string>();
 
         if (audio.Count > 0)
         {
-            var transcript = string.Join(" ", audio.Where(a => a.IsFinal).Select(a => a.TranscribedText));
+            string transcript = string.Join(" ", audio.Where(a => a.IsFinal).Select(a => a.TranscribedText));
             if (!string.IsNullOrWhiteSpace(transcript))
             {
                 parts.Add($"[Heard] {transcript}");
@@ -255,19 +255,19 @@ public sealed class VirtualSelf : IDisposable
 
         if (visual.Count > 0)
         {
-            var desc = visual.Last().Description;
+            string desc = visual.Last().Description;
             if (!string.IsNullOrWhiteSpace(desc))
             {
                 parts.Add($"[Saw] {desc}");
             }
 
-            var objects = visual.SelectMany(v => v.Objects).Select(o => o.Label).Distinct().ToList();
+            List<string> objects = visual.SelectMany(v => v.Objects).Select(o => o.Label).Distinct().ToList();
             if (objects.Count > 0)
             {
                 parts.Add($"[Objects] {string.Join(", ", objects)}");
             }
 
-            var faces = visual.SelectMany(v => v.Faces).ToList();
+            List<DetectedFace> faces = visual.SelectMany(v => v.Faces).ToList();
             if (faces.Count > 0)
             {
                 parts.Add($"[Faces] {faces.Count} detected");
@@ -276,7 +276,7 @@ public sealed class VirtualSelf : IDisposable
 
         if (text.Count > 0)
         {
-            var combined = string.Join(" ", text.Select(t => t.Text));
+            string combined = string.Join(" ", text.Select(t => t.Text));
             parts.Add($"[Read] {combined}");
         }
 

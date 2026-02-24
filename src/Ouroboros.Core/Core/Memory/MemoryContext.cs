@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Memory;
+namespace Ouroboros.Core.Memory;
 
 /// <summary>
 /// Memory-aware pipeline context that carries both data and memory state

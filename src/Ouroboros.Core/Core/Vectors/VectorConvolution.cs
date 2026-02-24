@@ -37,7 +37,7 @@ public static class VectorConvolution
             throw new ArgumentException("Thought vectors must have same dimension");
 
         int n = thought1.Length;
-        var result = new float[n];
+        float[] result = new float[n];
 
         // Circular convolution: result[k] = sum(thought1[j] * thought2[(k-j) mod n])
         for (int k = 0; k < n; k++)
@@ -69,8 +69,8 @@ public static class VectorConvolution
         int n = thought1.Length;
 
         // Convert to complex for FFT
-        var complex1 = new Complex[n];
-        var complex2 = new Complex[n];
+        Complex[] complex1 = new Complex[n];
+        Complex[] complex2 = new Complex[n];
         for (int i = 0; i < n; i++)
         {
             complex1[i] = new Complex(thought1[i], 0);
@@ -91,7 +91,7 @@ public static class VectorConvolution
         IFFT(complex1);
 
         // Extract real parts
-        var result = new float[n];
+        float[] result = new float[n];
         for (int i = 0; i < n; i++)
         {
             result[i] = (float)complex1[i].Real;
@@ -115,7 +115,7 @@ public static class VectorConvolution
         int n = combined.Length;
 
         // Correlation is convolution with reversed key
-        var reversedKey = new float[n];
+        float[] reversedKey = new float[n];
         reversedKey[0] = key[0];
         for (int i = 1; i < n; i++)
         {
@@ -138,9 +138,9 @@ public static class VectorConvolution
         if (targetDimension <= thought.Length)
             throw new ArgumentException("Target dimension must be larger than source");
 
-        var random = new SeededRandomProvider(seed);
+        SeededRandomProvider random = new SeededRandomProvider(seed);
         int sourceDim = thought.Length;
-        var result = new float[targetDimension];
+        float[] result = new float[targetDimension];
 
         // Create expansion through multiple convolution kernels
         int numKernels = targetDimension / sourceDim + 1;
@@ -148,14 +148,14 @@ public static class VectorConvolution
         for (int k = 0; k < numKernels && k * sourceDim < targetDimension; k++)
         {
             // Generate random kernel for this expansion
-            var kernel = new float[sourceDim];
+            float[] kernel = new float[sourceDim];
             for (int i = 0; i < sourceDim; i++)
             {
                 kernel[i] = (float)(random.NextDouble() * 2 - 1) / MathF.Sqrt(sourceDim);
             }
 
             // Convolve thought with kernel
-            var convolved = CircularConvolve(thought, kernel);
+            float[] convolved = CircularConvolve(thought, kernel);
 
             // Copy to result at offset
             int offset = k * sourceDim;
@@ -176,7 +176,7 @@ public static class VectorConvolution
     /// <returns>Meta-thought embedding capturing all thoughts.</returns>
     public static float[] CreateMetaThought(IEnumerable<float[]> thoughts)
     {
-        var thoughtList = thoughts.ToList();
+        List<float[]> thoughtList = thoughts.ToList();
         if (thoughtList.Count == 0)
             throw new ArgumentException("At least one thought required");
 
@@ -184,7 +184,7 @@ public static class VectorConvolution
             return thoughtList[0].ToArray();
 
         // Pairwise convolution, then combine
-        var result = thoughtList[0].ToArray();
+        float[] result = thoughtList[0].ToArray();
         for (int i = 1; i < thoughtList.Count; i++)
         {
             result = CircularConvolve(result, thoughtList[i]);
@@ -207,7 +207,7 @@ public static class VectorConvolution
             throw new ArgumentException("Thought vectors must have same dimension");
 
         int n = thought1.Length;
-        var gradient = new float[n];
+        float[] gradient = new float[n];
 
         for (int i = 0; i < n; i++)
         {
@@ -231,7 +231,7 @@ public static class VectorConvolution
             throw new ArgumentException("Vectors must have same dimension");
 
         int n = baseThought.Length;
-        var result = new float[n];
+        float[] result = new float[n];
 
         for (int i = 0; i < n; i++)
         {
@@ -255,12 +255,12 @@ public static class VectorConvolution
             scales = new[] { 3, 5, 7 }; // Default scales
 
         int n = thought.Length;
-        var results = new List<float[]>();
+        List<float[]> results = new List<float[]>();
 
         foreach (int kernelSize in scales)
         {
             // Create averaging kernel of this size
-            var kernel = new float[n];
+            float[] kernel = new float[n];
             int halfSize = kernelSize / 2;
             float value = 1.0f / kernelSize;
 
@@ -269,12 +269,12 @@ public static class VectorConvolution
                 kernel[(n - halfSize + i) % n] = value;
             }
 
-            var convolved = CircularConvolve(thought, kernel);
+            float[] convolved = CircularConvolve(thought, kernel);
             results.Add(convolved);
         }
 
         // Concatenate all scales
-        var combined = new float[n * scales.Length];
+        float[] combined = new float[n * scales.Length];
         for (int s = 0; s < scales.Length; s++)
         {
             results[s].CopyTo(combined, s * n);
@@ -315,7 +315,7 @@ public static class VectorConvolution
     /// <returns>Resonated thought with amplified patterns.</returns>
     public static float[] ThoughtResonance(ReadOnlySpan<float> thought, int iterations = 3)
     {
-        var result = thought.ToArray();
+        float[] result = thought.ToArray();
 
         for (int i = 0; i < iterations; i++)
         {
@@ -396,15 +396,15 @@ public static class VectorConvolution
         for (int len = 2; len <= n; len *= 2)
         {
             double angle = -2.0 * Math.PI / len;
-            var wLen = new Complex(Math.Cos(angle), Math.Sin(angle));
+            Complex wLen = new Complex(Math.Cos(angle), Math.Sin(angle));
 
             for (int i = 0; i < n; i += len)
             {
-                var w = Complex.One;
+                Complex w = Complex.One;
                 for (int k = 0; k < len / 2; k++)
                 {
-                    var t = w * data[i + k + len / 2];
-                    var u = data[i + k];
+                    Complex t = w * data[i + k + len / 2];
+                    Complex u = data[i + k];
                     data[i + k] = u + t;
                     data[i + k + len / 2] = u - t;
                     w *= wLen;

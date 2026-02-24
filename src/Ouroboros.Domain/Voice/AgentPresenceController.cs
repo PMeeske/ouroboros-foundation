@@ -160,7 +160,7 @@ public sealed class AgentPresenceController : IDisposable
     /// <param name="reason">The reason for the transition.</param>
     public void TransitionTo(AgentPresenceState newState, string? reason = null)
     {
-        var oldState = _state.Value;
+        AgentPresenceState oldState = _state.Value;
         if (oldState == newState) return;
 
         // Cleanup based on leaving state
@@ -220,7 +220,7 @@ public sealed class AgentPresenceController : IDisposable
     private void HandleBargeIn(InteractionEvent triggerEvent)
     {
         // User started speaking/typing while agent is speaking
-        var inputText = triggerEvent switch
+        string? inputText = triggerEvent switch
         {
             TextInputEvent t => t.Text,
             VoiceInputEvent v => v.TranscribedText,
@@ -245,7 +245,7 @@ public sealed class AgentPresenceController : IDisposable
     private void HandleBargeInDuringProcessing(InteractionEvent triggerEvent)
     {
         // User provided new input while agent is still processing
-        var inputText = triggerEvent switch
+        string? inputText = triggerEvent switch
         {
             TextInputEvent t => t.Text,
             VoiceInputEvent v => v.TranscribedText,

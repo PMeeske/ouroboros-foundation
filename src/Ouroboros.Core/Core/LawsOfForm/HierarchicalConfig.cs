@@ -163,8 +163,8 @@ public sealed class HierarchicalConfig
     /// <returns>A formatted string showing the hierarchy and resolved values.</returns>
     public override string ToString()
     {
-        var chain = this.GetResolutionChain();
-        var lines = new[]
+        Dictionary<string, bool> chain = this.GetResolutionChain();
+        string[] lines = new[]
         {
             $"System: {this.SystemDefault}",
             $"Organization: {this.OrganizationOverride} → {chain["Organization"]}",

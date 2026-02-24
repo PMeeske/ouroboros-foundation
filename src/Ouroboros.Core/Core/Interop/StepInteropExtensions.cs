@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Interop;
+namespace Ouroboros.Core.Interop;
 
 /// <summary>
 /// Minimal interop-specific extensions for integration with external systems.

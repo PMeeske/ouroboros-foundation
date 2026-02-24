@@ -24,16 +24,16 @@ public sealed class SExpressionParser
             return Result<Atom>.Failure("Input cannot be empty or whitespace");
         }
 
-        var tokens = Tokenize(input);
+        List<string> tokens = Tokenize(input);
         if (tokens.Count == 0)
         {
             return Result<Atom>.Failure("No tokens found in input");
         }
 
-        var index = 0;
+        int index = 0;
         try
         {
-            var atom = ParseAtom(tokens, ref index);
+            Atom atom = ParseAtom(tokens, ref index);
 
             // Check for trailing tokens
             SkipWhitespaceTokens(tokens, ref index);
@@ -62,14 +62,14 @@ public sealed class SExpressionParser
             return Result<ImmutableList<Atom>>.Failure("Input cannot be empty or whitespace");
         }
 
-        var tokens = Tokenize(input);
+        List<string> tokens = Tokenize(input);
         if (tokens.Count == 0)
         {
             return Result<ImmutableList<Atom>>.Failure("No tokens found in input");
         }
 
-        var atoms = ImmutableList<Atom>.Empty;
-        var index = 0;
+        ImmutableList<Atom> atoms = ImmutableList<Atom>.Empty;
+        int index = 0;
 
         try
         {
@@ -81,7 +81,7 @@ public sealed class SExpressionParser
                     break;
                 }
 
-                var atom = ParseAtom(tokens, ref index);
+                Atom atom = ParseAtom(tokens, ref index);
                 atoms = atoms.Add(atom);
             }
 
@@ -101,7 +101,7 @@ public sealed class SExpressionParser
     /// <returns>True if parsing succeeded.</returns>
     public bool TryParse(string input, out Atom? atom)
     {
-        var result = Parse(input);
+        Result<Atom> result = Parse(input);
         if (result.IsSuccess)
         {
             atom = result.Value;
@@ -114,14 +114,14 @@ public sealed class SExpressionParser
 
     private List<string> Tokenize(string input)
     {
-        var tokens = new List<string>();
-        var current = new StringBuilder();
-        var inString = false;
-        var escapeNext = false;
+        List<string> tokens = new List<string>();
+        StringBuilder current = new StringBuilder();
+        bool inString = false;
+        bool escapeNext = false;
 
-        for (var i = 0; i < input.Length; i++)
+        for (int i = 0; i < input.Length; i++)
         {
-            var c = input[i];
+            char c = input[i];
 
             if (escapeNext)
             {
@@ -217,7 +217,7 @@ public sealed class SExpressionParser
             throw new ParseException("Unexpected end of input");
         }
 
-        var token = tokens[index];
+        string token = tokens[index];
 
         if (token == "(")
         {
@@ -242,7 +242,7 @@ public sealed class SExpressionParser
 
         index++; // consume '('
 
-        var children = ImmutableList<Atom>.Empty;
+        ImmutableList<Atom> children = ImmutableList<Atom>.Empty;
 
         while (index < tokens.Count)
         {
@@ -259,7 +259,7 @@ public sealed class SExpressionParser
                 return new Expression(children);
             }
 
-            var child = ParseAtom(tokens, ref index);
+            Atom child = ParseAtom(tokens, ref index);
             children = children.Add(child);
         }
 
@@ -270,7 +270,7 @@ public sealed class SExpressionParser
     {
         if (token.StartsWith("$"))
         {
-            var varName = token.Substring(1);
+            string varName = token.Substring(1);
             if (string.IsNullOrEmpty(varName))
             {
                 throw new ParseException("Variable name cannot be empty after '$'");
@@ -282,7 +282,7 @@ public sealed class SExpressionParser
         // Handle quoted strings
         if (token.StartsWith("\"") && token.EndsWith("\"") && token.Length > 1)
         {
-            var content = token.Substring(1, token.Length - 2);
+            string content = token.Substring(1, token.Length - 2);
             return new Symbol(content);
         }
 

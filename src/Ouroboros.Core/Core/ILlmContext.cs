@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core;
+namespace Ouroboros.Core;
 
 /// <summary>
 /// Represents a context with LLM capabilities.

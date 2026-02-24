@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Hyperon;
+namespace Ouroboros.Core.Hyperon;
 
 /// <summary>
 /// Represents a variable (placeholder for pattern matching) in the atom space.

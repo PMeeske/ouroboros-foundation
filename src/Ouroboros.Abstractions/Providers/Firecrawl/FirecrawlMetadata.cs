@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Providers.Firecrawl;
+namespace Ouroboros.Providers.Firecrawl;
 
 /// <summary>
 /// Metadata extracted from a scraped page.

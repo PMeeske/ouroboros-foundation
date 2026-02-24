@@ -83,7 +83,7 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
     {
         ArgumentNullException.ThrowIfNull(task);
 
-        var execution = new MaintenanceExecution
+        MaintenanceExecution execution = new MaintenanceExecution
         {
             Task = task,
             StartedAt = DateTime.UtcNow,
@@ -92,7 +92,7 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
 
         try
         {
-            var result = await task.Execute(ct);
+            Result<object> result = await task.Execute(ct);
             
             execution = execution with
             {
@@ -132,7 +132,7 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
     /// </summary>
     public IReadOnlyList<AnomalyAlert> GetAlerts(bool unresolvedOnly = true)
     {
-        var alerts = _alerts.AsEnumerable();
+        IEnumerable<AnomalyAlert> alerts = _alerts.AsEnumerable();
         if (unresolvedOnly)
         {
             alerts = alerts.Where(a => !a.IsResolved);
@@ -155,14 +155,14 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
     /// </summary>
     public Result<AnomalyAlert> ResolveAlert(Guid alertId, string resolution)
     {
-        var alert = _alerts.FirstOrDefault(a => a.Id == alertId);
+        AnomalyAlert? alert = _alerts.FirstOrDefault(a => a.Id == alertId);
         if (alert == null)
         {
             return Result<AnomalyAlert>.Failure($"Alert {alertId} not found");
         }
 
         // Since ConcurrentBag doesn't support updates, we add a resolved copy
-        var resolved = alert with
+        AnomalyAlert resolved = alert with
         {
             IsResolved = true,
             ResolvedAt = DateTime.UtcNow,
@@ -179,9 +179,9 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
         {
             try
             {
-                var now = DateTime.UtcNow;
+                DateTime now = DateTime.UtcNow;
 
-                foreach (var task in _tasks.Where(t => t.IsEnabled))
+                foreach (MaintenanceTask? task in _tasks.Where(t => t.IsEnabled))
                 {
                     if (ShouldExecute(task, now))
                     {
@@ -211,7 +211,7 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
 
     private bool ShouldExecute(MaintenanceTask task, DateTime now)
     {
-        var lastExecution = _history
+        MaintenanceExecution? lastExecution = _history
             .Where(e => e.Task.Id == task.Id)
             .OrderByDescending(e => e.StartedAt)
             .FirstOrDefault();
@@ -221,7 +221,7 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
             return true; // Never executed
         }
 
-        var timeSinceLastExecution = now - lastExecution.StartedAt;
+        TimeSpan timeSinceLastExecution = now - lastExecution.StartedAt;
         return timeSinceLastExecution >= task.Schedule;
     }
 
@@ -243,7 +243,7 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
             IsEnabled = true,
             Execute = async ct =>
             {
-                var result = await compactor(ct);
+                Result<CompactionResult> result = await compactor(ct);
                 return result.IsSuccess
                     ? Result<object>.Success(result.Value)
                     : Result<object>.Failure(result.Error);
@@ -270,7 +270,7 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
             IsEnabled = true,
             Execute = async ct =>
             {
-                var result = await archiver(archiveAge, ct);
+                Result<ArchiveResult> result = await archiver(archiveAge, ct);
                 return result.IsSuccess
                     ? Result<object>.Success(result.Value)
                     : Result<object>.Failure(result.Error);
@@ -296,7 +296,7 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
             IsEnabled = true,
             Execute = async ct =>
             {
-                var result = await detector(ct);
+                Result<AnomalyDetectionResult> result = await detector(ct);
                 return result.IsSuccess
                     ? Result<object>.Success(result.Value)
                     : Result<object>.Failure(result.Error);

@@ -36,7 +36,7 @@ public readonly struct Future<T>
 
         return new Future<T>(async ct =>
         {
-            var leftResult = await left.RunAsync(ct).ConfigureAwait(false);
+            T leftResult = await left.RunAsync(ct).ConfigureAwait(false);
             return await asyncStep(leftResult).ConfigureAwait(false);
         });
     }
@@ -50,7 +50,7 @@ public readonly struct Future<T>
 
         return new Future<T>(async ct =>
         {
-            var leftResult = await left.RunAsync(ct).ConfigureAwait(false);
+            T leftResult = await left.RunAsync(ct).ConfigureAwait(false);
             return pureStep(leftResult);
         });
     }

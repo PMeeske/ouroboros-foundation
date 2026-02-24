@@ -46,7 +46,7 @@ public sealed class Interpreter
         // For ground queries, check direct match
         if (!query.ContainsVariables())
         {
-            foreach (var result in EvaluateInternal(query, new HashSet<string>(), 0))
+            foreach (Atom result in EvaluateInternal(query, new HashSet<string>(), 0))
             {
                 yield return (result, Substitution.Empty);
             }
@@ -55,13 +55,13 @@ public sealed class Interpreter
         }
 
         // For patterns, return results with bindings
-        foreach (var (atom, bindings) in space.Query(query))
+        foreach ((Atom? atom, Substitution? bindings) in space.Query(query))
         {
             yield return (atom, bindings);
         }
 
         // Also evaluate with implies rules
-        foreach (var ruleResult in EvaluateWithRules(query))
+        foreach ((Atom Result, Substitution Bindings) ruleResult in EvaluateWithRules(query))
         {
             yield return ruleResult;
         }
@@ -76,7 +76,7 @@ public sealed class Interpreter
             yield break;
         }
 
-        var queryKey = query.ToSExpr();
+        string queryKey = query.ToSExpr();
         if (visited.Contains(queryKey))
         {
             yield break;
@@ -87,10 +87,10 @@ public sealed class Interpreter
         // Case 1: Query is a grounded operation expression
         if (query is Expression expr && expr.Children.Count > 0 && expr.Children[0] is Symbol headSym)
         {
-            var opResult = groundedOps.Get(headSym.Name);
+            Option<GroundedOperation> opResult = groundedOps.Get(headSym.Name);
             if (opResult.HasValue && opResult.Value is not null)
             {
-                foreach (var result in opResult.Value(space, expr))
+                foreach (Atom result in opResult.Value(space, expr))
                 {
                     yield return result;
                 }
@@ -100,13 +100,13 @@ public sealed class Interpreter
         }
 
         // Case 2: Direct match in atom space (ground query or pattern match)
-        foreach (var (atom, bindings) in space.Query(query))
+        foreach ((Atom? atom, Substitution? bindings) in space.Query(query))
         {
             yield return bindings.Apply(query);
         }
 
         // Case 3: Evaluate using implies rules
-        foreach (var (result, _) in EvaluateWithRules(query))
+        foreach ((Atom? result, Substitution _) in EvaluateWithRules(query))
         {
             // Avoid duplicates from direct matches
             yield return result;
@@ -116,35 +116,35 @@ public sealed class Interpreter
     private IEnumerable<(Atom Result, Substitution Bindings)> EvaluateWithRules(Atom query)
     {
         // Find all implies rules in the space
-        var impliesPattern = Atom.Expr(Atom.Sym("implies"), Atom.Var("_cond"), Atom.Var("_conc"));
+        Expression impliesPattern = Atom.Expr(Atom.Sym("implies"), Atom.Var("_cond"), Atom.Var("_conc"));
 
-        foreach (var (rule, _) in space.Query(impliesPattern))
+        foreach ((Atom? rule, Substitution _) in space.Query(impliesPattern))
         {
             if (rule is not Expression ruleExpr || ruleExpr.Children.Count < 3)
             {
                 continue;
             }
 
-            var condition = ruleExpr.Children[1];
-            var conclusion = ruleExpr.Children[2];
+            Atom condition = ruleExpr.Children[1];
+            Atom conclusion = ruleExpr.Children[2];
 
             // Try to unify query with conclusion
-            var queryBindings = Unifier.Unify(conclusion, query);
+            Substitution? queryBindings = Unifier.Unify(conclusion, query);
             if (queryBindings is null)
             {
                 continue;
             }
 
             // Apply bindings to condition and check if it's satisfied
-            var boundCondition = queryBindings.Apply(condition);
+            Atom boundCondition = queryBindings.Apply(condition);
 
-            foreach (var (_, conditionBindings) in space.Query(boundCondition))
+            foreach ((Atom _, Substitution? conditionBindings) in space.Query(boundCondition))
             {
                 // Combine bindings and yield the result
-                var composedBindings = queryBindings.Compose(conditionBindings);
+                Substitution? composedBindings = queryBindings.Compose(conditionBindings);
                 if (composedBindings is not null)
                 {
-                    var result = composedBindings.Apply(query);
+                    Atom result = composedBindings.Apply(query);
                     yield return (result, composedBindings);
                 }
             }

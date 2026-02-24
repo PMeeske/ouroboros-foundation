@@ -70,10 +70,10 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
         _logger = logger;
 
         // Parse connection string to extract host and port
-        var uri = new Uri(connectionString);
-        var host = uri.Host;
-        var port = uri.Port > 0 ? uri.Port : 6334; // Default to gRPC port
-        var useHttps = uri.Scheme == "https";
+        Uri uri = new Uri(connectionString);
+        string host = uri.Host;
+        int port = uri.Port > 0 ? uri.Port : 6334; // Default to gRPC port
+        bool useHttps = uri.Scheme == "https";
 
         _logger?.LogInformation("Initializing Qdrant client: {Host}:{Port} (HTTPS: {UseHttps})", host, port, useHttps);
 
@@ -101,7 +101,7 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
     /// </summary>
     public async Task AddAsync(IEnumerable<LCVector> vectors, CancellationToken cancellationToken = default)
     {
-        var vectorList = vectors.ToList();
+        List<LCVector> vectorList = vectors.ToList();
         if (!vectorList.Any())
         {
             _logger?.LogDebug("No vectors to add");
@@ -114,7 +114,7 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
             await EnsureCollectionExistsAsync(vectorList.First(), cancellationToken);
 
             // Convert vectors to Qdrant points
-            var points = vectorList.Select(v => new PointStruct
+            List<PointStruct> points = vectorList.Select(v => new PointStruct
             {
                 Id = new PointId { Uuid = Guid.NewGuid().ToString() },
                 Vectors = v.Embedding?.ToArray() ?? Array.Empty<float>(),
@@ -126,11 +126,11 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
             }).ToList();
 
             // Add metadata to payload
-            foreach (var (point, vector) in points.Zip(vectorList))
+            foreach ((PointStruct? point, LCVector? vector) in points.Zip(vectorList))
             {
                 if (vector.Metadata != null)
                 {
-                    foreach (var kvp in vector.Metadata)
+                    foreach (KeyValuePair<string, object> kvp in vector.Metadata)
                     {
                         point.Payload[$"metadata_{kvp.Key}"] = kvp.Value?.ToString() ?? string.Empty;
                     }
@@ -141,7 +141,7 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
             const int batchSize = 100;
             for (int i = 0; i < points.Count; i += batchSize)
             {
-                var batch = points.Skip(i).Take(batchSize).ToList();
+                List<PointStruct> batch = points.Skip(i).Take(batchSize).ToList();
                 await _client.UpsertAsync(_collectionName, batch, cancellationToken: cancellationToken);
                 _logger?.LogDebug("Upserted batch of {Count} vectors to collection {Collection}", batch.Count, _collectionName);
             }
@@ -166,7 +166,7 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
         try
         {
             // Check if collection exists
-            var collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
+            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
             if (!collectionExists)
             {
                 _logger?.LogDebug("Collection {Collection} does not exist, returning empty results", _collectionName);
@@ -174,25 +174,25 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
             }
 
             // Perform similarity search
-            var searchResult = await _client.SearchAsync(
+            IReadOnlyList<ScoredPoint> searchResult = await _client.SearchAsync(
                 _collectionName,
                 embedding,
                 limit: (ulong)amount,
                 cancellationToken: cancellationToken);
 
             // Convert results to documents
-            var documents = searchResult.Select(scored =>
+            List<LCDocument> documents = searchResult.Select(scored =>
             {
-                var text = scored.Payload.TryGetValue("text", out var textValue)
+                string text = scored.Payload.TryGetValue("text", out Value? textValue)
                     ? textValue.StringValue
                     : string.Empty;
 
-                var metadata = new Dictionary<string, object>();
-                foreach (var kvp in scored.Payload)
+                Dictionary<string, object> metadata = new Dictionary<string, object>();
+                foreach (KeyValuePair<string, Value> kvp in scored.Payload)
                 {
                     if (kvp.Key.StartsWith("metadata_"))
                     {
-                        var key = kvp.Key["metadata_".Length..];
+                        string key = kvp.Key["metadata_".Length..];
                         metadata[key] = kvp.Value.StringValue;
                     }
                     else if (kvp.Key != "text")
@@ -223,7 +223,7 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
     {
         try
         {
-            var collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
+            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
             if (collectionExists)
             {
                 await _client.DeleteCollectionAsync(_collectionName, cancellationToken: cancellationToken);
@@ -252,12 +252,12 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
 
     private async Task<IEnumerable<LCVector>> GetAllAsync()
     {
-        var results = new List<LCVector>();
+        List<LCVector> results = new List<LCVector>();
         PointId? offset = null;
 
         try
         {
-            var collectionExists = await _client.CollectionExistsAsync(_collectionName);
+            bool collectionExists = await _client.CollectionExistsAsync(_collectionName);
             if (!collectionExists)
             {
                 return results;
@@ -265,19 +265,19 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
 
             do
             {
-                var scrollResult = await _client.ScrollAsync(
+                ScrollResponse scrollResult = await _client.ScrollAsync(
                     _collectionName,
                     limit: 100,
                     offset: offset,
                     payloadSelector: new WithPayloadSelector { Enable = true },
                     vectorsSelector: new WithVectorsSelector { Enable = true });
 
-                foreach (var point in scrollResult.Result)
+                foreach (RetrievedPoint? point in scrollResult.Result)
                 {
-                    var text = point.Payload.TryGetValue("text", out var textValue)
+                    string text = point.Payload.TryGetValue("text", out Value? textValue)
                         ? textValue.StringValue
                         : string.Empty;
-                    var id = point.Payload.TryGetValue("id", out var idValue)
+                    string id = point.Payload.TryGetValue("id", out Value? idValue)
                         ? idValue.StringValue
                         : point.Id.Uuid ?? point.Id.Num.ToString();
 
@@ -323,15 +323,15 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
     {
         try
         {
-            var collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
+            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
             if (!collectionExists)
             {
                 return Array.Empty<LCDocument>();
             }
 
-            var qdrantFilter = BuildFilter(filter);
+            Filter? qdrantFilter = BuildFilter(filter);
 
-            var searchResult = await _client.SearchAsync(
+            IReadOnlyList<ScoredPoint> searchResult = await _client.SearchAsync(
                 _collectionName,
                 embedding,
                 filter: qdrantFilter,
@@ -353,14 +353,14 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
     {
         try
         {
-            var collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
+            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
             if (!collectionExists)
             {
                 return 0;
             }
 
-            var qdrantFilter = BuildFilter(filter);
-            var count = await _client.CountAsync(_collectionName, filter: qdrantFilter, exact: true, cancellationToken: cancellationToken);
+            Filter? qdrantFilter = BuildFilter(filter);
+            ulong count = await _client.CountAsync(_collectionName, filter: qdrantFilter, exact: true, cancellationToken: cancellationToken);
 
             _logger?.LogDebug("Count in collection {Collection}: {Count}", _collectionName, count);
             return count;
@@ -381,7 +381,7 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
     {
         try
         {
-            var collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
+            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
             if (!collectionExists)
             {
                 return new ScrollResult(Array.Empty<LCDocument>(), null);
@@ -390,14 +390,14 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
             PointId? pointOffset = null;
             if (!string.IsNullOrEmpty(offset))
             {
-                pointOffset = Guid.TryParse(offset, out var guid)
+                pointOffset = Guid.TryParse(offset, out Guid guid)
                     ? new PointId { Uuid = guid.ToString() }
                     : new PointId { Num = ulong.Parse(offset) };
             }
 
-            var qdrantFilter = BuildFilter(filter);
+            Filter? qdrantFilter = BuildFilter(filter);
 
-            var scrollResult = await _client.ScrollAsync(
+            ScrollResponse scrollResult = await _client.ScrollAsync(
                 _collectionName,
                 filter: qdrantFilter,
                 limit: (uint)limit,
@@ -405,19 +405,19 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
                 payloadSelector: new WithPayloadSelector { Enable = true },
                 cancellationToken: cancellationToken);
 
-            var documents = scrollResult.Result.Select(point =>
+            List<LCDocument> documents = scrollResult.Result.Select(point =>
             {
-                var text = point.Payload.TryGetValue("text", out var textValue)
+                string text = point.Payload.TryGetValue("text", out Value? textValue)
                     ? textValue.StringValue
                     : string.Empty;
 
-                var metadata = ExtractMetadata(point.Payload);
+                Dictionary<string, object> metadata = ExtractMetadata(point.Payload);
                 metadata["id"] = point.Id.Uuid ?? point.Id.Num.ToString();
 
                 return new LCDocument(text, metadata);
             }).ToList();
 
-            var nextOffset = scrollResult.Result.Count > 0
+            string? nextOffset = scrollResult.Result.Count > 0
                 ? scrollResult.Result.Last().Id.Uuid ?? scrollResult.Result.Last().Id.Num.ToString()
                 : null;
 
@@ -439,13 +439,13 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
     {
         try
         {
-            var collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
+            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
             if (!collectionExists)
             {
                 return embeddings.Select(_ => (IReadOnlyCollection<LCDocument>)Array.Empty<LCDocument>()).ToList();
             }
 
-            var searches = embeddings.Select(e => new SearchPoints
+            List<SearchPoints> searches = embeddings.Select(e => new SearchPoints
             {
                 CollectionName = _collectionName,
                 Vector = { e },
@@ -453,9 +453,9 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
                 WithPayload = new WithPayloadSelector { Enable = true }
             }).ToList();
 
-            var batchResults = await _client.SearchBatchAsync(_collectionName, searches, cancellationToken: cancellationToken);
+            IReadOnlyList<BatchResult> batchResults = await _client.SearchBatchAsync(_collectionName, searches, cancellationToken: cancellationToken);
 
-            var results = batchResults.Select(batch =>
+            List<IReadOnlyCollection<LCDocument>> results = batchResults.Select(batch =>
                 (IReadOnlyCollection<LCDocument>)ConvertToDocuments(batch.Result)).ToList();
 
             _logger?.LogDebug("Batch search completed: {Queries} queries, {TotalResults} total results",
@@ -478,21 +478,21 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
     {
         try
         {
-            var collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
+            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
             if (!collectionExists)
             {
                 return Array.Empty<LCDocument>();
             }
 
-            var positive = positiveIds.Select(id => Guid.TryParse(id, out var guid)
+            List<PointId> positive = positiveIds.Select(id => Guid.TryParse(id, out Guid guid)
                 ? new PointId { Uuid = guid.ToString() }
                 : new PointId { Num = ulong.Parse(id) }).ToList();
 
-            var negative = negativeIds?.Select(id => Guid.TryParse(id, out var guid)
+            List<PointId>? negative = negativeIds?.Select(id => Guid.TryParse(id, out Guid guid)
                 ? new PointId { Uuid = guid.ToString() }
                 : new PointId { Num = ulong.Parse(id) }).ToList();
 
-            var results = await _client.RecommendAsync(
+            IReadOnlyList<ScoredPoint> results = await _client.RecommendAsync(
                 _collectionName,
                 positive,
                 negative,
@@ -515,7 +515,7 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
     {
         try
         {
-            var pointIds = ids.Select(id => Guid.TryParse(id, out var guid)
+            List<PointId> pointIds = ids.Select(id => Guid.TryParse(id, out Guid guid)
                 ? new PointId { Uuid = guid.ToString() }
                 : new PointId { Num = ulong.Parse(id) }).ToList();
 
@@ -535,7 +535,7 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
     {
         try
         {
-            var qdrantFilter = BuildFilter(filter);
+            Filter? qdrantFilter = BuildFilter(filter);
             if (qdrantFilter == null)
             {
                 throw new ArgumentException("Filter cannot be empty for delete operation", nameof(filter));
@@ -557,19 +557,19 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
     {
         try
         {
-            var collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
+            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
             if (!collectionExists)
             {
                 return new VectorStoreInfo(_collectionName, 0, 0, "NotFound");
             }
 
-            var info = await _client.GetCollectionInfoAsync(_collectionName, cancellationToken);
-            var count = await _client.CountAsync(_collectionName, exact: true, cancellationToken: cancellationToken);
+            Qdrant.Client.Grpc.CollectionInfo info = await _client.GetCollectionInfoAsync(_collectionName, cancellationToken);
+            ulong count = await _client.CountAsync(_collectionName, exact: true, cancellationToken: cancellationToken);
 
-            var vectorDim = info.Config?.Params?.VectorsConfig?.Params?.Size ?? 0;
-            var status = info.Status.ToString();
+            ulong vectorDim = info.Config?.Params?.VectorsConfig?.Params?.Size ?? 0;
+            string status = info.Status.ToString();
 
-            var additionalInfo = new Dictionary<string, object>
+            Dictionary<string, object> additionalInfo = new Dictionary<string, object>
             {
                 ["segments_count"] = info.SegmentsCount,
                 ["points_count"] = info.PointsCount,
@@ -596,10 +596,10 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
     /// </summary>
     private async Task EnsureCollectionExistsAsync(LCVector sampleVector, CancellationToken cancellationToken)
     {
-        var collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
+        bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
         if (!collectionExists)
         {
-            var vectorSize = sampleVector.Embedding?.Length ?? 0;
+            int vectorSize = sampleVector.Embedding?.Length ?? 0;
             if (vectorSize == 0)
             {
                 throw new InvalidOperationException("Cannot create collection: sample vector has no embedding");
@@ -628,14 +628,14 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
             return null;
         }
 
-        var conditions = new List<Condition>();
+        List<Condition> conditions = new List<Condition>();
 
-        foreach (var (key, value) in filter)
+        foreach ((string? key, object? value) in filter)
         {
-            var fieldName = key.StartsWith("metadata_") ? key : $"metadata_{key}";
+            string fieldName = key.StartsWith("metadata_") ? key : $"metadata_{key}";
 
             // Build conditions based on value type
-            var condition = value switch
+            Condition condition = value switch
             {
                 int i => MatchValue(fieldName, i),
                 long l => MatchValue(fieldName, l),
@@ -663,11 +663,11 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
     {
         return scoredPoints.Select(scored =>
         {
-            var text = scored.Payload.TryGetValue("text", out var textValue)
+            string text = scored.Payload.TryGetValue("text", out Value? textValue)
                 ? textValue.StringValue
                 : string.Empty;
 
-            var metadata = ExtractMetadata(scored.Payload);
+            Dictionary<string, object> metadata = ExtractMetadata(scored.Payload);
             metadata["score"] = scored.Score;
 
             return new LCDocument(text, metadata);
@@ -676,13 +676,13 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
 
     private static Dictionary<string, object> ExtractMetadata(Google.Protobuf.Collections.MapField<string, Value> payload)
     {
-        var metadata = new Dictionary<string, object>();
+        Dictionary<string, object> metadata = new Dictionary<string, object>();
 
-        foreach (var kvp in payload)
+        foreach (KeyValuePair<string, Value> kvp in payload)
         {
             if (kvp.Key.StartsWith("metadata_"))
             {
-                var key = kvp.Key["metadata_".Length..];
+                string key = kvp.Key["metadata_".Length..];
                 metadata[key] = kvp.Value.StringValue;
             }
             else if (kvp.Key != "text")

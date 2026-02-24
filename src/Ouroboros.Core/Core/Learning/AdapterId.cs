@@ -23,7 +23,7 @@ public sealed record AdapterId(Guid Value)
     /// <returns>An adapter ID if parsing succeeds, otherwise None.</returns>
     public static Option<AdapterId> FromString(string value)
     {
-        if (Guid.TryParse(value, out var guid))
+        if (Guid.TryParse(value, out Guid guid))
         {
             return Option<AdapterId>.Some(new AdapterId(guid));
         }

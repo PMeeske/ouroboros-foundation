@@ -39,7 +39,7 @@ public sealed record MetaModel(
     /// <param name="key">The parameter key.</param>
     /// <returns>The parameter value if present, null otherwise.</returns>
     public object? GetMetaParameter(string key) =>
-        MetaParameters.TryGetValue(key, out var value) ? value : null;
+        MetaParameters.TryGetValue(key, out object? value) ? value : null;
 
     /// <summary>
     /// Updates a single meta-parameter.
@@ -49,7 +49,7 @@ public sealed record MetaModel(
     /// <returns>A new MetaModel with the updated parameter.</returns>
     public MetaModel WithMetaParameter(string key, object value)
     {
-        var newParams = new Dictionary<string, object>(MetaParameters) { [key] = value };
+        Dictionary<string, object> newParams = new Dictionary<string, object>(MetaParameters) { [key] = value };
         return this with { MetaParameters = newParams };
     }
 

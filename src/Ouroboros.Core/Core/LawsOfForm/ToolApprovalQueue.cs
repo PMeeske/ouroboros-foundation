@@ -35,8 +35,8 @@ public sealed class ToolApprovalQueue
         ArgumentNullException.ThrowIfNull(call);
         ArgumentNullException.ThrowIfNull(decision);
 
-        var queueId = Guid.NewGuid().ToString();
-        var pending = new PendingApproval(queueId, call, decision, DateTime.UtcNow);
+        string queueId = Guid.NewGuid().ToString();
+        PendingApproval pending = new PendingApproval(queueId, call, decision, DateTime.UtcNow);
 
         this.pendingApprovals[queueId] = pending;
         this.completionSources[queueId] = new TaskCompletionSource<AuditableDecision<ToolResult>>();
@@ -54,8 +54,8 @@ public sealed class ToolApprovalQueue
         ToolCall call,
         AuditableDecision<ToolResult> decision)
     {
-        var queueId = this.Enqueue(call, decision);
-        var tcs = this.completionSources[queueId];
+        string queueId = this.Enqueue(call, decision);
+        TaskCompletionSource<AuditableDecision<ToolResult>> tcs = this.completionSources[queueId];
         return await tcs.Task;
     }
 
@@ -71,10 +71,10 @@ public sealed class ToolApprovalQueue
         AuditableDecision<ToolResult> decision,
         TimeSpan timeout)
     {
-        var queueId = this.Enqueue(call, decision);
-        var tcs = this.completionSources[queueId];
+        string queueId = this.Enqueue(call, decision);
+        TaskCompletionSource<AuditableDecision<ToolResult>> tcs = this.completionSources[queueId];
 
-        var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(timeout));
+        Task completedTask = await Task.WhenAny(tcs.Task, Task.Delay(timeout));
 
         if (completedTask == tcs.Task)
         {
@@ -107,18 +107,18 @@ public sealed class ToolApprovalQueue
     {
         ArgumentNullException.ThrowIfNull(queueId);
 
-        if (!this.pendingApprovals.TryRemove(queueId, out var pending))
+        if (!this.pendingApprovals.TryRemove(queueId, out PendingApproval? pending))
         {
             throw new InvalidOperationException($"No pending approval found for queue ID: {queueId}");
         }
 
-        if (!this.completionSources.TryRemove(queueId, out var tcs))
+        if (!this.completionSources.TryRemove(queueId, out TaskCompletionSource<AuditableDecision<ToolResult>>? tcs))
         {
             throw new InvalidOperationException($"No completion source found for queue ID: {queueId}");
         }
 
         // Build new evidence list with reviewer decision
-        var evidence = new List<Evidence>(pending.OriginalDecision.EvidenceTrail)
+        List<Evidence> evidence = new List<Evidence>(pending.OriginalDecision.EvidenceTrail)
         {
             new Evidence(
                 "human_review",
@@ -131,7 +131,7 @@ public sealed class ToolApprovalQueue
         if (approved)
         {
             // Create a success result (actual execution would happen here in a real system)
-            var toolResult = ToolResult.Success(
+            ToolResult toolResult = ToolResult.Success(
                 "Approved by human review",
                 pending.Call,
                 TimeSpan.Zero);
@@ -159,7 +159,7 @@ public sealed class ToolApprovalQueue
     /// <returns>A read-only list of pending approvals.</returns>
     public Task<IReadOnlyList<PendingApproval>> GetPending()
     {
-        var pending = this.pendingApprovals.Values.OrderBy(p => p.QueuedAt).ToList();
+        List<PendingApproval> pending = this.pendingApprovals.Values.OrderBy(p => p.QueuedAt).ToList();
         return Task.FromResult<IReadOnlyList<PendingApproval>>(pending);
     }
 
@@ -170,7 +170,7 @@ public sealed class ToolApprovalQueue
     /// <returns>The pending approval if found, null otherwise.</returns>
     public PendingApproval? GetPending(string queueId)
     {
-        this.pendingApprovals.TryGetValue(queueId, out var pending);
+        this.pendingApprovals.TryGetValue(queueId, out PendingApproval? pending);
         return pending;
     }
 
@@ -181,16 +181,16 @@ public sealed class ToolApprovalQueue
     /// <returns>True if cancelled, false if not found.</returns>
     public bool Cancel(string queueId)
     {
-        var removed = this.pendingApprovals.TryRemove(queueId, out var pending);
+        bool removed = this.pendingApprovals.TryRemove(queueId, out PendingApproval? pending);
 
-        if (removed && this.completionSources.TryRemove(queueId, out var tcs))
+        if (removed && this.completionSources.TryRemove(queueId, out TaskCompletionSource<AuditableDecision<ToolResult>>? tcs))
         {
-            var evidence = new List<Evidence>(pending!.OriginalDecision.EvidenceTrail)
+            List<Evidence> evidence = new List<Evidence>(pending!.OriginalDecision.EvidenceTrail)
             {
                 new Evidence("cancellation", Form.Void, "Approval request cancelled")
             };
 
-            var cancelDecision = AuditableDecision<ToolResult>.Reject(
+            AuditableDecision<ToolResult> cancelDecision = AuditableDecision<ToolResult>.Reject(
                 "Approval request cancelled",
                 "Request was cancelled before review",
                 evidence.ToArray());

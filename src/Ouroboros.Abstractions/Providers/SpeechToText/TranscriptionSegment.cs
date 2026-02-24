@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Providers.SpeechToText;
+namespace Ouroboros.Providers.SpeechToText;
 
 /// <summary>
 /// Represents a segment of transcribed audio with timing information.

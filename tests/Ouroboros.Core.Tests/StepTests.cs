@@ -5,6 +5,7 @@
 namespace Ouroboros.Tests.Core;
 
 using FluentAssertions;
+using Ouroboros.Abstractions.Monads;
 using Ouroboros.Core.Kleisli;
 using Ouroboros.Core.Steps;
 using Xunit;
@@ -69,7 +70,7 @@ public class StepTests
     public async Task Arrow_Identity_ReturnsInputUnchanged()
     {
         // Arrange
-        var identity = Arrow.Identity<int>();
+        Step<int, int> identity = Arrow.Identity<int>();
 
         // Act
         var result = await identity(42);
@@ -82,7 +83,7 @@ public class StepTests
     public async Task Arrow_Lift_WrapsFunction()
     {
         // Arrange
-        var lifted = Arrow.Lift<int, int>(x => x * 2);
+        Step<int, int> lifted = Arrow.Lift<int, int>(x => x * 2);
 
         // Act
         var result = await lifted(5);
@@ -95,7 +96,7 @@ public class StepTests
     public async Task Arrow_LiftAsync_WrapsAsyncFunction()
     {
         // Arrange
-        var lifted = Arrow.LiftAsync<int, int>(x => Task.FromResult(x * 2));
+        Step<int, int> lifted = Arrow.LiftAsync<int, int>(x => Task.FromResult(x * 2));
 
         // Act
         var result = await lifted(5);
@@ -108,10 +109,10 @@ public class StepTests
     public async Task Arrow_TryLift_OnSuccess_ReturnsSuccess()
     {
         // Arrange
-        var arrow = Arrow.TryLift<int, int>(x => x * 2);
+        KleisliResult<int, int, Exception> arrow = Arrow.TryLift<int, int>(x => x * 2);
 
         // Act
-        var result = await arrow(5);
+        Result<int, Exception> result = await arrow(5);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -122,14 +123,14 @@ public class StepTests
     public async Task Arrow_TryLift_OnException_ReturnsFailure()
     {
         // Arrange
-        var arrow = Arrow.TryLift<int, int>(x =>
+        KleisliResult<int, int, Exception> arrow = Arrow.TryLift<int, int>(x =>
         {
             if (x < 0) throw new ArgumentException("Must be positive");
             return x * 2;
         });
 
         // Act
-        var result = await arrow(-1);
+        Result<int, Exception> result = await arrow(-1);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -140,14 +141,14 @@ public class StepTests
     public async Task Arrow_TryLiftAsync_OnSuccess_ReturnsSuccess()
     {
         // Arrange
-        var arrow = Arrow.TryLiftAsync<int, int>(async x =>
+        KleisliResult<int, int, Exception> arrow = Arrow.TryLiftAsync<int, int>(async x =>
         {
             await Task.Delay(1);
             return x * 2;
         });
 
         // Act
-        var result = await arrow(5);
+        Result<int, Exception> result = await arrow(5);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -158,14 +159,14 @@ public class StepTests
     public async Task Arrow_TryLiftAsync_OnException_ReturnsFailure()
     {
         // Arrange
-        var arrow = Arrow.TryLiftAsync<int, int>(async x =>
+        KleisliResult<int, int, Exception> arrow = Arrow.TryLiftAsync<int, int>(async x =>
         {
             await Task.Delay(1);
             throw new InvalidOperationException("Test error");
         });
 
         // Act
-        var result = await arrow(5);
+        Result<int, Exception> result = await arrow(5);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -176,10 +177,10 @@ public class StepTests
     public async Task Arrow_Success_AlwaysReturnsSuccess()
     {
         // Arrange
-        var arrow = Arrow.Success<int, string, string>("constant");
+        KleisliResult<int, string, string> arrow = Arrow.Success<int, string, string>("constant");
 
         // Act
-        var result = await arrow(42);
+        Result<string, string> result = await arrow(42);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -190,10 +191,10 @@ public class StepTests
     public async Task Arrow_Failure_AlwaysReturnsFailure()
     {
         // Arrange
-        var arrow = Arrow.Failure<int, string, string>("error");
+        KleisliResult<int, string, string> arrow = Arrow.Failure<int, string, string>("error");
 
         // Act
-        var result = await arrow(42);
+        Result<string, string> result = await arrow(42);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -204,10 +205,10 @@ public class StepTests
     public async Task Arrow_Some_AlwaysReturnsSome()
     {
         // Arrange
-        var arrow = Arrow.Some<int, string>("value");
+        KleisliOption<int, string> arrow = Arrow.Some<int, string>("value");
 
         // Act
-        var result = await arrow(42);
+        Option<string> result = await arrow(42);
 
         // Assert
         result.HasValue.Should().BeTrue();
@@ -218,10 +219,10 @@ public class StepTests
     public async Task Arrow_None_AlwaysReturnsNone()
     {
         // Arrange
-        var arrow = Arrow.None<int, string>();
+        KleisliOption<int, string> arrow = Arrow.None<int, string>();
 
         // Act
-        var result = await arrow(42);
+        Option<string> result = await arrow(42);
 
         // Assert
         result.HasValue.Should().BeFalse();
@@ -235,12 +236,12 @@ public class StepTests
     public async Task Arrow_Compose_CombinesTwoArrows()
     {
         // Arrange
-        var compose = Arrow.Compose<int, int, string>();
+        KleisliCompose<int, int, string> compose = Arrow.Compose<int, int, string>();
         Kleisli<int, int> double_ = x => Task.FromResult(x * 2);
         Kleisli<int, string> toString = x => Task.FromResult(x.ToString());
 
         // Act
-        var composed = compose(double_, toString);
+        Kleisli<int, string> composed = compose(double_, toString);
         var result = await composed(5);
 
         // Assert
@@ -254,10 +255,10 @@ public class StepTests
         Kleisli<int, int> double_ = x => Task.FromResult(x * 2);
         Kleisli<int, string> toString = x => Task.FromResult(x.ToString());
 
-        var curriedCompose = Arrow.ComposeWith<int, int, string>(double_);
+        Func<Kleisli<int, string>, Kleisli<int, string>> curriedCompose = Arrow.ComposeWith<int, int, string>(double_);
 
         // Act
-        var composed = curriedCompose(toString);
+        Kleisli<int, string> composed = curriedCompose(toString);
         var result = await composed(5);
 
         // Assert
@@ -272,7 +273,7 @@ public class StepTests
     public void SyncStep_Invoke_ExecutesSynchronously()
     {
         // Arrange
-        var step = new SyncStep<int, int>(x => x * 2);
+        SyncStep<int, int> step = new SyncStep<int, int>(x => x * 2);
 
         // Act
         var result = step.Invoke(5);
@@ -285,7 +286,7 @@ public class StepTests
     public async Task SyncStep_ToAsync_ConvertsToAsyncStep()
     {
         // Arrange
-        var syncStep = new SyncStep<int, int>(x => x * 2);
+        SyncStep<int, int> syncStep = new SyncStep<int, int>(x => x * 2);
 
         // Act
         Step<int, int> asyncStep = syncStep.ToAsync();
@@ -299,11 +300,11 @@ public class StepTests
     public void SyncStep_Pipe_ComposesSynchronously()
     {
         // Arrange
-        var double_ = new SyncStep<int, int>(x => x * 2);
-        var addThree = new SyncStep<int, int>(x => x + 3);
+        SyncStep<int, int> double_ = new SyncStep<int, int>(x => x * 2);
+        SyncStep<int, int> addThree = new SyncStep<int, int>(x => x + 3);
 
         // Act
-        var composed = double_.Pipe(addThree);
+        SyncStep<int, int> composed = double_.Pipe(addThree);
         var result = composed.Invoke(5);
 
         // Assert
@@ -314,11 +315,11 @@ public class StepTests
     public async Task SyncStep_PipeWithAsync_ComposesWithAsyncStep()
     {
         // Arrange
-        var double_ = new SyncStep<int, int>(x => x * 2);
+        SyncStep<int, int> double_ = new SyncStep<int, int>(x => x * 2);
         Step<int, string> toString = x => Task.FromResult(x.ToString());
 
         // Act
-        var composed = double_.Pipe(toString);
+        Step<int, string> composed = double_.Pipe(toString);
         var result = await composed(5);
 
         // Assert
@@ -329,10 +330,10 @@ public class StepTests
     public void SyncStep_Map_TransformsOutput()
     {
         // Arrange
-        var step = new SyncStep<int, int>(x => x * 2);
+        SyncStep<int, int> step = new SyncStep<int, int>(x => x * 2);
 
         // Act
-        var mapped = step.Map(x => x.ToString());
+        SyncStep<int, string> mapped = step.Map(x => x.ToString());
         var result = mapped.Invoke(5);
 
         // Assert
@@ -343,7 +344,7 @@ public class StepTests
     public void SyncStep_Identity_ReturnsInputUnchanged()
     {
         // Arrange
-        var identity = SyncStep<int, int>.Identity;
+        SyncStep<int, int> identity = SyncStep<int, int>.Identity;
 
         // Act
         var result = identity.Invoke(42);
@@ -370,7 +371,7 @@ public class StepTests
     public async Task SyncStep_ImplicitToStep_Works()
     {
         // Arrange
-        var syncStep = new SyncStep<int, int>(x => x * 2);
+        SyncStep<int, int> syncStep = new SyncStep<int, int>(x => x * 2);
 
         // Act
         Step<int, int> asyncStep = syncStep;
@@ -391,7 +392,7 @@ public class StepTests
         Func<int, int> func = x => x * 2;
 
         // Act
-        var step = func.ToSyncStep();
+        SyncStep<int, int> step = func.ToSyncStep();
         var result = step.Invoke(5);
 
         // Assert
@@ -402,11 +403,11 @@ public class StepTests
     public async Task SyncStep_Then_WithAsyncStep_Composes()
     {
         // Arrange
-        var syncStep = new SyncStep<int, int>(x => x * 2);
+        SyncStep<int, int> syncStep = new SyncStep<int, int>(x => x * 2);
         Step<int, string> asyncStep = x => Task.FromResult(x.ToString());
 
         // Act
-        var composed = syncStep.Then(asyncStep);
+        Step<int, string> composed = syncStep.Then(asyncStep);
         var result = await composed(5);
 
         // Assert
@@ -418,10 +419,10 @@ public class StepTests
     {
         // Arrange
         Step<int, int> asyncStep = x => Task.FromResult(x * 2);
-        var syncStep = new SyncStep<int, string>(x => x.ToString());
+        SyncStep<int, string> syncStep = new SyncStep<int, string>(x => x.ToString());
 
         // Act
-        var composed = asyncStep.Then(syncStep);
+        Step<int, string> composed = asyncStep.Then(syncStep);
         var result = await composed(5);
 
         // Assert
@@ -432,11 +433,11 @@ public class StepTests
     public void SyncStep_TrySync_OnSuccess_ReturnsSuccess()
     {
         // Arrange
-        var step = new SyncStep<int, int>(x => x * 2);
+        SyncStep<int, int> step = new SyncStep<int, int>(x => x * 2);
 
         // Act
-        var wrapped = step.TrySync();
-        var result = wrapped.Invoke(5);
+        SyncStep<int, Result<int, Exception>> wrapped = step.TrySync();
+        Result<int, Exception> result = wrapped.Invoke(5);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -447,11 +448,11 @@ public class StepTests
     public void SyncStep_TrySync_OnException_ReturnsFailure()
     {
         // Arrange
-        var step = new SyncStep<int, int>(x => throw new InvalidOperationException("Test"));
+        SyncStep<int, int> step = new SyncStep<int, int>(x => throw new InvalidOperationException("Test"));
 
         // Act
-        var wrapped = step.TrySync();
-        var result = wrapped.Invoke(5);
+        SyncStep<int, Result<int, Exception>> wrapped = step.TrySync();
+        Result<int, Exception> result = wrapped.Invoke(5);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -462,11 +463,11 @@ public class StepTests
     public void SyncStep_TryOption_WhenPredicatePasses_ReturnsSome()
     {
         // Arrange
-        var step = new SyncStep<int, int>(x => x * 2);
+        SyncStep<int, int> step = new SyncStep<int, int>(x => x * 2);
 
         // Act
-        var wrapped = step.TryOption(x => x > 0);
-        var result = wrapped.Invoke(5);
+        SyncStep<int, Option<int>> wrapped = step.TryOption(x => x > 0);
+        Option<int> result = wrapped.Invoke(5);
 
         // Assert
         result.HasValue.Should().BeTrue();
@@ -477,11 +478,11 @@ public class StepTests
     public void SyncStep_TryOption_WhenPredicateFails_ReturnsNone()
     {
         // Arrange
-        var step = new SyncStep<int, int>(x => x * 2);
+        SyncStep<int, int> step = new SyncStep<int, int>(x => x * 2);
 
         // Act
-        var wrapped = step.TryOption(x => x > 100);
-        var result = wrapped.Invoke(5);
+        SyncStep<int, Option<int>> wrapped = step.TryOption(x => x > 100);
+        Option<int> result = wrapped.Invoke(5);
 
         // Assert
         result.HasValue.Should().BeFalse();
@@ -491,11 +492,11 @@ public class StepTests
     public void SyncStep_TryOption_OnException_ReturnsNone()
     {
         // Arrange
-        var step = new SyncStep<int, int>(x => throw new InvalidOperationException());
+        SyncStep<int, int> step = new SyncStep<int, int>(x => throw new InvalidOperationException());
 
         // Act
-        var wrapped = step.TryOption(x => true);
-        var result = wrapped.Invoke(5);
+        SyncStep<int, Option<int>> wrapped = step.TryOption(x => true);
+        Option<int> result = wrapped.Invoke(5);
 
         // Assert
         result.HasValue.Should().BeFalse();
@@ -511,11 +512,11 @@ public class StepTests
         // Left identity: return >=> f = f
         var a = 5;
         Kleisli<int, int> f = x => Task.FromResult(x * 2);
-        var identity = Arrow.Identity<int>();
+        Step<int, int> identity = Arrow.Identity<int>();
 
         // Compose identity then f using explicit Kleisli arrows
         Kleisli<int, int> identityKleisli = x => identity(x);
-        var composed = Arrow.Compose<int, int, int>()(identityKleisli, f);
+        Kleisli<int, int> composed = Arrow.Compose<int, int, int>()(identityKleisli, f);
 
         // Act
         var composedResult = await composed(a);
@@ -531,11 +532,11 @@ public class StepTests
         // Right identity: f >=> return = f
         var a = 5;
         Kleisli<int, int> f = x => Task.FromResult(x * 2);
-        var identity = Arrow.Identity<int>();
+        Step<int, int> identity = Arrow.Identity<int>();
 
         // Compose f then identity
         Kleisli<int, int> identityKleisli = x => identity(x);
-        var composed = Arrow.Compose<int, int, int>()(f, identityKleisli);
+        Kleisli<int, int> composed = Arrow.Compose<int, int, int>()(f, identityKleisli);
 
         // Act
         var composedResult = await composed(a);
@@ -555,12 +556,12 @@ public class StepTests
         Kleisli<int, int> h = x => Task.FromResult(x - 1);
 
         // (f >=> g) >=> h
-        var fg = Arrow.Compose<int, int, int>()(f, g);
-        var fg_h = Arrow.Compose<int, int, int>()(fg, h);
+        Kleisli<int, int> fg = Arrow.Compose<int, int, int>()(f, g);
+        Kleisli<int, int> fg_h = Arrow.Compose<int, int, int>()(fg, h);
 
         // f >=> (g >=> h)
-        var gh = Arrow.Compose<int, int, int>()(g, h);
-        var f_gh = Arrow.Compose<int, int, int>()(f, gh);
+        Kleisli<int, int> gh = Arrow.Compose<int, int, int>()(g, h);
+        Kleisli<int, int> f_gh = Arrow.Compose<int, int, int>()(f, gh);
 
         // Act
         var leftResult = await fg_h(a);
@@ -579,8 +580,8 @@ public class StepTests
     {
         // Arrange
         Func<int, int> func = x => x * 2;
-        var step1 = new SyncStep<int, int>(func);
-        var step2 = new SyncStep<int, int>(func);
+        SyncStep<int, int> step1 = new SyncStep<int, int>(func);
+        SyncStep<int, int> step2 = new SyncStep<int, int>(func);
 
         // Assert
         step1.Equals(step2).Should().BeTrue();
@@ -590,8 +591,8 @@ public class StepTests
     public void SyncStep_DifferentDelegates_AreNotEqual()
     {
         // Arrange
-        var step1 = new SyncStep<int, int>(x => x * 2);
-        var step2 = new SyncStep<int, int>(x => x * 2);
+        SyncStep<int, int> step1 = new SyncStep<int, int>(x => x * 2);
+        SyncStep<int, int> step2 = new SyncStep<int, int>(x => x * 2);
 
         // Assert - Different lambda instances are different delegates
         step1.Equals(step2).Should().BeFalse();
@@ -602,8 +603,8 @@ public class StepTests
     {
         // Arrange
         Func<int, int> func = x => x * 2;
-        var step1 = new SyncStep<int, int>(func);
-        var step2 = new SyncStep<int, int>(func);
+        SyncStep<int, int> step1 = new SyncStep<int, int>(func);
+        SyncStep<int, int> step2 = new SyncStep<int, int>(func);
 
         // Assert
         step1.GetHashCode().Should().Be(step2.GetHashCode());
@@ -617,13 +618,13 @@ public class StepTests
     public async Task Step_ComplexPipeline_WorksCorrectly()
     {
         // Arrange - Build a complex pipeline
-        var parseNumber = Arrow.TryLift<string, int>(int.Parse);
-        var doubleNumber = Arrow.Lift<int, int>(x => x * 2);
-        var formatResult = Arrow.Lift<int, string>(x => $"Result: {x}");
+        KleisliResult<string, int, Exception> parseNumber = Arrow.TryLift<string, int>(int.Parse);
+        Step<int, int> doubleNumber = Arrow.Lift<int, int>(x => x * 2);
+        Step<int, string> formatResult = Arrow.Lift<int, string>(x => $"Result: {x}");
 
         // Act - This demonstrates a real-world pattern
         var input = "21";
-        var parseResult = await parseNumber(input);
+        Result<int, Exception> parseResult = await parseNumber(input);
 
         // Build the final result
         string result;
@@ -646,7 +647,7 @@ public class StepTests
     public async Task SyncStep_ChainedOperations_WorkCorrectly()
     {
         // Arrange
-        var step = SyncStep<int, int>.Identity
+        SyncStep<int, string> step = SyncStep<int, int>.Identity
             .Pipe(new SyncStep<int, int>(x => x * 2))
             .Pipe(new SyncStep<int, int>(x => x + 3))
             .Pipe(new SyncStep<int, string>(x => x.ToString()));
@@ -667,7 +668,7 @@ public class StepTests
     {
         // Arrange
         // (input * 2) + 3 = expected
-        var step = new SyncStep<int, int>(x => x * 2)
+        SyncStep<int, string> step = new SyncStep<int, int>(x => x * 2)
             .Pipe(new SyncStep<int, int>(x => x + 3))
             .Map(x => x.ToString());
 

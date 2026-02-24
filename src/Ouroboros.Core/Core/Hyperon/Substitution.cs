@@ -2,6 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+
 namespace Ouroboros.Core.Hyperon;
 
 /// <summary>
@@ -41,7 +42,7 @@ public sealed record Substitution
     /// <param name="varName">The variable name (without '$').</param>
     /// <returns>The bound atom wrapped in Option, or None if not bound.</returns>
     public Option<Atom> Lookup(string varName) =>
-        Bindings.TryGetValue(varName, out var value)
+        Bindings.TryGetValue(varName, out Atom? value)
             ? Option<Atom>.Some(value)
             : Option<Atom>.None();
 
@@ -64,10 +65,10 @@ public sealed record Substitution
     /// <returns>The composed substitution, or null if compositions conflict.</returns>
     public Substitution? Compose(Substitution other)
     {
-        var result = Bindings;
-        foreach (var (varName, value) in other.Bindings)
+        ImmutableDictionary<string, Atom> result = Bindings;
+        foreach ((string? varName, Atom? value) in other.Bindings)
         {
-            if (result.TryGetValue(varName, out var existing))
+            if (result.TryGetValue(varName, out Atom? existing))
             {
                 if (!existing.Equals(value))
                 {
@@ -116,7 +117,7 @@ public sealed record Substitution
             return "{}";
         }
 
-        var bindings = Bindings.Select(kv => $"${kv.Key} -> {kv.Value.ToSExpr()}");
+        IEnumerable<string> bindings = Bindings.Select(kv => $"${kv.Key} -> {kv.Value.ToSExpr()}");
         return $"{{{string.Join(", ", bindings)}}}";
     }
 }

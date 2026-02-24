@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Hyperon;
+namespace Ouroboros.Core.Hyperon;
 
 /// <summary>
 /// Extension methods for monadic composition of atom queries.

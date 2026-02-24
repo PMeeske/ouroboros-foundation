@@ -26,7 +26,7 @@ public sealed class CompositeMessageFilter : IMessageFilter
     public async Task<bool> ShouldRouteAsync(NeuronMessage message, CancellationToken ct = default)
     {
         // All filters must approve for the message to be routed
-        foreach (var filter in _filters)
+        foreach (IMessageFilter filter in _filters)
         {
             if (!await filter.ShouldRouteAsync(message, ct))
             {

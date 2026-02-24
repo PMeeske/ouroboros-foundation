@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Hyperon;
+namespace Ouroboros.Core.Hyperon;
 
 /// <summary>
 /// Represents a Laws of Form expression tree as a MeTTa atom.
@@ -84,7 +84,7 @@ public sealed record FormExpression : Atom
             return FormAtom.Mark;
         }
 
-        var inner = ResolveToFormAtom(Operands[0]);
+        FormAtom inner = ResolveToFormAtom(Operands[0]);
         return inner.Cross();
     }
 
@@ -95,8 +95,8 @@ public sealed record FormExpression : Atom
             return FormAtom.Void;
         }
 
-        var left = ResolveToFormAtom(Operands[0]);
-        var right = ResolveToFormAtom(Operands[1]);
+        FormAtom left = ResolveToFormAtom(Operands[0]);
+        FormAtom right = ResolveToFormAtom(Operands[1]);
         return left.Call(right);
     }
 
@@ -107,8 +107,8 @@ public sealed record FormExpression : Atom
             return FormAtom.Void;
         }
 
-        var left = ResolveToFormAtom(Operands[0]);
-        var right = ResolveToFormAtom(Operands[1]);
+        FormAtom left = ResolveToFormAtom(Operands[0]);
+        FormAtom right = ResolveToFormAtom(Operands[1]);
         return op(left, right);
     }
 

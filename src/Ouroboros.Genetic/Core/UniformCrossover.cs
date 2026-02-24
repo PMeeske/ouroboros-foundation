@@ -69,8 +69,8 @@ public sealed class UniformCrossover<TGene>
         }
 
         int geneCount = parent1.Genes.Count;
-        var genes1 = new List<TGene>(geneCount);
-        var genes2 = new List<TGene>(geneCount);
+        List<TGene> genes1 = new List<TGene>(geneCount);
+        List<TGene> genes2 = new List<TGene>(geneCount);
 
         // Uniform crossover: randomly select each gene from either parent
         for (int i = 0; i < geneCount; i++)
@@ -87,8 +87,8 @@ public sealed class UniformCrossover<TGene>
             }
         }
 
-        var offspring1 = parent1.WithGenes(genes1);
-        var offspring2 = parent2.WithGenes(genes2);
+        IChromosome<TGene> offspring1 = parent1.WithGenes(genes1);
+        IChromosome<TGene> offspring2 = parent2.WithGenes(genes2);
 
         return (offspring1, offspring2);
     }

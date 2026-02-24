@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Steps;
+namespace Ouroboros.Core.Steps;
 
 /// <summary>
 /// Interface representing a computation step that transforms input of type <typeparamref name="TIn"/>
@@ -55,7 +55,7 @@ public interface IStep<in TIn, TOut>
     /// </remarks>
     async Task<TOut> ExecuteAsync(TIn input)
     {
-        var result = await TryExecuteAsync(input).ConfigureAwait(false);
+        StepResult<TOut> result = await TryExecuteAsync(input).ConfigureAwait(false);
 
         if (result.IsSuccess)
         {

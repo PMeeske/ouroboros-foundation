@@ -40,10 +40,10 @@ public sealed record EpisodeMetrics(
             throw new InvalidOperationException("Cannot create metrics for incomplete episode");
         }
 
-        var stepCount = episode.StepCount;
-        var averageReward = stepCount > 0 ? episode.TotalReward / stepCount : 0.0;
-        var duration = episode.Duration ?? TimeSpan.Zero;
-        var averageLatency = stepCount > 0 ? TimeSpan.FromTicks(duration.Ticks / stepCount) : TimeSpan.Zero;
+        int stepCount = episode.StepCount;
+        double averageReward = stepCount > 0 ? episode.TotalReward / stepCount : 0.0;
+        TimeSpan duration = episode.Duration ?? TimeSpan.Zero;
+        TimeSpan averageLatency = stepCount > 0 ? TimeSpan.FromTicks(duration.Ticks / stepCount) : TimeSpan.Zero;
 
         return new EpisodeMetrics(
             episode.Id,

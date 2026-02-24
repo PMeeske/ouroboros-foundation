@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Providers.SpeechToText;
+namespace Ouroboros.Providers.SpeechToText;
 
 /// <summary>
 /// Audio chunk for streaming speech-to-text.

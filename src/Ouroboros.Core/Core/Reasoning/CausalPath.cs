@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Reasoning;
+namespace Ouroboros.Core.Reasoning;
 
 /// <summary>
 /// Represents a causal path from causes to an effect.

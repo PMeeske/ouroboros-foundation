@@ -71,7 +71,7 @@ public sealed class GeneticAlgorithm<TGene> : IGeneticAlgorithm<TGene>
                 return Result<IChromosome<TGene>, string>.Failure("Number of generations must be at least 1");
             }
 
-            var population = new Population<TGene>(initialPopulation);
+            Population<TGene> population = new Population<TGene>(initialPopulation);
             
             // Evaluate initial population
             population = await population.EvaluateAsync(FitnessFunction, cancellationToken);
@@ -91,11 +91,11 @@ public sealed class GeneticAlgorithm<TGene> : IGeneticAlgorithm<TGene>
 
     private async Task<Population<TGene>> EvolveGenerationAsync(Population<TGene> population, CancellationToken cancellationToken)
     {
-        var newChromosomes = new List<IChromosome<TGene>>();
+        List<IChromosome<TGene>> newChromosomes = new List<IChromosome<TGene>>();
 
         // Elitism: preserve the best chromosomes
         int eliteCount = (int)(population.Size * this.elitismRate);
-        var elites = population.Chromosomes
+        List<IChromosome<TGene>> elites = population.Chromosomes
             .OrderByDescending(c => c.Fitness)
             .Take(eliteCount)
             .ToList();
@@ -106,11 +106,11 @@ public sealed class GeneticAlgorithm<TGene> : IGeneticAlgorithm<TGene>
         for (int i = 0; i < offspringCount / 2; i++)
         {
             // Selection
-            var parent1 = this.selection.Select(population);
-            var parent2 = this.selection.Select(population);
+            IChromosome<TGene> parent1 = this.selection.Select(population);
+            IChromosome<TGene> parent2 = this.selection.Select(population);
 
             // Crossover
-            var (offspring1, offspring2) = this.crossover.Crossover(parent1, parent2);
+            (IChromosome<TGene>? offspring1, IChromosome<TGene>? offspring2) = this.crossover.Crossover(parent1, parent2);
 
             // Mutation
             offspring1 = this.mutation.Mutate(offspring1);
@@ -126,12 +126,12 @@ public sealed class GeneticAlgorithm<TGene> : IGeneticAlgorithm<TGene>
         // Handle odd population size
         if (newChromosomes.Count < population.Size)
         {
-            var parent = this.selection.Select(population);
-            var offspring = this.mutation.Mutate(parent);
+            IChromosome<TGene> parent = this.selection.Select(population);
+            IChromosome<TGene> offspring = this.mutation.Mutate(parent);
             newChromosomes.Add(offspring);
         }
 
-        var newPopulation = new Population<TGene>(newChromosomes);
+        Population<TGene> newPopulation = new Population<TGene>(newChromosomes);
         return await newPopulation.EvaluateAsync(FitnessFunction, cancellationToken);
     }
 }

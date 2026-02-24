@@ -108,7 +108,7 @@ public sealed class VisualSensor : IDisposable
 
         _frameCount++;
 
-        var frame = new VideoFrame(
+        VideoFrame frame = new VideoFrame(
             frameData,
             width,
             height,
@@ -125,18 +125,18 @@ public sealed class VisualSensor : IDisposable
         }
 
         // Analyze the frame
-        var options = new VisionAnalysisOptions(
+        VisionAnalysisOptions options = new VisionAnalysisOptions(
             IncludeDescription: true,
             DetectObjects: _config.EnableObjectDetection,
             DetectFaces: _config.EnableFaceDetection,
             ClassifyScene: _config.EnableSceneClassification,
             MaxObjects: _config.MaxObjectsToDetect);
 
-        var analysisResult = await _visionModel.AnalyzeImageAsync(frameData, format, options, ct);
+        Result<VisionAnalysisResult, string> analysisResult = await _visionModel.AnalyzeImageAsync(frameData, format, options, ct);
 
         if (analysisResult.IsSuccess)
         {
-            var result = analysisResult.Value;
+            VisionAnalysisResult result = analysisResult.Value;
             _analysisResults.OnNext(result);
 
             // Publish to virtual self
@@ -165,7 +165,7 @@ public sealed class VisualSensor : IDisposable
     {
         if (_disposed) return Result<VisionAnalysisResult, string>.Failure("Sensor is disposed");
 
-        var result = await _visionModel.AnalyzeImageFileAsync(filePath, null, ct);
+        Result<VisionAnalysisResult, string> result = await _visionModel.AnalyzeImageFileAsync(filePath, null, ct);
 
         if (result.IsSuccess)
         {

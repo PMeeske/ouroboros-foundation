@@ -17,7 +17,7 @@ public interface IEthicalReasoner
     /// <param name="context">The action context.</param>
     /// <param name="principles">The ethical principles to evaluate against.</param>
     /// <returns>A tuple containing violations and concerns.</returns>
-    (IReadOnlyList<EthicalViolation> violations, IReadOnlyList<EthicalConcern> concerns) 
+    (IReadOnlyList<EthicalViolation> violations, IReadOnlyList<EthicalConcern> concerns)
         AnalyzeAction(
             ProposedAction action,
             ActionContext context,

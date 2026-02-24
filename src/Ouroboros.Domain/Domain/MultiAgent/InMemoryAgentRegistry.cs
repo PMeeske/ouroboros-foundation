@@ -44,7 +44,7 @@ public sealed class InMemoryAgentRegistry : IAgentRegistry
     /// <inheritdoc/>
     public Task<Result<AgentCapabilities, string>> GetAgentCapabilitiesAsync(AgentId agentId)
     {
-        if (this.agents.TryGetValue(agentId, out var capabilities))
+        if (this.agents.TryGetValue(agentId, out AgentCapabilities? capabilities))
         {
             return Task.FromResult(Result<AgentCapabilities, string>.Success(capabilities));
         }
@@ -66,9 +66,9 @@ public sealed class InMemoryAgentRegistry : IAgentRegistry
             return Task.FromResult(Result<Unit, string>.Failure("Load must be between 0.0 and 1.0"));
         }
 
-        if (this.agents.TryGetValue(agentId, out var capabilities))
+        if (this.agents.TryGetValue(agentId, out AgentCapabilities? capabilities))
         {
-            var updated = capabilities with { CurrentLoad = load };
+            AgentCapabilities updated = capabilities with { CurrentLoad = load };
             this.agents[agentId] = updated;
             return Task.FromResult(Result<Unit, string>.Success(Unit.Value));
         }
@@ -79,9 +79,9 @@ public sealed class InMemoryAgentRegistry : IAgentRegistry
     /// <inheritdoc/>
     public Task<Result<Unit, string>> UpdateAgentAvailabilityAsync(AgentId agentId, bool isAvailable)
     {
-        if (this.agents.TryGetValue(agentId, out var capabilities))
+        if (this.agents.TryGetValue(agentId, out AgentCapabilities? capabilities))
         {
-            var updated = capabilities with { IsAvailable = isAvailable };
+            AgentCapabilities updated = capabilities with { IsAvailable = isAvailable };
             this.agents[agentId] = updated;
             return Task.FromResult(Result<Unit, string>.Success(Unit.Value));
         }

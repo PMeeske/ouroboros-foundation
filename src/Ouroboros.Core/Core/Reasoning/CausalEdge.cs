@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Reasoning;
+namespace Ouroboros.Core.Reasoning;
 
 /// <summary>
 /// Represents a causal edge between two variables.

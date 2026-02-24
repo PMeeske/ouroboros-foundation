@@ -42,14 +42,14 @@ public class FileThoughtStore : IThoughtStore
     /// <inheritdoc/>
     public async Task SaveThoughtsAsync(string sessionId, IEnumerable<PersistedThought> thoughts, CancellationToken ct = default)
     {
-        var sessionLock = GetSessionLock(sessionId);
+        SemaphoreSlim sessionLock = GetSessionLock(sessionId);
         await sessionLock.WaitAsync(ct);
         try
         {
-            var filePath = GetSessionFilePath(sessionId);
-            var existingThoughts = await LoadThoughtsFromFileAsync(filePath, ct);
+            string filePath = GetSessionFilePath(sessionId);
+            List<PersistedThought> existingThoughts = await LoadThoughtsFromFileAsync(filePath, ct);
 
-            foreach (var thought in thoughts)
+            foreach (PersistedThought thought in thoughts)
             {
                 existingThoughts.Add(thought);
             }
@@ -65,7 +65,7 @@ public class FileThoughtStore : IThoughtStore
     /// <inheritdoc/>
     public async Task<IReadOnlyList<PersistedThought>> GetThoughtsAsync(string sessionId, CancellationToken ct = default)
     {
-        var filePath = GetSessionFilePath(sessionId);
+        string filePath = GetSessionFilePath(sessionId);
         return await LoadThoughtsFromFileAsync(filePath, ct);
     }
 
@@ -76,7 +76,7 @@ public class FileThoughtStore : IThoughtStore
         DateTime to,
         CancellationToken ct = default)
     {
-        var thoughts = await GetThoughtsAsync(sessionId, ct);
+        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct);
         return thoughts.Where(t => t.Timestamp >= from && t.Timestamp <= to).ToList();
     }
 
@@ -87,7 +87,7 @@ public class FileThoughtStore : IThoughtStore
         int limit = 100,
         CancellationToken ct = default)
     {
-        var thoughts = await GetThoughtsAsync(sessionId, ct);
+        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct);
         return thoughts
             .Where(t => t.Type.Equals(thoughtType, StringComparison.OrdinalIgnoreCase))
             .Take(limit)
@@ -101,8 +101,8 @@ public class FileThoughtStore : IThoughtStore
         int limit = 20,
         CancellationToken ct = default)
     {
-        var thoughts = await GetThoughtsAsync(sessionId, ct);
-        var queryLower = query.ToLowerInvariant();
+        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct);
+        string queryLower = query.ToLowerInvariant();
 
         return thoughts
             .Where(t => t.Content.ToLowerInvariant().Contains(queryLower) ||
@@ -119,7 +119,7 @@ public class FileThoughtStore : IThoughtStore
         int count = 10,
         CancellationToken ct = default)
     {
-        var thoughts = await GetThoughtsAsync(sessionId, ct);
+        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct);
         return thoughts
             .OrderByDescending(t => t.Timestamp)
             .Take(count)
@@ -132,17 +132,17 @@ public class FileThoughtStore : IThoughtStore
         Guid parentThoughtId,
         CancellationToken ct = default)
     {
-        var thoughts = await GetThoughtsAsync(sessionId, ct);
-        var result = new List<PersistedThought>();
+        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct);
+        List<PersistedThought> result = new List<PersistedThought>();
 
         // Find direct children
-        var children = thoughts.Where(t => t.ParentThoughtId == parentThoughtId).ToList();
+        List<PersistedThought> children = thoughts.Where(t => t.ParentThoughtId == parentThoughtId).ToList();
         result.AddRange(children);
 
         // Recursively find grandchildren
-        foreach (var child in children)
+        foreach (PersistedThought? child in children)
         {
-            var grandchildren = await GetChainedThoughtsAsync(sessionId, child.Id, ct);
+            IReadOnlyList<PersistedThought> grandchildren = await GetChainedThoughtsAsync(sessionId, child.Id, ct);
             result.AddRange(grandchildren);
         }
 
@@ -152,11 +152,11 @@ public class FileThoughtStore : IThoughtStore
     /// <inheritdoc/>
     public async Task ClearSessionAsync(string sessionId, CancellationToken ct = default)
     {
-        var sessionLock = GetSessionLock(sessionId);
+        SemaphoreSlim sessionLock = GetSessionLock(sessionId);
         await sessionLock.WaitAsync(ct);
         try
         {
-            var filePath = GetSessionFilePath(sessionId);
+            string filePath = GetSessionFilePath(sessionId);
             if (File.Exists(filePath))
             {
                 File.Delete(filePath);
@@ -171,16 +171,16 @@ public class FileThoughtStore : IThoughtStore
     /// <inheritdoc/>
     public async Task<ThoughtStatistics> GetStatisticsAsync(string sessionId, CancellationToken ct = default)
     {
-        var thoughts = await GetThoughtsAsync(sessionId, ct);
+        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct);
 
         if (!thoughts.Any())
         {
             return new ThoughtStatistics { TotalCount = 0 };
         }
 
-        var countByType = thoughts.GroupBy(t => t.Type).ToDictionary(g => g.Key, g => g.Count());
-        var countByOrigin = thoughts.GroupBy(t => t.Origin).ToDictionary(g => g.Key, g => g.Count());
-        var chainCount = thoughts.Count(t => t.ParentThoughtId == null && thoughts.Any(c => c.ParentThoughtId == t.Id));
+        Dictionary<string, int> countByType = thoughts.GroupBy(t => t.Type).ToDictionary(g => g.Key, g => g.Count());
+        Dictionary<string, int> countByOrigin = thoughts.GroupBy(t => t.Origin).ToDictionary(g => g.Key, g => g.Count());
+        int chainCount = thoughts.Count(t => t.ParentThoughtId == null && thoughts.Any(c => c.ParentThoughtId == t.Id));
 
         return new ThoughtStatistics
         {
@@ -198,7 +198,7 @@ public class FileThoughtStore : IThoughtStore
     /// <inheritdoc/>
     public Task<IReadOnlyList<string>> ListSessionsAsync(CancellationToken ct = default)
     {
-        var sessions = Directory.GetFiles(_baseDirectory, "*.thoughts.json")
+        List<string> sessions = Directory.GetFiles(_baseDirectory, "*.thoughts.json")
             .Select(f => Path.GetFileNameWithoutExtension(f).Replace(".thoughts", ""))
             .ToList();
 
@@ -208,7 +208,7 @@ public class FileThoughtStore : IThoughtStore
     private string GetSessionFilePath(string sessionId)
     {
         // Sanitize session ID for file name
-        var safeId = string.Join("_", sessionId.Split(Path.GetInvalidFileNameChars()));
+        string safeId = string.Join("_", sessionId.Split(Path.GetInvalidFileNameChars()));
         return Path.Combine(_baseDirectory, $"{safeId}.thoughts.json");
     }
 
@@ -226,7 +226,7 @@ public class FileThoughtStore : IThoughtStore
 
         try
         {
-            var json = await File.ReadAllTextAsync(filePath, ct);
+            string json = await File.ReadAllTextAsync(filePath, ct);
             return JsonSerializer.Deserialize<List<PersistedThought>>(json, _jsonOptions) ?? new List<PersistedThought>();
         }
         catch (JsonException)
@@ -238,7 +238,7 @@ public class FileThoughtStore : IThoughtStore
 
     private async Task SaveThoughtsToFileAsync(string filePath, List<PersistedThought> thoughts, CancellationToken ct)
     {
-        var json = JsonSerializer.Serialize(thoughts, _jsonOptions);
+        string json = JsonSerializer.Serialize(thoughts, _jsonOptions);
         await File.WriteAllTextAsync(filePath, json, ct);
     }
 
@@ -247,7 +247,7 @@ public class FileThoughtStore : IThoughtStore
         double score = 0;
 
         // Content match
-        var contentLower = thought.Content.ToLowerInvariant();
+        string contentLower = thought.Content.ToLowerInvariant();
         if (contentLower.Contains(query))
         {
             score += 1.0;
@@ -274,7 +274,7 @@ public class FileThoughtStore : IThoughtStore
         score *= (thought.Confidence + thought.Relevance) / 2;
 
         // Recency bonus
-        var age = DateTime.UtcNow - thought.Timestamp;
+        TimeSpan age = DateTime.UtcNow - thought.Timestamp;
         if (age.TotalHours < 1) score *= 1.2;
         else if (age.TotalDays < 1) score *= 1.1;
 

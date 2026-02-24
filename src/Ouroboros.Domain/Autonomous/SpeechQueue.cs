@@ -78,8 +78,8 @@ public sealed class SpeechQueue : IDisposable
     {
         if (_disposed || string.IsNullOrWhiteSpace(text)) return;
 
-        var tcs = new TaskCompletionSource<bool>();
-        using var registration = ct.Register(() => tcs.TrySetCanceled());
+        TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+        using CancellationTokenRegistration registration = ct.Register(() => tcs.TrySetCanceled());
 
         _speechSubject.OnNext(new SpeechRequest(text, persona, tcs));
 

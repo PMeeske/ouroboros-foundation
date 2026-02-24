@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.CognitivePhysics;
+namespace Ouroboros.Core.CognitivePhysics;
 
 /// <summary>
 /// Default ethics gate that permits all transitions.

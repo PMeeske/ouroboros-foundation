@@ -50,8 +50,8 @@ public sealed class FileSystemBlobStorage : IAdapterBlobStorage
                 return Result<string, string>.Failure("Weights cannot be empty");
             }
 
-            var fileName = $"{adapterId}.bin";
-            var filePath = Path.Combine(_baseDirectory, fileName);
+            string fileName = $"{adapterId}.bin";
+            string filePath = Path.Combine(_baseDirectory, fileName);
 
             _logger?.LogInformation("Storing adapter weights to {FilePath}", filePath);
 
@@ -88,7 +88,7 @@ public sealed class FileSystemBlobStorage : IAdapterBlobStorage
 
             _logger?.LogInformation("Retrieving adapter weights from {Path}", path);
 
-            var weights = await File.ReadAllBytesAsync(path, ct);
+            byte[] weights = await File.ReadAllBytesAsync(path, ct);
 
             return Result<byte[], string>.Success(weights);
         }
@@ -153,8 +153,8 @@ public sealed class FileSystemBlobStorage : IAdapterBlobStorage
                 return Result<long, string>.Failure($"File not found: {path}");
             }
 
-            var fileInfo = new FileInfo(path);
-            var size = await Task.Run(() => fileInfo.Length, ct);
+            FileInfo fileInfo = new FileInfo(path);
+            long size = await Task.Run(() => fileInfo.Length, ct);
 
             return Result<long, string>.Success(size);
         }

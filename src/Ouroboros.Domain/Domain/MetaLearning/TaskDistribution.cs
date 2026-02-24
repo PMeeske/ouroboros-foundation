@@ -51,9 +51,9 @@ public sealed record TaskDistribution(
             throw new ArgumentException("Task list cannot be empty", nameof(weightedTasks));
         }
 
-        var tasks = weightedTasks.Keys.ToList();
-        var weights = weightedTasks.Values.ToList();
-        var totalWeight = weights.Sum();
+        List<SynthesisTask> tasks = weightedTasks.Keys.ToList();
+        List<double> weights = weightedTasks.Values.ToList();
+        double totalWeight = weights.Sum();
 
         return new TaskDistribution(
             Name: "Weighted",
@@ -64,9 +64,9 @@ public sealed record TaskDistribution(
             },
             Sampler: random =>
             {
-                var target = random.NextDouble() * totalWeight;
-                var cumulative = 0.0;
-                for (var i = 0; i < tasks.Count; i++)
+                double target = random.NextDouble() * totalWeight;
+                double cumulative = 0.0;
+                for (int i = 0; i < tasks.Count; i++)
                 {
                     cumulative += weights[i];
                     if (cumulative >= target)
@@ -100,9 +100,9 @@ public sealed record TaskDistribution(
     /// <returns>List of sampled tasks.</returns>
     public List<SynthesisTask> SampleBatch(int count, IRandomProvider? random = null)
     {
-        var provider = random ?? CryptoRandomProvider.Instance;
-        var tasks = new List<SynthesisTask>(count);
-        for (var i = 0; i < count; i++)
+        IRandomProvider provider = random ?? CryptoRandomProvider.Instance;
+        List<SynthesisTask> tasks = new List<SynthesisTask>(count);
+        for (int i = 0; i < count; i++)
         {
             tasks.Add(Sample(provider));
         }

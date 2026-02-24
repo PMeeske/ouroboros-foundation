@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent;
+namespace Ouroboros.Agent;
 
 /// <summary>
 /// Unified metrics for orchestrator performance tracking.
@@ -23,7 +23,7 @@ public sealed record OrchestratorMetrics(
     /// Gets a custom metric or returns default.
     /// </summary>
     public double GetCustomMetric(string key, double defaultValue = 0.0) =>
-        CustomMetrics.TryGetValue(key, out var value) ? value : defaultValue;
+        CustomMetrics.TryGetValue(key, out double value) ? value : defaultValue;
 
     /// <summary>
     /// Creates initial metrics for a new orchestrator.
@@ -66,7 +66,7 @@ public sealed record OrchestratorMetrics(
     /// </summary>
     public OrchestratorMetrics WithCustomMetric(string key, double value)
     {
-        var newCustomMetrics = new Dictionary<string, double>(CustomMetrics)
+        Dictionary<string, double> newCustomMetrics = new Dictionary<string, double>(CustomMetrics)
         {
             [key] = value
         };

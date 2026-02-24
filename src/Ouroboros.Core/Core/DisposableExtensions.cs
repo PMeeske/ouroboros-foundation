@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core;
+namespace Ouroboros.Core;
 
 /// <summary>
 /// Extension methods for working with disposable resources in pipelines.

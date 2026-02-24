@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.EmbodiedInteraction;
+namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Collection of affordances detected in the environment.
@@ -23,7 +23,7 @@ public sealed class AffordanceMap
     /// </summary>
     public void Add(Affordance affordance)
     {
-        if (!_objectAffordances.TryGetValue(affordance.TargetObjectId, out var objectList))
+        if (!_objectAffordances.TryGetValue(affordance.TargetObjectId, out List<Affordance>? objectList))
         {
             objectList = new List<Affordance>();
             _objectAffordances[affordance.TargetObjectId] = objectList;
@@ -31,7 +31,7 @@ public sealed class AffordanceMap
 
         objectList.Add(affordance);
 
-        if (!_typeIndex.TryGetValue(affordance.Type, out var typeList))
+        if (!_typeIndex.TryGetValue(affordance.Type, out List<Affordance>? typeList))
         {
             typeList = new List<Affordance>();
             _typeIndex[affordance.Type] = typeList;
@@ -44,7 +44,7 @@ public sealed class AffordanceMap
     /// Gets affordances for a specific object.
     /// </summary>
     public Option<IReadOnlyList<Affordance>> GetForObject(string objectId) =>
-        _objectAffordances.TryGetValue(objectId, out var list)
+        _objectAffordances.TryGetValue(objectId, out List<Affordance>? list)
             ? Option<IReadOnlyList<Affordance>>.Some(list)
             : Option<IReadOnlyList<Affordance>>.None();
 
@@ -52,7 +52,7 @@ public sealed class AffordanceMap
     /// Gets affordances of a specific type.
     /// </summary>
     public IReadOnlyList<Affordance> GetByType(AffordanceType type) =>
-        _typeIndex.TryGetValue(type, out var list) ? list : Array.Empty<Affordance>();
+        _typeIndex.TryGetValue(type, out List<Affordance>? list) ? list : Array.Empty<Affordance>();
 
     /// <summary>
     /// Finds affordances matching criteria.
@@ -61,7 +61,7 @@ public sealed class AffordanceMap
         Func<Affordance, bool> predicate,
         int? limit = null)
     {
-        var query = All.Where(predicate).OrderByDescending(a => a.RiskAdjustedConfidence);
+        IOrderedEnumerable<Affordance> query = All.Where(predicate).OrderByDescending(a => a.RiskAdjustedConfidence);
         return limit.HasValue ? query.Take(limit.Value) : query;
     }
 
@@ -88,15 +88,15 @@ public sealed class AffordanceMap
     /// </summary>
     public int RemoveStale(TimeSpan maxAge)
     {
-        var cutoff = DateTime.UtcNow - maxAge;
-        var removed = 0;
+        DateTime cutoff = DateTime.UtcNow - maxAge;
+        int removed = 0;
 
-        foreach (var list in _objectAffordances.Values)
+        foreach (List<Affordance> list in _objectAffordances.Values)
         {
             removed += list.RemoveAll(a => a.DetectedAt < cutoff);
         }
 
-        foreach (var list in _typeIndex.Values)
+        foreach (List<Affordance> list in _typeIndex.Values)
         {
             list.RemoveAll(a => a.DetectedAt < cutoff);
         }

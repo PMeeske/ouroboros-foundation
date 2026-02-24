@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Performance;
+namespace Ouroboros.Core.Performance;
 
 /// <summary>
 /// Extension methods for object pools.

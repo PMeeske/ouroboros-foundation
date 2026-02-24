@@ -33,7 +33,7 @@ public sealed record Example(
     /// <returns>A new Example with the added metadata.</returns>
     public Example WithMetadata(string key, object value)
     {
-        var newMetadata = Metadata is null
+        Dictionary<string, object> newMetadata = Metadata is null
             ? new Dictionary<string, object> { [key] = value }
             : new Dictionary<string, object>(Metadata) { [key] = value };
         return this with { Metadata = newMetadata };

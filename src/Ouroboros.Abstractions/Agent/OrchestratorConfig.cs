@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent;
+namespace Ouroboros.Agent;
 
 /// <summary>
 /// Configuration options for orchestrator behavior.
@@ -45,7 +45,7 @@ public record OrchestratorConfig
     /// Gets a custom setting value or returns default.
     /// </summary>
     public T? GetSetting<T>(string key, T? defaultValue = default) =>
-        CustomSettings.TryGetValue(key, out var value) && value is T typed
+        CustomSettings.TryGetValue(key, out object value) && value is T typed
             ? typed
             : defaultValue;
 }

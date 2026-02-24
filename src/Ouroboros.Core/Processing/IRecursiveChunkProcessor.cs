@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Processing;
+namespace Ouroboros.Core.Processing;
 
 /// <summary>
 /// Interface for processing large contexts by recursively chunking them into smaller pieces.

@@ -1,4 +1,5 @@
-﻿namespace Ouroboros.Core.LawsOfForm;
+
+namespace Ouroboros.Core.LawsOfForm;
 
 /// <summary>
 /// Simple claim extractor that splits text into sentences.
@@ -15,7 +16,7 @@ public sealed class SimpleClaimExtractor : IClaimExtractor
         }
 
         // Simple sentence splitting (production would use NLP)
-        var sentences = text
+        List<Claim> sentences = text
             .Split(new[] { '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries)
             .Select(s => s.Trim())
             .Where(s => s.Length > 10) // Filter out very short fragments

@@ -67,9 +67,9 @@ public sealed class Population<TGene>
     public async Task<Population<TGene>> EvaluateAsync(IFitnessFunction<TGene> fitnessFunction,
         CancellationToken cancellationToken)
     {
-        var evaluatedChromosomes = new List<IChromosome<TGene>>();
+        List<IChromosome<TGene>> evaluatedChromosomes = new List<IChromosome<TGene>>();
         
-        foreach (var chromosome in this.chromosomes)
+        foreach (IChromosome<TGene> chromosome in this.chromosomes)
         {
             double fitness = await fitnessFunction.EvaluateAsync(chromosome, cancellationToken);
             evaluatedChromosomes.Add(chromosome.WithFitness(fitness));

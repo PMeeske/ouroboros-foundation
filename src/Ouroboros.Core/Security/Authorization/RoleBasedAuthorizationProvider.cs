@@ -1,4 +1,4 @@
-﻿using Ouroboros.Core.Security.Authentication;
+using Ouroboros.Core.Security.Authentication;
 
 namespace Ouroboros.Core.Security.Authorization;
 

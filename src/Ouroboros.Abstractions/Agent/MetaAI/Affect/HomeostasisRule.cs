@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent.MetaAI.Affect;
+namespace Ouroboros.Agent.MetaAI.Affect;
 
 /// <summary>
 /// Represents a homeostasis policy for maintaining affective equilibrium.

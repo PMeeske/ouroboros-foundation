@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent.MetaAI.MetaLearning;
+namespace Ouroboros.Agent.MetaAI.MetaLearning;
 
 /// <summary>
 /// Represents an example for few-shot task adaptation.

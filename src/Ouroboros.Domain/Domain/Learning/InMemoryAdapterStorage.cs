@@ -61,7 +61,7 @@ public sealed class InMemoryAdapterStorage : IAdapterStorage
     {
         try
         {
-            if (_store.TryGetValue(adapterId, out var metadata))
+            if (_store.TryGetValue(adapterId, out AdapterMetadata? metadata))
             {
                 _logger?.LogInformation("Retrieved metadata for adapter {AdapterId}", adapterId);
                 return Task.FromResult(Result<AdapterMetadata, string>.Success(metadata));
@@ -89,7 +89,7 @@ public sealed class InMemoryAdapterStorage : IAdapterStorage
                 return Task.FromResult(Result<List<AdapterMetadata>, string>.Failure("Task name cannot be empty"));
             }
 
-            var adapters = _store.Values
+            List<AdapterMetadata> adapters = _store.Values
                 .Where(m => m.TaskName.Equals(taskName, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 

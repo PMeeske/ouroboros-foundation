@@ -45,7 +45,7 @@ public static class GeneticPipelineExtensions
         double elitismRate = 0.1,
         int? seed = null)
     {
-        var algorithm = new GeneticAlgorithm<TGene>(
+        GeneticAlgorithm<TGene> algorithm = new GeneticAlgorithm<TGene>(
             fitnessFunction,
             mutateGene,
             mutationRate,
@@ -53,15 +53,15 @@ public static class GeneticPipelineExtensions
             elitismRate,
             seed);
 
-        var evolutionStep = new GeneticEvolutionStep<TIn, TOut, TGene>(algorithm, stepFactory);
+        GeneticEvolutionStep<TIn, TOut, TGene> evolutionStep = new GeneticEvolutionStep<TIn, TOut, TGene>(algorithm, stepFactory);
         
         return async input =>
         {
             // First apply the base step (often identity)
-            var baseOutput = await step(input);
-            
+            TIn? baseOutput = await step(input);
+
             // Then apply the evolved step
-            var evolvedStep = evolutionStep.CreateEvolvedStep(initialPopulation, generations, cancellationToken);
+            Step<TIn, Result<TOut, string>> evolvedStep = evolutionStep.CreateEvolvedStep(initialPopulation, generations, cancellationToken);
             return await evolvedStep(baseOutput);
         };
     }
@@ -97,7 +97,7 @@ public static class GeneticPipelineExtensions
         double elitismRate = 0.1,
         int? seed = null)
     {
-        var algorithm = new GeneticAlgorithm<TGene>(
+        GeneticAlgorithm<TGene> algorithm = new GeneticAlgorithm<TGene>(
             fitnessFunction,
             mutateGene,
             mutationRate,
@@ -105,15 +105,15 @@ public static class GeneticPipelineExtensions
             elitismRate,
             seed);
 
-        var evolutionStep = new GeneticEvolutionStep<TIn, TOut, TGene>(algorithm, stepFactory);
+        GeneticEvolutionStep<TIn, TOut, TGene> evolutionStep = new GeneticEvolutionStep<TIn, TOut, TGene>(algorithm, stepFactory);
         
         return async input =>
         {
             // First apply the base step (often identity)
-            var baseOutput = await step(input);
-            
+            TIn? baseOutput = await step(input);
+
             // Then apply the evolved step with metadata
-            var evolvedStep = evolutionStep.CreateEvolvedStepWithMetadata(initialPopulation, generations, cancellationToken);
+            Step<TIn, Result<(IChromosome<TGene> BestChromosome, TOut Output), string>> evolvedStep = evolutionStep.CreateEvolvedStepWithMetadata(initialPopulation, generations, cancellationToken);
             return await evolvedStep(baseOutput);
         };
     }

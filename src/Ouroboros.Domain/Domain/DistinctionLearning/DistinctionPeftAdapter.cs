@@ -60,27 +60,27 @@ public sealed class DistinctionPeftAdapter
             }
 
             // Convert distinctions to training examples
-            var examples = distinctions.Select(ToTrainingExample).ToList();
+            List<TrainingExample> examples = distinctions.Select(ToTrainingExample).ToList();
 
             // Create adapter config
-            var config = new AdapterConfig(
+            AdapterConfig config = new AdapterConfig(
                 Rank: 8,
                 LearningRate: 0.0001,
                 TargetModules: "q_proj,v_proj");
 
             // Initialize adapter
-            var initResult = await _peft.InitializeAdapterAsync(modelName, config, ct);
+            Result<byte[], string> initResult = await _peft.InitializeAdapterAsync(modelName, config, ct);
             if (initResult.IsFailure)
             {
                 return Result<Unit, string>.Failure($"Failed to initialize adapter: {initResult.Error}");
             }
 
             // Train adapter
-            var trainingConfig = new TrainingConfig(
+            TrainingConfig trainingConfig = new TrainingConfig(
                 Epochs: 3,
                 BatchSize: 4);
 
-            var trainResult = await _peft.TrainAdapterAsync(
+            Result<byte[], string> trainResult = await _peft.TrainAdapterAsync(
                 modelName,
                 initResult.Value,
                 examples,
@@ -93,8 +93,8 @@ public sealed class DistinctionPeftAdapter
             }
 
             // Store trained weights
-            var distinctionId = Guid.NewGuid().ToString();
-            var metadata = new DistinctionWeightMetadata(
+            string distinctionId = Guid.NewGuid().ToString();
+            DistinctionWeightMetadata metadata = new DistinctionWeightMetadata(
                 Id: distinctionId,
                 Path: string.Empty, // Will be filled by storage
                 Fitness: distinctions.Average(d => d.Fitness),
@@ -103,7 +103,7 @@ public sealed class DistinctionPeftAdapter
                 IsDissolved: false,
                 SizeBytes: trainResult.Value.Length);
 
-            var storeResult = await _storage.StoreWeightsAsync(
+            Result<string, string> storeResult = await _storage.StoreWeightsAsync(
                 distinctionId,
                 trainResult.Value,
                 metadata,

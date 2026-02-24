@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Kleisli;
+namespace Ouroboros.Core.Kleisli;
 
 /// <summary>
 /// Kleisli arrow for Option monad computations.

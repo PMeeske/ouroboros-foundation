@@ -4,6 +4,7 @@
 
 namespace Ouroboros.Core.LawsOfForm;
 
+using System.Collections.Generic;
 using Ouroboros.Core.Monads;
 using Ouroboros.Core.Steps;
 
@@ -22,7 +23,7 @@ public static class ConfidenceGatedPipeline
     {
         return async response =>
         {
-            var form = response.Confidence.ToForm(highThreshold: threshold, lowThreshold: threshold * 0.5);
+            Form form = response.Confidence.ToForm(highThreshold: threshold, lowThreshold: threshold * 0.5);
 
             if (form.IsMark())
             {
@@ -52,7 +53,7 @@ public static class ConfidenceGatedPipeline
     {
         return async response =>
         {
-            var form = response.Confidence.ToForm(highThreshold, lowThreshold);
+            Form form = response.Confidence.ToForm(highThreshold, lowThreshold);
 
             return form.Match(
                 onMark: () => onHighConfidence(response),
@@ -81,7 +82,7 @@ public static class ConfidenceGatedPipeline
     {
         return async response =>
         {
-            var form = response.Confidence.ToForm(highThreshold: threshold, lowThreshold: threshold * 0.5);
+            Form form = response.Confidence.ToForm(highThreshold: threshold, lowThreshold: threshold * 0.5);
 
             return form.ToResult(
                 response,
@@ -115,7 +116,7 @@ public static class ConfidenceGatedPipeline
         double highThreshold = 0.8,
         double lowThreshold = 0.3)
     {
-        var responseList = responses.ToList();
+        List<LlmResponse> responseList = responses.ToList();
 
         if (responseList.Count == 0)
         {
@@ -123,11 +124,11 @@ public static class ConfidenceGatedPipeline
         }
 
         // Convert each response confidence to a form with weight
-        var opinions = responseList
+        (Form, double)[] opinions = responseList
             .Select(r => (r.Confidence.ToForm(highThreshold, lowThreshold), 1.0))
             .ToArray();
 
-        var consensus = FormExtensions.Superposition(opinions);
+        Form consensus = FormExtensions.Superposition(opinions);
 
         if (consensus.IsImaginary())
         {
@@ -136,7 +137,7 @@ public static class ConfidenceGatedPipeline
         }
 
         // Return the response with highest confidence
-        var bestResponse = responseList.OrderByDescending(r => r.Confidence).First();
+        LlmResponse bestResponse = responseList.OrderByDescending(r => r.Confidence).First();
 
         return Result<LlmResponse, string>.Success(bestResponse);
     }

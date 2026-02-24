@@ -30,7 +30,7 @@ public sealed class GroundedRegistry
     /// <param name="name">The operation name.</param>
     /// <returns>The operation wrapped in Option, or None if not registered.</returns>
     public Option<GroundedOperation> Get(string name) =>
-        operations.TryGetValue(name, out var op)
+        operations.TryGetValue(name, out GroundedOperation? op)
             ? Option<GroundedOperation>.Some(op)
             : Option<GroundedOperation>.None();
 
@@ -52,7 +52,7 @@ public sealed class GroundedRegistry
     /// <returns>A new registry with standard operations.</returns>
     public static GroundedRegistry CreateStandard()
     {
-        var registry = new GroundedRegistry();
+        GroundedRegistry registry = new GroundedRegistry();
         StandardOperations.RegisterAll(registry);
         return registry;
     }

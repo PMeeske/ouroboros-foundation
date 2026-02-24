@@ -2,6 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+
 namespace Ouroboros.Core.Hyperon;
 
 /// <summary>
@@ -19,7 +20,7 @@ public static class Unifier
     /// <returns>A substitution if unification succeeds, null otherwise.</returns>
     public static Substitution? Unify(Atom pattern, Atom target, Substitution? initial = null)
     {
-        var subst = initial ?? Substitution.Empty;
+        Substitution subst = initial ?? Substitution.Empty;
         return UnifyInternal(pattern, target, subst);
     }
 
@@ -67,7 +68,7 @@ public static class Unifier
         }
 
         // Check existing binding
-        var existing = subst.Lookup(variable.Name);
+        Option<Atom> existing = subst.Lookup(variable.Name);
         if (existing.HasValue)
         {
             // Variable already bound - check if it unifies with the new value
@@ -95,10 +96,10 @@ public static class Unifier
             return null;
         }
 
-        var current = subst;
-        for (var i = 0; i < pattern.Children.Count; i++)
+        Substitution current = subst;
+        for (int i = 0; i < pattern.Children.Count; i++)
         {
-            var result = UnifyInternal(pattern.Children[i], target.Children[i], current);
+            Substitution? result = UnifyInternal(pattern.Children[i], target.Children[i], current);
             if (result is null)
             {
                 return null;
@@ -118,9 +119,9 @@ public static class Unifier
     /// <returns>Enumerable of successful substitutions.</returns>
     public static IEnumerable<Substitution> UnifyAll(Atom pattern, IEnumerable<Atom> atoms)
     {
-        foreach (var atom in atoms)
+        foreach (Atom atom in atoms)
         {
-            var result = Unify(pattern, atom);
+            Substitution? result = Unify(pattern, atom);
             if (result is not null)
             {
                 yield return result;

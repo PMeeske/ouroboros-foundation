@@ -37,7 +37,7 @@ public sealed class ContradictionDetector
         ArgumentNullException.ThrowIfNull(response);
 
         // Extract claims from the response
-        var claims = this.claimExtractor.ExtractClaims(response.Text, response.ModelName ?? "unknown");
+        IReadOnlyList<Claim> claims = this.claimExtractor.ExtractClaims(response.Text, response.ModelName ?? "unknown");
 
         if (claims.Count < 2)
         {
@@ -50,7 +50,7 @@ public sealed class ContradictionDetector
         {
             for (int j = i + 1; j < claims.Count; j++)
             {
-                var pairCheck = this.CheckPair(claims[i], claims[j]);
+                Form pairCheck = this.CheckPair(claims[i], claims[j]);
 
                 if (pairCheck.IsImaginary())
                 {
@@ -71,7 +71,7 @@ public sealed class ContradictionDetector
     /// <returns>A Form representing cross-response consistency.</returns>
     public Form AnalyzeMultiple(IEnumerable<LlmResponse> responses)
     {
-        var responseList = responses.ToList();
+        List<LlmResponse> responseList = responses.ToList();
 
         if (responseList.Count < 2)
         {
@@ -79,7 +79,7 @@ public sealed class ContradictionDetector
         }
 
         // Extract all claims from all responses
-        var allClaims = responseList
+        List<Claim> allClaims = responseList
             .SelectMany(r => this.claimExtractor.ExtractClaims(r.Text, r.ModelName ?? "unknown"))
             .ToList();
 
@@ -93,7 +93,7 @@ public sealed class ContradictionDetector
         {
             for (int j = i + 1; j < allClaims.Count; j++)
             {
-                var pairCheck = this.CheckPair(allClaims[i], allClaims[j]);
+                Form pairCheck = this.CheckPair(allClaims[i], allClaims[j]);
 
                 if (pairCheck.IsImaginary())
                 {
@@ -118,7 +118,7 @@ public sealed class ContradictionDetector
         ArgumentNullException.ThrowIfNull(claim2);
 
         // Check if claims are about the same topic
-        var similarity = this.CalculateSimilarity(claim1.Statement, claim2.Statement);
+        double similarity = this.CalculateSimilarity(claim1.Statement, claim2.Statement);
 
         if (similarity < this.similarityThreshold)
         {
@@ -128,8 +128,8 @@ public sealed class ContradictionDetector
 
         // Check if both claims are confident about opposite things
         // This is the re-entry pattern: f = ⌐f
-        var claim1Form = claim1.Confidence.ToForm();
-        var claim2Form = claim2.Confidence.ToForm();
+        Form claim1Form = claim1.Confidence.ToForm();
+        Form claim2Form = claim2.Confidence.ToForm();
 
         // If one claim is positive (Mark) and the other is negative (Void) about the same thing
         // and both are confident, we have a contradiction
@@ -161,11 +161,11 @@ public sealed class ContradictionDetector
     {
         // Simple implementation: word overlap
         // In production, use embeddings or semantic similarity models
-        var words1 = statement1.ToLowerInvariant()
+        HashSet<string> words1 = statement1.ToLowerInvariant()
             .Split(new[] { ' ', ',', '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries)
             .ToHashSet();
 
-        var words2 = statement2.ToLowerInvariant()
+        HashSet<string> words2 = statement2.ToLowerInvariant()
             .Split(new[] { ' ', ',', '.', '!', '?' }, StringSplitOptions.RemoveEmptyEntries)
             .ToHashSet();
 
@@ -174,8 +174,8 @@ public sealed class ContradictionDetector
             return 0.0;
         }
 
-        var intersection = words1.Intersect(words2).Count();
-        var union = words1.Union(words2).Count();
+        int intersection = words1.Intersect(words2).Count();
+        int union = words1.Union(words2).Count();
 
         return union > 0 ? (double)intersection / union : 0.0;
     }
@@ -190,13 +190,13 @@ public sealed class ContradictionDetector
     private bool AreOpposite(string statement1, string statement2)
     {
         // Simple heuristic: check for negation words
-        var negationWords = new HashSet<string> { "not", "no", "never", "cannot", "can't", "won't", "don't", "doesn't", "isn't", "aren't" };
+        HashSet<string> negationWords = new HashSet<string> { "not", "no", "never", "cannot", "can't", "won't", "don't", "doesn't", "isn't", "aren't" };
 
-        var words1 = statement1.ToLowerInvariant().Split(' ');
-        var words2 = statement2.ToLowerInvariant().Split(' ');
+        string[] words1 = statement1.ToLowerInvariant().Split(' ');
+        string[] words2 = statement2.ToLowerInvariant().Split(' ');
 
-        var hasNegation1 = words1.Any(w => negationWords.Contains(w));
-        var hasNegation2 = words2.Any(w => negationWords.Contains(w));
+        bool hasNegation1 = words1.Any(w => negationWords.Contains(w));
+        bool hasNegation2 = words2.Any(w => negationWords.Contains(w));
 
         // If one has negation and the other doesn't, they might be opposite
         // This is a very simplified heuristic

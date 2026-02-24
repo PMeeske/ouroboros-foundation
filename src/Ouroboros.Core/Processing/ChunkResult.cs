@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Processing;
+namespace Ouroboros.Core.Processing;
 
 /// <summary>
 /// Represents an intermediate chunk result with its metadata.

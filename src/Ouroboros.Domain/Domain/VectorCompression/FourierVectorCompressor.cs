@@ -64,7 +64,7 @@ public sealed class FourierVectorCompressor
 
         // Pad to power of 2 for efficient FFT
         int paddedLength = NextPowerOfTwo(vector.Length);
-        var padded = new Complex[paddedLength];
+        Complex[] padded = new Complex[paddedLength];
         for (int i = 0; i < vector.Length; i++)
             padded[i] = new Complex(vector[i], 0);
 
@@ -72,10 +72,10 @@ public sealed class FourierVectorCompressor
         FFT(padded, false);
 
         // Select components based on strategy
-        var (indices, magnitudes) = SelectComponents(padded);
+        (int[]? indices, double[]? magnitudes) = SelectComponents(padded);
 
         // Extract real and imaginary parts of selected components
-        var components = new float[_targetDimension * 2]; // Store both real and imaginary
+        float[] components = new float[_targetDimension * 2]; // Store both real and imaginary
         for (int i = 0; i < _targetDimension && i < indices.Length; i++)
         {
             components[i * 2] = (float)padded[indices[i]].Real;
@@ -98,7 +98,7 @@ public sealed class FourierVectorCompressor
     public float[] Decompress(CompressedVector compressed)
     {
         int paddedLength = NextPowerOfTwo(compressed.OriginalLength);
-        var spectrum = new Complex[paddedLength];
+        Complex[] spectrum = new Complex[paddedLength];
 
         // Reconstruct frequency components
         for (int i = 0; i < compressed.Indices.Length && i * 2 + 1 < compressed.Components.Length; i++)
@@ -121,7 +121,7 @@ public sealed class FourierVectorCompressor
         FFT(spectrum, true);
 
         // Extract real parts
-        var result = new float[compressed.OriginalLength];
+        float[] result = new float[compressed.OriginalLength];
         for (int i = 0; i < compressed.OriginalLength; i++)
         {
             result[i] = (float)spectrum[i].Real;
@@ -139,7 +139,7 @@ public sealed class FourierVectorCompressor
     public double CompressedSimilarity(CompressedVector a, CompressedVector b)
     {
         // Find common indices
-        var commonIndices = a.Indices.Intersect(b.Indices).ToHashSet();
+        HashSet<int> commonIndices = a.Indices.Intersect(b.Indices).ToHashSet();
 
         if (commonIndices.Count == 0)
             return 0;
@@ -148,16 +148,16 @@ public sealed class FourierVectorCompressor
         double normA = 0;
         double normB = 0;
 
-        var aDict = a.Indices.Select((idx, i) => (idx, i)).ToDictionary(x => x.idx, x => x.i);
-        var bDict = b.Indices.Select((idx, i) => (idx, i)).ToDictionary(x => x.idx, x => x.i);
+        Dictionary<int, int> aDict = a.Indices.Select((idx, i) => (idx, i)).ToDictionary(x => x.idx, x => x.i);
+        Dictionary<int, int> bDict = b.Indices.Select((idx, i) => (idx, i)).ToDictionary(x => x.idx, x => x.i);
 
-        foreach (var idx in commonIndices)
+        foreach (int idx in commonIndices)
         {
             int ai = aDict[idx];
             int bi = bDict[idx];
 
-            var aComplex = new Complex(a.Components[ai * 2], a.Components[ai * 2 + 1]);
-            var bComplex = new Complex(b.Components[bi * 2], b.Components[bi * 2 + 1]);
+            Complex aComplex = new Complex(a.Components[ai * 2], a.Components[ai * 2 + 1]);
+            Complex bComplex = new Complex(b.Components[bi * 2], b.Components[bi * 2 + 1]);
 
             // Use magnitude for similarity
             double aMag = aComplex.Magnitude;
@@ -181,14 +181,14 @@ public sealed class FourierVectorCompressor
     /// <returns>Compressed vectors with shared index scheme for efficient comparison.</returns>
     public IReadOnlyList<CompressedVector> BatchCompress(IEnumerable<float[]> vectors)
     {
-        var vectorList = vectors.ToList();
+        List<float[]> vectorList = vectors.ToList();
         if (vectorList.Count == 0)
             return Array.Empty<CompressedVector>();
 
         if (_strategy == CompressionStrategy.HighestVariance)
         {
             // Learn optimal indices from dataset variance
-            var optimalIndices = LearnOptimalIndices(vectorList);
+            int[] optimalIndices = LearnOptimalIndices(vectorList);
             return vectorList.Select(v => CompressWithIndices(v, optimalIndices)).ToList();
         }
 
@@ -198,13 +198,13 @@ public sealed class FourierVectorCompressor
     private CompressedVector CompressWithIndices(float[] vector, int[] fixedIndices)
     {
         int paddedLength = NextPowerOfTwo(vector.Length);
-        var padded = new Complex[paddedLength];
+        Complex[] padded = new Complex[paddedLength];
         for (int i = 0; i < vector.Length; i++)
             padded[i] = new Complex(vector[i], 0);
 
         FFT(padded, false);
 
-        var components = new float[fixedIndices.Length * 2];
+        float[] components = new float[fixedIndices.Length * 2];
         for (int i = 0; i < fixedIndices.Length; i++)
         {
             if (fixedIndices[i] < paddedLength)
@@ -228,13 +228,13 @@ public sealed class FourierVectorCompressor
             return Array.Empty<int>();
 
         int paddedLength = NextPowerOfTwo(vectors[0].Length);
-        var variances = new double[paddedLength];
+        double[] variances = new double[paddedLength];
 
         // Compute FFT for each vector
-        var allSpectra = new List<Complex[]>();
-        foreach (var vector in vectors)
+        List<Complex[]> allSpectra = new List<Complex[]>();
+        foreach (float[] vector in vectors)
         {
-            var padded = new Complex[paddedLength];
+            Complex[] padded = new Complex[paddedLength];
             for (int i = 0; i < vector.Length; i++)
                 padded[i] = new Complex(vector[i], 0);
             FFT(padded, false);
@@ -244,7 +244,7 @@ public sealed class FourierVectorCompressor
         // Compute variance for each frequency component
         for (int i = 0; i < paddedLength; i++)
         {
-            var magnitudes = allSpectra.Select(s => s[i].Magnitude).ToList();
+            List<double> magnitudes = allSpectra.Select(s => s[i].Magnitude).ToList();
             double mean = magnitudes.Average();
             variances[i] = magnitudes.Sum(m => (m - mean) * (m - mean)) / magnitudes.Count;
         }
@@ -261,7 +261,7 @@ public sealed class FourierVectorCompressor
 
     private (int[] Indices, double[] Magnitudes) SelectComponents(Complex[] spectrum)
     {
-        var components = spectrum
+        (int Index, double Magnitude, Complex Complex)[] components = spectrum
             .Select((c, i) => (Index: i, Magnitude: c.Magnitude, Complex: c))
             .ToArray();
 
@@ -290,10 +290,10 @@ public sealed class FourierVectorCompressor
                 double targetEnergy = totalEnergy * 0.95;
                 double accumulatedEnergy = 0;
 
-                var sorted = components.OrderByDescending(c => c.Magnitude).ToList();
-                var selected = new List<int>();
+                List<(int Index, double Magnitude, Complex Complex)> sorted = components.OrderByDescending(c => c.Magnitude).ToList();
+                List<int> selected = new List<int>();
 
-                foreach (var c in sorted)
+                foreach ((int Index, double Magnitude, Complex Complex) c in sorted)
                 {
                     selected.Add(c.Index);
                     accumulatedEnergy += c.Magnitude * c.Magnitude;
@@ -309,7 +309,7 @@ public sealed class FourierVectorCompressor
                 break;
         }
 
-        var magnitudes = indices.Select(i => spectrum[i].Magnitude).ToArray();
+        double[] magnitudes = indices.Select(i => spectrum[i].Magnitude).ToArray();
         return (indices, magnitudes);
     }
 
@@ -341,15 +341,15 @@ public sealed class FourierVectorCompressor
         for (int len = 2; len <= n; len *= 2)
         {
             double angle = (inverse ? 2 : -2) * Math.PI / len;
-            var wBase = new Complex(Math.Cos(angle), Math.Sin(angle));
+            Complex wBase = new Complex(Math.Cos(angle), Math.Sin(angle));
 
             for (int i = 0; i < n; i += len)
             {
-                var w = Complex.One;
+                Complex w = Complex.One;
                 for (int k = 0; k < len / 2; k++)
                 {
-                    var t = w * data[i + k + len / 2];
-                    var u = data[i + k];
+                    Complex t = w * data[i + k + len / 2];
+                    Complex u = data[i + k];
                     data[i + k] = u + t;
                     data[i + k + len / 2] = u - t;
                     w *= wBase;

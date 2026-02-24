@@ -93,8 +93,8 @@ public sealed class OuroborosNeuralNetwork : IDisposable
             return;
         }
 
-        var snapshot = new IMessageFilter[filters.Count];
-        for (var i = 0; i < filters.Count; i++)
+        IMessageFilter[] snapshot = new IMessageFilter[filters.Count];
+        for (int i = 0; i < filters.Count; i++)
         {
             snapshot[i] = filters[i];
         }
@@ -112,9 +112,9 @@ public sealed class OuroborosNeuralNetwork : IDisposable
         _neurons[neuron.Id] = neuron;
 
         // Subscribe to topics
-        foreach (var topic in neuron.SubscribedTopics)
+        foreach (string topic in neuron.SubscribedTopics)
         {
-            if (!_topicSubscribers.TryGetValue(topic, out var subscribers))
+            if (!_topicSubscribers.TryGetValue(topic, out HashSet<string>? subscribers))
             {
                 subscribers = [];
                 _topicSubscribers[topic] = subscribers;
@@ -125,21 +125,21 @@ public sealed class OuroborosNeuralNetwork : IDisposable
         // Create default connections based on topic overlap
         if (_topology != null)
         {
-            foreach (var existingNeuron in _neurons.Values)
+            foreach (Neuron existingNeuron in _neurons.Values)
             {
                 if (existingNeuron.Id == neuron.Id)
                 {
                     continue;
                 }
 
-                var sharedTopics = neuron.SubscribedTopics
+                int sharedTopics = neuron.SubscribedTopics
                     .Intersect(existingNeuron.SubscribedTopics).Count();
 
                 if (sharedTopics > 0)
                 {
                     // Neurons with shared interests get default excitatory connection
                     // Only create if connection doesn't already exist
-                    var weight = Math.Min(0.5 + (sharedTopics * 0.1), 0.9);
+                    double weight = Math.Min(0.5 + (sharedTopics * 0.1), 0.9);
                     if (_topology.GetConnection(existingNeuron.Id, neuron.Id) == null)
                     {
                         _topology.SetConnection(existingNeuron.Id, neuron.Id, weight);
@@ -158,13 +158,13 @@ public sealed class OuroborosNeuralNetwork : IDisposable
     /// </summary>
     public async Task UnregisterNeuronAsync(string neuronId)
     {
-        if (_neurons.TryRemove(neuronId, out var neuron))
+        if (_neurons.TryRemove(neuronId, out Neuron? neuron))
         {
             await neuron.StopAsync();
 
-            foreach (var topic in neuron.SubscribedTopics)
+            foreach (string topic in neuron.SubscribedTopics)
             {
-                if (_topicSubscribers.TryGetValue(topic, out var subscribers))
+                if (_topicSubscribers.TryGetValue(topic, out HashSet<string>? subscribers))
                 {
                     subscribers.Remove(neuronId);
                 }
@@ -184,7 +184,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
 
         _intentionBus.Start();
 
-        foreach (var neuron in _neurons.Values)
+        foreach (Neuron neuron in _neurons.Values)
         {
             neuron.Start();
         }
@@ -200,7 +200,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
 
         await _intentionBus.StopAsync();
 
-        foreach (var neuron in _neurons.Values)
+        foreach (Neuron neuron in _neurons.Values)
         {
             await neuron.StopAsync();
         }
@@ -217,7 +217,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
         // Only apply weight-based routing if topology exists
         if (_topology != null)
         {
-            var weight = _topology.GetWeight(message.SourceNeuron, subscriberId);
+            double weight = _topology.GetWeight(message.SourceNeuron, subscriberId);
 
             if (weight <= -0.8)
             {
@@ -227,7 +227,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
             else if (weight < 0)
             {
                 // Weak inhibition — deliver with reduced priority
-                var inhibitedMessage = message with { Priority = IntentionPriority.Low };
+                NeuronMessage inhibitedMessage = message with { Priority = IntentionPriority.Low };
                 subscriber.ReceiveMessage(inhibitedMessage);
             }
             else
@@ -235,7 +235,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
                 // Excitatory — deliver normally (optionally boost priority for high weights)
                 if (weight > 0.8)
                 {
-                    var boostedMessage = message with { Priority = IntentionPriority.High };
+                    NeuronMessage boostedMessage = message with { Priority = IntentionPriority.High };
                     subscriber.ReceiveMessage(boostedMessage);
                 }
                 else
@@ -288,17 +288,17 @@ public sealed class OuroborosNeuralNetwork : IDisposable
         if (_filters != null && _filters.Count > 0)
         {
             // Capture a local snapshot to avoid concurrent modifications during async processing
-            var filters = _filters;
+            IReadOnlyList<IMessageFilter> filters = _filters;
 
             // First, attempt a synchronous fast-path by checking whether all filters
             // complete synchronously. Only fall back to background execution if any
             // filter is incomplete.
-            var filterTasks = new List<Task<bool>>(filters.Count);
-            var allCompletedSynchronously = true;
+            List<Task<bool>> filterTasks = new List<Task<bool>>(filters.Count);
+            bool allCompletedSynchronously = true;
 
-            foreach (var filter in filters)
+            foreach (IMessageFilter filter in filters)
             {
-                var task = filter.ShouldRouteAsync(message, CancellationToken.None);
+                Task<bool> task = filter.ShouldRouteAsync(message, CancellationToken.None);
                 filterTasks.Add(task);
                 if (!task.IsCompletedSuccessfully)
                 {
@@ -309,7 +309,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
             if (allCompletedSynchronously)
             {
                 // Evaluate all filter results synchronously
-                foreach (var task in filterTasks)
+                foreach (Task<bool> task in filterTasks)
                 {
                     if (!task.Result)
                     {
@@ -331,9 +331,9 @@ public sealed class OuroborosNeuralNetwork : IDisposable
                     try
                     {
                         // Check all filters, using already-started tasks where possible
-                        foreach (var task in filterTasks)
+                        foreach (Task<bool> task in filterTasks)
                         {
-                            var allowed = task.IsCompletedSuccessfully
+                            bool allowed = task.IsCompletedSuccessfully
                                 ? task.Result
                                 : await task;
 
@@ -372,7 +372,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
         // Route to specific target
         if (!string.IsNullOrEmpty(message.TargetNeuron))
         {
-            if (_neurons.TryGetValue(message.TargetNeuron, out var target))
+            if (_neurons.TryGetValue(message.TargetNeuron, out Neuron? target))
             {
                 target.ReceiveMessage(message);
             }
@@ -380,11 +380,11 @@ public sealed class OuroborosNeuralNetwork : IDisposable
         }
 
         // Route by topic subscription WITH weight modulation
-        if (_topicSubscribers.TryGetValue(message.Topic, out var subscribers))
+        if (_topicSubscribers.TryGetValue(message.Topic, out HashSet<string>? subscribers))
         {
-            foreach (var subscriberId in subscribers)
+            foreach (string subscriberId in subscribers)
             {
-                if (subscriberId != message.SourceNeuron && _neurons.TryGetValue(subscriberId, out var subscriber))
+                if (subscriberId != message.SourceNeuron && _neurons.TryGetValue(subscriberId, out Neuron? subscriber))
                 {
                     DeliverWeightedMessage(message, subscriber, subscriberId);
                 }
@@ -392,12 +392,12 @@ public sealed class OuroborosNeuralNetwork : IDisposable
         }
 
         // Also match wildcard subscriptions
-        var wildcardTopic = message.Topic.Contains('.') ? message.Topic[..message.Topic.LastIndexOf('.')] + ".*" : "*";
-        if (_topicSubscribers.TryGetValue(wildcardTopic, out var wildcardSubscribers))
+        string wildcardTopic = message.Topic.Contains('.') ? message.Topic[..message.Topic.LastIndexOf('.')] + ".*" : "*";
+        if (_topicSubscribers.TryGetValue(wildcardTopic, out HashSet<string>? wildcardSubscribers))
         {
-            foreach (var subscriberId in wildcardSubscribers)
+            foreach (string subscriberId in wildcardSubscribers)
             {
-                if (subscriberId != message.SourceNeuron && _neurons.TryGetValue(subscriberId, out var subscriber))
+                if (subscriberId != message.SourceNeuron && _neurons.TryGetValue(subscriberId, out Neuron? subscriber))
                 {
                     DeliverWeightedMessage(message, subscriber, subscriberId);
                 }
@@ -410,14 +410,14 @@ public sealed class OuroborosNeuralNetwork : IDisposable
     /// </summary>
     public void Broadcast(string topic, object payload, string sourceNeuron)
     {
-        var message = new NeuronMessage
+        NeuronMessage message = new NeuronMessage
         {
             SourceNeuron = sourceNeuron,
             Topic = topic,
             Payload = payload,
         };
 
-        foreach (var neuron in _neurons.Values)
+        foreach (Neuron neuron in _neurons.Values)
         {
             if (neuron.Id != sourceNeuron)
             {
@@ -441,7 +441,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
     /// </summary>
     public string GetNetworkState()
     {
-        var sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.AppendLine("🧠 **Ouroboros Neural Network**\n");
         sb.AppendLine($"**Status:** {(_isActive ? "Active 🟢" : "Inactive 🔴")}");
         sb.AppendLine($"**Neurons:** {_neurons.Count}");
@@ -450,19 +450,19 @@ public sealed class OuroborosNeuralNetwork : IDisposable
         // Include topology information if available
         if (_topology != null)
         {
-            var weights = _topology.GetWeightSnapshot();
+            IReadOnlyDictionary<(string Source, string Target), double> weights = _topology.GetWeightSnapshot();
             sb.AppendLine($"**Weighted Connections:** {weights.Count}");
 
-            var excitatoryCount = weights.Count(w => w.Value > 0);
-            var inhibitoryCount = weights.Count(w => w.Value < 0);
+            int excitatoryCount = weights.Count(w => w.Value > 0);
+            int inhibitoryCount = weights.Count(w => w.Value < 0);
             sb.AppendLine($"  Excitatory: {excitatoryCount}, Inhibitory: {inhibitoryCount}");
         }
 
         sb.AppendLine();
 
-        foreach (var neuron in _neurons.Values.OrderBy(n => n.Type))
+        foreach (Neuron? neuron in _neurons.Values.OrderBy(n => n.Type))
         {
-            var status = neuron.IsActive ? "🟢" : "🔴";
+            string status = neuron.IsActive ? "🟢" : "🔴";
             sb.AppendLine($"  {status} **{neuron.Name}** ({neuron.Type})");
             sb.AppendLine($"     ID: {neuron.Id}, Topics: {string.Join(", ", neuron.SubscribedTopics.Take(3))}");
         }
@@ -486,7 +486,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
         _isActive = false;
         _intentionBus.Dispose();
 
-        foreach (var neuron in _neurons.Values)
+        foreach (Neuron neuron in _neurons.Values)
         {
             neuron.Dispose();
         }

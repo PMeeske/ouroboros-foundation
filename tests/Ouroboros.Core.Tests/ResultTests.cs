@@ -21,7 +21,7 @@ public class ResultTests
     public void Ok_CreatesSuccessResult()
     {
         // Arrange & Act
-        var result = Result<int>.Success(42);
+        Result<int> result = Result<int>.Success(42);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -33,7 +33,7 @@ public class ResultTests
     public void Error_CreatesFailureResult()
     {
         // Arrange & Act
-        var result = Result<int>.Failure("Something went wrong");
+        Result<int> result = Result<int>.Failure("Something went wrong");
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -45,7 +45,7 @@ public class ResultTests
     public void Success_WithNullValue_CreatesSuccessWithNullValue()
     {
         // Arrange & Act
-        var result = Result<string?>.Success(null);
+        Result<string?> result = Result<string?>.Success(null);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -56,7 +56,7 @@ public class ResultTests
     public void Failure_WithEmptyError_CreatesFailureWithEmptyError()
     {
         // Arrange & Act
-        var result = Result<int>.Failure(string.Empty);
+        Result<int> result = Result<int>.Failure(string.Empty);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -71,7 +71,7 @@ public class ResultTests
     public void Value_OnSuccess_ReturnsValue()
     {
         // Arrange
-        var result = Result<int>.Success(42);
+        Result<int> result = Result<int>.Success(42);
 
         // Act
         var value = result.Value;
@@ -84,7 +84,7 @@ public class ResultTests
     public void Value_OnFailure_ThrowsInvalidOperationException()
     {
         // Arrange
-        var result = Result<int>.Failure("error");
+        Result<int> result = Result<int>.Failure("error");
 
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => result.Value);
@@ -94,7 +94,7 @@ public class ResultTests
     public void Error_OnFailure_ReturnsError()
     {
         // Arrange
-        var result = Result<int>.Failure("error message");
+        Result<int> result = Result<int>.Failure("error message");
 
         // Act
         var error = result.Error;
@@ -107,7 +107,7 @@ public class ResultTests
     public void Error_OnSuccess_ThrowsInvalidOperationException()
     {
         // Arrange
-        var result = Result<int>.Success(42);
+        Result<int> result = Result<int>.Success(42);
 
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => result.Error);
@@ -121,10 +121,10 @@ public class ResultTests
     public void Map_OnSuccess_TransformsValue()
     {
         // Arrange
-        var result = Result<int>.Success(5);
+        Result<int> result = Result<int>.Success(5);
 
         // Act
-        var mapped = result.Map(x => x * 2);
+        Result<int> mapped = result.Map(x => x * 2);
 
         // Assert
         mapped.IsSuccess.Should().BeTrue();
@@ -135,10 +135,10 @@ public class ResultTests
     public void Map_OnFailure_PropagatesError()
     {
         // Arrange
-        var result = Result<int>.Failure("original error");
+        Result<int> result = Result<int>.Failure("original error");
 
         // Act
-        var mapped = result.Map(x => x * 2);
+        Result<int> mapped = result.Map(x => x * 2);
 
         // Assert
         mapped.IsFailure.Should().BeTrue();
@@ -149,10 +149,10 @@ public class ResultTests
     public void Map_WithTypeConversion_ConvertsSuccessfully()
     {
         // Arrange
-        var result = Result<int>.Success(42);
+        Result<int> result = Result<int>.Success(42);
 
         // Act
-        var mapped = result.Map(x => x.ToString());
+        Result<string> mapped = result.Map(x => x.ToString());
 
         // Assert
         mapped.IsSuccess.Should().BeTrue();
@@ -167,10 +167,10 @@ public class ResultTests
     public void Map_WithVariousValues_TransformsCorrectly(int input, int expected)
     {
         // Arrange
-        var result = Result<int>.Success(input);
+        Result<int> result = Result<int>.Success(input);
 
         // Act
-        var mapped = result.Map(x => x * 2);
+        Result<int> mapped = result.Map(x => x * 2);
 
         // Assert
         mapped.Value.Should().Be(expected);
@@ -184,10 +184,10 @@ public class ResultTests
     public void Bind_OnSuccess_AppliesFunction()
     {
         // Arrange
-        var result = Result<int>.Success(5);
+        Result<int> result = Result<int>.Success(5);
 
         // Act
-        var bound = result.Bind(x => Result<int>.Success(x * 2));
+        Result<int> bound = result.Bind(x => Result<int>.Success(x * 2));
 
         // Assert
         bound.IsSuccess.Should().BeTrue();
@@ -198,10 +198,10 @@ public class ResultTests
     public void Bind_OnFailure_ShortCircuits()
     {
         // Arrange
-        var result = Result<int>.Failure("original error");
+        Result<int> result = Result<int>.Failure("original error");
 
         // Act
-        var bound = result.Bind(x => Result<int>.Success(x * 2));
+        Result<int> bound = result.Bind(x => Result<int>.Success(x * 2));
 
         // Assert
         bound.IsFailure.Should().BeTrue();
@@ -212,10 +212,10 @@ public class ResultTests
     public void Bind_CanChainOperations()
     {
         // Arrange
-        var result = Result<int>.Success(5);
+        Result<int> result = Result<int>.Success(5);
 
         // Act
-        var chained = result
+        Result<int> chained = result
             .Bind(x => Result<int>.Success(x * 2))
             .Bind(x => Result<int>.Success(x + 3))
             .Bind(x => Result<int>.Success(x - 1));
@@ -229,10 +229,10 @@ public class ResultTests
     public void Bind_ShortCircuitsOnFirstError()
     {
         // Arrange
-        var result = Result<int>.Success(5);
+        Result<int> result = Result<int>.Success(5);
 
         // Act
-        var chained = result
+        Result<int> chained = result
             .Bind(x => Result<int>.Success(x * 2))
             .Bind(x => Result<int>.Failure("first error"))
             .Bind(x => Result<int>.Success(x + 100)); // Should not execute
@@ -246,10 +246,10 @@ public class ResultTests
     public void Bind_WithTypeConversion_WorksCorrectly()
     {
         // Arrange
-        var result = Result<int>.Success(42);
+        Result<int> result = Result<int>.Success(42);
 
         // Act
-        var bound = result.Bind(x => Result<string>.Success(x.ToString()));
+        Result<string> bound = result.Bind(x => Result<string>.Success(x.ToString()));
 
         // Assert
         bound.IsSuccess.Should().BeTrue();
@@ -264,7 +264,7 @@ public class ResultTests
     public void Match_OnSuccess_ExecutesSuccessFunction()
     {
         // Arrange
-        var result = Result<int>.Success(42);
+        Result<int> result = Result<int>.Success(42);
 
         // Act
         var output = result.Match(
@@ -279,7 +279,7 @@ public class ResultTests
     public void Match_OnFailure_ExecutesFailureFunction()
     {
         // Arrange
-        var result = Result<int>.Failure("something went wrong");
+        Result<int> result = Result<int>.Failure("something went wrong");
 
         // Act
         var output = result.Match(
@@ -294,7 +294,7 @@ public class ResultTests
     public void Match_WithAction_OnSuccess_ExecutesSuccessAction()
     {
         // Arrange
-        var result = Result<int>.Success(42);
+        Result<int> result = Result<int>.Success(42);
         var wasCalled = false;
         var capturedValue = 0;
 
@@ -312,7 +312,7 @@ public class ResultTests
     public void Match_WithAction_OnFailure_ExecutesFailureAction()
     {
         // Arrange
-        var result = Result<int>.Failure("error");
+        Result<int> result = Result<int>.Failure("error");
         var wasCalled = false;
         var capturedError = string.Empty;
 
@@ -334,7 +334,7 @@ public class ResultTests
     public void GetValueOrDefault_OnSuccess_ReturnsValue()
     {
         // Arrange
-        var result = Result<int>.Success(42);
+        Result<int> result = Result<int>.Success(42);
 
         // Act
         var value = result.GetValueOrDefault(0);
@@ -347,7 +347,7 @@ public class ResultTests
     public void GetValueOrDefault_OnFailure_ReturnsDefault()
     {
         // Arrange
-        var result = Result<int>.Failure("error");
+        Result<int> result = Result<int>.Failure("error");
 
         // Act
         var value = result.GetValueOrDefault(99);
@@ -360,7 +360,7 @@ public class ResultTests
     public void GetValueOrDefault_OnFailure_ReturnsSpecifiedDefault()
     {
         // Arrange
-        var result = Result<string>.Failure("error");
+        Result<string> result = Result<string>.Failure("error");
 
         // Act
         var value = result.GetValueOrDefault("fallback");
@@ -377,10 +377,10 @@ public class ResultTests
     public void ToOption_OnSuccess_ReturnsSome()
     {
         // Arrange
-        var result = Result<int>.Success(42);
+        Result<int> result = Result<int>.Success(42);
 
         // Act
-        var option = result.ToOption();
+        Option<int> option = result.ToOption();
 
         // Assert
         option.HasValue.Should().BeTrue();
@@ -391,10 +391,10 @@ public class ResultTests
     public void ToOption_OnFailure_ReturnsNone()
     {
         // Arrange
-        var result = Result<int>.Failure("error");
+        Result<int> result = Result<int>.Failure("error");
 
         // Act
-        var option = result.ToOption();
+        Option<int> option = result.ToOption();
 
         // Assert
         option.HasValue.Should().BeFalse();
@@ -408,8 +408,8 @@ public class ResultTests
     public void Equals_TwoSuccessResultsWithSameValue_ReturnsTrue()
     {
         // Arrange
-        var result1 = Result<int>.Success(42);
-        var result2 = Result<int>.Success(42);
+        Result<int> result1 = Result<int>.Success(42);
+        Result<int> result2 = Result<int>.Success(42);
 
         // Assert
         result1.Equals(result2).Should().BeTrue();
@@ -420,8 +420,8 @@ public class ResultTests
     public void Equals_TwoSuccessResultsWithDifferentValues_ReturnsFalse()
     {
         // Arrange
-        var result1 = Result<int>.Success(42);
-        var result2 = Result<int>.Success(43);
+        Result<int> result1 = Result<int>.Success(42);
+        Result<int> result2 = Result<int>.Success(43);
 
         // Assert
         result1.Equals(result2).Should().BeFalse();
@@ -432,8 +432,8 @@ public class ResultTests
     public void Equals_TwoFailureResultsWithSameError_ReturnsTrue()
     {
         // Arrange
-        var result1 = Result<int>.Failure("error");
-        var result2 = Result<int>.Failure("error");
+        Result<int> result1 = Result<int>.Failure("error");
+        Result<int> result2 = Result<int>.Failure("error");
 
         // Assert
         result1.Equals(result2).Should().BeTrue();
@@ -443,8 +443,8 @@ public class ResultTests
     public void Equals_SuccessAndFailure_ReturnsFalse()
     {
         // Arrange
-        var success = Result<int>.Success(42);
-        var failure = Result<int>.Failure("error");
+        Result<int> success = Result<int>.Success(42);
+        Result<int> failure = Result<int>.Failure("error");
 
         // Assert
         success.Equals(failure).Should().BeFalse();
@@ -454,8 +454,8 @@ public class ResultTests
     public void GetHashCode_TwoEqualResults_ReturnSameHashCode()
     {
         // Arrange
-        var result1 = Result<int>.Success(42);
-        var result2 = Result<int>.Success(42);
+        Result<int> result1 = Result<int>.Success(42);
+        Result<int> result2 = Result<int>.Success(42);
 
         // Assert
         result1.GetHashCode().Should().Be(result2.GetHashCode());
@@ -469,7 +469,7 @@ public class ResultTests
     public void ToString_OnSuccess_ReturnsSuccessString()
     {
         // Arrange
-        var result = Result<int>.Success(42);
+        Result<int> result = Result<int>.Success(42);
 
         // Act
         var str = result.ToString();
@@ -483,7 +483,7 @@ public class ResultTests
     public void ToString_OnFailure_ReturnsFailureString()
     {
         // Arrange
-        var result = Result<int>.Failure("error message");
+        Result<int> result = Result<int>.Failure("error message");
 
         // Act
         var str = result.ToString();
@@ -504,8 +504,8 @@ public class ResultTests
         var a = 42;
         Func<int, Result<int>> f = x => Result<int>.Success(x * 2);
 
-        var left = Result<int>.Success(a).Bind(f);
-        var right = f(a);
+        Result<int> left = Result<int>.Success(a).Bind(f);
+        Result<int> right = f(a);
 
         left.Value.Should().Be(right.Value);
         left.IsSuccess.Should().Be(right.IsSuccess);
@@ -515,9 +515,9 @@ public class ResultTests
     public void Result_RightIdentity_Holds()
     {
         // Right identity: m >>= return ≡ m
-        var m = Result<int>.Success(42);
+        Result<int> m = Result<int>.Success(42);
 
-        var result = m.Bind(x => Result<int>.Success(x));
+        Result<int> result = m.Bind(x => Result<int>.Success(x));
 
         result.Value.Should().Be(m.Value);
         result.IsSuccess.Should().Be(m.IsSuccess);
@@ -527,12 +527,12 @@ public class ResultTests
     public void Result_Associativity_Holds()
     {
         // Associativity: (m >>= f) >>= g ≡ m >>= (\x -> f x >>= g)
-        var m = Result<int>.Success(5);
+        Result<int> m = Result<int>.Success(5);
         Func<int, Result<int>> f = x => Result<int>.Success(x * 2);
         Func<int, Result<int>> g = x => Result<int>.Success(x + 3);
 
-        var left = m.Bind(f).Bind(g);
-        var right = m.Bind(x => f(x).Bind(g));
+        Result<int> left = m.Bind(f).Bind(g);
+        Result<int> right = m.Bind(x => f(x).Bind(g));
 
         left.Value.Should().Be(right.Value);
     }
@@ -541,14 +541,14 @@ public class ResultTests
     public void Result_AssociativityWithFailure_Holds()
     {
         // Associativity should hold even when f returns failure
-        var m = Result<int>.Success(5);
+        Result<int> m = Result<int>.Success(5);
         Func<int, Result<int>> f = x => x > 3
             ? Result<int>.Failure("too large")
             : Result<int>.Success(x * 2);
         Func<int, Result<int>> g = x => Result<int>.Success(x + 3);
 
-        var left = m.Bind(f).Bind(g);
-        var right = m.Bind(x => f(x).Bind(g));
+        Result<int> left = m.Bind(f).Bind(g);
+        Result<int> right = m.Bind(x => f(x).Bind(g));
 
         left.IsFailure.Should().Be(right.IsFailure);
         left.Error.Should().Be(right.Error);
@@ -577,7 +577,7 @@ public class ResultTests
     public void GenericResult_Success_CreatesSuccessfulResult()
     {
         // Arrange & Act
-        var result = Result<int, Exception>.Success(42);
+        Result<int, Exception> result = Result<int, Exception>.Success(42);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -588,8 +588,8 @@ public class ResultTests
     public void GenericResult_Failure_CreatesFailedResult()
     {
         // Arrange & Act
-        var exception = new InvalidOperationException("test error");
-        var result = Result<int, Exception>.Failure(exception);
+        InvalidOperationException exception = new InvalidOperationException("test error");
+        Result<int, Exception> result = Result<int, Exception>.Failure(exception);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -600,10 +600,10 @@ public class ResultTests
     public void GenericResult_MapError_TransformsErrorType()
     {
         // Arrange
-        var result = Result<int, string>.Failure("error text");
+        Result<int, string> result = Result<int, string>.Failure("error text");
 
         // Act
-        var mapped = result.MapError(err => new Exception(err));
+        Result<int, Exception> mapped = result.MapError(err => new Exception(err));
 
         // Assert
         mapped.IsFailure.Should().BeTrue();
@@ -614,10 +614,10 @@ public class ResultTests
     public void GenericResult_MapError_PreservesSuccessValue()
     {
         // Arrange
-        var result = Result<int, string>.Success(42);
+        Result<int, string> result = Result<int, string>.Success(42);
 
         // Act
-        var mapped = result.MapError(err => new Exception(err));
+        Result<int, Exception> mapped = result.MapError(err => new Exception(err));
 
         // Assert
         mapped.IsSuccess.Should().BeTrue();

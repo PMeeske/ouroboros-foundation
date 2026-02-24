@@ -35,7 +35,7 @@ public static class VectorCompressionService
             ArgumentNullException.ThrowIfNull(vector);
             ArgumentNullException.ThrowIfNull(config);
 
-            var m = method ?? config.DefaultMethod;
+            CompressionMethod m = method ?? config.DefaultMethod;
 
             if (m == CompressionMethod.Adaptive)
             {
@@ -43,11 +43,11 @@ public static class VectorCompressionService
             }
 
             // Create compressors
-            var fftCompressor = new FourierVectorCompressor(
+            FourierVectorCompressor fftCompressor = new FourierVectorCompressor(
                 config.TargetDimension,
                 FourierVectorCompressor.CompressionStrategy.HighestMagnitude);
 
-            var dctCompressor = new DCTVectorCompressor(
+            DCTVectorCompressor dctCompressor = new DCTVectorCompressor(
                 config.TargetDimension,
                 config.EnergyThreshold);
 
@@ -57,20 +57,20 @@ public static class VectorCompressionService
             switch (m)
             {
                 case CompressionMethod.DCT:
-                    var dct = dctCompressor.Compress(vector);
+                    DCTCompressedVector dct = dctCompressor.Compress(vector);
                     result = WrapWithHeader(CompressionMethod.DCT, dct.ToBytes());
                     energyRetained = dct.EnergyRetained;
                     break;
 
                 case CompressionMethod.QuantizedDCT:
-                    var dctQ = dctCompressor.Compress(vector);
-                    var quantized = dctCompressor.Quantize(dctQ, 8);
+                    DCTCompressedVector dctQ = dctCompressor.Compress(vector);
+                    QuantizedDCTVector quantized = dctCompressor.Quantize(dctQ, 8);
                     result = WrapWithHeader(CompressionMethod.QuantizedDCT, quantized.ToBytes());
                     energyRetained = dctQ.EnergyRetained;
                     break;
 
                 case CompressionMethod.FFT:
-                    var fft = fftCompressor.Compress(vector);
+                    CompressedVector fft = fftCompressor.Compress(vector);
                     result = WrapWithHeader(CompressionMethod.FFT, fft.ToBytes());
                     break;
 
@@ -79,7 +79,7 @@ public static class VectorCompressionService
             }
 
             // Create compression event
-            var compressionEvent = VectorCompressionEvent.Create(
+            VectorCompressionEvent compressionEvent = VectorCompressionEvent.Create(
                 method: m.ToString(),
                 originalBytes: vector.Length * sizeof(float),
                 compressedBytes: result.Length,
@@ -107,18 +107,18 @@ public static class VectorCompressionService
             ArgumentNullException.ThrowIfNull(data);
             ArgumentNullException.ThrowIfNull(config);
 
-            var (method, payload) = UnwrapHeader(data);
+            (CompressionMethod method, byte[]? payload) = UnwrapHeader(data);
 
             // Create compressors
-            var fftCompressor = new FourierVectorCompressor(
+            FourierVectorCompressor fftCompressor = new FourierVectorCompressor(
                 config.TargetDimension,
                 FourierVectorCompressor.CompressionStrategy.HighestMagnitude);
 
-            var dctCompressor = new DCTVectorCompressor(
+            DCTVectorCompressor dctCompressor = new DCTVectorCompressor(
                 config.TargetDimension,
                 config.EnergyThreshold);
 
-            var result = method switch
+            float[] result = method switch
             {
                 CompressionMethod.DCT => dctCompressor.Decompress(DCTCompressedVector.FromBytes(payload)),
                 CompressionMethod.QuantizedDCT => dctCompressor.DecompressQuantized(QuantizedDCTVector.FromBytes(payload)),
@@ -146,23 +146,23 @@ public static class VectorCompressionService
             ArgumentNullException.ThrowIfNull(b);
             ArgumentNullException.ThrowIfNull(config);
 
-            var (methodA, payloadA) = UnwrapHeader(a);
-            var (methodB, payloadB) = UnwrapHeader(b);
+            (CompressionMethod methodA, byte[]? payloadA) = UnwrapHeader(a);
+            (CompressionMethod methodB, byte[]? payloadB) = UnwrapHeader(b);
 
             // Create compressors
-            var fftCompressor = new FourierVectorCompressor(
+            FourierVectorCompressor fftCompressor = new FourierVectorCompressor(
                 config.TargetDimension,
                 FourierVectorCompressor.CompressionStrategy.HighestMagnitude);
 
-            var dctCompressor = new DCTVectorCompressor(
+            DCTVectorCompressor dctCompressor = new DCTVectorCompressor(
                 config.TargetDimension,
                 config.EnergyThreshold);
 
             if (methodA != methodB)
             {
                 // Fall back to full decompression if methods differ
-                var vecAResult = Decompress(a, config);
-                var vecBResult = Decompress(b, config);
+                Result<float[]> vecAResult = Decompress(a, config);
+                Result<float[]> vecBResult = Decompress(b, config);
 
                 if (vecAResult.IsFailure || vecBResult.IsFailure)
                 {
@@ -201,7 +201,7 @@ public static class VectorCompressionService
         {
             ArgumentNullException.ThrowIfNull(events);
 
-            var eventList = events.ToList();
+            List<VectorCompressionEvent> eventList = events.ToList();
 
             if (eventList.Count == 0)
             {
@@ -215,13 +215,13 @@ public static class VectorCompressionService
                 });
             }
 
-            var totalOriginal = eventList.Sum(e => e.OriginalBytes);
-            var totalCompressed = eventList.Sum(e => e.CompressedBytes);
-            var avgEnergy = eventList.Average(e => e.EnergyRetained);
-            var methodBreakdown = eventList.GroupBy(e => e.Method)
+            long totalOriginal = eventList.Sum(e => e.OriginalBytes);
+            long totalCompressed = eventList.Sum(e => e.CompressedBytes);
+            double avgEnergy = eventList.Average(e => e.EnergyRetained);
+            Dictionary<string, int> methodBreakdown = eventList.GroupBy(e => e.Method)
                 .ToDictionary(g => g.Key, g => g.Count());
 
-            var stats = new VectorCompressionStats
+            VectorCompressionStats stats = new VectorCompressionStats
             {
                 VectorsCompressed = eventList.Count,
                 TotalOriginalBytes = totalOriginal,
@@ -254,15 +254,15 @@ public static class VectorCompressionService
             ArgumentNullException.ThrowIfNull(vectors);
             ArgumentNullException.ThrowIfNull(config);
 
-            var vectorList = vectors.ToList();
-            var compressedResults = new List<byte[]>();
-            var compressionEvents = new List<VectorCompressionEvent>();
+            List<float[]> vectorList = vectors.ToList();
+            List<byte[]> compressedResults = new List<byte[]>();
+            List<VectorCompressionEvent> compressionEvents = new List<VectorCompressionEvent>();
 
             // Process in parallel for efficiency
-            var compressionTasks = vectorList.Select(v => Task.Run(() => Compress(v, config, method))).ToList();
-            var results = await Task.WhenAll(compressionTasks);
+            List<Task<Result<(byte[] CompressedData, VectorCompressionEvent Event)>>> compressionTasks = vectorList.Select(v => Task.Run(() => Compress(v, config, method))).ToList();
+            Result<(byte[] CompressedData, VectorCompressionEvent Event)>[] results = await Task.WhenAll(compressionTasks);
 
-            foreach (var result in results)
+            foreach (Result<(byte[] CompressedData, VectorCompressionEvent Event)> result in results)
             {
                 if (result.IsFailure)
                 {
@@ -293,18 +293,18 @@ public static class VectorCompressionService
             ArgumentNullException.ThrowIfNull(vector);
             ArgumentNullException.ThrowIfNull(config);
 
-            var fftCompressor = new FourierVectorCompressor(
+            FourierVectorCompressor fftCompressor = new FourierVectorCompressor(
                 config.TargetDimension,
                 FourierVectorCompressor.CompressionStrategy.HighestMagnitude);
 
-            var dctCompressor = new DCTVectorCompressor(
+            DCTVectorCompressor dctCompressor = new DCTVectorCompressor(
                 config.TargetDimension,
                 config.EnergyThreshold);
 
-            var dct = dctCompressor.Compress(vector);
-            var fft = fftCompressor.Compress(vector);
+            DCTCompressedVector dct = dctCompressor.Compress(vector);
+            CompressedVector fft = fftCompressor.Compress(vector);
 
-            var preview = new CompressionPreview(
+            CompressionPreview preview = new CompressionPreview(
                 OriginalDimension: vector.Length,
                 OriginalSizeBytes: vector.Length * sizeof(float),
                 DCTCompressedSize: dct.ToBytes().Length,
@@ -359,7 +359,7 @@ public static class VectorCompressionService
     private static byte[] WrapWithHeader(CompressionMethod method, byte[] payload)
     {
         // Header: 4 bytes magic + 1 byte method + 4 bytes payload length
-        var result = new byte[9 + payload.Length];
+        byte[] result = new byte[9 + payload.Length];
         result[0] = (byte)'O';
         result[1] = (byte)'V';
         result[2] = (byte)'C';
@@ -377,9 +377,9 @@ public static class VectorCompressionService
             throw new InvalidOperationException("Invalid compressed vector format");
         }
 
-        var method = (CompressionMethod)data[4];
+        CompressionMethod method = (CompressionMethod)data[4];
         int payloadLen = BitConverter.ToInt32(data, 5);
-        var payload = new byte[payloadLen];
+        byte[] payload = new byte[payloadLen];
         Array.Copy(data, 9, payload, 0, payloadLen);
 
         return (method, payload);

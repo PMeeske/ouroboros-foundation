@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Hyperon.Parsing;
+namespace Ouroboros.Core.Hyperon.Parsing;
 
 /// <summary>
 /// Exception thrown during parsing.

@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Performance;
+namespace Ouroboros.Core.Performance;
 
 /// <summary>
 /// Disposable wrapper for pooled objects that automatically returns them to the pool.

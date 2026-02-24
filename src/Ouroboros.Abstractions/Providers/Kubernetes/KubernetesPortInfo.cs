@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Providers.Kubernetes;
+namespace Ouroboros.Providers.Kubernetes;
 
 /// <summary>
 /// Represents a Kubernetes service port.

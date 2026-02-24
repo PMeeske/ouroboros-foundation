@@ -28,7 +28,7 @@ public sealed record SkillUsageContext
     /// <summary>
     /// Gets the input parameters for this skill invocation.
     /// </summary>
-    public IReadOnlyDictionary<string, object> InputParameters { get; init; } = 
+    public IReadOnlyDictionary<string, object> InputParameters { get; init; } =
         new Dictionary<string, object>();
 
     /// <summary>

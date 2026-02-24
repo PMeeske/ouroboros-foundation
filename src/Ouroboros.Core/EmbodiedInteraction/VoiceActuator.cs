@@ -91,7 +91,7 @@ public sealed class VoiceActuator : IDisposable
         CancellationToken ct = default)
     {
         if (_disposed) return Result<SynthesizedSpeech, string>.Failure("Actuator is disposed");
-        if (string.IsNullOrWhiteSpace(text)) 
+        if (string.IsNullOrWhiteSpace(text))
             return Result<SynthesizedSpeech, string>.Failure("Text cannot be empty");
 
         // Set speaking state
@@ -101,11 +101,11 @@ public sealed class VoiceActuator : IDisposable
 
         try
         {
-            var config = emotion != null 
-                ? _config with { Style = emotion } 
+            VoiceConfig config = emotion != null
+                ? _config with { Style = emotion }
                 : _config;
 
-            var result = await _ttsModel.SynthesizeAsync(text, config, _speakingCts.Token);
+            Result<SynthesizedSpeech, string> result = await _ttsModel.SynthesizeAsync(text, config, _speakingCts.Token);
 
             if (result.IsSuccess)
             {
@@ -136,8 +136,8 @@ public sealed class VoiceActuator : IDisposable
             return Observable.Empty<byte[]>();
         }
 
-        var config = emotion != null 
-            ? _config with { Style = emotion } 
+        VoiceConfig config = emotion != null
+            ? _config with { Style = emotion }
             : _config;
 
         _isSpeaking = true;

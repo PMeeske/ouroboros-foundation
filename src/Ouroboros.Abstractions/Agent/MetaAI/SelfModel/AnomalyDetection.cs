@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent.MetaAI.SelfModel;
+namespace Ouroboros.Agent.MetaAI.SelfModel;
 
 /// <summary>
 /// Anomaly detection result.

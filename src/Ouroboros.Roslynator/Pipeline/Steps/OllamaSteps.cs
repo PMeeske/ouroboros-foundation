@@ -29,11 +29,11 @@ public static class OllamaSteps
 
         try
         {
-            var span = state.Diagnostic.Location.SourceSpan;
-            var node = state.CurrentRoot.FindNode(span);
-            var code = node.ToFullString();
+            TextSpan span = state.Diagnostic.Location.SourceSpan;
+            SyntaxNode node = state.CurrentRoot.FindNode(span);
+            string code = node.ToFullString();
 
-            var prompt = BuildPrompt(state.Diagnostic.Id, state.Diagnostic.GetMessage(), code);
+            string prompt = BuildPrompt(state.Diagnostic.Id, state.Diagnostic.GetMessage(), code);
 
             var requestObj = new
             {
@@ -43,30 +43,30 @@ public static class OllamaSteps
                 options = new { temperature = 0.05, top_p = 0.95 }
             };
 
-            var json = JsonSerializer.Serialize(requestObj);
-            using var content = new StringContent(json, Encoding.UTF8, "application/json");
+            string json = JsonSerializer.Serialize(requestObj);
+            using StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            using var resp = await _http.PostAsync(Endpoint, content, state.CancellationToken).ConfigureAwait(false);
+            using HttpResponseMessage resp = await _http.PostAsync(Endpoint, content, state.CancellationToken).ConfigureAwait(false);
             if (!resp.IsSuccessStatusCode) return state;
 
-            var payload = await resp.Content.ReadAsStringAsync(state.CancellationToken).ConfigureAwait(false);
-            using var doc = JsonDocument.Parse(payload);
+            string payload = await resp.Content.ReadAsStringAsync(state.CancellationToken).ConfigureAwait(false);
+            using JsonDocument doc = JsonDocument.Parse(payload);
 
             // Ollama JSON may vary — look for "response" string or first text segment
             string? raw = null;
-            if (doc.RootElement.TryGetProperty("response", out var r))
+            if (doc.RootElement.TryGetProperty("response", out JsonElement r))
                 raw = r.GetString();
-            else if (doc.RootElement.TryGetProperty("results", out var results) && results.GetArrayLength() > 0)
+            else if (doc.RootElement.TryGetProperty("results", out JsonElement results) && results.GetArrayLength() > 0)
                 raw = results[0].GetProperty("output").GetString();
 
-            var fixedCode = CleanOutput(raw);
+            string fixedCode = CleanOutput(raw);
             if (string.IsNullOrWhiteSpace(fixedCode) || fixedCode == code) return state;
 
             // parse produced code back into a SyntaxNode (best-effort)
-            var fixedNode = CSharpSyntaxTree.ParseText(fixedCode).GetRoot().DescendantNodesAndSelf().FirstOrDefault();
+            SyntaxNode? fixedNode = CSharpSyntaxTree.ParseText(fixedCode).GetRoot().DescendantNodesAndSelf().FirstOrDefault();
             if (fixedNode is null) return state;
 
-            var newRoot = state.CurrentRoot.ReplaceNode(node, fixedNode);
+            SyntaxNode newRoot = state.CurrentRoot.ReplaceNode(node, fixedNode);
             return state.WithNewRoot(newRoot, "Ollama AI Fix");
         }
 #pragma warning disable CA1031 // Fail gracefully on any LLM/parsing errors
@@ -90,7 +90,7 @@ Code to fix:
     private static string CleanOutput(string? output)
     {
         if (string.IsNullOrWhiteSpace(output)) return string.Empty;
-        var clean = Regex.Replace(output, @"^```[a-zA-Z]*\s*", "", RegexOptions.Multiline);
+        string clean = Regex.Replace(output, @"^```[a-zA-Z]*\s*", "", RegexOptions.Multiline);
         clean = Regex.Replace(clean, @"\s*```$", "", RegexOptions.Multiline);
         return clean.Trim();
     }

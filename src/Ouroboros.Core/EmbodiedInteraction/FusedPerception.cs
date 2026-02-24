@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.EmbodiedInteraction;
+namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Fused multimodal perception combining multiple sensor inputs.
@@ -42,7 +42,7 @@ public sealed record FusedPerception(
     {
         get
         {
-            var counts = new[]
+            (SensorModality, int Count)[] counts = new[]
             {
                 (SensorModality.Audio, AudioPerceptions.Count),
                 (SensorModality.Visual, VisualPerceptions.Count),

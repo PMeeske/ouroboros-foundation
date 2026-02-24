@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Reasoning;
+namespace Ouroboros.Core.Reasoning;
 
 /// <summary>
 /// Represents an observation of variables at a point in time.

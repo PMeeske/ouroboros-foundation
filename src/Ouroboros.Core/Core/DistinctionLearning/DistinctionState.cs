@@ -45,7 +45,7 @@ public sealed record DistinctionState(
     /// </summary>
     public DistinctionState WithDistinction(ActiveDistinction distinction)
     {
-        var newDistinctions = new List<ActiveDistinction>(ActiveDistinctions) { distinction };
+        List<ActiveDistinction> newDistinctions = new List<ActiveDistinction>(ActiveDistinctions) { distinction };
         return this with
         {
             ActiveDistinctions = newDistinctions,
@@ -61,7 +61,7 @@ public sealed record DistinctionState(
     /// <returns>A new state with the added distinction.</returns>
     public DistinctionState AddDistinction(string distinction, double fitness)
     {
-        var newDistinction = new ActiveDistinction(
+        ActiveDistinction newDistinction = new ActiveDistinction(
             Id: Guid.NewGuid().ToString(),
             Content: distinction,
             Fitness: fitness,

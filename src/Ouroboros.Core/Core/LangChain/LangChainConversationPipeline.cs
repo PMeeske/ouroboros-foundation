@@ -53,7 +53,7 @@ public class LangChainConversationPipeline
     {
         return this.AddTransformation(context =>
         {
-            var history = context.GetConversationHistory();
+            string history = context.GetConversationHistory();
             if (!string.IsNullOrEmpty(history))
             {
                 context.SetProperty("conversation_history", history);
@@ -69,7 +69,7 @@ public class LangChainConversationPipeline
     /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     public async Task<LangChainConversationContext> RunAsync(LangChainConversationContext initialContext)
     {
-        var currentContext = initialContext;
+        LangChainConversationContext currentContext = initialContext;
 
         foreach (Func<LangChainConversationContext, Task<LangChainConversationContext>> step in this.steps)
         {
@@ -123,8 +123,8 @@ public static class LangChainConversationBuilder
     {
         return pipeline.AddStep(async context =>
         {
-            var input = context.GetProperty<string>("input") ?? string.Empty;
-            var aiResponse = await responseGenerator(input);
+            string input = context.GetProperty<string>("input") ?? string.Empty;
+            string aiResponse = await responseGenerator(input);
             context.SetProperty("text", aiResponse);
             return context;
         });

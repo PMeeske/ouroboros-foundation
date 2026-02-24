@@ -152,7 +152,7 @@ public readonly struct ContextualStepDefinition<TIn, TOut, TContext>
     public (TOut result, List<string> logs) Invoke(TIn input, TContext context)
     {
         // Copy to a local so the lambda does not capture 'this' (not allowed in structs).
-        var compiled = _compiled;
+        ContextualStep<TIn, TOut, TContext> compiled = _compiled;
         return Task.Run(() => compiled(input, context)).GetAwaiter().GetResult();
     }
 

@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Configuration;
+namespace Ouroboros.Core.Configuration;
 
 /// <summary>
 /// Configuration for vector store operations.

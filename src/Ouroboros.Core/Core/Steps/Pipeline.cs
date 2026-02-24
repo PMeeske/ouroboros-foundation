@@ -38,7 +38,7 @@ public readonly struct Pipeline<TIn, TOut>
         Step<TIn, TOut> current = _step;
         return new Pipeline<TIn, TNext>(async input =>
         {
-            var mid = await current(input).ConfigureAwait(false);
+            TOut? mid = await current(input).ConfigureAwait(false);
             return await next(mid).ConfigureAwait(false);
         });
     }
@@ -56,7 +56,7 @@ public readonly struct Pipeline<TIn, TOut>
         Step<TIn, TOut> current = _step;
         return new Pipeline<TIn, TNext>(async input =>
         {
-            var result = await current(input).ConfigureAwait(false);
+            TOut? result = await current(input).ConfigureAwait(false);
             return func(result);
         });
     }
@@ -74,7 +74,7 @@ public readonly struct Pipeline<TIn, TOut>
         Step<TIn, TOut> current = _step;
         return new Pipeline<TIn, TNext>(async input =>
         {
-            var result = await current(input).ConfigureAwait(false);
+            TOut? result = await current(input).ConfigureAwait(false);
             return await func(result).ConfigureAwait(false);
         });
     }
@@ -92,8 +92,8 @@ public readonly struct Pipeline<TIn, TOut>
         Step<TIn, TOut> current = _step;
         return new Pipeline<TIn, TNext>(async input =>
         {
-            var mid = await current(input).ConfigureAwait(false);
-            var nextStep = func(mid);
+            TOut? mid = await current(input).ConfigureAwait(false);
+            Step<TOut, TNext> nextStep = func(mid);
             return await nextStep(mid).ConfigureAwait(false);
         });
     }
@@ -110,7 +110,7 @@ public readonly struct Pipeline<TIn, TOut>
         Step<TIn, TOut> current = _step;
         return new Pipeline<TIn, TOut>(async input =>
         {
-            var result = await current(input).ConfigureAwait(false);
+            TOut? result = await current(input).ConfigureAwait(false);
             action(result);
             return result;
         });
@@ -128,7 +128,7 @@ public readonly struct Pipeline<TIn, TOut>
         Step<TIn, TOut> current = _step;
         return new Pipeline<TIn, TOut>(async input =>
         {
-            var result = await current(input).ConfigureAwait(false);
+            TOut? result = await current(input).ConfigureAwait(false);
             await func(result).ConfigureAwait(false);
             return result;
         });
@@ -145,7 +145,7 @@ public readonly struct Pipeline<TIn, TOut>
         {
             try
             {
-                var result = await current(input).ConfigureAwait(false);
+                TOut? result = await current(input).ConfigureAwait(false);
                 return Result<TOut, Exception>.Success(result);
             }
             catch (Exception ex)
@@ -262,7 +262,7 @@ public static class Pipeline
     {
         return new Pipeline<TIn, TOut[]>(async input =>
         {
-            var tasks = pipelines.Select(p => p.RunAsync(input)).ToArray();
+            Task<TOut>[] tasks = pipelines.Select(p => p.RunAsync(input)).ToArray();
             return await Task.WhenAll(tasks).ConfigureAwait(false);
         });
     }
@@ -278,8 +278,8 @@ public static class Pipeline
     {
         return new Pipeline<TIn, TOut>(async input =>
         {
-            var tasks = pipelines.Select(p => p.RunAsync(input)).ToArray();
-            var completed = await Task.WhenAny(tasks).ConfigureAwait(false);
+            Task<TOut>[] tasks = pipelines.Select(p => p.RunAsync(input)).ToArray();
+            Task<TOut> completed = await Task.WhenAny(tasks).ConfigureAwait(false);
             return await completed.ConfigureAwait(false);
         });
     }

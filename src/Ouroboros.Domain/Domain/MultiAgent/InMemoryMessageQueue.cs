@@ -26,7 +26,7 @@ public sealed class InMemoryMessageQueue : IMessageQueue
 
         try
         {
-            var queue = this.queues.GetOrAdd(agentId, _ => new ConcurrentQueue<Message>());
+            ConcurrentQueue<Message> queue = this.queues.GetOrAdd(agentId, _ => new ConcurrentQueue<Message>());
             queue.Enqueue(message);
             return Task.FromResult(Result<Unit, string>.Success(Unit.Value));
         }
@@ -44,12 +44,12 @@ public sealed class InMemoryMessageQueue : IMessageQueue
             return Task.FromResult(Result<Message, string>.Failure("Operation was cancelled"));
         }
 
-        if (!this.queues.TryGetValue(agentId, out var queue))
+        if (!this.queues.TryGetValue(agentId, out ConcurrentQueue<Message>? queue))
         {
             return Task.FromResult(Result<Message, string>.Failure("No messages available for agent"));
         }
 
-        if (queue.TryDequeue(out var message))
+        if (queue.TryDequeue(out Message? message))
         {
             return Task.FromResult(Result<Message, string>.Success(message));
         }
@@ -60,7 +60,7 @@ public sealed class InMemoryMessageQueue : IMessageQueue
     /// <inheritdoc/>
     public Task<bool> HasPendingMessagesAsync(AgentId agentId)
     {
-        if (this.queues.TryGetValue(agentId, out var queue))
+        if (this.queues.TryGetValue(agentId, out ConcurrentQueue<Message>? queue))
         {
             return Task.FromResult(!queue.IsEmpty);
         }

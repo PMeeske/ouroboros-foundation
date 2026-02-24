@@ -35,7 +35,7 @@ public sealed record AdapterMetadata(
     /// <returns>New adapter metadata.</returns>
     public static AdapterMetadata Create(AdapterId id, string taskName, AdapterConfig config, string blobStoragePath)
     {
-        var now = DateTime.UtcNow;
+        DateTime now = DateTime.UtcNow;
         return new AdapterMetadata(
             Id: id,
             TaskName: taskName,

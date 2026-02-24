@@ -37,7 +37,7 @@ public sealed class DCTVectorCompressor
         int n = vector.Length;
 
         // Apply DCT-II
-        var dct = new double[n];
+        double[] dct = new double[n];
         double sqrt2n = Math.Sqrt(2.0 / n);
         double sqrtN = Math.Sqrt(1.0 / n);
 
@@ -64,7 +64,7 @@ public sealed class DCTVectorCompressor
         }
 
         // Keep only significant coefficients (DCT energy is concentrated in low frequencies)
-        var coefficients = new float[keep];
+        float[] coefficients = new float[keep];
         for (int i = 0; i < keep; i++)
         {
             coefficients[i] = (float)dct[i];
@@ -92,14 +92,14 @@ public sealed class DCTVectorCompressor
         int keep = compressed.Coefficients.Length;
 
         // Pad coefficients with zeros
-        var dct = new double[n];
+        double[] dct = new double[n];
         for (int i = 0; i < keep; i++)
         {
             dct[i] = compressed.Coefficients[i];
         }
 
         // Apply inverse DCT (DCT-III)
-        var result = new float[n];
+        float[] result = new float[n];
         double sqrt2n = Math.Sqrt(2.0 / n);
         double sqrtN = Math.Sqrt(1.0 / n);
 
@@ -165,7 +165,7 @@ public sealed class DCTVectorCompressor
     /// <returns>Quantized compressed vector.</returns>
     public QuantizedDCTVector Quantize(DCTCompressedVector compressed, int bits = 8)
     {
-        var coeffs = compressed.Coefficients;
+        float[] coeffs = compressed.Coefficients;
 
         // Find min/max for scaling
         float min = coeffs.Min();
@@ -184,7 +184,7 @@ public sealed class DCTVectorCompressor
         }
 
         int maxVal = (1 << bits) - 1;
-        var quantized = new byte[coeffs.Length * (bits > 8 ? 2 : 1)];
+        byte[] quantized = new byte[coeffs.Length * (bits > 8 ? 2 : 1)];
 
         for (int i = 0; i < coeffs.Length; i++)
         {
@@ -220,7 +220,7 @@ public sealed class DCTVectorCompressor
             ? quantized.QuantizedCoefficients.Length
             : quantized.QuantizedCoefficients.Length / 2;
 
-        var coeffs = new float[coeffCount];
+        float[] coeffs = new float[coeffCount];
         float range = quantized.Max - quantized.Min;
         int maxVal = (1 << quantized.BitsPerCoefficient) - 1;
 
@@ -240,7 +240,7 @@ public sealed class DCTVectorCompressor
             coeffs[i] = quantized.Min + (qVal / (float)maxVal) * range;
         }
 
-        var dct = new DCTCompressedVector(coeffs, quantized.OriginalLength, 1.0, 1.0);
+        DCTCompressedVector dct = new DCTCompressedVector(coeffs, quantized.OriginalLength, 1.0, 1.0);
         return Decompress(dct);
     }
 

@@ -37,6 +37,6 @@ public sealed record ProposedAction
     /// <summary>
     /// Gets additional metadata about this action.
     /// </summary>
-    public IReadOnlyDictionary<string, object> Metadata { get; init; } = 
+    public IReadOnlyDictionary<string, object> Metadata { get; init; } =
         new Dictionary<string, object>();
 }

@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Providers.TextToSpeech;
+namespace Ouroboros.Providers.TextToSpeech;
 
 /// <summary>
 /// A chunk of synthesized audio with metadata for streaming TTS.

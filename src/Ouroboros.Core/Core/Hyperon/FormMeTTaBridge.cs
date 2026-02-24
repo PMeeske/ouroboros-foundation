@@ -50,7 +50,7 @@ public sealed class FormMeTTaBridge : IDisposable
         _formCache = new ConcurrentDictionary<string, FormAtom>();
 
         // Create registry with Laws of Form operations
-        var registry = groundedOps ?? GroundedRegistry.CreateStandard();
+        GroundedRegistry registry = groundedOps ?? GroundedRegistry.CreateStandard();
         RegisterFormOperations(registry);
 
         _interpreter = new Interpreter(space, registry);
@@ -67,14 +67,14 @@ public sealed class FormMeTTaBridge : IDisposable
     /// <returns>The resulting form.</returns>
     public Form DrawDistinction(string context, Atom? reason = null)
     {
-        var previous = _distinctionContext.GetValueOrDefault(context, Form.Void);
-        var newForm = Form.Mark;
+        Form previous = _distinctionContext.GetValueOrDefault(context, Form.Void);
+        Form newForm = Form.Mark;
 
         _distinctionContext[context] = newForm;
         _formCache[context] = new FormAtom(newForm);
 
         // Add to atom space
-        var distinctionAtom = Atom.Expr(
+        Expression distinctionAtom = Atom.Expr(
             Atom.Sym("Distinction"),
             Atom.Sym(context),
             Atom.Sym("Mark"));
@@ -99,19 +99,19 @@ public sealed class FormMeTTaBridge : IDisposable
     /// <returns>The crossed form.</returns>
     public Form CrossDistinction(string context)
     {
-        var previous = _distinctionContext.GetValueOrDefault(context, Form.Void);
-        var newForm = previous.Not();
+        Form previous = _distinctionContext.GetValueOrDefault(context, Form.Void);
+        Form newForm = previous.Not();
 
         _distinctionContext[context] = newForm;
         _formCache[context] = new FormAtom(newForm);
 
         // Determine if this is a cancellation (double crossing)
-        var eventType = newForm.IsVoid() && previous.IsMarked()
+        DistinctionEventType eventType = newForm.IsVoid() && previous.IsMarked()
             ? DistinctionEventType.Cancelled
             : DistinctionEventType.Crossed;
 
         // Update atom space
-        var distinctionAtom = Atom.Expr(
+        Expression distinctionAtom = Atom.Expr(
             Atom.Sym("Distinction"),
             Atom.Sym(context),
             newForm.ToMeTTa());
@@ -135,14 +135,14 @@ public sealed class FormMeTTaBridge : IDisposable
     /// <returns>The imaginary (re-entrant) form.</returns>
     public Form CreateReEntry(string context)
     {
-        var previous = _distinctionContext.GetValueOrDefault(context, Form.Void);
-        var newForm = Form.Imaginary;
+        Form previous = _distinctionContext.GetValueOrDefault(context, Form.Void);
+        Form newForm = Form.Imaginary;
 
         _distinctionContext[context] = newForm;
         _formCache[context] = new FormAtom(newForm);
 
         // Add re-entry to atom space
-        var reentryAtom = Atom.Expr(
+        Expression reentryAtom = Atom.Expr(
             Atom.Sym("ReEntry"),
             Atom.Sym(context),
             Atom.Sym("Imaginary"));
@@ -166,8 +166,8 @@ public sealed class FormMeTTaBridge : IDisposable
     /// <returns>The truth value as a Form.</returns>
     public Form EvaluateTruthValue(Atom expression)
     {
-        var trace = ImmutableList.CreateBuilder<string>();
-        var result = EvaluateTruthValueInternal(expression, trace);
+        ImmutableList<string>.Builder trace = ImmutableList.CreateBuilder<string>();
+        Form result = EvaluateTruthValueInternal(expression, trace);
 
         OnTruthValueEvaluated(new TruthValueEventArgs
         {
@@ -188,14 +188,14 @@ public sealed class FormMeTTaBridge : IDisposable
     /// <returns>Results if guard is marked, empty otherwise.</returns>
     public IEnumerable<Atom> DistinctionGatedInference(string guard, Atom query)
     {
-        var guardForm = _distinctionContext.GetValueOrDefault(guard, Form.Void);
+        Form guardForm = _distinctionContext.GetValueOrDefault(guard, Form.Void);
 
         if (!guardForm.IsMarked())
         {
             yield break;
         }
 
-        foreach (var result in _interpreter.Evaluate(query))
+        foreach (Atom result in _interpreter.Evaluate(query))
         {
             OnDistinctionChanged(new DistinctionEventArgs
             {
@@ -216,10 +216,10 @@ public sealed class FormMeTTaBridge : IDisposable
     /// <returns>Matching results with associated form states.</returns>
     public IEnumerable<(Atom Result, Form State, Substitution Bindings)> FormGatedMatch(Atom pattern)
     {
-        foreach (var (result, bindings) in _interpreter.EvaluateWithBindings(pattern))
+        foreach ((Atom? result, Substitution? bindings) in _interpreter.EvaluateWithBindings(pattern))
         {
             // Compute the form state based on certainty of bindings
-            var form = ComputeBindingCertainty(bindings);
+            Form form = ComputeBindingCertainty(bindings);
 
             OnDistinctionChanged(new DistinctionEventArgs
             {
@@ -241,10 +241,10 @@ public sealed class FormMeTTaBridge : IDisposable
     public IEnumerable<Atom> MetaReason(Atom expression)
     {
         // Create meta-level representation
-        var metaAtom = MeTTaSpec.Quote(expression);
+        Expression metaAtom = MeTTaSpec.Quote(expression);
 
         // Add meta-level facts about the expression
-        var metaFacts = new List<Atom>
+        List<Atom> metaFacts = new List<Atom>
         {
             Atom.Expr(Atom.Sym("is-expression"), metaAtom),
             Atom.Expr(Atom.Sym("has-variables"), Atom.Sym(expression.ContainsVariables() ? "True" : "False"))
@@ -256,7 +256,7 @@ public sealed class FormMeTTaBridge : IDisposable
             metaFacts.Add(Atom.Expr(Atom.Sym("arity"), metaAtom, Atom.Sym(expr.Children.Count.ToString())));
         }
 
-        foreach (var fact in metaFacts)
+        foreach (Atom fact in metaFacts)
         {
             _space.Add(fact);
 
@@ -344,8 +344,8 @@ public sealed class FormMeTTaBridge : IDisposable
                 return Enumerable.Empty<Atom>();
             }
 
-            var inner = args.Children[1];
-            var formOpt = inner.ToForm();
+            Atom inner = args.Children[1];
+            Option<Form> formOpt = inner.ToForm();
 
             if (formOpt.HasValue)
             {
@@ -376,11 +376,11 @@ public sealed class FormMeTTaBridge : IDisposable
                 return Enumerable.Empty<Atom>();
             }
 
-            var left = args.Children[1];
-            var right = args.Children[2];
+            Atom left = args.Children[1];
+            Atom right = args.Children[2];
 
-            var leftForm = left.ToForm();
-            var rightForm = right.ToForm();
+            Option<Form> leftForm = left.ToForm();
+            Option<Form> rightForm = right.ToForm();
 
             if (leftForm.HasValue && rightForm.HasValue)
             {
@@ -410,14 +410,14 @@ public sealed class FormMeTTaBridge : IDisposable
                 return new[] { Atom.Sym("Void") };
             }
 
-            var expr = args.Children[1];
+            Atom expr = args.Children[1];
 
             if (expr is FormExpression fe)
             {
                 return new[] { fe.Evaluate() };
             }
 
-            var formOpt = expr.ToForm();
+            Option<Form> formOpt = expr.ToForm();
             return formOpt.HasValue
                 ? new[] { formOpt.Value.Eval().ToMeTTa() }
                 : new[] { Atom.Sym("Void") };
@@ -431,7 +431,7 @@ public sealed class FormMeTTaBridge : IDisposable
                 return new[] { MeTTaSpec.False };
             }
 
-            var formOpt = args.Children[1].ToForm();
+            Option<Form> formOpt = args.Children[1].ToForm();
             return formOpt.HasValue && formOpt.Value.IsMarked()
                 ? new[] { MeTTaSpec.True }
                 : new[] { MeTTaSpec.False };
@@ -445,7 +445,7 @@ public sealed class FormMeTTaBridge : IDisposable
                 return new[] { MeTTaSpec.False };
             }
 
-            var formOpt = args.Children[1].ToForm();
+            Option<Form> formOpt = args.Children[1].ToForm();
             return formOpt.HasValue && formOpt.Value.IsCertain()
                 ? new[] { MeTTaSpec.True }
                 : new[] { MeTTaSpec.False };
@@ -464,7 +464,7 @@ public sealed class FormMeTTaBridge : IDisposable
         }
 
         // Symbol to form conversion
-        var directForm = expression.ToForm();
+        Option<Form> directForm = expression.ToForm();
         if (directForm.HasValue)
         {
             trace.Add($"Symbol to Form: {directForm.Value}");
@@ -491,7 +491,7 @@ public sealed class FormMeTTaBridge : IDisposable
         }
 
         // Query the interpreter
-        var results = _interpreter.Evaluate(expression).ToList();
+        List<Atom> results = _interpreter.Evaluate(expression).ToList();
         trace.Add($"Interpreter results: {results.Count}");
 
         if (results.Count == 0)
@@ -500,9 +500,9 @@ public sealed class FormMeTTaBridge : IDisposable
         }
 
         // If any result is marked, return Mark
-        foreach (var result in results)
+        foreach (Atom result in results)
         {
-            var resultForm = result.ToForm();
+            Option<Form> resultForm = result.ToForm();
             if (resultForm.HasValue && resultForm.Value.IsMarked())
             {
                 return Form.Mark;
@@ -520,8 +520,8 @@ public sealed class FormMeTTaBridge : IDisposable
             return Form.Mark;
         }
 
-        var innerForm = EvaluateTruthValueInternal(expr.Children[1], trace);
-        var result = innerForm.Not();
+        Form innerForm = EvaluateTruthValueInternal(expr.Children[1], trace);
+        Form result = innerForm.Not();
         trace.Add($"Cross({innerForm}) = {result}");
         return result;
     }
@@ -534,9 +534,9 @@ public sealed class FormMeTTaBridge : IDisposable
             return Form.Void;
         }
 
-        var left = EvaluateTruthValueInternal(expr.Children[1], trace);
-        var right = EvaluateTruthValueInternal(expr.Children[2], trace);
-        var result = left.Call(right);
+        Form left = EvaluateTruthValueInternal(expr.Children[1], trace);
+        Form right = EvaluateTruthValueInternal(expr.Children[2], trace);
+        Form result = left.Call(right);
         trace.Add($"Call({left}, {right}) = {result}");
         return result;
     }
@@ -548,9 +548,9 @@ public sealed class FormMeTTaBridge : IDisposable
             return Form.Void;
         }
 
-        var left = EvaluateTruthValueInternal(expr.Children[1], trace);
-        var right = EvaluateTruthValueInternal(expr.Children[2], trace);
-        var result = left.And(right);
+        Form left = EvaluateTruthValueInternal(expr.Children[1], trace);
+        Form right = EvaluateTruthValueInternal(expr.Children[2], trace);
+        Form result = left.And(right);
         trace.Add($"And({left}, {right}) = {result}");
         return result;
     }
@@ -562,9 +562,9 @@ public sealed class FormMeTTaBridge : IDisposable
             return Form.Void;
         }
 
-        var left = EvaluateTruthValueInternal(expr.Children[1], trace);
-        var right = EvaluateTruthValueInternal(expr.Children[2], trace);
-        var result = left.Or(right);
+        Form left = EvaluateTruthValueInternal(expr.Children[1], trace);
+        Form right = EvaluateTruthValueInternal(expr.Children[2], trace);
+        Form result = left.Or(right);
         trace.Add($"Or({left}, {right}) = {result}");
         return result;
     }
@@ -576,8 +576,8 @@ public sealed class FormMeTTaBridge : IDisposable
             return Form.Mark;
         }
 
-        var inner = EvaluateTruthValueInternal(expr.Children[1], trace);
-        var result = inner.Not();
+        Form inner = EvaluateTruthValueInternal(expr.Children[1], trace);
+        Form result = inner.Not();
         trace.Add($"Not({inner}) = {result}");
         return result;
     }
@@ -595,7 +595,7 @@ public sealed class FormMeTTaBridge : IDisposable
             return Form.Void;
         }
 
-        var condition = EvaluateTruthValueInternal(expr.Children[1], trace);
+        Form condition = EvaluateTruthValueInternal(expr.Children[1], trace);
 
         // Short-circuit: false antecedent makes implication vacuously true
         if (condition.IsVoid())
@@ -611,7 +611,7 @@ public sealed class FormMeTTaBridge : IDisposable
             return Form.Imaginary;
         }
 
-        var conclusion = EvaluateTruthValueInternal(expr.Children[2], trace);
+        Form conclusion = EvaluateTruthValueInternal(expr.Children[2], trace);
         trace.Add($"Implies({condition}, {conclusion}) = {conclusion}");
         return conclusion;
     }
@@ -619,7 +619,7 @@ public sealed class FormMeTTaBridge : IDisposable
     private Form EvaluateGeneric(Expression expr, ImmutableList<string>.Builder trace)
     {
         // Generic evaluation: check if expression matches anything
-        var matches = _space.Query(expr).ToList();
+        List<(Atom Atom, Substitution Bindings)> matches = _space.Query(expr).ToList();
         trace.Add($"Generic query found {matches.Count} matches");
         return matches.Count > 0 ? Form.Mark : Form.Void;
     }
@@ -632,7 +632,7 @@ public sealed class FormMeTTaBridge : IDisposable
         }
 
         // Check if any binding contains variables (uncertain)
-        foreach (var kvp in bindings.Bindings)
+        foreach (KeyValuePair<string, Atom> kvp in bindings.Bindings)
         {
             if (kvp.Value.ContainsVariables())
             {

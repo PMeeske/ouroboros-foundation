@@ -125,8 +125,8 @@ public static class LawsOfForm
         Step<TIn, Form<T2>> step2) =>
         async input =>
         {
-            var task1 = step1(input);
-            var task2 = step2(input);
+            Task<Form<T1>> task1 = step1(input);
+            Task<Form<T2>> task2 = step2(input);
             await Task.WhenAll(task1, task2).ConfigureAwait(false);
             return Product(await task1, await task2);
         };

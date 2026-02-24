@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Memory;
+namespace Ouroboros.Core.Memory;
 
 /// <summary>
 /// Represents a single turn in a conversation

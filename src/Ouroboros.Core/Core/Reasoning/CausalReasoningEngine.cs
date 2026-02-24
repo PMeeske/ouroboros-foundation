@@ -196,11 +196,11 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
     private Result<CausalGraph, string> DiscoverUsingPC(List<Observation> data, CancellationToken ct)
     {
         // Extract variable names from first observation
-        var variableNames = data[0].Values.Keys.ToList();
-        var n = variableNames.Count;
+        List<string> variableNames = data[0].Values.Keys.ToList();
+        int n = variableNames.Count;
 
         // Initialize complete graph (all edges present)
-        var adjacencyMatrix = new bool[n, n];
+        bool[,] adjacencyMatrix = new bool[n, n];
         for (int i = 0; i < n; i++)
         {
             for (int j = 0; j < n; j++)
@@ -227,7 +227,7 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
                     }
 
                     // Get neighbors of i (excluding j)
-                    var neighbors = new List<int>();
+                    List<int> neighbors = new List<int>();
                     for (int k = 0; k < n; k++)
                     {
                         if (k != i && k != j && adjacencyMatrix[i, k])
@@ -237,7 +237,7 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
                     }
 
                     // Test all conditioning sets of current size
-                    foreach (var condSet in this.GetCombinations(neighbors, conditioningSize))
+                    foreach (List<int> condSet in this.GetCombinations(neighbors, conditioningSize))
                     {
                         if (this.TestConditionalIndependence(data, i, j, condSet, variableNames))
                         {
@@ -252,16 +252,16 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
         }
 
         // Phase 2: Orient edges to create DAG
-        var edges = this.OrientEdges(adjacencyMatrix, variableNames, data);
+        List<CausalEdge> edges = this.OrientEdges(adjacencyMatrix, variableNames, data);
 
         // Create variables
-        var variables = variableNames.Select(name => this.CreateVariable(name, data)).ToList();
+        List<Variable> variables = variableNames.Select(name => this.CreateVariable(name, data)).ToList();
 
         // Create structural equations (simplified)
-        var equations = new Dictionary<string, StructuralEquation>();
-        foreach (var variable in variables)
+        Dictionary<string, StructuralEquation> equations = new Dictionary<string, StructuralEquation>();
+        foreach (Variable variable in variables)
         {
-            var parents = edges
+            List<string> parents = edges
                 .Where(e => e.Effect == variable.Name)
                 .Select(e => e.Cause)
                 .ToList();
@@ -273,14 +273,14 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
                 1.0);
         }
 
-        var causalGraph = new CausalGraph(variables, edges, equations);
+        CausalGraph causalGraph = new CausalGraph(variables, edges, equations);
         return Result<CausalGraph, string>.Success(causalGraph);
     }
 
     private Variable CreateVariable(string name, List<Observation> data)
     {
-        var values = data.Select(o => o.Values[name]).Distinct().ToList();
-        var type = this.InferVariableType(values);
+        List<object> values = data.Select(o => o.Values[name]).Distinct().ToList();
+        VariableType type = this.InferVariableType(values);
 
         return new Variable(name, type, values);
     }
@@ -310,15 +310,15 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
         // Simplified chi-square test for conditional independence
         // In production, use proper statistical tests based on variable types
 
-        var nameI = variableNames[varI];
-        var nameJ = variableNames[varJ];
+        string nameI = variableNames[varI];
+        string nameJ = variableNames[varJ];
 
         // Extract data for variables
-        var dataI = data.Select(o => Convert.ToDouble(o.Values[nameI])).ToArray();
-        var dataJ = data.Select(o => Convert.ToDouble(o.Values[nameJ])).ToArray();
+        double[] dataI = data.Select(o => Convert.ToDouble(o.Values[nameI])).ToArray();
+        double[] dataJ = data.Select(o => Convert.ToDouble(o.Values[nameJ])).ToArray();
 
         // Compute correlation
-        var correlation = this.ComputeCorrelation(dataI, dataJ);
+        double correlation = this.ComputeCorrelation(dataI, dataJ);
 
         // Simple threshold-based test (should be proper statistical test)
         return Math.Abs(correlation) < SignificanceLevel;
@@ -331,12 +331,12 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
             return 0;
         }
 
-        var meanX = x.Average();
-        var meanY = y.Average();
+        double meanX = x.Average();
+        double meanY = y.Average();
 
-        var numerator = x.Zip(y, (xi, yi) => (xi - meanX) * (yi - meanY)).Sum();
-        var denomX = Math.Sqrt(x.Select(xi => Math.Pow(xi - meanX, 2)).Sum());
-        var denomY = Math.Sqrt(y.Select(yi => Math.Pow(yi - meanY, 2)).Sum());
+        double numerator = x.Zip(y, (xi, yi) => (xi - meanX) * (yi - meanY)).Sum();
+        double denomX = Math.Sqrt(x.Select(xi => Math.Pow(xi - meanX, 2)).Sum());
+        double denomY = Math.Sqrt(y.Select(yi => Math.Pow(yi - meanY, 2)).Sum());
 
         if (denomX == 0 || denomY == 0)
         {
@@ -348,8 +348,8 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
 
     private List<CausalEdge> OrientEdges(bool[,] adjacencyMatrix, List<string> variableNames, List<Observation> data)
     {
-        var edges = new List<CausalEdge>();
-        var n = variableNames.Count;
+        List<CausalEdge> edges = new List<CausalEdge>();
+        int n = variableNames.Count;
 
         // Simple heuristic: orient based on time order if available, otherwise use correlation strength
         for (int i = 0; i < n; i++)
@@ -358,14 +358,14 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
             {
                 if (adjacencyMatrix[i, j])
                 {
-                    var nameI = variableNames[i];
-                    var nameJ = variableNames[j];
+                    string nameI = variableNames[i];
+                    string nameJ = variableNames[j];
 
-                    var dataI = data.Select(o => Convert.ToDouble(o.Values[nameI])).ToArray();
-                    var dataJ = data.Select(o => Convert.ToDouble(o.Values[nameJ])).ToArray();
+                    double[] dataI = data.Select(o => Convert.ToDouble(o.Values[nameI])).ToArray();
+                    double[] dataJ = data.Select(o => Convert.ToDouble(o.Values[nameJ])).ToArray();
 
-                    var correlation = this.ComputeCorrelation(dataI, dataJ);
-                    var strength = Math.Abs(correlation);
+                    double correlation = this.ComputeCorrelation(dataI, dataJ);
+                    double strength = Math.Abs(correlation);
 
                     // Orient edge from i to j (simplified - should use proper orientation rules)
                     edges.Add(new CausalEdge(nameI, nameJ, strength, EdgeType.Direct));
@@ -385,7 +385,7 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
         }
 
         // Return mean value from data
-        var samples = data.Select(o => Convert.ToDouble(o.Values[variable])).ToArray();
+        double[] samples = data.Select(o => Convert.ToDouble(o.Values[variable])).ToArray();
         return samples.Average();
     }
 
@@ -404,10 +404,10 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
 
         for (int i = 0; i <= items.Count - size; i++)
         {
-            var item = items[i];
-            var remainingItems = items.Skip(i + 1).ToList();
+            int item = items[i];
+            List<int> remainingItems = items.Skip(i + 1).ToList();
 
-            foreach (var combination in this.GetCombinations(remainingItems, size - 1))
+            foreach (List<int> combination in this.GetCombinations(remainingItems, size - 1))
             {
                 yield return new List<int> { item }.Concat(combination).ToList();
             }
@@ -421,7 +421,7 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
         CancellationToken ct)
     {
         // Find path from intervention to outcome
-        var paths = this.FindAllPaths(intervention, outcome, model);
+        List<CausalPath> paths = this.FindAllPaths(intervention, outcome, model);
 
         if (paths.Count == 0)
         {
@@ -431,10 +431,10 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
         // Compute total causal effect (sum of path effects)
         double totalEffect = 0;
 
-        foreach (var path in paths)
+        foreach (CausalPath path in paths)
         {
             double pathEffect = 1.0;
-            foreach (var edge in path.Edges)
+            foreach (CausalEdge edge in path.Edges)
             {
                 pathEffect *= edge.Strength;
             }
@@ -455,24 +455,24 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
         // Twin network approach: abduct exogenous variables, modify intervention, predict outcome
 
         // Step 1: Abduct exogenous variables from factual observation
-        var exogenousVars = this.AbductExogenousVariables(factual, model);
+        Dictionary<string, object> exogenousVars = this.AbductExogenousVariables(factual, model);
 
         // Step 2: Simulate intervention in counterfactual world
-        var counterfactualValues = new Dictionary<string, object>(factual.Values);
+        Dictionary<string, object> counterfactualValues = new Dictionary<string, object>(factual.Values);
 
         // Find the intervention variable and set it to counterfactual value
         // (Simplified - should parse intervention string properly)
-        var interventionVar = model.Variables.FirstOrDefault(v => v.Name == intervention);
+        Variable? interventionVar = model.Variables.FirstOrDefault(v => v.Name == intervention);
         if (interventionVar != null)
         {
             counterfactualValues[intervention] = interventionVar.PossibleValues.FirstOrDefault() ?? 0;
         }
 
         // Step 3: Propagate effects using structural equations
-        var counterfactualOutcome = this.PropagateEffects(outcome, counterfactualValues, model, exogenousVars);
+        object counterfactualOutcome = this.PropagateEffects(outcome, counterfactualValues, model, exogenousVars);
 
         // Step 4: Create distribution (simplified as point estimate)
-        var distribution = new Distribution(
+        Distribution distribution = new Distribution(
             DistributionType.Empirical,
             Convert.ToDouble(counterfactualOutcome),
             0.1,
@@ -495,7 +495,7 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
         Dictionary<string, object> exogenousVars)
     {
         // Use structural equation to compute outcome
-        if (model.Equations.TryGetValue(outcome, out var equation))
+        if (model.Equations.TryGetValue(outcome, out StructuralEquation? equation))
         {
             return equation.Function(values);
         }
@@ -511,17 +511,17 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
         CancellationToken ct)
     {
         // Find all causal paths from potential causes to effect
-        var allPaths = new List<CausalPath>();
-        var attributions = new Dictionary<string, double>();
+        List<CausalPath> allPaths = new List<CausalPath>();
+        Dictionary<string, double> attributions = new Dictionary<string, double>();
 
-        foreach (var cause in possibleCauses)
+        foreach (string cause in possibleCauses)
         {
-            var paths = this.FindAllPaths(cause, effect, model);
+            List<CausalPath> paths = this.FindAllPaths(cause, effect, model);
             allPaths.AddRange(paths);
 
             // Compute attribution as total effect from this cause
             double attribution = 0;
-            foreach (var path in paths)
+            foreach (CausalPath path in paths)
             {
                 attribution += path.TotalEffect;
             }
@@ -530,19 +530,19 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
         }
 
         // Normalize attributions
-        var totalAttribution = attributions.Values.Sum();
+        double totalAttribution = attributions.Values.Sum();
         if (totalAttribution > 0)
         {
-            var normalizedAttributions = attributions.ToDictionary(
+            Dictionary<string, double> normalizedAttributions = attributions.ToDictionary(
                 kv => kv.Key,
                 kv => kv.Value / totalAttribution);
             attributions = normalizedAttributions;
         }
 
         // Generate narrative explanation
-        var narrative = this.GenerateNarrativeExplanation(effect, attributions, allPaths);
+        string narrative = this.GenerateNarrativeExplanation(effect, attributions, allPaths);
 
-        var explanation = new Explanation(effect, allPaths, attributions, narrative);
+        Explanation explanation = new Explanation(effect, allPaths, attributions, narrative);
         return Result<Explanation, string>.Success(explanation);
     }
 
@@ -551,11 +551,11 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
         Dictionary<string, double> attributions,
         List<CausalPath> paths)
     {
-        var sortedCauses = attributions.OrderByDescending(kv => kv.Value).ToList();
+        List<KeyValuePair<string, double>> sortedCauses = attributions.OrderByDescending(kv => kv.Value).ToList();
 
-        var narrative = $"The effect on '{effect}' is primarily caused by: ";
+        string narrative = $"The effect on '{effect}' is primarily caused by: ";
 
-        var topCauses = sortedCauses.Take(3).Select(kv =>
+        List<string> topCauses = sortedCauses.Take(3).Select(kv =>
             $"{kv.Key} ({kv.Value:P1})").ToList();
 
         narrative += string.Join(", ", topCauses);
@@ -579,12 +579,12 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
         CancellationToken ct)
     {
         // Find best intervention by evaluating effect of each controllable variable
-        var bestIntervention = new Intervention(string.Empty, 0, 0, 0, new List<string>());
-        var maxEffect = 0.0;
+        Intervention bestIntervention = new Intervention(string.Empty, 0, 0, 0, new List<string>());
+        double maxEffect = 0.0;
 
-        foreach (var variable in controllableVariables)
+        foreach (string variable in controllableVariables)
         {
-            var paths = this.FindAllPaths(variable, desiredOutcome, model);
+            List<CausalPath> paths = this.FindAllPaths(variable, desiredOutcome, model);
 
             if (paths.Count == 0)
             {
@@ -599,10 +599,10 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
                 maxEffect = effect;
 
                 // Find variables affected by this intervention
-                var sideEffects = this.FindAffectedVariables(variable, desiredOutcome, model);
+                List<string> sideEffects = this.FindAffectedVariables(variable, desiredOutcome, model);
 
-                var targetVar = model.Variables.FirstOrDefault(v => v.Name == variable);
-                var newValue = targetVar?.PossibleValues.LastOrDefault() ?? 1.0;
+                Variable? targetVar = model.Variables.FirstOrDefault(v => v.Name == variable);
+                object newValue = targetVar?.PossibleValues.LastOrDefault() ?? 1.0;
 
                 bestIntervention = new Intervention(
                     variable,
@@ -623,19 +623,19 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
 
     private List<string> FindAffectedVariables(string source, string target, CausalGraph model)
     {
-        var affected = new List<string>();
+        List<string> affected = new List<string>();
 
         // Find all variables reachable from source (excluding target)
-        var visited = new HashSet<string>();
-        var queue = new Queue<string>();
+        HashSet<string> visited = new HashSet<string>();
+        Queue<string> queue = new Queue<string>();
         queue.Enqueue(source);
         visited.Add(source);
 
         while (queue.Count > 0)
         {
-            var current = queue.Dequeue();
+            string current = queue.Dequeue();
 
-            foreach (var edge in model.Edges.Where(e => e.Cause == current))
+            foreach (CausalEdge? edge in model.Edges.Where(e => e.Cause == current))
             {
                 if (!visited.Contains(edge.Effect) && edge.Effect != target)
                 {
@@ -651,9 +651,9 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
 
     private List<CausalPath> FindAllPaths(string source, string target, CausalGraph model)
     {
-        var paths = new List<CausalPath>();
-        var currentPath = new List<string> { source };
-        var currentEdges = new List<CausalEdge>();
+        List<CausalPath> paths = new List<CausalPath>();
+        List<string> currentPath = new List<string> { source };
+        List<CausalEdge> currentEdges = new List<CausalEdge>();
 
         this.FindPathsRecursive(source, target, model, currentPath, currentEdges, paths, new HashSet<string> { source });
 
@@ -672,8 +672,8 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
         if (current == target)
         {
             // Found a path
-            var totalEffect = currentEdges.Aggregate(1.0, (acc, edge) => acc * edge.Strength);
-            var isDirect = currentPath.Count == 2;
+            double totalEffect = currentEdges.Aggregate(1.0, (acc, edge) => acc * edge.Strength);
+            bool isDirect = currentPath.Count == 2;
 
             allPaths.Add(new CausalPath(
                 new List<string>(currentPath),
@@ -685,7 +685,7 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
         }
 
         // Explore neighbors
-        foreach (var edge in model.Edges.Where(e => e.Cause == current))
+        foreach (CausalEdge? edge in model.Edges.Where(e => e.Cause == current))
         {
             if (!visited.Contains(edge.Effect))
             {

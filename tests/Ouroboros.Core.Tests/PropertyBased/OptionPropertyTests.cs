@@ -27,8 +27,8 @@ public class OptionPropertyTests
     {
         // return a >>= f ≡ f a
         Func<int, Option<int>> f = x => Option<int>.Some(x * 2);
-        var left = Option<int>.Some(a).Bind(f);
-        var right = f(a);
+        Option<int> left = Option<int>.Some(a).Bind(f);
+        Option<int> right = f(a);
         return left.HasValue == right.HasValue &&
                 (!left.HasValue || left.Value == right.Value);
     }
@@ -46,8 +46,8 @@ public class OptionPropertyTests
         Func<int, Option<int>> f = x => x != 0
             ? Option<int>.Some(x * 2)
             : Option<int>.None();
-        var left = Option<int>.Some(a).Bind(f);
-        var right = f(a);
+        Option<int> left = Option<int>.Some(a).Bind(f);
+        Option<int> right = f(a);
         return (left.HasValue == right.HasValue &&
                 (!left.HasValue || left.Value == right.Value));
     }
@@ -63,8 +63,8 @@ public class OptionPropertyTests
     public bool Option_RightIdentity_HoldsForAllOptions(bool hasValue, int value)
     {
         // m >>= return ≡ m
-        var m = hasValue ? Option<int>.Some(value) : Option<int>.None();
-        var result = m.Bind(x => Option<int>.Some(x));
+        Option<int> m = hasValue ? Option<int>.Some(value) : Option<int>.None();
+        Option<int> result = m.Bind(x => Option<int>.Some(x));
 
         return (result.HasValue == m.HasValue &&
                 (!result.HasValue || result.Value == m.Value));
@@ -80,12 +80,12 @@ public class OptionPropertyTests
     public bool Option_Associativity_HoldsForAllInts(int a)
     {
         // (m >>= f) >>= g ≡ m >>= (\x -> f x >>= g)
-        var m = Option<int>.Some(a);
+        Option<int> m = Option<int>.Some(a);
         Func<int, Option<int>> f = x => Option<int>.Some(x * 2);
         Func<int, Option<int>> g = x => Option<int>.Some(x + 3);
 
-        var left = m.Bind(f).Bind(g);
-        var right = m.Bind(x => f(x).Bind(g));
+        Option<int> left = m.Bind(f).Bind(g);
+        Option<int> right = m.Bind(x => f(x).Bind(g));
 
         return (left.HasValue == right.HasValue &&
                 (!left.HasValue || left.Value == right.Value));
@@ -101,7 +101,7 @@ public class OptionPropertyTests
     public bool Option_Associativity_WithPartialFunctions_HoldsForAllInts(int a)
     {
         // (m >>= f) >>= g ≡ m >>= (\x -> f x >>= g)
-        var m = Option<int>.Some(a);
+        Option<int> m = Option<int>.Some(a);
         Func<int, Option<int>> f = x => x > 0
             ? Option<int>.Some(x * 2)
             : Option<int>.None();
@@ -109,8 +109,8 @@ public class OptionPropertyTests
             ? Option<int>.Some(x + 3)
             : Option<int>.None();
 
-        var left = m.Bind(f).Bind(g);
-        var right = m.Bind(x => f(x).Bind(g));
+        Option<int> left = m.Bind(f).Bind(g);
+        Option<int> right = m.Bind(x => f(x).Bind(g));
 
         return (left.HasValue == right.HasValue &&
                 (!left.HasValue || left.Value == right.Value));
@@ -124,12 +124,12 @@ public class OptionPropertyTests
     public void Option_Associativity_WithNone_Holds()
     {
         // (m >>= f) >>= g ≡ m >>= (\x -> f x >>= g)
-        var m = Option<int>.None();
+        Option<int> m = Option<int>.None();
         Func<int, Option<int>> f = x => Option<int>.Some(x * 2);
         Func<int, Option<int>> g = x => Option<int>.Some(x + 3);
 
-        var left = m.Bind(f).Bind(g);
-        var right = m.Bind(x => f(x).Bind(g));
+        Option<int> left = m.Bind(f).Bind(g);
+        Option<int> right = m.Bind(x => f(x).Bind(g));
 
         left.HasValue.Should().Be(right.HasValue);
     }
@@ -145,9 +145,9 @@ public class OptionPropertyTests
     public bool Option_FunctorLaw_Identity_HoldsForAllOptions(bool hasValue, int value)
     {
         // fmap id ≡ id
-        var option = hasValue ? Option<int>.Some(value) : Option<int>.None();
+        Option<int> option = hasValue ? Option<int>.Some(value) : Option<int>.None();
         Func<int, int> identity = x => x;
-        var mapped = option.Map(identity);
+        Option<int> mapped = option.Map(identity);
 
         return (mapped.HasValue == option.HasValue &&
                 (!mapped.HasValue || mapped.Value == option.Value));
@@ -164,12 +164,12 @@ public class OptionPropertyTests
     public bool Option_FunctorLaw_Composition_HoldsForAllOptions(bool hasValue, int value)
     {
         // fmap (g . f) ≡ fmap g . fmap f
-        var option = hasValue ? Option<int>.Some(value) : Option<int>.None();
+        Option<int> option = hasValue ? Option<int>.Some(value) : Option<int>.None();
         Func<int, int> f = x => x * 2;
         Func<int, int> g = x => x + 10;
 
-        var left = option.Map(f).Map(g);
-        var right = option.Map(x => g(f(x)));
+        Option<int> left = option.Map(f).Map(g);
+        Option<int> right = option.Map(x => g(f(x)));
 
         return (left.HasValue == right.HasValue &&
                 (!left.HasValue || left.Value == right.Value));
@@ -186,11 +186,11 @@ public class OptionPropertyTests
     public bool Option_MapBindRelationship_HoldsForAllOptions(bool hasValue, int value)
     {
         // fmap f ≡ (>>= return . f)
-        var option = hasValue ? Option<int>.Some(value) : Option<int>.None();
+        Option<int> option = hasValue ? Option<int>.Some(value) : Option<int>.None();
         Func<int, int> f = x => x * 3 + 7;
 
-        var mappedResult = option.Map(f);
-        var bindResult = option.Bind(x => Option<int>.Some(f(x)));
+        Option<int> mappedResult = option.Map(f);
+        Option<int> bindResult = option.Bind(x => Option<int>.Some(f(x)));
 
         return (mappedResult.HasValue == bindResult.HasValue &&
                 (!mappedResult.HasValue || mappedResult.Value == bindResult.Value));

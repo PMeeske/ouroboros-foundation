@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.LangChain;
+namespace Ouroboros.Core.LangChain;
 
 /// <summary>
 /// Extension methods to integrate with existing WithMemory pattern using LangChain

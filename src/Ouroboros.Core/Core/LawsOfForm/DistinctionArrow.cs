@@ -25,7 +25,7 @@ public static class DistinctionArrow
     {
         return input =>
         {
-            var distinction = predicate(input);
+            Form distinction = predicate(input);
             return Task.FromResult(distinction.IsMarked() ? input : default);
         };
     }
@@ -50,12 +50,12 @@ public static class DistinctionArrow
             // Null input is treated as void (short-circuit behavior for gated pipelines)
             if (input is null)
             {
-                var result = onVoid(input);
+                TOutput? result = onVoid(input);
                 return Task.FromResult(result);
             }
 
-            var distinction = predicate(input);
-            var resultValue = distinction.IsMarked() ? onMarked(input) : onVoid(input);
+            Form distinction = predicate(input);
+            TOutput? resultValue = distinction.IsMarked() ? onMarked(input) : onVoid(input);
             return Task.FromResult(resultValue);
         };
     }
@@ -73,7 +73,7 @@ public static class DistinctionArrow
     {
         return input =>
         {
-            foreach (var predicate in predicates)
+            foreach (Func<T, Form> predicate in predicates)
             {
                 if (!predicate(input).IsMarked())
                 {
@@ -98,7 +98,7 @@ public static class DistinctionArrow
     {
         return input =>
         {
-            foreach (var predicate in predicates)
+            foreach (Func<T, Form> predicate in predicates)
             {
                 if (predicate(input).IsMarked())
                 {
@@ -124,7 +124,7 @@ public static class DistinctionArrow
     {
         return input =>
         {
-            var form = extractor(input);
+            Form form = extractor(input);
             // Eval() is a stub that doesn't really transform, so just use the form itself
             return Task.FromResult(combiner(input, form));
         };
@@ -147,10 +147,10 @@ public static class DistinctionArrow
     {
         return input =>
         {
-            var current = Form.Void;
+            Form current = Form.Void;
             for (int i = 0; i < maxDepth; i++)
             {
-                var next = selfReference(input, current);
+                Form next = selfReference(input, current);
                 if (next.Eval().Equals(current.Eval()))
                 {
                     // Fixed point reached

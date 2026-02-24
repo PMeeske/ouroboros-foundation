@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Providers.DuckDuckGo;
+namespace Ouroboros.Providers.DuckDuckGo;
 
 /// <summary>
 /// A DuckDuckGo news search result.

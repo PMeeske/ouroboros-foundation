@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Providers.DuckDuckGo;
+namespace Ouroboros.Providers.DuckDuckGo;
 
 /// <summary>
 /// A related topic from DuckDuckGo instant answers.

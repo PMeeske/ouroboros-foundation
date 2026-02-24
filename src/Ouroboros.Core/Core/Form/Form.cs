@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.SpencerBrown;
+namespace Ouroboros.Core.SpencerBrown;
 
 /// <summary>
 /// Represents a Form (distinction) in Spencer-Brown's calculus.

@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Providers.TextToSpeech;
+namespace Ouroboros.Providers.TextToSpeech;
 
 /// <summary>
 /// Available voices for text-to-speech synthesis.

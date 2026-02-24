@@ -25,7 +25,7 @@ public class InMemoryThoughtStore : IThoughtStore
     {
         lock (_lock)
         {
-            var list = _sessions.GetOrAdd(sessionId, _ => new List<PersistedThought>());
+            List<PersistedThought> list = _sessions.GetOrAdd(sessionId, _ => new List<PersistedThought>());
             list.AddRange(thoughts);
         }
         return Task.CompletedTask;
@@ -34,7 +34,7 @@ public class InMemoryThoughtStore : IThoughtStore
     /// <inheritdoc/>
     public Task<IReadOnlyList<PersistedThought>> GetThoughtsAsync(string sessionId, CancellationToken ct = default)
     {
-        if (_sessions.TryGetValue(sessionId, out var thoughts))
+        if (_sessions.TryGetValue(sessionId, out List<PersistedThought>? thoughts))
         {
             return Task.FromResult<IReadOnlyList<PersistedThought>>(thoughts.OrderBy(t => t.Timestamp).ToList());
         }
@@ -48,7 +48,7 @@ public class InMemoryThoughtStore : IThoughtStore
         DateTime to,
         CancellationToken ct = default)
     {
-        var thoughts = await GetThoughtsAsync(sessionId, ct);
+        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct);
         return thoughts.Where(t => t.Timestamp >= from && t.Timestamp <= to).ToList();
     }
 
@@ -59,7 +59,7 @@ public class InMemoryThoughtStore : IThoughtStore
         int limit = 100,
         CancellationToken ct = default)
     {
-        var thoughts = await GetThoughtsAsync(sessionId, ct);
+        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct);
         return thoughts
             .Where(t => t.Type.Equals(thoughtType, StringComparison.OrdinalIgnoreCase))
             .Take(limit)
@@ -73,8 +73,8 @@ public class InMemoryThoughtStore : IThoughtStore
         int limit = 20,
         CancellationToken ct = default)
     {
-        var thoughts = await GetThoughtsAsync(sessionId, ct);
-        var queryLower = query.ToLowerInvariant();
+        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct);
+        string queryLower = query.ToLowerInvariant();
 
         return thoughts
             .Where(t => t.Content.ToLowerInvariant().Contains(queryLower))
@@ -88,7 +88,7 @@ public class InMemoryThoughtStore : IThoughtStore
         int count = 10,
         CancellationToken ct = default)
     {
-        var thoughts = await GetThoughtsAsync(sessionId, ct);
+        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct);
         return thoughts
             .OrderByDescending(t => t.Timestamp)
             .Take(count)
@@ -101,7 +101,7 @@ public class InMemoryThoughtStore : IThoughtStore
         Guid parentThoughtId,
         CancellationToken ct = default)
     {
-        var thoughts = await GetThoughtsAsync(sessionId, ct);
+        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct);
         return thoughts.Where(t => t.ParentThoughtId == parentThoughtId).ToList();
     }
 
@@ -115,7 +115,7 @@ public class InMemoryThoughtStore : IThoughtStore
     /// <inheritdoc/>
     public async Task<ThoughtStatistics> GetStatisticsAsync(string sessionId, CancellationToken ct = default)
     {
-        var thoughts = await GetThoughtsAsync(sessionId, ct);
+        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct);
 
         if (!thoughts.Any())
         {

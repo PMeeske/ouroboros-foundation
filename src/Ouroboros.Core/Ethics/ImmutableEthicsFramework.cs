@@ -51,7 +51,7 @@ public sealed class ImmutableEthicsFramework : IEthicsFramework
         try
         {
             // Analyze the action against ethical principles
-            var (violations, concerns) = _reasoner.AnalyzeAction(action, context, _corePrinciples);
+            (IReadOnlyList<EthicalViolation>? violations, IReadOnlyList<EthicalConcern>? concerns) = _reasoner.AnalyzeAction(action, context, _corePrinciples);
 
             EthicalClearance clearance;
 
@@ -112,15 +112,15 @@ public sealed class ImmutableEthicsFramework : IEthicsFramework
 
         try
         {
-            var allViolations = new List<EthicalViolation>();
-            var allConcerns = new List<EthicalConcern>();
+            List<EthicalViolation> allViolations = new List<EthicalViolation>();
+            List<EthicalConcern> allConcerns = new List<EthicalConcern>();
 
             // Evaluate each step in the plan
-            foreach (var step in planContext.Plan.Steps)
+            foreach (PlanStep step in planContext.Plan.Steps)
             {
-                step.Parameters.TryGetValue("target", out var targetValue);
+                step.Parameters.TryGetValue("target", out object? targetValue);
 
-                var proposedAction = new ProposedAction
+                ProposedAction proposedAction = new ProposedAction
                 {
                     ActionType = step.Action,
                     Description = $"{step.Action}: {step.ExpectedOutcome}",
@@ -129,7 +129,7 @@ public sealed class ImmutableEthicsFramework : IEthicsFramework
                     PotentialEffects = new[] { step.ExpectedOutcome }
                 };
 
-                var (violations, concerns) = _reasoner.AnalyzeAction(
+                (IReadOnlyList<EthicalViolation>? violations, IReadOnlyList<EthicalConcern>? concerns) = _reasoner.AnalyzeAction(
                     proposedAction,
                     planContext.ActionContext,
                     _corePrinciples);
@@ -206,8 +206,8 @@ public sealed class ImmutableEthicsFramework : IEthicsFramework
 
         try
         {
-            var violations = new List<EthicalViolation>();
-            var concerns = new List<EthicalConcern>();
+            List<EthicalViolation> violations = new List<EthicalViolation>();
+            List<EthicalConcern> concerns = new List<EthicalConcern>();
 
             // Check goal description for harmful patterns
             if (_reasoner.ContainsHarmfulPatterns(goal.Description))
@@ -289,8 +289,8 @@ public sealed class ImmutableEthicsFramework : IEthicsFramework
 
         try
         {
-            var violations = new List<EthicalViolation>();
-            var concerns = new List<EthicalConcern>();
+            List<EthicalViolation> violations = new List<EthicalViolation>();
+            List<EthicalConcern> concerns = new List<EthicalConcern>();
 
             // Check skill description and steps for harmful patterns
             if (_reasoner.ContainsHarmfulPatterns(skillContext.Skill.Description))
@@ -366,8 +366,8 @@ public sealed class ImmutableEthicsFramework : IEthicsFramework
 
         try
         {
-            var violations = new List<EthicalViolation>();
-            var concerns = new List<EthicalConcern>();
+            List<EthicalViolation> violations = new List<EthicalViolation>();
+            List<EthicalConcern> concerns = new List<EthicalConcern>();
 
             // Check for harmful research patterns
             if (_reasoner.ContainsHarmfulPatterns(researchDescription))
@@ -383,7 +383,7 @@ public sealed class ImmutableEthicsFramework : IEthicsFramework
             }
 
             // Research on sensitive topics requires oversight
-            var sensitiveKeywords = new[] { "user data", "personal", "private", "confidential", "experiment on users" };
+            string[] sensitiveKeywords = new[] { "user data", "personal", "private", "confidential", "experiment on users" };
             if (sensitiveKeywords.Any(k => researchDescription.Contains(k, StringComparison.OrdinalIgnoreCase)))
             {
                 concerns.Add(new EthicalConcern
@@ -437,8 +437,8 @@ public sealed class ImmutableEthicsFramework : IEthicsFramework
 
         try
         {
-            var violations = new List<EthicalViolation>();
-            var concerns = new List<EthicalConcern>();
+            List<EthicalViolation> violations = new List<EthicalViolation>();
+            List<EthicalConcern> concerns = new List<EthicalConcern>();
 
             // All self-modification requires human approval
             concerns.Add(new EthicalConcern
@@ -487,7 +487,7 @@ public sealed class ImmutableEthicsFramework : IEthicsFramework
                 });
             }
 
-            var clearance = violations.Count > 0
+            EthicalClearance clearance = violations.Count > 0
                 ? EthicalClearance.Denied(
                     "Self-modification violates ethical principles",
                     violations,
@@ -521,7 +521,7 @@ public sealed class ImmutableEthicsFramework : IEthicsFramework
         ArgumentNullException.ThrowIfNull(concern);
         ArgumentNullException.ThrowIfNull(context);
 
-        var clearance = new EthicalClearance
+        EthicalClearance clearance = new EthicalClearance
         {
             IsPermitted = true,
             Level = EthicalClearanceLevel.PermittedWithConcerns,
@@ -541,7 +541,7 @@ public sealed class ImmutableEthicsFramework : IEthicsFramework
         EthicalClearance clearance,
         CancellationToken ct)
     {
-        var entry = new EthicsAuditEntry
+        EthicsAuditEntry entry = new EthicsAuditEntry
         {
             Timestamp = DateTime.UtcNow,
             AgentId = context.AgentId,

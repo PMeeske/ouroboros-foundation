@@ -2,6 +2,7 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using System.Text;
 using Ouroboros.Core.Configuration;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
@@ -84,7 +85,7 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
     public QdrantCollectionAdmin(string endpoint = "http://localhost:6333")
     {
         _endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
-        var uri = new Uri(endpoint);
+        Uri uri = new Uri(endpoint);
         _client = new QdrantClient(uri.Host, uri.Port > 0 ? uri.Port : 6334, uri.Scheme == "https");
         _disposeClient = true;
     }
@@ -134,7 +135,7 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
     {
         if (_registry == null) return KnownCollections;
 
-        var mappings = _registry.GetAllMappings();
+        IReadOnlyDictionary<QdrantCollectionRole, string> mappings = _registry.GetAllMappings();
         return mappings.ToDictionary(
             kvp => kvp.Value,
             kvp => KnownCollections.GetValueOrDefault(kvp.Value, kvp.Key.ToString()));
@@ -175,17 +176,17 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
     {
         try
         {
-            var exists = await _client.CollectionExistsAsync(collectionName, ct);
+            bool exists = await _client.CollectionExistsAsync(collectionName, ct);
             if (!exists) return null;
 
-            var info = await _client.GetCollectionInfoAsync(collectionName, ct);
-            var vectorSize = info.Config?.Params?.VectorsConfig?.Params?.Size ?? 0;
-            var pointsCount = info.PointsCount;
-            var distance = info.Config?.Params?.VectorsConfig?.Params?.Distance ?? Distance.Cosine;
-            var status = info.Status;
+            Qdrant.Client.Grpc.CollectionInfo info = await _client.GetCollectionInfoAsync(collectionName, ct);
+            ulong vectorSize = info.Config?.Params?.VectorsConfig?.Params?.Size ?? 0;
+            ulong pointsCount = info.PointsCount;
+            Distance distance = info.Config?.Params?.VectorsConfig?.Params?.Distance ?? Distance.Cosine;
+            CollectionStatus status = info.Status;
 
-            GetKnownCollections().TryGetValue(collectionName, out var purpose);
-            var links = _collectionLinks
+            GetKnownCollections().TryGetValue(collectionName, out string? purpose);
+            List<string> links = _collectionLinks
                 .Where(l => l.SourceCollection == collectionName || l.TargetCollection == collectionName)
                 .Select(l => l.SourceCollection == collectionName ? l.TargetCollection : l.SourceCollection)
                 .Distinct()
@@ -218,7 +219,7 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
     {
         try
         {
-            var exists = await _client.CollectionExistsAsync(collectionName, ct);
+            bool exists = await _client.CollectionExistsAsync(collectionName, ct);
             if (exists) return false;
 
             await _client.CreateCollectionAsync(
@@ -251,7 +252,7 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
     {
         try
         {
-            var exists = await _client.CollectionExistsAsync(collectionName, ct);
+            bool exists = await _client.CollectionExistsAsync(collectionName, ct);
             if (!exists) return false;
 
             await _client.DeleteCollectionAsync(collectionName, cancellationToken: ct);
@@ -276,16 +277,16 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
         int expectedDimension = DefaultVectorSize,
         CancellationToken ct = default)
     {
-        var reports = new List<CollectionHealthReport>();
+        List<CollectionHealthReport> reports = new List<CollectionHealthReport>();
         await RefreshCollectionCacheAsync(ct);
 
-        foreach (var (name, info) in _collectionCache)
+        foreach ((string? name, CollectionInfo? info) in _collectionCache)
         {
-            var mismatch = info.VectorSize != (ulong)expectedDimension && info.VectorSize > 0;
-            var issue = mismatch
+            bool mismatch = info.VectorSize != (ulong)expectedDimension && info.VectorSize > 0;
+            string? issue = mismatch
                 ? $"Dimension mismatch: expected {expectedDimension}, got {info.VectorSize}"
                 : null;
-            var recommendation = mismatch
+            string? recommendation = mismatch
                 ? $"Delete and recreate collection, or migrate vectors to {expectedDimension} dimensions"
                 : null;
 
@@ -310,16 +311,16 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
         int targetDimension = DefaultVectorSize,
         CancellationToken ct = default)
     {
-        var healed = new List<string>();
-        var healthReports = await HealthCheckAsync(targetDimension, ct);
+        List<string> healed = new List<string>();
+        IReadOnlyList<CollectionHealthReport> healthReports = await HealthCheckAsync(targetDimension, ct);
 
-        foreach (var report in healthReports.Where(r => r.DimensionMismatch))
+        foreach (CollectionHealthReport? report in healthReports.Where(r => r.DimensionMismatch))
         {
             try
             {
                 // Get existing info for recreation
-                var info = _collectionCache.GetValueOrDefault(report.CollectionName);
-                var distance = info?.DistanceMetric ?? Distance.Cosine;
+                CollectionInfo? info = _collectionCache.GetValueOrDefault(report.CollectionName);
+                Distance distance = info?.DistanceMetric ?? Distance.Cosine;
 
                 // Delete the mismatched collection
                 await _client.DeleteCollectionAsync(report.CollectionName, cancellationToken: ct);
@@ -392,17 +393,17 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
     {
         await RefreshCollectionCacheAsync(ct);
 
-        var sb = new System.Text.StringBuilder();
+        StringBuilder sb = new System.Text.StringBuilder();
         sb.AppendLine("╔══════════════════════════════════════════════════════════════════╗");
         sb.AppendLine("║              OUROBOROS MEMORY ARCHITECTURE                       ║");
         sb.AppendLine("╠══════════════════════════════════════════════════════════════════╣");
 
         // Group collections by purpose
-        var thoughtCollections = _collectionCache.Keys.Where(k => k.Contains("thought")).ToList();
-        var skillCollections = _collectionCache.Keys.Where(k => k.Contains("skill") || k.Contains("tool")).ToList();
-        var knowledgeCollections = _collectionCache.Keys.Where(k => k.Contains("core") || k.Contains("code")).ToList();
-        var personalityCollections = _collectionCache.Keys.Where(k => k.Contains("person") || k.Contains("self")).ToList();
-        var otherCollections = _collectionCache.Keys
+        List<string> thoughtCollections = _collectionCache.Keys.Where(k => k.Contains("thought")).ToList();
+        List<string> skillCollections = _collectionCache.Keys.Where(k => k.Contains("skill") || k.Contains("tool")).ToList();
+        List<string> knowledgeCollections = _collectionCache.Keys.Where(k => k.Contains("core") || k.Contains("code")).ToList();
+        List<string> personalityCollections = _collectionCache.Keys.Where(k => k.Contains("person") || k.Contains("self")).ToList();
+        List<string> otherCollections = _collectionCache.Keys
             .Except(thoughtCollections)
             .Except(skillCollections)
             .Except(knowledgeCollections)
@@ -413,12 +414,12 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
         {
             if (!collections.Any()) return;
             sb.AppendLine($"║ {title,-64} ║");
-            foreach (var col in collections)
+            foreach (string col in collections)
             {
-                var info = _collectionCache.GetValueOrDefault(col);
-                var status = info?.Status == CollectionStatus.Green ? "✓" : "⚠";
-                var points = info?.PointsCount ?? 0;
-                var dim = info?.VectorSize ?? 0;
+                CollectionInfo? info = _collectionCache.GetValueOrDefault(col);
+                string status = info?.Status == CollectionStatus.Green ? "✓" : "⚠";
+                ulong points = info?.PointsCount ?? 0;
+                ulong dim = info?.VectorSize ?? 0;
                 sb.AppendLine($"║   {status} {col,-40} [{dim,4}d] {points,8} pts ║");
             }
         }
@@ -432,7 +433,7 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
         sb.AppendLine("╠══════════════════════════════════════════════════════════════════╣");
         sb.AppendLine("║ COLLECTION LINKS                                                 ║");
 
-        foreach (var link in _collectionLinks.Take(10))
+        foreach (CollectionLink? link in _collectionLinks.Take(10))
         {
             sb.AppendLine($"║   {link.SourceCollection,-25} ─{link.RelationType,12}→ {link.TargetCollection,-15} ║");
         }
@@ -454,10 +455,10 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
     {
         await RefreshCollectionCacheAsync(ct);
 
-        var totalCollections = _collectionCache.Count;
-        var totalPoints = _collectionCache.Values.Sum(c => (long)c.PointsCount);
-        var healthyCollections = _collectionCache.Values.Count(c => c.Status == CollectionStatus.Green);
-        var dimensionGroups = _collectionCache.Values
+        int totalCollections = _collectionCache.Count;
+        long totalPoints = _collectionCache.Values.Sum(c => (long)c.PointsCount);
+        int healthyCollections = _collectionCache.Values.Count(c => c.Status == CollectionStatus.Green);
+        Dictionary<ulong, int> dimensionGroups = _collectionCache.Values
             .GroupBy(c => c.VectorSize)
             .ToDictionary(g => g.Key, g => g.Count());
 
@@ -474,12 +475,12 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
     {
         try
         {
-            var collections = await _client.ListCollectionsAsync(ct);
+            IReadOnlyList<string> collections = await _client.ListCollectionsAsync(ct);
             _collectionCache.Clear();
 
-            foreach (var collectionName in collections)
+            foreach (string collectionName in collections)
             {
-                var info = await GetCollectionInfoAsync(collectionName, ct);
+                CollectionInfo? info = await GetCollectionInfoAsync(collectionName, ct);
                 if (info != null)
                 {
                     _collectionCache[collectionName] = info;

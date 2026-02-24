@@ -59,14 +59,14 @@ public static class ExperienceFactory
         bool success,
         IReadOnlyList<string>? tags = null)
     {
-        var plan = new Plan(goal, new List<PlanStep>(), new Dictionary<string, double>(), DateTime.UtcNow);
-        var stepResult = new StepResult(
+        Plan plan = new Plan(goal, new List<PlanStep>(), new Dictionary<string, double>(), DateTime.UtcNow);
+        StepResult stepResult = new StepResult(
             new PlanStep(action, new Dictionary<string, object>(), outcome, success ? 1.0 : 0.0),
             success, outcome, null, TimeSpan.Zero, new Dictionary<string, object>());
-        var execution = new PlanExecutionResult(
+        PlanExecutionResult execution = new PlanExecutionResult(
             plan, new List<StepResult> { stepResult }, success, outcome,
             new Dictionary<string, object>(), TimeSpan.Zero);
-        var verification = new PlanVerificationResult(
+        PlanVerificationResult verification = new PlanVerificationResult(
             execution, success, success ? 1.0 : 0.0,
             new List<string>(), new List<string>(), DateTime.UtcNow);
 

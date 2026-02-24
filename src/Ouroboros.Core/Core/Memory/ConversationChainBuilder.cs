@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Memory;
+namespace Ouroboros.Core.Memory;
 
 /// <summary>
 /// Fluent builder for conversational chains that mirrors LangChain's approach

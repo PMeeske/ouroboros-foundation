@@ -51,7 +51,7 @@ public sealed record FeatureFlags
     /// <returns>A read-only list of enabled feature names.</returns>
     public IReadOnlyList<string> GetEnabledFeatures()
     {
-        var enabled = new List<string>();
+        List<string> enabled = new List<string>();
         if (Embodiment) enabled.Add(nameof(Embodiment));
         if (SelfModel) enabled.Add(nameof(SelfModel));
         if (Affect) enabled.Add(nameof(Affect));

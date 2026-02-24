@@ -1,4 +1,5 @@
-﻿namespace Ouroboros.Core.Hyperon;
+
+namespace Ouroboros.Core.Hyperon;
 
 /// <summary>
 /// Standard grounded operations for MeTTa-like semantics.
@@ -37,11 +38,11 @@ public static class StandardOperations
             yield break;
         }
 
-        var condition = args.Children[1];
-        var conclusion = args.Children[2];
+        Atom condition = args.Children[1];
+        Atom conclusion = args.Children[2];
 
         // Find all atoms matching the condition
-        foreach (var (_, bindings) in space.Query(condition))
+        foreach ((Atom _, Substitution? bindings) in space.Query(condition))
         {
             // Apply bindings to conclusion
             yield return bindings.Apply(conclusion);
@@ -58,8 +59,8 @@ public static class StandardOperations
             yield break;
         }
 
-        var a = args.Children[1];
-        var b = args.Children[2];
+        Atom a = args.Children[1];
+        Atom b = args.Children[2];
 
         if (a.Equals(b))
         {
@@ -78,7 +79,7 @@ public static class StandardOperations
             yield break;
         }
 
-        var expr = args.Children[1];
+        Atom expr = args.Children[1];
 
         // Query for the expression - if no results, "not" succeeds
         if (!space.Query(expr).Any())
@@ -98,7 +99,7 @@ public static class StandardOperations
             yield break;
         }
 
-        var conjuncts = args.Children.Skip(1).ToList();
+        List<Atom> conjuncts = args.Children.Skip(1).ToList();
         if (conjuncts.Count == 0)
         {
             yield return Atom.Sym("True");
@@ -106,7 +107,7 @@ public static class StandardOperations
         }
 
         // Check all conjuncts
-        foreach (var (subst, _) in EvaluateConjuncts(space, conjuncts, Substitution.Empty))
+        foreach ((Substitution? subst, bool _) in EvaluateConjuncts(space, conjuncts, Substitution.Empty))
         {
             yield return Atom.Sym("True");
             yield break; // At least one success
@@ -123,7 +124,7 @@ public static class StandardOperations
             yield break;
         }
 
-        foreach (var disjunct in args.Children.Skip(1))
+        foreach (Atom? disjunct in args.Children.Skip(1))
         {
             if (space.Query(disjunct).Any())
             {
@@ -143,7 +144,7 @@ public static class StandardOperations
             yield break;
         }
 
-        var atom = args.Children[1];
+        Atom atom = args.Children[1];
         if (space is AtomSpace mutableSpace)
         {
             mutableSpace.Add(atom);
@@ -161,7 +162,7 @@ public static class StandardOperations
             yield break;
         }
 
-        var atom = args.Children[1];
+        Atom atom = args.Children[1];
         if (space is AtomSpace mutableSpace && mutableSpace.Remove(atom))
         {
             yield return Atom.Sym("True");
@@ -178,8 +179,8 @@ public static class StandardOperations
             yield break;
         }
 
-        var pattern = args.Children[1];
-        foreach (var (atom, _) in space.Query(pattern))
+        Atom pattern = args.Children[1];
+        foreach ((Atom? atom, Substitution _) in space.Query(pattern))
         {
             yield return atom;
         }
@@ -209,18 +210,18 @@ public static class StandardOperations
             yield break;
         }
 
-        var first = currentSubst.Apply(conjuncts[0]);
-        var rest = conjuncts.Skip(1).ToList();
+        Atom first = currentSubst.Apply(conjuncts[0]);
+        List<Atom> rest = conjuncts.Skip(1).ToList();
 
-        foreach (var (_, bindings) in space.Query(first))
+        foreach ((Atom _, Substitution? bindings) in space.Query(first))
         {
-            var composedSubst = currentSubst.Compose(bindings);
+            Substitution? composedSubst = currentSubst.Compose(bindings);
             if (composedSubst is null)
             {
                 continue;
             }
 
-            foreach (var result in EvaluateConjuncts(space, rest, composedSubst))
+            foreach ((Substitution Subst, bool Success) result in EvaluateConjuncts(space, rest, composedSubst))
             {
                 yield return result;
             }

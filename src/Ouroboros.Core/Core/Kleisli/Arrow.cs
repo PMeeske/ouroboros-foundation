@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Kleisli;
+namespace Ouroboros.Core.Kleisli;
 
 /// <summary>
 /// Unified factory methods for creating Kleisli arrows.

@@ -90,13 +90,13 @@ public sealed class EvolutionCrossover
         Func<TChromosome, TChromosome, double, Result<TChromosome>> crossoverFunc)
         where TChromosome : IChromosome
     {
-        var offspring1Result = this.Crossover(parent1, parent2, crossoverFunc);
+        Result<TChromosome> offspring1Result = this.Crossover(parent1, parent2, crossoverFunc);
         if (offspring1Result.IsFailure)
         {
             return Result<(TChromosome, TChromosome)>.Failure(offspring1Result.Error);
         }
 
-        var offspring2Result = this.Crossover(parent2, parent1, crossoverFunc);
+        Result<TChromosome> offspring2Result = this.Crossover(parent2, parent1, crossoverFunc);
         if (offspring2Result.IsFailure)
         {
             return Result<(TChromosome, TChromosome)>.Failure(offspring2Result.Error);

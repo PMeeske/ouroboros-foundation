@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Security;
+namespace Ouroboros.Core.Security;
 
 /// <summary>
 /// Options for input validation.

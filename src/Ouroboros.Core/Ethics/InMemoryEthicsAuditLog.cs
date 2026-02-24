@@ -34,12 +34,12 @@ public sealed class InMemoryEthicsAuditLog : IEthicsAuditLog
         ArgumentNullException.ThrowIfNull(description);
         ArgumentNullException.ThrowIfNull(violations);
 
-        var clearance = EthicalClearance.Denied(
+        EthicalClearance clearance = EthicalClearance.Denied(
             $"Violation attempt blocked: {description}",
             violations,
             violations.Select(v => v.ViolatedPrinciple).Distinct().ToList());
 
-        var entry = new EthicsAuditEntry
+        EthicsAuditEntry entry = new EthicsAuditEntry
         {
             Timestamp = DateTime.UtcNow,
             AgentId = agentId,
@@ -67,7 +67,7 @@ public sealed class InMemoryEthicsAuditLog : IEthicsAuditLog
     {
         ArgumentNullException.ThrowIfNull(agentId);
 
-        var query = _entries.Where(e => e.AgentId == agentId);
+        IEnumerable<EthicsAuditEntry> query = _entries.Where(e => e.AgentId == agentId);
 
         if (startTime.HasValue)
             query = query.Where(e => e.Timestamp >= startTime.Value);
@@ -75,7 +75,7 @@ public sealed class InMemoryEthicsAuditLog : IEthicsAuditLog
         if (endTime.HasValue)
             query = query.Where(e => e.Timestamp <= endTime.Value);
 
-        var result = query
+        List<EthicsAuditEntry> result = query
             .OrderByDescending(e => e.Timestamp)
             .ToList();
 

@@ -45,8 +45,8 @@ public sealed class MockPeftIntegration : IPeftIntegration
             await Task.Delay(100, ct);
 
             // Create mock adapter weights (size proportional to rank)
-            var size = config.Rank * 1024; // Each rank contributes 1KB
-            var weights = new byte[size];
+            int size = config.Rank * 1024; // Each rank contributes 1KB
+            byte[] weights = new byte[size];
             _random.NextBytes(weights);
 
             return Result<byte[], string>.Success(weights);
@@ -78,11 +78,11 @@ public sealed class MockPeftIntegration : IPeftIntegration
                 config.Epochs);
 
             // Simulate training time (1 second per 10 examples per epoch)
-            var trainingTimeMs = (examples.Count * config.Epochs * 100) / 10;
+            int trainingTimeMs = (examples.Count * config.Epochs * 100) / 10;
             await Task.Delay(Math.Min(trainingTimeMs, 5000), ct); // Cap at 5 seconds
 
             // Modify weights slightly to simulate training
-            var trainedWeights = new byte[adapterWeights.Length];
+            byte[] trainedWeights = new byte[adapterWeights.Length];
             Array.Copy(adapterWeights, trainedWeights, adapterWeights.Length);
 
             // Add some random modifications
@@ -121,7 +121,7 @@ public sealed class MockPeftIntegration : IPeftIntegration
             await Task.Delay(200, ct);
 
             // Generate mock response
-            var response = adapterWeights != null
+            string response = adapterWeights != null
                 ? $"[ADAPTED] Mock response to: {prompt}"
                 : $"[BASE] Mock response to: {prompt}";
 
@@ -161,15 +161,15 @@ public sealed class MockPeftIntegration : IPeftIntegration
             }
 
             // For mock: use the first adapter's size and perform simple averaging
-            var size = adapterWeights[0].Length;
-            var merged = new byte[size];
+            int size = adapterWeights[0].Length;
+            byte[] merged = new byte[size];
 
             for (int i = 0; i < size; i++)
             {
                 int sum = 0;
                 int count = 0;
 
-                foreach (var weights in adapterWeights)
+                foreach (byte[] weights in adapterWeights)
                 {
                     if (i < weights.Length)
                     {
@@ -233,7 +233,7 @@ public sealed class MockPeftIntegration : IPeftIntegration
                 example.Stage);
 
             // Simulate training delay based on stage
-            var delayMs = example.Stage switch
+            int delayMs = example.Stage switch
             {
                 DreamStage.Distinction => 50,
                 DreamStage.SubjectEmerges => 100,
@@ -244,11 +244,11 @@ public sealed class MockPeftIntegration : IPeftIntegration
             await Task.Delay(delayMs, ct);
 
             // Modify weights based on distinction
-            var newWeights = new byte[currentWeights.Length];
+            byte[] newWeights = new byte[currentWeights.Length];
             Array.Copy(currentWeights, newWeights, currentWeights.Length);
 
             // Simulate weight modification using distinction hash
-            var hash = example.Circumstance.GetHashCode();
+            int hash = example.Circumstance.GetHashCode();
             for (int i = 0; i < Math.Min(100, newWeights.Length); i++)
             {
                 newWeights[i] = (byte)((newWeights[i] + (hash >> (i % 32))) % 256);
@@ -284,15 +284,15 @@ public sealed class MockPeftIntegration : IPeftIntegration
             // Simulate dissolution delay
             await Task.Delay(100, ct);
 
-            var newWeights = new byte[currentWeights.Length];
+            byte[] newWeights = new byte[currentWeights.Length];
             Array.Copy(currentWeights, newWeights, currentWeights.Length);
 
             // Apply dissolution mask
-            var maskLength = Math.Min(dissolutionMask.Length, newWeights.Length);
+            int maskLength = Math.Min(dissolutionMask.Length, newWeights.Length);
             for (int i = 0; i < maskLength; i++)
             {
                 // Reduce weights proportionally to mask and strength
-                var reduction = dissolutionMask[i] * dissolutionStrength;
+                double reduction = dissolutionMask[i] * dissolutionStrength;
                 newWeights[i] = (byte)(newWeights[i] * (1.0 - reduction));
             }
 
@@ -331,15 +331,15 @@ public sealed class MockPeftIntegration : IPeftIntegration
             }
 
             // Use geometric mean for recognition (subject-object unity)
-            var size = weights[0].Length;
-            var merged = new byte[size];
+            int size = weights[0].Length;
+            byte[] merged = new byte[size];
 
             for (int i = 0; i < size; i++)
             {
                 double product = 1.0;
                 int count = 0;
 
-                foreach (var w in weights)
+                foreach (byte[] w in weights)
                 {
                     if (i < w.Length && w[i] > 0)
                     {

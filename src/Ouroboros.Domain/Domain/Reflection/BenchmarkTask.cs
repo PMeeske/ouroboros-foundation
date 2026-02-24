@@ -27,10 +27,10 @@ public sealed record BenchmarkTask(
     {
         try
         {
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
             cts.CancelAfter(this.Timeout);
 
-            var task = this.Execute();
+            Task<bool> task = this.Execute();
             await task.WaitAsync(cts.Token).ConfigureAwait(false);
             return task.Result;
         }

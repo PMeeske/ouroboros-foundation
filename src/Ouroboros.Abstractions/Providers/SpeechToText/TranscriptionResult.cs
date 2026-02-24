@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Providers.SpeechToText;
+namespace Ouroboros.Providers.SpeechToText;
 
 /// <summary>
 /// Represents the result of a speech-to-text transcription.

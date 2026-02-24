@@ -59,9 +59,9 @@ public sealed record SynthesisTask(
             throw new ArgumentException("Training split must be between 0 and 1", nameof(trainingSplit));
         }
 
-        var splitIndex = (int)(allExamples.Count * trainingSplit);
-        var training = allExamples.Take(splitIndex).ToList();
-        var validation = allExamples.Skip(splitIndex).ToList();
+        int splitIndex = (int)(allExamples.Count * trainingSplit);
+        List<Example> training = allExamples.Take(splitIndex).ToList();
+        List<Example> validation = allExamples.Skip(splitIndex).ToList();
         return (training, validation);
     }
 }

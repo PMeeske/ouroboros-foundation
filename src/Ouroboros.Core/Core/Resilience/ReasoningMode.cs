@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.Resilience;
+namespace Ouroboros.Core.Resilience;
 
 /// <summary>
 /// Reasoning modes for hybrid neural-symbolic systems.

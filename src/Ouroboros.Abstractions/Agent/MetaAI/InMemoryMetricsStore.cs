@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent.MetaAI;
+namespace Ouroboros.Agent.MetaAI;
 
 /// <summary>
 /// In-memory metrics store for testing and development.
@@ -25,7 +25,7 @@ public sealed class InMemoryMetricsStore : IMetricsStore
     {
         lock (_lock)
         {
-            return Task.FromResult(_metrics.TryGetValue(resourceName, out var metrics) ? metrics : null);
+            return Task.FromResult(_metrics.TryGetValue(resourceName, out PerformanceMetrics metrics) ? metrics : null);
         }
     }
 
@@ -71,7 +71,7 @@ public sealed class InMemoryMetricsStore : IMetricsStore
                     NewestMetric: null));
             }
 
-            var allMetrics = _metrics.Values.ToList();
+            List<PerformanceMetrics> allMetrics = _metrics.Values.ToList();
 
             return Task.FromResult(new MetricsStoreStatistics(
                 TotalResources: allMetrics.Count,

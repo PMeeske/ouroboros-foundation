@@ -1,4 +1,4 @@
-﻿using Ouroboros.Core.LawsOfForm;
+using Ouroboros.Core.LawsOfForm;
 
 namespace Ouroboros.Core.Learning;
 

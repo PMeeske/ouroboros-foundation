@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Diagnostics;
+namespace Ouroboros.Diagnostics;
 
 /// <summary>
 /// Metric type enumeration.

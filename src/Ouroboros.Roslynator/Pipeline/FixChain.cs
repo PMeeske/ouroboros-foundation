@@ -29,7 +29,7 @@ public abstract class FixChain
     /// </summary>
     public Task RegisterAsync(CodeFixContext context)
     {
-        var registrationFunc = FixChainArrows.CreateFixChain(Title, EquivalenceKey, PipelineBuilder);
+        Func<CodeFixContext, Task> registrationFunc = FixChainArrows.CreateFixChain(Title, EquivalenceKey, PipelineBuilder);
         return registrationFunc(context);
     }
 
@@ -39,13 +39,13 @@ public abstract class FixChain
     /// </summary>
     public async Task<Document> ExecuteAsync(Document document, Diagnostic diagnostic, CancellationToken token)
     {
-        var root = await document.GetSyntaxRootAsync(token).ConfigureAwait(false);
-        var initial = new FixState(document, diagnostic, root!).WithCancellation(token);
+        SyntaxNode? root = await document.GetSyntaxRootAsync(token).ConfigureAwait(false);
+        FixState initial = new FixState(document, diagnostic, root!).WithCancellation(token);
 
-        var future = new Future<FixState>(_ => Task.FromResult(initial));
-        var pipeline = PipelineBuilder(future);
+        Future<FixState> future = new Future<FixState>(_ => Task.FromResult(initial));
+        Future<FixState> pipeline = PipelineBuilder(future);
 
-        var final = await pipeline.RunAsync(token).ConfigureAwait(false);
+        FixState final = await pipeline.RunAsync(token).ConfigureAwait(false);
 
         return final.Changes.IsEmpty ? document : document.WithSyntaxRoot(final.CurrentRoot);
     }

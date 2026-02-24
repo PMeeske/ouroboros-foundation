@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Text.Json;
+using Google.Protobuf.Collections;
 using Ouroboros.Core.Configuration;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
@@ -60,7 +61,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
         _config = config ?? throw new ArgumentNullException(nameof(config));
         _embeddingFunc = embeddingFunc;
 
-        var uri = new Uri(config.Endpoint);
+        Uri uri = new Uri(config.Endpoint);
         _client = new QdrantClient(uri.Host, uri.Port > 0 ? uri.Port : 6334, uri.Scheme == "https");
     }
 
@@ -120,8 +121,8 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
     {
         await EnsureInitializedAsync(ct);
 
-        var embedding = await GenerateEmbeddingAsync(thought.Content, ct);
-        var point = CreateThoughtPoint(sessionId, thought, embedding);
+        float[] embedding = await GenerateEmbeddingAsync(thought.Content, ct);
+        PointStruct point = CreateThoughtPoint(sessionId, thought, embedding);
 
         await _client.UpsertAsync(_config.ThoughtsCollection, new[] { point }, cancellationToken: ct);
     }
@@ -131,10 +132,10 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
     {
         await EnsureInitializedAsync(ct);
 
-        var points = new List<PointStruct>();
-        foreach (var thought in thoughts)
+        List<PointStruct> points = new List<PointStruct>();
+        foreach (PersistedThought thought in thoughts)
         {
-            var embedding = await GenerateEmbeddingAsync(thought.Content, ct);
+            float[] embedding = await GenerateEmbeddingAsync(thought.Content, ct);
             points.Add(CreateThoughtPoint(sessionId, thought, embedding));
         }
 
@@ -144,7 +145,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
             const int batchSize = 100;
             for (int i = 0; i < points.Count; i += batchSize)
             {
-                var batch = points.Skip(i).Take(batchSize).ToList();
+                List<PointStruct> batch = points.Skip(i).Take(batchSize).ToList();
                 await _client.UpsertAsync(_config.ThoughtsCollection, batch, cancellationToken: ct);
             }
         }
@@ -155,8 +156,8 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
     {
         await EnsureInitializedAsync(ct);
 
-        var filter = CreateSessionFilter(sessionId);
-        var results = await _client.ScrollAsync(_config.ThoughtsCollection, filter: filter, limit: 1000, cancellationToken: ct);
+        Filter filter = CreateSessionFilter(sessionId);
+        ScrollResponse results = await _client.ScrollAsync(_config.ThoughtsCollection, filter: filter, limit: 1000, cancellationToken: ct);
 
         return results.Result
             .Select(DeserializeThought)
@@ -170,7 +171,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
     public async Task<IReadOnlyList<PersistedThought>> GetThoughtsInRangeAsync(
         string sessionId, DateTime from, DateTime to, CancellationToken ct = default)
     {
-        var all = await GetThoughtsAsync(sessionId, ct);
+        IReadOnlyList<PersistedThought> all = await GetThoughtsAsync(sessionId, ct);
         return all.Where(t => t.Timestamp >= from && t.Timestamp <= to).ToList();
     }
 
@@ -180,7 +181,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
     {
         await EnsureInitializedAsync(ct);
 
-        var filter = new Filter
+        Filter filter = new Filter
         {
             Must =
             {
@@ -189,7 +190,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
             }
         };
 
-        var results = await _client.ScrollAsync(_config.ThoughtsCollection, filter: filter, limit: (uint)limit, cancellationToken: ct);
+        ScrollResponse results = await _client.ScrollAsync(_config.ThoughtsCollection, filter: filter, limit: (uint)limit, cancellationToken: ct);
 
         return results.Result
             .Select(DeserializeThought)
@@ -207,17 +208,17 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
         if (_embeddingFunc == null)
         {
             // Fallback to text search
-            var all = await GetThoughtsAsync(sessionId, ct);
+            IReadOnlyList<PersistedThought> all = await GetThoughtsAsync(sessionId, ct);
             return all
                 .Where(t => t.Content.Contains(query, StringComparison.OrdinalIgnoreCase))
                 .Take(limit)
                 .ToList();
         }
 
-        var queryEmbedding = await _embeddingFunc(query);
-        var filter = CreateSessionFilter(sessionId);
+        float[] queryEmbedding = await _embeddingFunc(query);
+        Filter filter = CreateSessionFilter(sessionId);
 
-        var results = await _client.SearchAsync(
+        IReadOnlyList<ScoredPoint> results = await _client.SearchAsync(
             _config.ThoughtsCollection,
             queryEmbedding,
             filter: filter,
@@ -235,7 +236,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
     public async Task<IReadOnlyList<PersistedThought>> GetRecentThoughtsAsync(
         string sessionId, int count = 10, CancellationToken ct = default)
     {
-        var all = await GetThoughtsAsync(sessionId, ct);
+        IReadOnlyList<PersistedThought> all = await GetThoughtsAsync(sessionId, ct);
         return all.OrderByDescending(t => t.Timestamp).Take(count).ToList();
     }
 
@@ -246,7 +247,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
         await EnsureInitializedAsync(ct);
 
         // Find all relations where source is the parent
-        var relFilter = new Filter
+        Filter relFilter = new Filter
         {
             Must =
             {
@@ -254,16 +255,16 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
             }
         };
 
-        var relations = await _client.ScrollAsync(_config.RelationsCollection, filter: relFilter, limit: 100, cancellationToken: ct);
-        var targetIds = relations.Result
-            .Select(r => r.Payload.TryGetValue("target_thought_id", out var v) ? v.StringValue : null)
+        ScrollResponse relations = await _client.ScrollAsync(_config.RelationsCollection, filter: relFilter, limit: 100, cancellationToken: ct);
+        HashSet<string?> targetIds = relations.Result
+            .Select(r => r.Payload.TryGetValue("target_thought_id", out Value? v) ? v.StringValue : null)
             .Where(id => id != null)
             .ToHashSet();
 
         if (targetIds.Count == 0) return Array.Empty<PersistedThought>();
 
         // Get the target thoughts
-        var all = await GetThoughtsAsync(sessionId, ct);
+        IReadOnlyList<PersistedThought> all = await GetThoughtsAsync(sessionId, ct);
         return all.Where(t => targetIds.Contains(t.Id.ToString())).ToList();
     }
 
@@ -272,7 +273,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
     {
         await EnsureInitializedAsync(ct);
 
-        var filter = CreateSessionFilter(sessionId);
+        Filter filter = CreateSessionFilter(sessionId);
 
         // Delete from all collections
         await _client.DeleteAsync(_config.ThoughtsCollection, filter, cancellationToken: ct);
@@ -283,7 +284,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
     /// <inheritdoc/>
     public async Task<ThoughtStatistics> GetStatisticsAsync(string sessionId, CancellationToken ct = default)
     {
-        var thoughts = await GetThoughtsAsync(sessionId, ct);
+        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct);
 
         return new ThoughtStatistics
         {
@@ -303,10 +304,10 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
         await EnsureInitializedAsync(ct);
 
         // Get all points and extract unique session IDs
-        var results = await _client.ScrollAsync(_config.ThoughtsCollection, limit: 10000, cancellationToken: ct);
+        ScrollResponse results = await _client.ScrollAsync(_config.ThoughtsCollection, limit: 10000, cancellationToken: ct);
 
         return results.Result
-            .Select(p => p.Payload.TryGetValue("session_id", out var v) ? v.StringValue : null)
+            .Select(p => p.Payload.TryGetValue("session_id", out Value? v) ? v.StringValue : null)
             .Where(s => !string.IsNullOrEmpty(s))
             .Distinct()
             .Cast<string>()
@@ -335,19 +336,19 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
         if (autoInferRelations && _embeddingFunc != null)
         {
             // Find semantically similar recent thoughts
-            var recent = await GetRecentThoughtsAsync(sessionId, 10, ct);
-            var thoughtEmbedding = await _embeddingFunc(thought.Content);
+            IReadOnlyList<PersistedThought> recent = await GetRecentThoughtsAsync(sessionId, 10, ct);
+            float[] thoughtEmbedding = await _embeddingFunc(thought.Content);
 
-            foreach (var recentThought in recent.Where(r => r.Id != thought.Id))
+            foreach (PersistedThought? recentThought in recent.Where(r => r.Id != thought.Id))
             {
-                var recentEmbedding = await _embeddingFunc(recentThought.Content);
-                var similarity = CosineSimilarity(thoughtEmbedding, recentEmbedding);
+                float[] recentEmbedding = await _embeddingFunc(recentThought.Content);
+                double similarity = CosineSimilarity(thoughtEmbedding, recentEmbedding);
 
                 if (similarity > 0.7) // High similarity threshold
                 {
                     // Infer relation type based on thought types and content
-                    var relationType = InferRelationType(thought, recentThought);
-                    var relation = new ThoughtRelation(
+                    string relationType = InferRelationType(thought, recentThought);
+                    ThoughtRelation relation = new ThoughtRelation(
                         Guid.NewGuid(),
                         recentThought.Id,
                         thought.Id,
@@ -368,10 +369,10 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
     {
         await EnsureInitializedAsync(ct);
 
-        var text = $"{relation.RelationType}: {relation.SourceThoughtId} -> {relation.TargetThoughtId}";
-        var embedding = await GenerateEmbeddingAsync(text, ct);
+        string text = $"{relation.RelationType}: {relation.SourceThoughtId} -> {relation.TargetThoughtId}";
+        float[] embedding = await GenerateEmbeddingAsync(text, ct);
 
-        var payload = new Dictionary<string, Value>
+        Dictionary<string, Value> payload = new Dictionary<string, Value>
         {
             ["id"] = relation.Id.ToString(),
             ["session_id"] = sessionId,
@@ -387,7 +388,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
             payload["metadata_json"] = JsonSerializer.Serialize(relation.Metadata);
         }
 
-        var point = new PointStruct
+        PointStruct point = new PointStruct
         {
             Id = new PointId { Uuid = relation.Id.ToString() },
             Vectors = embedding,
@@ -404,9 +405,9 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
     {
         await EnsureInitializedAsync(ct);
 
-        var embedding = await GenerateEmbeddingAsync(result.Content, ct);
+        float[] embedding = await GenerateEmbeddingAsync(result.Content, ct);
 
-        var payload = new Dictionary<string, Value>
+        Dictionary<string, Value> payload = new Dictionary<string, Value>
         {
             ["id"] = result.Id.ToString(),
             ["session_id"] = sessionId,
@@ -428,7 +429,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
             payload["metadata_json"] = JsonSerializer.Serialize(result.Metadata);
         }
 
-        var point = new PointStruct
+        PointStruct point = new PointStruct
         {
             Id = new PointId { Uuid = result.Id.ToString() },
             Vectors = embedding,
@@ -438,7 +439,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
         await _client.UpsertAsync(_config.ResultsCollection, new[] { point }, cancellationToken: ct);
 
         // Create relation from thought to result
-        var relation = new ThoughtRelation(
+        ThoughtRelation relation = new ThoughtRelation(
             Guid.NewGuid(),
             result.ThoughtId,
             result.Id,
@@ -457,7 +458,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
     {
         await EnsureInitializedAsync(ct);
 
-        var filter = new Filter
+        Filter filter = new Filter
         {
             Should =
             {
@@ -466,7 +467,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
             }
         };
 
-        var results = await _client.ScrollAsync(_config.RelationsCollection, filter: filter, limit: 100, cancellationToken: ct);
+        ScrollResponse results = await _client.ScrollAsync(_config.RelationsCollection, filter: filter, limit: 100, cancellationToken: ct);
 
         return results.Result
             .Select(DeserializeRelation)
@@ -483,7 +484,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
     {
         await EnsureInitializedAsync(ct);
 
-        var filter = new Filter
+        Filter filter = new Filter
         {
             Must =
             {
@@ -491,7 +492,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
             }
         };
 
-        var results = await _client.ScrollAsync(_config.ResultsCollection, filter: filter, limit: 100, cancellationToken: ct);
+        ScrollResponse results = await _client.ScrollAsync(_config.ResultsCollection, filter: filter, limit: 100, cancellationToken: ct);
 
         return results.Result
             .Select(DeserializeResult)
@@ -508,11 +509,11 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
     {
         await EnsureInitializedAsync(ct);
 
-        var chains = new List<List<PersistedThought>>();
-        var visited = new HashSet<Guid>();
-        var allThoughts = (await GetThoughtsAsync(sessionId, ct)).ToDictionary(t => t.Id);
+        List<List<PersistedThought>> chains = new List<List<PersistedThought>>();
+        HashSet<Guid> visited = new HashSet<Guid>();
+        Dictionary<Guid, PersistedThought> allThoughts = (await GetThoughtsAsync(sessionId, ct)).ToDictionary(t => t.Id);
 
-        if (!allThoughts.TryGetValue(startThoughtId, out var startThought))
+        if (!allThoughts.TryGetValue(startThoughtId, out PersistedThought? startThought))
             return chains;
 
         await FindChainsRecursiveAsync(
@@ -529,26 +530,26 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
     {
         await EnsureInitializedAsync(ct);
 
-        var thoughts = await GetThoughtsAsync(sessionId, ct);
+        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct);
 
         // Get relations
-        var relFilter = CreateSessionFilter(sessionId);
-        var relations = await _client.ScrollAsync(_config.RelationsCollection, filter: relFilter, limit: 10000, cancellationToken: ct);
-        var relationList = relations.Result.Select(DeserializeRelation).Where(r => r != null).Cast<ThoughtRelation>().ToList();
+        Filter relFilter = CreateSessionFilter(sessionId);
+        ScrollResponse relations = await _client.ScrollAsync(_config.RelationsCollection, filter: relFilter, limit: 10000, cancellationToken: ct);
+        List<ThoughtRelation> relationList = relations.Result.Select(DeserializeRelation).Where(r => r != null).Cast<ThoughtRelation>().ToList();
 
         // Get results
-        var results = await _client.ScrollAsync(_config.ResultsCollection, filter: relFilter, limit: 10000, cancellationToken: ct);
-        var resultList = results.Result.Select(DeserializeResult).Where(r => r != null).Cast<ThoughtResult>().ToList();
+        ScrollResponse results = await _client.ScrollAsync(_config.ResultsCollection, filter: relFilter, limit: 10000, cancellationToken: ct);
+        List<ThoughtResult> resultList = results.Result.Select(DeserializeResult).Where(r => r != null).Cast<ThoughtResult>().ToList();
 
         // Calculate chain statistics
-        var chainStarts = thoughts.Where(t => !relationList.Any(r => r.TargetThoughtId == t.Id)).ToList();
-        var avgChainLength = 0.0;
+        List<PersistedThought> chainStarts = thoughts.Where(t => !relationList.Any(r => r.TargetThoughtId == t.Id)).ToList();
+        double avgChainLength = 0.0;
         if (chainStarts.Count > 0)
         {
-            var totalLength = 0;
-            foreach (var start in chainStarts.Take(10)) // Sample for performance
+            int totalLength = 0;
+            foreach (PersistedThought? start in chainStarts.Take(10)) // Sample for performance
             {
-                var chains = await FindCausalChainsAsync(sessionId, start.Id, 10, ct);
+                IReadOnlyList<List<PersistedThought>> chains = await FindCausalChainsAsync(sessionId, start.Id, 10, ct);
                 if (chains.Count > 0)
                     totalLength += chains.Max(c => c.Count);
             }
@@ -578,7 +579,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
         await EnsureInitializedAsync(ct);
 
         // Find relations of the given type
-        var filter = new Filter
+        Filter filter = new Filter
         {
             Must =
             {
@@ -587,21 +588,21 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
             }
         };
 
-        var relResults = await _client.ScrollAsync(_config.RelationsCollection, filter: filter, limit: 1000, cancellationToken: ct);
-        var relations = relResults.Result.Select(DeserializeRelation).Where(r => r != null).Cast<ThoughtRelation>().ToList();
+        ScrollResponse relResults = await _client.ScrollAsync(_config.RelationsCollection, filter: filter, limit: 1000, cancellationToken: ct);
+        List<ThoughtRelation> relations = relResults.Result.Select(DeserializeRelation).Where(r => r != null).Cast<ThoughtRelation>().ToList();
 
-        var allThoughts = (await GetThoughtsAsync(sessionId, ct)).ToDictionary(t => t.Id);
-        var results = new List<(PersistedThought, ThoughtRelation)>();
+        Dictionary<Guid, PersistedThought> allThoughts = (await GetThoughtsAsync(sessionId, ct)).ToDictionary(t => t.Id);
+        List<(PersistedThought, ThoughtRelation)> results = new List<(PersistedThought, ThoughtRelation)>();
 
-        foreach (var rel in relations)
+        foreach (ThoughtRelation? rel in relations)
         {
-            if (allThoughts.TryGetValue(rel.SourceThoughtId, out var source))
+            if (allThoughts.TryGetValue(rel.SourceThoughtId, out PersistedThought? source))
             {
                 if (targetType == null)
                 {
                     results.Add((source, rel));
                 }
-                else if (allThoughts.TryGetValue(rel.TargetThoughtId, out var target) && target.Type == targetType)
+                else if (allThoughts.TryGetValue(rel.TargetThoughtId, out PersistedThought? target) && target.Type == targetType)
                 {
                     results.Add((source, rel));
                 }
@@ -643,7 +644,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
 
     private static PointStruct CreateThoughtPoint(string sessionId, PersistedThought thought, float[] embedding)
     {
-        var payload = new Dictionary<string, Value>
+        Dictionary<string, Value> payload = new Dictionary<string, Value>
         {
             ["id"] = thought.Id.ToString(),
             ["session_id"] = sessionId,
@@ -697,9 +698,9 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
                 Confidence = payload["confidence"].DoubleValue,
                 Relevance = payload["relevance"].DoubleValue,
                 Timestamp = DateTime.Parse(payload["timestamp"].StringValue),
-                Topic = payload.TryGetValue("topic", out var topic) && !string.IsNullOrEmpty(topic.StringValue) ? topic.StringValue : null,
-                ParentThoughtId = payload.TryGetValue("parent_thought_id", out var pid) && !string.IsNullOrEmpty(pid.StringValue) ? Guid.Parse(pid.StringValue) : null,
-                MetadataJson = payload.TryGetValue("metadata_json", out var meta) ? meta.StringValue : null
+                Topic = payload.TryGetValue("topic", out Value? topic) && !string.IsNullOrEmpty(topic.StringValue) ? topic.StringValue : null,
+                ParentThoughtId = payload.TryGetValue("parent_thought_id", out Value? pid) && !string.IsNullOrEmpty(pid.StringValue) ? Guid.Parse(pid.StringValue) : null,
+                MetadataJson = payload.TryGetValue("metadata_json", out Value? meta) ? meta.StringValue : null
             };
         }
         catch
@@ -712,7 +713,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
     {
         try
         {
-            var p = point.Payload;
+            MapField<string, Value> p = point.Payload;
             return new ThoughtRelation(
                 Guid.Parse(p["id"].StringValue),
                 Guid.Parse(p["source_thought_id"].StringValue),
@@ -720,7 +721,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
                 p["relation_type"].StringValue,
                 p["strength"].DoubleValue,
                 DateTime.Parse(p["created_at"].StringValue),
-                p.TryGetValue("metadata_json", out var meta) ? JsonSerializer.Deserialize<Dictionary<string, object>>(meta.StringValue) : null);
+                p.TryGetValue("metadata_json", out Value? meta) ? JsonSerializer.Deserialize<Dictionary<string, object>>(meta.StringValue) : null);
         }
         catch
         {
@@ -732,7 +733,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
     {
         try
         {
-            var p = point.Payload;
+            MapField<string, Value> p = point.Payload;
             return new ThoughtResult(
                 Guid.Parse(p["id"].StringValue),
                 Guid.Parse(p["thought_id"].StringValue),
@@ -741,8 +742,8 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
                 p["success"].BoolValue,
                 p["confidence"].DoubleValue,
                 DateTime.Parse(p["created_at"].StringValue),
-                p.TryGetValue("execution_time_ms", out var time) ? TimeSpan.FromMilliseconds(time.DoubleValue) : null,
-                p.TryGetValue("metadata_json", out var meta) ? JsonSerializer.Deserialize<Dictionary<string, object>>(meta.StringValue) : null);
+                p.TryGetValue("execution_time_ms", out Value? time) ? TimeSpan.FromMilliseconds(time.DoubleValue) : null,
+                p.TryGetValue("metadata_json", out Value? meta) ? JsonSerializer.Deserialize<Dictionary<string, object>>(meta.StringValue) : null);
         }
         catch
         {
@@ -781,7 +782,7 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
             magB += b[i] * b[i];
         }
 
-        var mag = Math.Sqrt(magA) * Math.Sqrt(magB);
+        double mag = Math.Sqrt(magA) * Math.Sqrt(magB);
         return mag > 0 ? dot / mag : 0;
     }
 
@@ -805,8 +806,8 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
         visited.Add(current.Id);
 
         // Find outgoing relations
-        var relations = await GetRelationsForThoughtAsync(current.Id, ct);
-        var outgoing = relations.Where(r => r.SourceThoughtId == current.Id).ToList();
+        IReadOnlyList<ThoughtRelation> relations = await GetRelationsForThoughtAsync(current.Id, ct);
+        List<ThoughtRelation> outgoing = relations.Where(r => r.SourceThoughtId == current.Id).ToList();
 
         if (outgoing.Count == 0)
         {
@@ -815,9 +816,9 @@ public sealed class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDispo
             return;
         }
 
-        foreach (var rel in outgoing)
+        foreach (ThoughtRelation? rel in outgoing)
         {
-            if (allThoughts.TryGetValue(rel.TargetThoughtId, out var nextThought) && !visited.Contains(nextThought.Id))
+            if (allThoughts.TryGetValue(rel.TargetThoughtId, out PersistedThought? nextThought) && !visited.Contains(nextThought.Id))
             {
                 currentChain.Add(nextThought);
                 await FindChainsRecursiveAsync(sessionId, nextThought, currentChain, allChains, visited, allThoughts, maxDepth, ct);

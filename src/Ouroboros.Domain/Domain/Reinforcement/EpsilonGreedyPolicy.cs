@@ -66,7 +66,7 @@ public sealed class EpsilonGreedyPolicy : IPolicy
         if (this.random.NextDouble() < this.epsilon)
         {
             // Explore: random action
-            var index = this.random.Next(availableActions.Count);
+            int index = this.random.Next(availableActions.Count);
             selectedAction = availableActions[index];
         }
         else
@@ -85,20 +85,20 @@ public sealed class EpsilonGreedyPolicy : IPolicy
         Observation observation,
         CancellationToken cancellationToken = default)
     {
-        var stateKey = this.GetStateKey(state);
-        var actionKey = this.GetActionKey(action);
+        string stateKey = this.GetStateKey(state);
+        string actionKey = this.GetActionKey(action);
 
         // Simple Q-learning update
-        var stateActions = this.qValues.GetOrAdd(stateKey, _ => new ConcurrentDictionary<string, double>());
-        var currentQ = stateActions.GetOrAdd(actionKey, 0.0);
+        ConcurrentDictionary<string, double> stateActions = this.qValues.GetOrAdd(stateKey, _ => new ConcurrentDictionary<string, double>());
+        double currentQ = stateActions.GetOrAdd(actionKey, 0.0);
 
         // Q(s,a) = Q(s,a) + α[r + γ*max(Q(s',a')) - Q(s,a)]
         // Using α=0.1, γ=0.9 for simplicity
         const double alpha = 0.1;
         const double gamma = 0.9;
 
-        var maxNextQ = observation.IsTerminal ? 0.0 : this.GetMaxQValue(observation.State);
-        var newQ = currentQ + (alpha * ((observation.Reward + (gamma * maxNextQ)) - currentQ));
+        double maxNextQ = observation.IsTerminal ? 0.0 : this.GetMaxQValue(observation.State);
+        double newQ = currentQ + (alpha * ((observation.Reward + (gamma * maxNextQ)) - currentQ));
 
         stateActions[actionKey] = newQ;
 
@@ -109,16 +109,16 @@ public sealed class EpsilonGreedyPolicy : IPolicy
         EnvironmentState state,
         IReadOnlyList<EnvironmentAction> availableActions)
     {
-        var stateKey = this.GetStateKey(state);
-        var stateActions = this.qValues.GetOrAdd(stateKey, _ => new ConcurrentDictionary<string, double>());
+        string stateKey = this.GetStateKey(state);
+        ConcurrentDictionary<string, double> stateActions = this.qValues.GetOrAdd(stateKey, _ => new ConcurrentDictionary<string, double>());
 
         EnvironmentAction? bestAction = null;
-        var bestValue = double.NegativeInfinity;
+        double bestValue = double.NegativeInfinity;
 
-        foreach (var action in availableActions)
+        foreach (EnvironmentAction action in availableActions)
         {
-            var actionKey = this.GetActionKey(action);
-            var qValue = stateActions.GetOrAdd(actionKey, 0.0);
+            string actionKey = this.GetActionKey(action);
+            double qValue = stateActions.GetOrAdd(actionKey, 0.0);
 
             if (qValue > bestValue)
             {
@@ -133,8 +133,8 @@ public sealed class EpsilonGreedyPolicy : IPolicy
 
     private double GetMaxQValue(EnvironmentState state)
     {
-        var stateKey = this.GetStateKey(state);
-        if (!this.qValues.TryGetValue(stateKey, out var stateActions) || stateActions.IsEmpty)
+        string stateKey = this.GetStateKey(state);
+        if (!this.qValues.TryGetValue(stateKey, out ConcurrentDictionary<string, double>? stateActions) || stateActions.IsEmpty)
         {
             return 0.0;
         }
@@ -145,8 +145,8 @@ public sealed class EpsilonGreedyPolicy : IPolicy
     private string GetStateKey(EnvironmentState state)
     {
         // Simple serialization - in production, use proper hashing
-        var keys = state.StateData.Keys.OrderBy(k => k);
-        var values = keys.Select(k => $"{k}:{state.StateData[k]}");
+        IOrderedEnumerable<string> keys = state.StateData.Keys.OrderBy(k => k);
+        IEnumerable<string> values = keys.Select(k => $"{k}:{state.StateData[k]}");
         return string.Join(";", values);
     }
 
@@ -157,8 +157,8 @@ public sealed class EpsilonGreedyPolicy : IPolicy
             return action.ActionType;
         }
 
-        var keys = action.Parameters.Keys.OrderBy(k => k);
-        var values = keys.Select(k => $"{k}:{action.Parameters[k]}");
+        IOrderedEnumerable<string> keys = action.Parameters.Keys.OrderBy(k => k);
+        IEnumerable<string> values = keys.Select(k => $"{k}:{action.Parameters[k]}");
         return $"{action.ActionType}({string.Join(",", values)})";
     }
 }

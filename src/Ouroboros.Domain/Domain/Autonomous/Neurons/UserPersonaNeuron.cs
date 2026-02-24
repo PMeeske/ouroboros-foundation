@@ -105,7 +105,7 @@ public sealed class UserPersonaNeuron : Neuron
     /// </summary>
     public (int TotalInteractions, double AverageSatisfaction, int SessionMessages) GetStats()
     {
-        var avgSatisfaction = _interactions.Where(i => i.UserSatisfaction.HasValue)
+        double avgSatisfaction = _interactions.Where(i => i.UserSatisfaction.HasValue)
             .Select(i => i.UserSatisfaction!.Value)
             .DefaultIfEmpty(0)
             .Average();
@@ -125,7 +125,7 @@ public sealed class UserPersonaNeuron : Neuron
         // Signal that response is complete - training loop can proceed
         _responseWaiter?.TrySetResult(true);
 
-        var interaction = new TrainingInteraction(
+        TrainingInteraction interaction = new TrainingInteraction(
             Guid.NewGuid(),
             userMessage,
             systemResponse,
@@ -172,7 +172,7 @@ public sealed class UserPersonaNeuron : Neuron
                 break;
 
             case "user_persona.add_interest":
-                var interest = message.Payload?.ToString();
+                string? interest = message.Payload?.ToString();
                 if (!string.IsNullOrEmpty(interest) && !_config.Interests.Contains(interest))
                 {
                     _config = _config with { Interests = [.. _config.Interests, interest] };
@@ -200,14 +200,14 @@ public sealed class UserPersonaNeuron : Neuron
         if (!_isTrainingActive) return;
 
         // Check if it's time to generate a new message
-        var elapsed = (DateTime.UtcNow - _lastMessageTime).TotalSeconds;
+        double elapsed = (DateTime.UtcNow - _lastMessageTime).TotalSeconds;
         if (elapsed >= _config.MessageIntervalSeconds && _pendingQuestions.Count == 0)
         {
             await GenerateNextMessageAsync(ct);
         }
 
         // Send pending question
-        if (_pendingQuestions.TryDequeue(out var question))
+        if (_pendingQuestions.TryDequeue(out string? question))
         {
             _lastMessageTime = DateTime.UtcNow;
             _sessionMessageCount++;
@@ -268,7 +268,7 @@ public sealed class UserPersonaNeuron : Neuron
                 if (_responseWaiter != null)
                 {
                     Console.WriteLine("  [UserPersonaNeuron] Waiting for Ouroboros response...");
-                    using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                    using CancellationTokenSource timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
                     timeoutCts.CancelAfter(TimeSpan.FromMinutes(5)); // 5 minute timeout
 
                     try
@@ -307,7 +307,7 @@ public sealed class UserPersonaNeuron : Neuron
         await GenerateNextMessageAsync(ct);
 
         // Immediately send the question (don't wait for OnTick)
-        if (_pendingQuestions.TryDequeue(out var question))
+        if (_pendingQuestions.TryDequeue(out string? question))
         {
             Console.WriteLine($"  [UserPersonaNeuron] Sending question: {question[..Math.Min(50, question.Length)]}...");
             _lastMessageTime = DateTime.UtcNow;
@@ -350,7 +350,7 @@ public sealed class UserPersonaNeuron : Neuron
         _trainingCts?.Cancel();
         _pendingQuestions.Clear();
 
-        var stats = GetStats();
+        (int TotalInteractions, double AverageSatisfaction, int SessionMessages) stats = GetStats();
         SendMessage("training.stopped", new
         {
             TotalInteractions = stats.TotalInteractions,
@@ -365,23 +365,23 @@ public sealed class UserPersonaNeuron : Neuron
         {
             _config = new UserPersonaConfig
             {
-                Name = json.TryGetProperty("name", out var n) ? n.GetString() ?? "AutoUser" : _config.Name,
-                SkillLevel = json.TryGetProperty("skillLevel", out var s) ? s.GetString() ?? "intermediate" : _config.SkillLevel,
-                CommunicationStyle = json.TryGetProperty("style", out var st) ? st.GetString() ?? "casual" : _config.CommunicationStyle,
-                MessageIntervalSeconds = json.TryGetProperty("interval", out var i) ? i.GetInt32() : _config.MessageIntervalSeconds,
-                MaxSessionMessages = json.TryGetProperty("maxMessages", out var m) ? m.GetInt32() : _config.MaxSessionMessages,
-                FollowUpProbability = json.TryGetProperty("followUpProb", out var f) ? f.GetDouble() : _config.FollowUpProbability,
-                ChallengeProbability = json.TryGetProperty("challengeProb", out var c) ? c.GetDouble() : _config.ChallengeProbability,
+                Name = json.TryGetProperty("name", out JsonElement n) ? n.GetString() ?? "AutoUser" : _config.Name,
+                SkillLevel = json.TryGetProperty("skillLevel", out JsonElement s) ? s.GetString() ?? "intermediate" : _config.SkillLevel,
+                CommunicationStyle = json.TryGetProperty("style", out JsonElement st) ? st.GetString() ?? "casual" : _config.CommunicationStyle,
+                MessageIntervalSeconds = json.TryGetProperty("interval", out JsonElement i) ? i.GetInt32() : _config.MessageIntervalSeconds,
+                MaxSessionMessages = json.TryGetProperty("maxMessages", out JsonElement m) ? m.GetInt32() : _config.MaxSessionMessages,
+                FollowUpProbability = json.TryGetProperty("followUpProb", out JsonElement f) ? f.GetDouble() : _config.FollowUpProbability,
+                ChallengeProbability = json.TryGetProperty("challengeProb", out JsonElement c) ? c.GetDouble() : _config.ChallengeProbability,
                 Traits = _config.Traits,
                 Interests = _config.Interests
             };
 
-            if (json.TryGetProperty("traits", out var traits) && traits.ValueKind == JsonValueKind.Array)
+            if (json.TryGetProperty("traits", out JsonElement traits) && traits.ValueKind == JsonValueKind.Array)
             {
                 _config = _config with { Traits = traits.EnumerateArray().Select(t => t.GetString() ?? "").Where(t => !string.IsNullOrEmpty(t)).ToList() };
             }
 
-            if (json.TryGetProperty("interests", out var interests) && interests.ValueKind == JsonValueKind.Array)
+            if (json.TryGetProperty("interests", out JsonElement interests) && interests.ValueKind == JsonValueKind.Array)
             {
                 _config = _config with { Interests = interests.EnumerateArray().Select(t => t.GetString() ?? "").Where(t => !string.IsNullOrEmpty(t)).ToList() };
             }
@@ -395,15 +395,15 @@ public sealed class UserPersonaNeuron : Neuron
         if (GenerateFunction == null)
         {
             // Fallback: use template-based generation
-            var question = GenerateTemplateQuestion();
+            string question = GenerateTemplateQuestion();
             _pendingQuestions.Enqueue(question);
             return;
         }
 
         try
         {
-            var prompt = BuildQuestionGenerationPrompt();
-            var question = await GenerateFunction(prompt, ct);
+            string prompt = BuildQuestionGenerationPrompt();
+            string question = await GenerateFunction(prompt, ct);
 
             if (!string.IsNullOrWhiteSpace(question))
             {
@@ -424,7 +424,7 @@ public sealed class UserPersonaNeuron : Neuron
 
     private string BuildQuestionGenerationPrompt()
     {
-        var sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
         // Problem-solving mode takes priority
         if (_config.ProblemSolvingMode && !string.IsNullOrWhiteSpace(_config.Problem))
@@ -453,7 +453,7 @@ public sealed class UserPersonaNeuron : Neuron
         if (_conversationHistory.Count > 0)
         {
             sb.AppendLine("Recent conversation:");
-            foreach (var msg in _conversationHistory.TakeLast(6))
+            foreach (string? msg in _conversationHistory.TakeLast(6))
             {
                 sb.AppendLine($"  {msg}");
             }
@@ -461,11 +461,11 @@ public sealed class UserPersonaNeuron : Neuron
             sb.AppendLine();
 
             // Decide message type based on probabilities
-            var roll = _random.NextDouble();
+            double roll = _random.NextDouble();
             if (_config.SelfDialogueMode)
             {
                 // Self-dialogue has different interaction patterns
-                var dialogueStyles = new[]
+                string[] dialogueStyles = new[]
                 {
                     "Challenge the last point with a counterargument or alternative interpretation.",
                     "Play devil's advocate - what's the weakness in that reasoning?",
@@ -502,7 +502,7 @@ public sealed class UserPersonaNeuron : Neuron
 
             if (_config.SelfDialogueMode)
             {
-                var selfDialogueOpeners = new[]
+                string[] selfDialogueOpeners = new[]
                 {
                     $"Pose a philosophical paradox about {_currentTopic} for your other self to wrestle with.",
                     $"Present a controversial thesis about {_currentTopic} and challenge Ouroboros to defend or refute it.",
@@ -515,7 +515,7 @@ public sealed class UserPersonaNeuron : Neuron
             }
             else
             {
-                var questionStyles = new[]
+                string[] questionStyles = new[]
                 {
                     $"Ask an intriguing 'what if' question about {_currentTopic}",
                     $"Ask about a common misconception regarding {_currentTopic}",
@@ -545,8 +545,8 @@ public sealed class UserPersonaNeuron : Neuron
 
     private string BuildProblemSolvingPrompt()
     {
-        var sb = new StringBuilder();
-        var step = _sessionMessageCount + 1;
+        StringBuilder sb = new StringBuilder();
+        int step = _sessionMessageCount + 1;
 
         sb.AppendLine($"## PROBLEM-SOLVING SESSION - Step {step}");
         sb.AppendLine();
@@ -564,7 +564,7 @@ public sealed class UserPersonaNeuron : Neuron
         if (_conversationHistory.Count > 0)
         {
             sb.AppendLine("**Progress so far:**");
-            foreach (var msg in _conversationHistory.TakeLast(6))
+            foreach (string? msg in _conversationHistory.TakeLast(6))
             {
                 sb.AppendLine($"  {msg}");
             }
@@ -585,7 +585,7 @@ public sealed class UserPersonaNeuron : Neuron
         else if (_sessionMessageCount < 3)
         {
             // Early steps: Research and planning
-            var earlyActions = new[]
+            string[] earlyActions = new[]
             {
                 "Build on the previous response. Propose the next concrete step.",
                 "Start drafting a solution. Outline the key components.",
@@ -598,7 +598,7 @@ public sealed class UserPersonaNeuron : Neuron
         else if (_sessionMessageCount < _config.MaxSessionMessages - 3)
         {
             // Middle steps: Execution and iteration
-            var midActions = new[]
+            string[] midActions = new[]
             {
                 "Continue implementing. Write concrete code/content.",
                 "Review progress and fix any issues you see.",
@@ -611,7 +611,7 @@ public sealed class UserPersonaNeuron : Neuron
         else
         {
             // Final steps: Wrap up and deliver
-            var finalActions = new[]
+            string[] finalActions = new[]
             {
                 "We're nearing the end. Consolidate everything into the final deliverable.",
                 "Create the complete solution with all necessary components.",
@@ -630,9 +630,9 @@ public sealed class UserPersonaNeuron : Neuron
 
     private string GenerateTemplateQuestion()
     {
-        var topic = _currentTopic ?? _config.Interests[_random.Next(_config.Interests.Count)];
+        string topic = _currentTopic ?? _config.Interests[_random.Next(_config.Interests.Count)];
 
-        var templates = new[]
+        string[] templates = new[]
         {
             // Exploratory
             $"What's the most fascinating thing about {topic}?",
@@ -678,7 +678,7 @@ public sealed class UserPersonaNeuron : Neuron
         {
             try
             {
-                var lastUserMsg = _conversationHistory.LastOrDefault(m => m.StartsWith("User:"))
+                string lastUserMsg = _conversationHistory.LastOrDefault(m => m.StartsWith("User:"))
                     ?.Replace("User: ", "") ?? "";
                 satisfaction = await EvaluateFunction(lastUserMsg, response, ct);
             }
@@ -689,10 +689,10 @@ public sealed class UserPersonaNeuron : Neuron
         }
 
         // Record interaction
-        var lastQuestion = _conversationHistory.LastOrDefault(m => m.StartsWith("User:"))?.Replace("User: ", "");
+        string? lastQuestion = _conversationHistory.LastOrDefault(m => m.StartsWith("User:"))?.Replace("User: ", "");
         if (!string.IsNullOrEmpty(lastQuestion))
         {
-            var interaction = new TrainingInteraction(
+            TrainingInteraction interaction = new TrainingInteraction(
                 Guid.NewGuid(),
                 lastQuestion,
                 response,
@@ -729,7 +729,7 @@ public sealed class UserPersonaNeuron : Neuron
         // Periodic analysis of training progress
         if (_interactions.Count > 0 && _interactions.Count % 10 == 0)
         {
-            var recentSatisfaction = _interactions.TakeLast(10)
+            double recentSatisfaction = _interactions.TakeLast(10)
                 .Where(i => i.UserSatisfaction.HasValue)
                 .Select(i => i.UserSatisfaction!.Value)
                 .DefaultIfEmpty(0)

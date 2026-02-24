@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Infrastructure.FeatureEngineering;
+namespace Ouroboros.Infrastructure.FeatureEngineering;
 
 /// <summary>
 /// Extension methods for StreamDeduplicator to support fluent API.

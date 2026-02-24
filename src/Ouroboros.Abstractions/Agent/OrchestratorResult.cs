@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent;
+namespace Ouroboros.Agent;
 
 /// <summary>
 /// Result of an orchestrator execution with typed output.
@@ -55,7 +55,7 @@ public sealed record OrchestratorResult<T>(
     /// Gets a metadata value or returns default.
     /// </summary>
     public TValue? GetMetadata<TValue>(string key, TValue? defaultValue = default) =>
-        Metadata.TryGetValue(key, out var value) && value is TValue typed
+        Metadata.TryGetValue(key, out object value) && value is TValue typed
             ? typed
             : defaultValue;
 }

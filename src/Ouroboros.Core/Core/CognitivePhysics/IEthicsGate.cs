@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core.CognitivePhysics;
+namespace Ouroboros.Core.CognitivePhysics;
 
 /// <summary>
 /// Interface for evaluating ethical constraints on context transitions.

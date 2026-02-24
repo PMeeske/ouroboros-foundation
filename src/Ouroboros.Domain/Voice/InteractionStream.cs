@@ -344,7 +344,7 @@ public sealed class InteractionStream : IDisposable
     public void SetPresenceState(AgentPresenceState state, string? reason = null)
     {
         if (_disposed) return;
-        var previousState = _currentState.Value;
+        AgentPresenceState previousState = _currentState.Value;
         if (previousState == state) return;
 
         _presenceState.OnNext(new PresenceStateEvent

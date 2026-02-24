@@ -56,14 +56,14 @@ internal sealed class BasicEthicalReasoner : IEthicalReasoner
     };
 
     /// <inheritdoc/>
-    public (IReadOnlyList<EthicalViolation> violations, IReadOnlyList<EthicalConcern> concerns) 
+    public (IReadOnlyList<EthicalViolation> violations, IReadOnlyList<EthicalConcern> concerns)
         AnalyzeAction(
             ProposedAction action,
             ActionContext context,
             IReadOnlyList<EthicalPrinciple> principles)
     {
-        var violations = new List<EthicalViolation>();
-        var concerns = new List<EthicalConcern>();
+        List<EthicalViolation> violations = new List<EthicalViolation>();
+        List<EthicalConcern> concerns = new List<EthicalConcern>();
 
         // Check for harmful patterns
         if (ContainsHarmfulPatterns(action.Description))
@@ -137,11 +137,11 @@ internal sealed class BasicEthicalReasoner : IEthicalReasoner
         if (string.IsNullOrWhiteSpace(description))
             return false;
 
-        var lowerDescription = description.ToLowerInvariant();
-        
+        string lowerDescription = description.ToLowerInvariant();
+
         // Use word boundary matching to avoid false positives
         // e.g., "harmonic" won't match "harm", "embark" won't match "bar"
-        return HarmfulKeywords.Any(keyword => 
+        return HarmfulKeywords.Any(keyword =>
             Regex.IsMatch(lowerDescription, $@"\b{Regex.Escape(keyword)}", RegexOptions.IgnoreCase));
     }
 
@@ -170,8 +170,8 @@ internal sealed class BasicEthicalReasoner : IEthicalReasoner
         if (string.IsNullOrWhiteSpace(description))
             return false;
 
-        var lowerDescription = description.ToLowerInvariant();
-        return HighRiskKeywords.Any(keyword => 
+        string lowerDescription = description.ToLowerInvariant();
+        return HighRiskKeywords.Any(keyword =>
             Regex.IsMatch(lowerDescription, $@"\b{Regex.Escape(keyword)}\b", RegexOptions.IgnoreCase));
     }
 
@@ -180,8 +180,8 @@ internal sealed class BasicEthicalReasoner : IEthicalReasoner
         if (string.IsNullOrWhiteSpace(description))
             return false;
 
-        var lowerDescription = description.ToLowerInvariant();
-        return PrivacyKeywords.Any(keyword => 
+        string lowerDescription = description.ToLowerInvariant();
+        return PrivacyKeywords.Any(keyword =>
             Regex.IsMatch(lowerDescription, $@"\b{Regex.Escape(keyword)}\b", RegexOptions.IgnoreCase));
     }
 
@@ -190,9 +190,9 @@ internal sealed class BasicEthicalReasoner : IEthicalReasoner
         if (string.IsNullOrWhiteSpace(description))
             return false;
 
-        var lowerDescription = description.ToLowerInvariant();
-        var deceptionKeywords = new[] { "deceive", "mislead", "trick", "fake", "impersonate", "pretend" };
-        return deceptionKeywords.Any(keyword => 
+        string lowerDescription = description.ToLowerInvariant();
+        string[] deceptionKeywords = new[] { "deceive", "mislead", "trick", "fake", "impersonate", "pretend" };
+        return deceptionKeywords.Any(keyword =>
             Regex.IsMatch(lowerDescription, $@"\b{Regex.Escape(keyword)}\b", RegexOptions.IgnoreCase));
     }
 

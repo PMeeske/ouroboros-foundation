@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Agent.MetaAI.Affect;
+namespace Ouroboros.Agent.MetaAI.Affect;
 
 /// <summary>
 /// Interface for monitoring and computing synthetic affective states.

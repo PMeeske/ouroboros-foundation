@@ -1,4 +1,4 @@
-﻿namespace Ouroboros.Core;
+namespace Ouroboros.Core;
 
 /// <summary>
 /// Marker interface for step metadata.

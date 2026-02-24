@@ -51,13 +51,13 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
 
         try
         {
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
             cts.CancelAfter(timeout);
 
-            var stopwatch = Stopwatch.StartNew();
+            Stopwatch stopwatch = Stopwatch.StartNew();
 
             // Initialize beam with primitives
-            var beam = InitializeBeam(dsl);
+            List<ASTNode> beam = InitializeBeam(dsl);
 
             // Iterative deepening search
             for (int depth = 1; depth <= this.maxDepth; depth++)
@@ -71,13 +71,13 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
                 beam = await ExpandBeamAsync(beam, dsl, depth, cts.Token);
 
                 // Evaluate programs against examples
-                var validPrograms = await EvaluateBeamAsync(beam, examples, cts.Token);
+                List<Program> validPrograms = await EvaluateBeamAsync(beam, examples, cts.Token);
 
                 // Check if we found a solution
                 if (validPrograms.Count > 0)
                 {
                     stopwatch.Stop();
-                    var bestProgram = validPrograms.OrderByDescending(p => p.LogProbability).First();
+                    Program bestProgram = validPrograms.OrderByDescending(p => p.LogProbability).First();
                     return Result<Program, string>.Success(bestProgram);
                 }
 
@@ -110,7 +110,7 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
 
         try
         {
-            var extractedPrimitives = strategy switch
+            List<Primitive> extractedPrimitives = strategy switch
             {
                 CompressionStrategy.AntiUnification => await ExtractViaAntiUnificationAsync(successfulPrograms, ct),
                 CompressionStrategy.EGraph => await ExtractViaEGraphAsync(successfulPrograms, ct),
@@ -143,9 +143,9 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
         try
         {
             // Update primitive log probabilities based on training pairs
-            var primitiveUsage = new Dictionary<string, int>();
+            Dictionary<string, int> primitiveUsage = new Dictionary<string, int>();
 
-            foreach (var (task, solution) in pairs)
+            foreach ((SynthesisTask? task, Program? solution) in pairs)
             {
                 ct.ThrowIfCancellationRequested();
 
@@ -154,10 +154,10 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
             }
 
             // Update log probabilities
-            var totalUsage = primitiveUsage.Values.Sum();
-            foreach (var (primitive, count) in primitiveUsage)
+            int totalUsage = primitiveUsage.Values.Sum();
+            foreach ((string? primitive, int count) in primitiveUsage)
             {
-                var probability = (double)count / totalUsage;
+                double probability = (double)count / totalUsage;
                 this.primitiveLogProbabilities[primitive] = Math.Log(probability);
             }
 
@@ -191,7 +191,7 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
             ct.ThrowIfCancellationRequested();
 
             // Create new primitives list combining current and new
-            var updatedPrimitives = new List<Primitive>(currentDSL.Primitives);
+            List<Primitive> updatedPrimitives = new List<Primitive>(currentDSL.Primitives);
 
             // Add new primitives
             if (newPrimitives != null && newPrimitives.Count > 0)
@@ -204,11 +204,11 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
             {
                 updatedPrimitives = updatedPrimitives.Select(p =>
                 {
-                    if (stats.PrimitiveUseCounts.TryGetValue(p.Name, out var count) &&
-                        stats.PrimitiveSuccessRates.TryGetValue(p.Name, out var successRate))
+                    if (stats.PrimitiveUseCounts.TryGetValue(p.Name, out int count) &&
+                        stats.PrimitiveSuccessRates.TryGetValue(p.Name, out double successRate))
                     {
                         // Adjust log prior based on usage and success
-                        var adjustedLogPrior = p.LogPrior + Math.Log(count + 1) + Math.Log(successRate + 0.01);
+                        double adjustedLogPrior = p.LogPrior + Math.Log(count + 1) + Math.Log(successRate + 0.01);
                         return p with { LogPrior = adjustedLogPrior };
                     }
 
@@ -216,7 +216,7 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
                 }).ToList();
             }
 
-            var evolvedDSL = currentDSL with { Primitives = updatedPrimitives };
+            DomainSpecificLanguage evolvedDSL = currentDSL with { Primitives = updatedPrimitives };
 
             await Task.CompletedTask;
             return Result<DomainSpecificLanguage, string>.Success(evolvedDSL);
@@ -245,32 +245,32 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
         int targetDepth,
         CancellationToken ct)
     {
-        var expandedBeam = new List<ASTNode>();
+        List<ASTNode> expandedBeam = new List<ASTNode>();
 
-        foreach (var node in currentBeam)
+        foreach (ASTNode node in currentBeam)
         {
             ct.ThrowIfCancellationRequested();
 
             // If node is at target depth - 1, expand it
-            var nodeDepth = CalculateDepth(node);
+            int nodeDepth = CalculateDepth(node);
             if (nodeDepth < targetDepth)
             {
                 // Try applying each primitive
-                foreach (var primitive in dsl.Primitives)
+                foreach (Primitive primitive in dsl.Primitives)
                 {
                     // Create application node
-                    var applicationNode = new ASTNode(
+                    ASTNode applicationNode = new ASTNode(
                         "Apply",
                         primitive.Name,
                         new List<ASTNode> { node });
                     expandedBeam.Add(applicationNode);
 
                     // Create composition with another node
-                    foreach (var otherNode in currentBeam)
+                    foreach (ASTNode otherNode in currentBeam)
                     {
                         if (node != otherNode)
                         {
-                            var compositionNode = new ASTNode(
+                            ASTNode compositionNode = new ASTNode(
                                 "Apply",
                                 primitive.Name,
                                 new List<ASTNode> { node, otherNode });
@@ -290,21 +290,21 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
         List<InputOutputExample> examples,
         CancellationToken ct)
     {
-        var validPrograms = new List<Program>();
+        List<Program> validPrograms = new List<Program>();
 
-        foreach (var node in beam)
+        foreach (ASTNode node in beam)
         {
             ct.ThrowIfCancellationRequested();
 
             try
             {
                 // Try to execute program on all examples
-                var allExamplesPass = true;
-                var trace = new List<ExecutionStep>();
+                bool allExamplesPass = true;
+                List<ExecutionStep> trace = new List<ExecutionStep>();
 
-                foreach (var example in examples)
+                foreach (InputOutputExample example in examples)
                 {
-                    var result = await ExecuteProgramAsync(node, example.Input, ct);
+                    object? result = await ExecuteProgramAsync(node, example.Input, ct);
                     if (result == null || !result.Equals(example.ExpectedOutput))
                     {
                         allExamplesPass = false;
@@ -316,7 +316,7 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
 
                 if (allExamplesPass)
                 {
-                    var program = CreateProgram(node, trace);
+                    Program program = CreateProgram(node, trace);
                     validPrograms.Add(program);
                 }
             }
@@ -345,10 +345,10 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
         if (node.NodeType == "Apply")
         {
             // Execute children first
-            var childResults = new List<object>();
-            foreach (var child in node.Children)
+            List<object> childResults = new List<object>();
+            foreach (ASTNode child in node.Children)
             {
-                var result = await ExecuteProgramAsync(child, input, ct);
+                object? result = await ExecuteProgramAsync(child, input, ct);
                 if (result != null)
                 {
                     childResults.Add(result);
@@ -365,11 +365,11 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
 
     private Program CreateProgram(ASTNode node, List<ExecutionStep> trace)
     {
-        var sourceCode = ASTToSourceCode(node);
-        var depth = CalculateDepth(node);
-        var nodeCount = CountNodes(node);
-        var ast = new AbstractSyntaxTree(node, depth, nodeCount);
-        var logProb = CalculateLogProbability(node);
+        string sourceCode = ASTToSourceCode(node);
+        int depth = CalculateDepth(node);
+        int nodeCount = CountNodes(node);
+        AbstractSyntaxTree ast = new AbstractSyntaxTree(node, depth, nodeCount);
+        double logProb = CalculateLogProbability(node);
 
         return new Program(
             sourceCode,
@@ -388,7 +388,7 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
 
         if (node.NodeType == "Apply" && node.Children.Count > 0)
         {
-            var childrenCode = string.Join(" ", node.Children.Select(ASTToSourceCode));
+            string childrenCode = string.Join(" ", node.Children.Select(ASTToSourceCode));
             return $"({node.Value} {childrenCode})";
         }
 
@@ -413,9 +413,9 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
     private double CalculateLogProbability(ASTNode node)
     {
         // Calculate log probability based on primitive usage
-        var logProb = 0.0;
+        double logProb = 0.0;
 
-        if (this.primitiveLogProbabilities.TryGetValue(node.Value, out var prob))
+        if (this.primitiveLogProbabilities.TryGetValue(node.Value, out double prob))
         {
             logProb += prob;
         }
@@ -425,7 +425,7 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
         }
 
         // Add children probabilities
-        foreach (var child in node.Children)
+        foreach (ASTNode child in node.Children)
         {
             logProb += CalculateLogProbability(child);
         }
@@ -456,7 +456,7 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
 
         usage[node.Value]++;
 
-        foreach (var child in node.Children)
+        foreach (ASTNode child in node.Children)
         {
             CountPrimitiveUsage(child, usage);
         }
@@ -464,10 +464,10 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
 
     private async Task<List<Primitive>> ExtractViaAntiUnificationAsync(List<Program> programs, CancellationToken ct)
     {
-        var extractedPrimitives = new List<Primitive>();
+        List<Primitive> extractedPrimitives = new List<Primitive>();
 
         // Group programs by structure similarity
-        var programPairs = new List<(Program, Program)>();
+        List<(Program, Program)> programPairs = new List<(Program, Program)>();
         for (int i = 0; i < programs.Count; i++)
         {
             for (int j = i + 1; j < programs.Count; j++)
@@ -478,17 +478,17 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
         }
 
         // Find common patterns via anti-unification
-        foreach (var (prog1, prog2) in programPairs)
+        foreach ((Program? prog1, Program? prog2) in programPairs)
         {
             ct.ThrowIfCancellationRequested();
 
-            var commonPattern = AntiUnify(prog1.AST.Root, prog2.AST.Root);
+            ASTNode? commonPattern = AntiUnify(prog1.AST.Root, prog2.AST.Root);
             if (commonPattern != null && CountNodes(commonPattern) > 2)
             {
                 // Create a new primitive from the common pattern
-                var primitiveName = $"learned_{extractedPrimitives.Count}";
-                var primitiveType = InferType(commonPattern);
-                var primitive = new Primitive(
+                string primitiveName = $"learned_{extractedPrimitives.Count}";
+                string primitiveType = InferType(commonPattern);
+                Primitive primitive = new Primitive(
                     primitiveName,
                     primitiveType,
                     args => args.FirstOrDefault() ?? new object(),
@@ -509,10 +509,10 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
         {
             if (node1.Children.Count == node2.Children.Count)
             {
-                var unifiedChildren = new List<ASTNode>();
+                List<ASTNode> unifiedChildren = new List<ASTNode>();
                 for (int i = 0; i < node1.Children.Count; i++)
                 {
-                    var unified = AntiUnify(node1.Children[i], node2.Children[i]);
+                    ASTNode? unified = AntiUnify(node1.Children[i], node2.Children[i]);
                     if (unified != null)
                     {
                         unifiedChildren.Add(unified);

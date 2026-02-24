@@ -2,6 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using LangChain.Abstractions.Schema;
 using LangChain.Chains.HelperChains;
 using LangChain.Chains.LLM;
 using LangChain.Prompts;
@@ -26,8 +27,8 @@ public static class LangChainIntegration
         {
             try
             {
-                var chainValues = new ChainValues(input);
-                var result = await chain.CallAsync(chainValues);
+                ChainValues chainValues = new ChainValues(input);
+                IChainValues result = await chain.CallAsync(chainValues);
                 return Result<Dictionary<string, object>, string>.Success(result.Value);
             }
             catch (Exception ex)
@@ -48,8 +49,8 @@ public static class LangChainIntegration
         {
             try
             {
-                var chainValues = new ChainValues(input);
-                var result = await chain.CallAsync(chainValues);
+                ChainValues chainValues = new ChainValues(input);
+                IChainValues result = await chain.CallAsync(chainValues);
                 return Result<Dictionary<string, object>, string>.Success(result.Value);
             }
             catch (Exception ex)
@@ -68,8 +69,8 @@ public static class LangChainIntegration
     {
         return async input =>
         {
-            var chainValues = new ChainValues(input);
-            var result = await chain.CallAsync(chainValues);
+            ChainValues chainValues = new ChainValues(input);
+            IChainValues result = await chain.CallAsync(chainValues);
             return result.Value;
         };
     }
@@ -83,8 +84,8 @@ public static class LangChainIntegration
     {
         return async input =>
         {
-            var chainValues = new ChainValues(input);
-            var result = await chain.CallAsync(chainValues);
+            ChainValues chainValues = new ChainValues(input);
+            IChainValues result = await chain.CallAsync(chainValues);
             return result.Value;
         };
     }
@@ -96,7 +97,7 @@ public static class LangChainIntegration
     public static KleisliResult<Dictionary<string, object>, Dictionary<string, object>, string> CreateSetKleisli(
         object value, string outputKey = "query")
     {
-        var setChain = new SetChain(value, outputKey);
+        SetChain setChain = new SetChain(value, outputKey);
         return setChain.ToMonadicKleisli();
     }
 
@@ -109,7 +110,7 @@ public static class LangChainIntegration
         PromptTemplate prompt,
         string outputKey = "text")
     {
-        var llmChain = new LlmChain(new LlmChainInput(llm, prompt)
+        LlmChain llmChain = new LlmChain(new LlmChainInput(llm, prompt)
         {
             OutputKey = outputKey,
         });
@@ -124,7 +125,7 @@ public static class LangChainIntegration
     public static Step<Dictionary<string, object>, Dictionary<string, object>> CreateSetStep(
         object value, string outputKey = "query")
     {
-        var setChain = new SetChain(value, outputKey);
+        SetChain setChain = new SetChain(value, outputKey);
         return setChain.ToStep();
     }
 
@@ -137,7 +138,7 @@ public static class LangChainIntegration
         PromptTemplate prompt,
         string outputKey = "text")
     {
-        var llmChain = new LlmChain(new LlmChainInput(llm, prompt)
+        LlmChain llmChain = new LlmChain(new LlmChainInput(llm, prompt)
         {
             OutputKey = outputKey,
         });
@@ -166,19 +167,19 @@ public static class LangChainConversationIntegration
             try
             {
                 // Create LLM chain
-                var llmChain = new LlmChain(new LlmChainInput(llm, prompt)
+                LlmChain llmChain = new LlmChain(new LlmChainInput(llm, prompt)
                 {
                     OutputKey = outputKey,
                 });
 
                 // Convert context properties to chain input
-                var chainInput = new ChainValues(context.GetProperties());
+                ChainValues chainInput = new ChainValues(context.GetProperties());
 
                 // Execute LangChain
-                var result = await llmChain.CallAsync(chainInput);
+                IChainValues result = await llmChain.CallAsync(chainInput);
 
                 // Update context with results
-                foreach (var kvp in result.Value)
+                foreach (KeyValuePair<string, object> kvp in result.Value)
                 {
                     context.SetProperty(kvp.Key, kvp.Value);
                 }
@@ -208,16 +209,16 @@ public static class LangChainConversationIntegration
             try
             {
                 // Create SetChain
-                var setChain = new SetChain(value, outputKey);
+                SetChain setChain = new SetChain(value, outputKey);
 
                 // Convert context to chain input
-                var chainInput = new ChainValues(context.GetProperties());
+                ChainValues chainInput = new ChainValues(context.GetProperties());
 
                 // Execute chain
-                var result = await setChain.CallAsync(chainInput);
+                IChainValues result = await setChain.CallAsync(chainInput);
 
                 // Update context
-                foreach (var kvp in result.Value)
+                foreach (KeyValuePair<string, object> kvp in result.Value)
                 {
                     context.SetProperty(kvp.Key, kvp.Value);
                 }
@@ -245,13 +246,13 @@ public static class LangChainConversationIntegration
             try
             {
                 // Convert context to chain input
-                var chainInput = new ChainValues(context.GetProperties());
+                ChainValues chainInput = new ChainValues(context.GetProperties());
 
                 // Execute chain
-                var result = await chain.CallAsync(chainInput);
+                IChainValues result = await chain.CallAsync(chainInput);
 
                 // Update context
-                foreach (var kvp in result.Value)
+                foreach (KeyValuePair<string, object> kvp in result.Value)
                 {
                     context.SetProperty(kvp.Key, kvp.Value);
                 }

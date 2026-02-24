@@ -24,7 +24,7 @@ public class PipelinePropertyTests
     public async Task<bool> Pipeline_Map_PreservesIdentity_ForAllInts(int input)
     {
         // pipeline.Map(id) ≡ pipeline
-        var pipeline = Pipeline.Lift<int, int>(x => x * 2 + 5);
+        Pipeline<int, int> pipeline = Pipeline.Lift<int, int>(x => x * 2 + 5);
         Func<int, int> identity = x => x;
 
         var originalResult = await pipeline.RunAsync(input);
@@ -43,7 +43,7 @@ public class PipelinePropertyTests
     public async Task<bool> Pipeline_Map_CompositionLaw_HoldsForAllInts(int input)
     {
         // pipeline.Map(f).Map(g) ≡ pipeline.Map(g ∘ f)
-        var pipeline = Pipeline.Lift<int, int>(x => x * 2);
+        Pipeline<int, int> pipeline = Pipeline.Lift<int, int>(x => x * 2);
         Func<int, int> f = x => x + 10;
         Func<int, int> g = x => x * 3;
 
@@ -64,7 +64,7 @@ public class PipelinePropertyTests
     public async Task<bool> Pipeline_Bind_AssociativityLaw_HoldsForAllInts(int input)
     {
         // Test associativity through Then composition which is the Kleisli composition
-        var pipeline = Pipeline.Lift<int, int>(x => x * 2);
+        Pipeline<int, int> pipeline = Pipeline.Lift<int, int>(x => x * 2);
 
         Step<int, int> f = x => Task.FromResult(x + 10);
         Step<int, int> g = x => Task.FromResult(x * 3);
@@ -91,11 +91,11 @@ public class PipelinePropertyTests
         // return a >>= f ≡ f a
         Func<int, Step<int, int>> f = x => async _ => x * 3 + 7;
 
-        var pipeline = Pipeline.Pure<int>();
+        Pipeline<int, int> pipeline = Pipeline.Pure<int>();
         var boundResult = await pipeline.Bind(f).RunAsync(input);
 
         // f(input)(input) - call the kleisli arrow with input
-        var fStep = f(input);
+        Step<int, int> fStep = f(input);
         var directResult = await fStep(input);
 
         return (boundResult == directResult);
@@ -111,7 +111,7 @@ public class PipelinePropertyTests
     public async Task<bool> Pipeline_Bind_RightIdentity_HoldsForAllInts(int input)
     {
         // m >>= return ≡ m
-        var pipeline = Pipeline.Lift<int, int>(x => x * 2 + 5);
+        Pipeline<int, int> pipeline = Pipeline.Lift<int, int>(x => x * 2 + 5);
 
         var originalResult = await pipeline.RunAsync(input);
         var boundResult = await pipeline.Bind(x => (Step<int, int>)(async _ => x)).RunAsync(input);
@@ -129,7 +129,7 @@ public class PipelinePropertyTests
     public async Task<bool> Pipeline_Then_AssociativityLaw_HoldsForAllInts(int input)
     {
         // (f >=> g) >=> h ≡ f >=> (g >=> h)
-        var pipeline = Pipeline.Lift<int, int>(x => x + 1);
+        Pipeline<int, int> pipeline = Pipeline.Lift<int, int>(x => x + 1);
         Step<int, int> f = x => Task.FromResult(x * 2);
         Step<int, int> g = x => Task.FromResult(x + 10);
         Step<int, int> h = x => Task.FromResult(x - 5);
@@ -153,7 +153,7 @@ public class PipelinePropertyTests
     public async Task<bool> Pipeline_MapAsync_PreservesIdentity_ForAllInts(int input)
     {
         // pipeline.MapAsync(async x => x) ≡ pipeline
-        var pipeline = Pipeline.Lift<int, int>(x => x * 2 + 5);
+        Pipeline<int, int> pipeline = Pipeline.Lift<int, int>(x => x * 2 + 5);
         Func<int, Task<int>> asyncIdentity = x => Task.FromResult(x);
 
         var originalResult = await pipeline.RunAsync(input);
@@ -190,7 +190,7 @@ public class PipelinePropertyTests
     public async Task<bool> Pipeline_Map_ThenRelationship_HoldsForAllInts(int input)
     {
         // pipeline.Map(f) ≡ pipeline.Then(Step that wraps f)
-        var pipeline = Pipeline.Lift<int, int>(x => x * 2);
+        Pipeline<int, int> pipeline = Pipeline.Lift<int, int>(x => x * 2);
         Func<int, int> f = x => x + 10;
 
         var mappedResult = await pipeline.Map(f).RunAsync(input);

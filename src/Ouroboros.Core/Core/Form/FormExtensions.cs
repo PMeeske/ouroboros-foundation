@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 
 namespace Ouroboros.Core.SpencerBrown;
 
@@ -30,7 +30,7 @@ public static class FormExtensions
     public static Step<TIn, Form<TOut>> MarkStep<TIn, TOut>(this Step<TIn, TOut> step) =>
         async input =>
         {
-            var result = await step(input).ConfigureAwait(false);
+            TOut? result = await step(input).ConfigureAwait(false);
             return Form<TOut>.Mark(result);
         };
 
@@ -48,7 +48,7 @@ public static class FormExtensions
     public static Step<TIn, Form<TOut>> WithCalling<TIn, TOut>(this Step<TIn, Form<TOut>> step) =>
         async input =>
         {
-            var result = await step(input).ConfigureAwait(false);
+            Form<TOut> result = await step(input).ConfigureAwait(false);
             return result.Call();
         };
 
@@ -58,7 +58,7 @@ public static class FormExtensions
     public static Step<TIn, Form<TOut>> WithCrossing<TIn, TOut>(this Step<TIn, Form<TOut>> step) =>
         async input =>
         {
-            var result = await step(input).ConfigureAwait(false);
+            Form<TOut> result = await step(input).ConfigureAwait(false);
             return result.Cross();
         };
 
