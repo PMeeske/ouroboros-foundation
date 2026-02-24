@@ -18,7 +18,7 @@ public class UniversalCodeFixProvider : CodeFixProvider
     public override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
         // Build the pipeline lazily (no heavy work here).
-        var chain = new ConcreteChains.UniversalChain();
+        ConcreteChains.UniversalChain chain = new ConcreteChains.UniversalChain();
 
         // Register the code fix (Roslyn will call the CodeAction later).
         await chain.RegisterAsync(context).ConfigureAwait(false);

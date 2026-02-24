@@ -49,8 +49,8 @@ public static class SkillExtensions
     {
         ArgumentNullException.ThrowIfNull(skill);
 
-        var extractedTags = tags ?? ExtractTags(skill.Name, skill.Description);
-        var avgExecutionTime = skill.UsageCount > 0
+        IReadOnlyList<string> extractedTags = tags ?? ExtractTags(skill.Name, skill.Description);
+        long avgExecutionTime = skill.UsageCount > 0
             ? (long)((DateTime.UtcNow - skill.CreatedAt).TotalMilliseconds / skill.UsageCount)
             : 0L;
 
@@ -90,8 +90,8 @@ public static class SkillExtensions
 
     private static IReadOnlyList<string> ExtractTags(string name, string description)
     {
-        var combined = $"{name} {description}".ToLowerInvariant();
-        var words = combined
+        string combined = $"{name} {description}".ToLowerInvariant();
+        List<string> words = combined
             .Split(new[] { ' ', ',', '.', ':', ';', '-', '_', '(', ')', '[', ']' }, StringSplitOptions.RemoveEmptyEntries)
             .Where(w => w.Length > 3)
             .Distinct()

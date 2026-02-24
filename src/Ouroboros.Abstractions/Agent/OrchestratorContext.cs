@@ -24,7 +24,7 @@ public sealed record OrchestratorContext(
     /// Gets a value from metadata or returns default.
     /// </summary>
     public T? GetMetadata<T>(string key, T? defaultValue = default) =>
-        Metadata.TryGetValue(key, out var value) && value is T typed
+        Metadata.TryGetValue(key, out object value) && value is T typed
             ? typed
             : defaultValue;
 
@@ -33,7 +33,7 @@ public sealed record OrchestratorContext(
     /// </summary>
     public OrchestratorContext WithMetadata(string key, object value)
     {
-        var newMetadata = new Dictionary<string, object>(Metadata) { [key] = value };
+        Dictionary<string, object> newMetadata = new Dictionary<string, object>(Metadata) { [key] = value };
         return this with { Metadata = newMetadata };
     }
 }

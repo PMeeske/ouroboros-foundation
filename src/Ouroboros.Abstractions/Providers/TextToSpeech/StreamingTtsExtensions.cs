@@ -21,20 +21,20 @@ public static class StreamingTtsExtensions
     {
         return System.Reactive.Linq.Observable.Create<string>(observer =>
         {
-            var buffer = new System.Text.StringBuilder();
+            System.Text.StringBuilder buffer = new System.Text.StringBuilder();
 
             return tokens.Subscribe(
                 onNext: token =>
                 {
                     buffer.Append(token);
 
-                    var text = buffer.ToString();
-                    var lastEnder = text.LastIndexOfAny(SentenceEnders);
+                    string text = buffer.ToString();
+                    int lastEnder = text.LastIndexOfAny(SentenceEnders);
 
                     // Emit if we have a sentence boundary and enough content
                     if (lastEnder >= MinChunkSize)
                     {
-                        var sentence = text[..(lastEnder + 1)].Trim();
+                        string sentence = text[..(lastEnder + 1)].Trim();
                         if (!string.IsNullOrWhiteSpace(sentence))
                         {
                             observer.OnNext(sentence);
@@ -50,7 +50,7 @@ public static class StreamingTtsExtensions
                     else if (buffer.Length > MaxChunkSize)
                     {
                         // Force emit if buffer is too large (no sentence boundary found)
-                        var chunk = text.Trim();
+                        string chunk = text.Trim();
                         if (!string.IsNullOrWhiteSpace(chunk))
                         {
                             observer.OnNext(chunk);
@@ -63,7 +63,7 @@ public static class StreamingTtsExtensions
                 onCompleted: () =>
                 {
                     // Flush remaining buffer
-                    var remaining = buffer.ToString().Trim();
+                    string remaining = buffer.ToString().Trim();
                     if (!string.IsNullOrWhiteSpace(remaining))
                     {
                         observer.OnNext(remaining);
@@ -86,15 +86,15 @@ public static class StreamingTtsExtensions
             yield break;
         }
 
-        var pattern = new System.Text.RegularExpressions.Regex(
+        System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(
             @"(?<=[.!?])\s+|(?<=\n)",
             System.Text.RegularExpressions.RegexOptions.Compiled);
 
-        var sentences = pattern.Split(text);
+        string[] sentences = pattern.Split(text);
 
-        foreach (var sentence in sentences)
+        foreach (string sentence in sentences)
         {
-            var trimmed = sentence.Trim();
+            string trimmed = sentence.Trim();
             if (!string.IsNullOrWhiteSpace(trimmed))
             {
                 yield return trimmed;

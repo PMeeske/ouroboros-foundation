@@ -48,13 +48,13 @@ public static class FixChainArrows
         Func<Future<FixState>, Future<FixState>> pipelineBuilder,
         CancellationToken token)
     {
-        var root = await document.GetSyntaxRootAsync(token).ConfigureAwait(false);
-        var initial = new FixState(document, diagnostic, root!).WithCancellation(token);
+        SyntaxNode? root = await document.GetSyntaxRootAsync(token).ConfigureAwait(false);
+        FixState initial = new FixState(document, diagnostic, root!).WithCancellation(token);
 
-        var future = new Future<FixState>(_ => Task.FromResult(initial));
-        var pipeline = pipelineBuilder(future);
+        Future<FixState> future = new Future<FixState>(_ => Task.FromResult(initial));
+        Future<FixState> pipeline = pipelineBuilder(future);
 
-        var final = await pipeline.RunAsync(token).ConfigureAwait(false);
+        FixState final = await pipeline.RunAsync(token).ConfigureAwait(false);
 
         return final.Changes.IsEmpty ? document : document.WithSyntaxRoot(final.CurrentRoot);
     }

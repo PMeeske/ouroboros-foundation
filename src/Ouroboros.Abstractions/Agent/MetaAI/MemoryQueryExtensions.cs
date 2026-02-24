@@ -23,7 +23,7 @@ public static class MemoryQueryExtensions
         int maxResults = 100,
         double minSimilarity = 0.0)
     {
-        var contextString = context != null
+        string? contextString = context != null
             ? string.Join(", ", context.Select(kv => $"{kv.Key}={kv.Value}"))
             : null;
 
