@@ -50,4 +50,42 @@ public sealed class QdrantSettings
     /// Builds the HTTP/REST endpoint URI string.
     /// </summary>
     public string HttpEndpoint => $"{(UseHttps ? "https" : "http")}://{Host}:{HttpPort}";
+
+    /// <summary>
+    /// Optional Qdrant Cloud configuration for remote sync.
+    /// </summary>
+    public QdrantCloudSettings? Cloud { get; set; }
+}
+
+/// <summary>
+/// Configuration for a remote Qdrant Cloud cluster used as sync target.
+/// </summary>
+public sealed class QdrantCloudSettings
+{
+    /// <summary>
+    /// The full REST endpoint URL of the Qdrant Cloud cluster
+    /// (e.g. "https://abc-123.us-east4-0.gcp.cloud.qdrant.io:6333").
+    /// </summary>
+    public string Endpoint { get; set; } = "";
+
+    /// <summary>
+    /// API key for authenticating with Qdrant Cloud.
+    /// </summary>
+    public string ApiKey { get; set; } = "";
+
+    /// <summary>
+    /// Qdrant Cloud cluster ID (from the dashboard URL).
+    /// </summary>
+    public string? ClusterId { get; set; }
+
+    /// <summary>
+    /// Whether this cloud sync target is enabled.
+    /// </summary>
+    public bool Enabled { get; set; }
+
+    /// <summary>
+    /// Base64-encoded PKCS#8 EC private key for encrypting vectors before cloud upload.
+    /// If empty, a new key pair is generated on first sync and printed to stdout for saving.
+    /// </summary>
+    public string? EncryptionPrivateKey { get; set; }
 }
