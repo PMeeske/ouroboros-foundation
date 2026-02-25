@@ -8,7 +8,7 @@ public static class LangChainMemoryExtensions
     /// <summary>
     /// Wraps input with LangChain-based conversation context
     /// </summary>
-    public static LangChainConversationContext WithLangChainMemory<T>(this T input, int maxTurns = 10)
+    public static LangChainConversationContext WithLangChainMemory<T>(this T input, int maxTurns = 0)
     {
         LangChainConversationContext context = new LangChainConversationContext(maxTurns);
         if (input != null)

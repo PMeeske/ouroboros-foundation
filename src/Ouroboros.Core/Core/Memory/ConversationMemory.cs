@@ -16,10 +16,18 @@ public class ConversationMemory
 {
     private readonly ConcurrentQueue<ConversationTurn> _turns = new();
     private readonly int _maxTurns;
+    private readonly Action<ConversationTurn>? _onEvicted;
 
-    public ConversationMemory(int maxTurns = 10)
+    /// <param name="maxTurns">
+    /// Maximum number of turns to retain. Use 0 for unlimited (no eviction).
+    /// </param>
+    /// <param name="onEvicted">
+    /// Optional callback invoked when a turn is evicted (e.g., to archive it to Qdrant).
+    /// </param>
+    public ConversationMemory(int maxTurns = 0, Action<ConversationTurn>? onEvicted = null)
     {
         _maxTurns = maxTurns;
+        _onEvicted = onEvicted;
     }
 
     /// <summary>
@@ -29,10 +37,16 @@ public class ConversationMemory
     {
         _turns.Enqueue(new ConversationTurn(humanInput, aiResponse, DateTime.UtcNow));
 
-        // Maintain max turns limit
-        while (_turns.Count > _maxTurns)
+        // Evict oldest turns only when a cap is set (maxTurns > 0)
+        if (_maxTurns > 0)
         {
-            _turns.TryDequeue(out _);
+            while (_turns.Count > _maxTurns)
+            {
+                if (_turns.TryDequeue(out var evicted))
+                {
+                    _onEvicted?.Invoke(evicted);
+                }
+            }
         }
     }
 

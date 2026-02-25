@@ -12,7 +12,7 @@ public class LangChainConversationContext
     private readonly Dictionary<string, object> _properties = new();
     private readonly ConversationMemory _memory;
 
-    public LangChainConversationContext(int maxTurns = 10)
+    public LangChainConversationContext(int maxTurns = 0)
     {
         _memory = new ConversationMemory(maxTurns);
     }
