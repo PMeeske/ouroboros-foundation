@@ -46,4 +46,8 @@
     <ProjectReference Include="..\Ouroboros.Abstractions\Ouroboros.Abstractions.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\features\ethics\metta\*.metta" LinkBase="Ethics\MeTTa" />
+  </ItemGroup>
+
 </Project>

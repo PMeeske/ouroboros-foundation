@@ -2,6 +2,8 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using Ouroboros.Core.Ethics.MeTTa;
+
 namespace Ouroboros.Core.Ethics;
 
 /// <summary>
@@ -26,6 +28,10 @@ public sealed class ImmutableEthicsFramework : IEthicsFramework
     {
         ArgumentNullException.ThrowIfNull(auditLog);
         ArgumentNullException.ThrowIfNull(reasoner);
+
+        // Verify ethical atom integrity before anything else.
+        // If the MeTTa foundation has been tampered with, refuse to initialize.
+        EthicalAtomIntegrity.VerifyAll();
 
         _auditLog = auditLog;
         _reasoner = reasoner;
