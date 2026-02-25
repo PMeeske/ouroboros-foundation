@@ -1,0 +1,239 @@
+// <copyright file="Imagination.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace Ouroboros.Core.LawsOfForm;
+
+/// <summary>
+/// Provides operations for working with imaginary forms in the Laws of Form calculus.
+///
+/// In Spencer-Brown's Laws of Form (Chapter 11), imaginary values arise when a form
+/// contains a reference to itself - the re-entry. The canonical example is the
+/// equation f = ⌐f (a form equals its own negation).
+///
+/// This equation has no solution in the space of {Void, Mark}, but by introducing
+/// an imaginary value (analogous to √-1 in complex numbers), we can solve it.
+/// The imaginary form oscillates between marked and unmarked states across time.
+///
+/// Imagination in this context represents:
+/// 1. Self-reference: The ability of a system to refer to itself
+/// 2. Oscillation: Dynamic states that alternate between distinctions
+/// 3. Transcendence: Going beyond the binary marked/unmarked into continuous states
+/// 4. Creativity: Generating new forms through self-referential loops
+///
+/// The Ouroboros symbol - the serpent eating its own tail - is a perfect
+/// representation of re-entry and imagination in the Laws of Form.
+/// </summary>
+public static class Imagination
+{
+    /// <summary>
+    /// The fundamental imaginary constant, analogous to i = √-1.
+    /// This is the eigenform of the crossing operation: the form that,
+    /// when marked, equals itself.
+    /// </summary>
+    public static Form I => Form.Imaginary;
+
+    /// <summary>
+    /// Creates a re-entry form representing a self-referential equation.
+    /// The equation f = ⌐f defines an imaginary value.
+    /// </summary>
+    /// <param name="name">Optional name for the self-reference.</param>
+    /// <returns>A re-entry form.</returns>
+    public static Form SelfReference(string? name = null) => Form.ReEntry(name);
+
+    /// <summary>
+    /// Creates an oscillating form that alternates between two forms over time.
+    /// This models temporal behavior in the Laws of Form.
+    /// </summary>
+    /// <param name="stateA">The first state in the oscillation.</param>
+    /// <param name="stateB">The second state in the oscillation.</param>
+    /// <returns>An oscillator that switches between the two states.</returns>
+    public static Oscillator Oscillate(Form stateA, Form stateB) =>
+        new(stateA, stateB);
+
+    /// <summary>
+    /// Creates a wave form with the specified frequency and phase.
+    /// Models continuous oscillation in the imaginary domain.
+    /// </summary>
+    /// <param name="frequency">The frequency of oscillation (cycles per unit time).</param>
+    /// <param name="phase">The initial phase offset in radians.</param>
+    /// <returns>A wave form.</returns>
+    public static Wave CreateWave(double frequency = 1.0, double phase = 0.0) =>
+        new(frequency, phase);
+
+    /// <summary>
+    /// Superimposes two imaginary forms, creating interference.
+    /// This models wave interference in the imaginary domain.
+    /// </summary>
+    /// <param name="form1">The first imaginary form.</param>
+    /// <param name="form2">The second imaginary form.</param>
+    /// <returns>The superimposed form.</returns>
+    public static Form Superimpose(Form form1, Form form2)
+    {
+        object eval1 = form1.EvalToRecord();
+        object eval2 = form2.EvalToRecord();
+
+        // If both are imaginary, combine phases (interference)
+        if (eval1 is Form.ImaginaryForm imag1 && eval2 is Form.ImaginaryForm imag2)
+        {
+            double combinedPhase = imag1.Phase + imag2.Phase;
+            return Form.Imagine(combinedPhase);
+        }
+
+        // If only one is imaginary, return it
+        if (eval1 is Form.ImaginaryForm)
+        {
+            return form1;
+        }
+
+        if (eval2 is Form.ImaginaryForm)
+        {
+            return form2;
+        }
+
+        // Both are real - use indication
+        return form1.Call(form2);
+    }
+
+    /// <summary>
+    /// Applies the imagination operator: transforms a form by one cycle of imagination.
+    /// Each application is equivalent to multiplication by the imaginary unit.
+    /// </summary>
+    /// <param name="form">The form to transform.</param>
+    /// <returns>The form after one imagination cycle.</returns>
+    public static Form Apply(Form form)
+    {
+        object evaluated = form.EvalToRecord();
+
+        return evaluated switch
+        {
+            // Void becomes Imaginary (0 * i = 0, but we treat Void as the identity, so Void → i)
+            Form.VoidForm => Form.Imaginary,
+
+            // Mark becomes Imaginary with phase shift
+            Form.MarkForm => Form.Imagine(Math.PI),
+
+            // Imaginary rotates by π/2 (like multiplying by i)
+            Form.ImaginaryForm imag => Form.Imagine(imag.Phase + (Math.PI / 2)),
+
+            // ReEntry is already imaginary
+            Form.ReEntryForm => Form.Imaginary,
+
+            // Default: wrap in imagination
+            _ => Form.Imagine(0)
+        };
+    }
+
+    /// <summary>
+    /// Conjugates an imaginary form (negates its phase).
+    /// Analogous to complex conjugation: (a + bi)* = a - bi.
+    /// </summary>
+    /// <param name="form">The form to conjugate.</param>
+    /// <returns>The conjugated form.</returns>
+    public static Form Conjugate(Form form)
+    {
+        object evaluated = form.EvalToRecord();
+
+        if (evaluated is Form.ImaginaryForm imag)
+        {
+            return Form.Imagine(-imag.Phase);
+        }
+
+        // Real forms are their own conjugates
+        return form;
+    }
+
+    /// <summary>
+    /// Computes the "magnitude" of a form.
+    /// Real forms have magnitude 0 (Void) or 1 (Mark).
+    /// Imaginary forms always have magnitude 1 (they oscillate fully).
+    /// </summary>
+    /// <param name="form">The form to measure.</param>
+    /// <returns>The magnitude as a double.</returns>
+    public static double Magnitude(Form form)
+    {
+        object evaluated = form.EvalToRecord();
+
+        return evaluated switch
+        {
+            Form.VoidForm => 0.0,
+            Form.MarkForm => 1.0,
+            Form.ImaginaryForm => 1.0, // Imaginary forms have unit magnitude
+            Form.ReEntryForm => 1.0,
+            _ => 0.5 // Indeterminate
+        };
+    }
+
+    /// <summary>
+    /// Gets the phase of a form in radians.
+    /// Void has phase 0, Mark has phase π, Imaginary forms have their stored phase.
+    /// </summary>
+    /// <param name="form">The form to get the phase of.</param>
+    /// <returns>The phase in radians.</returns>
+    public static double Phase(Form form)
+    {
+        object evaluated = form.EvalToRecord();
+
+        return evaluated switch
+        {
+            Form.VoidForm => 0.0,
+            Form.MarkForm => Math.PI,
+            Form.ImaginaryForm imag => imag.Phase,
+            Form.ReEntryForm => Math.PI / 2, // 90 degrees - pure imaginary
+            _ => 0.0
+        };
+    }
+
+    /// <summary>
+    /// Projects an imaginary form onto the real axis (Void/Mark).
+    /// This collapses the oscillation to a definite state based on phase.
+    /// </summary>
+    /// <param name="form">The form to project.</param>
+    /// <returns>Void or Mark based on the form's phase.</returns>
+    public static Form Project(Form form)
+    {
+        object evaluated = form.EvalToRecord();
+
+        if (evaluated is Form.ImaginaryForm imag)
+        {
+            double normalizedPhase = imag.Phase % (2 * Math.PI);
+            if (normalizedPhase < 0)
+            {
+                normalizedPhase += 2 * Math.PI;
+            }
+
+            // Project based on phase: [0, π) → Void, [π, 2π) → Mark
+            return normalizedPhase < Math.PI ? Form.Void : Form.Mark;
+        }
+
+        // Real forms project to themselves
+        return form;
+    }
+
+    /// <summary>
+    /// Samples an imaginary form at a specific time, returning its apparent real value.
+    /// </summary>
+    /// <param name="form">The form to sample.</param>
+    /// <param name="time">The discrete time step.</param>
+    /// <returns>The apparent form at that time (Void or Mark).</returns>
+    public static Form Sample(Form form, int time)
+    {
+        object evaluated = form.EvalToRecord();
+
+        if (evaluated is Form.ImaginaryForm)
+        {
+            // Imaginary alternates between Void (even) and Mark (odd)
+            return time % 2 == 0 ? Form.Void : Form.Mark;
+        }
+
+        // Real forms are constant across time
+        return form;
+    }
+
+    /// <summary>
+    /// Creates a dream state - a form that exists in superposition of all phases.
+    /// This represents maximum uncertainty or creative potential.
+    /// </summary>
+    /// <returns>A dream form representing all possibilities.</returns>
+    public static Dream CreateDream() => new();
+}

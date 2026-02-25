@@ -1,0 +1,88 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Ouroboros.Tests</RootNamespace>
+    <AssemblyName>Ouroboros.Foundation.BDD</AssemblyName>
+    <IsTestProject>true</IsTestProject>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591;SA0001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="Reqnroll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Ouroboros.Core\Ouroboros.Core.csproj" />
+    <ProjectReference Include="..\..\src\Ouroboros.Domain\Ouroboros.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Ouroboros.Tools\Ouroboros.Tools.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="8.0.0" PrivateAssets="all">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" PrivateAssets="all">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="FluentAssertions" Version="8.8.0" />
+    <PackageReference Include="ReqnRoll" Version="3.3.3" />
+    <PackageReference Include="ReqnRoll.xUnit" Version="3.3.3" />
+    <PackageReference Include="ReqnRoll.Tools.MsBuild.Generation" Version="3.3.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Features\Ethics\MeTTa\**\*.metta" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Features\Ethics\**\*.feature" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ReqnrollFeatureFile Update="Features\CSharpHashVectorizer.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\DelegateTool.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\EventStore.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\InputValidator.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\MathTool.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\MetricCollector.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\MonadicToolExtensions.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\ObjectPool.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\OptionMonad.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\ResultMonad.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\Retrieval.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\SchemaGnerator.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\ToolBuilder.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+    <ReqnrollFeatureFile Update="Features\ToolRegistry.feature">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </ReqnrollFeatureFile>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,74 @@
+# CI pipeline for ouroboros-foundation
+# Triggers on push to main and pull requests
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  repository_dispatch:
+    types: [dependency-updated]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.event_name == 'repository_dispatch' && format('dispatch-{0}', github.event.client_payload.source_repo) || github.ref }}
+  cancel-in-progress: true
+
+# Permissions required for test result publishing and artifact uploads
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  build:
+    name: Build
+    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-dotnet-build.yml@main
+    with:
+      projects: >-
+        src/Ouroboros.Core/Ouroboros.Core.csproj
+        src/Ouroboros.Domain/Ouroboros.Domain.csproj
+        src/Ouroboros.Tools/Ouroboros.Tools.csproj
+        src/Ouroboros.Genetic/Ouroboros.Genetic.csproj
+        src/Ouroboros.Roslynator/Ouroboros.Roslynator.csproj
+
+  test:
+    name: Test
+    needs: build
+    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-dotnet-test.yml@main
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    with:
+      job-identifier: "test"
+      test-projects: >-
+        tests/Ouroboros.Core.Tests/Ouroboros.Core.Tests.csproj
+        tests/Ouroboros.Domain.Tests/Ouroboros.Domain.Tests.csproj
+        tests/Ouroboros.Tools.Tests/Ouroboros.Tools.Tests.csproj
+        tests/Ouroboros.Genetic.Tests/Ouroboros.Genetic.Tests.csproj
+      build-projects: >-
+        src/Ouroboros.Core/Ouroboros.Core.csproj
+        src/Ouroboros.Domain/Ouroboros.Domain.csproj
+        src/Ouroboros.Tools/Ouroboros.Tools.csproj
+        src/Ouroboros.Genetic/Ouroboros.Genetic.csproj
+      coverage-threshold: 60
+
+  bdd:
+    name: BDD Tests
+    needs: build
+    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-dotnet-test.yml@main
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+    with:
+      job-identifier: "bdd"
+      test-projects: tests/Ouroboros.Foundation.BDD/Ouroboros.Foundation.BDD.csproj
+      build-projects: >-
+        src/Ouroboros.Core/Ouroboros.Core.csproj
+        src/Ouroboros.Domain/Ouroboros.Domain.csproj
+        src/Ouroboros.Tools/Ouroboros.Tools.csproj
+      coverage-threshold: 0

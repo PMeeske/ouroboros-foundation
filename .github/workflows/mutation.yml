@@ -1,0 +1,50 @@
+# Mutation testing for ouroboros-foundation
+# Runs on schedule and manual trigger
+
+name: Mutation Testing
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'  # Weekly Sunday 3am UTC
+  workflow_dispatch:
+
+concurrency:
+  group: mutation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mutate-core:
+    name: Mutate Core
+    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-mutation-testing.yml@main
+    with:
+      project: src/Ouroboros.Core/Ouroboros.Core.csproj
+      test-project: tests/Ouroboros.Core.Tests/Ouroboros.Core.Tests.csproj
+      category: core
+      mutation-level: Standard
+
+  mutate-domain:
+    name: Mutate Domain
+    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-mutation-testing.yml@main
+    with:
+      project: src/Ouroboros.Domain/Ouroboros.Domain.csproj
+      test-project: tests/Ouroboros.Domain.Tests/Ouroboros.Domain.Tests.csproj
+      category: domain
+      mutation-level: Standard
+
+  mutate-tools:
+    name: Mutate Tools
+    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-mutation-testing.yml@main
+    with:
+      project: src/Ouroboros.Tools/Ouroboros.Tools.csproj
+      test-project: tests/Ouroboros.Tools.Tests/Ouroboros.Tools.Tests.csproj
+      category: tools
+      mutation-level: Standard
+
+  mutate-genetic:
+    name: Mutate Genetic
+    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-mutation-testing.yml@main
+    with:
+      project: src/Ouroboros.Genetic/Ouroboros.Genetic.csproj
+      test-project: tests/Ouroboros.Genetic.Tests/Ouroboros.Genetic.Tests.csproj
+      category: genetic
+      mutation-level: Standard
