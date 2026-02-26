@@ -48,3 +48,21 @@ jobs:
       test-project: tests/Ouroboros.Genetic.Tests/Ouroboros.Genetic.Tests.csproj
       category: genetic
       mutation-level: Standard
+
+  mutate-abstractions:
+    name: Mutate Abstractions
+    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-mutation-testing.yml@main
+    with:
+      project: src/Ouroboros.Abstractions/Ouroboros.Abstractions.csproj
+      test-project: tests/Ouroboros.Abstractions.Tests/Ouroboros.Abstractions.Tests.csproj
+      category: abstractions
+      mutation-level: Standard
+
+  mutate-roslynator:
+    name: Mutate Roslynator
+    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-mutation-testing.yml@main
+    with:
+      project: src/Ouroboros.Roslynator/Ouroboros.Roslynator.csproj
+      test-project: tests/Ouroboros.Roslynator.Tests/Ouroboros.Roslynator.Tests.csproj
+      category: roslynator
+      mutation-level: Standard
