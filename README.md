@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/PMeeske/ouroboros-foundation/actions/workflows/ci.yml/badge.svg)](https://github.com/PMeeske/ouroboros-foundation/actions/workflows/ci.yml)
 [![Mutation Testing](https://github.com/PMeeske/ouroboros-foundation/actions/workflows/mutation.yml/badge.svg)](https://github.com/PMeeske/ouroboros-foundation/actions/workflows/mutation.yml)
+![Tests](https://img.shields.io/badge/tests-1%2C995%20passed-brightgreen)
+![Coverage](https://img.shields.io/badge/coverage-215%20test%20files%20%2F%20931%20src-blue)
 
 **Core functional programming abstractions, domain primitives, and AI safety infrastructure for the Ouroboros agent system.**
 
