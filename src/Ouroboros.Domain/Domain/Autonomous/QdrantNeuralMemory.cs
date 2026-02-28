@@ -16,7 +16,7 @@ namespace Ouroboros.Domain.Autonomous;
 /// Stores neuron messages, intentions, and enables semantic search.
 /// Uses the shared IQdrantClient via gRPC for unified Qdrant access.
 /// </summary>
-public sealed class QdrantNeuralMemory : IDisposable
+public sealed partial class QdrantNeuralMemory : IDisposable
 {
     private readonly QdrantClient _client;
     private readonly string _neuronMessagesCollection;
@@ -52,7 +52,7 @@ public sealed class QdrantNeuralMemory : IDisposable
     /// </summary>
     /// <param name="qdrantEndpoint">Qdrant gRPC endpoint (e.g., http://localhost:6334).</param>
     [Obsolete("Use the constructor accepting QdrantClient + IQdrantCollectionRegistry from DI.")]
-    public QdrantNeuralMemory(string qdrantEndpoint = "http://localhost:6334")
+    public QdrantNeuralMemory(string qdrantEndpoint = DefaultEndpoints.QdrantGrpc)
     {
         Uri uri = new Uri(qdrantEndpoint.TrimEnd('/'));
         _client = new QdrantClient(uri.Host, uri.Port > 0 ? uri.Port : 6334, uri.Scheme == "https");

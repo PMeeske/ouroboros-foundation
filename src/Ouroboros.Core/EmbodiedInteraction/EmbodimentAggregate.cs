@@ -14,7 +14,7 @@ namespace Ouroboros.Core.EmbodiedInteraction;
 /// multiple embodiment providers. Follows DDD patterns where the aggregate
 /// owns the business logic and providers serve as state sources.
 /// </summary>
-public sealed class EmbodimentAggregate : IDisposable
+public sealed partial class EmbodimentAggregate : IDisposable
 {
     private readonly ConcurrentDictionary<string, IEmbodimentProvider> _providers = new();
     private readonly ConcurrentDictionary<string, SensorInfo> _activeSensors = new();

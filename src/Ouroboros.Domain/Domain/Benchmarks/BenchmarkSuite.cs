@@ -11,7 +11,7 @@ namespace Ouroboros.Domain.Benchmarks;
 /// Implementation of the benchmark suite for evaluating Ouroboros capabilities
 /// across multiple dimensions and standard AI benchmarks.
 /// </summary>
-public sealed class BenchmarkSuite : IBenchmarkSuite
+public sealed partial class BenchmarkSuite : IBenchmarkSuite
 {
     /// <summary>
     /// Runs the ARC-AGI-2 benchmark for abstract reasoning and pattern recognition.

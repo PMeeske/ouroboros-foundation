@@ -15,7 +15,7 @@ namespace Ouroboros.Core.Hyperon;
 /// - Meta-level reasoning about certainty
 /// - Self-referential loops via re-entry.
 /// </summary>
-public sealed class FormMeTTaBridge : IDisposable
+public sealed partial class FormMeTTaBridge : IDisposable
 {
     private readonly IAtomSpace _space;
     private readonly Interpreter _interpreter;

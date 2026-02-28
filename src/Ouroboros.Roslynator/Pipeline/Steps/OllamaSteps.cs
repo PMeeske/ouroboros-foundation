@@ -15,8 +15,11 @@ public static class OllamaSteps
 {
     private static readonly HttpClient _http = new() { Timeout = TimeSpan.FromMinutes(2) };
 
+    /// <summary>Default Ollama endpoint base URL.</summary>
+    private const string DefaultOllamaEndpoint = "http://localhost:11434";
+
     private static string Endpoint => Environment.GetEnvironmentVariable("OLLAMA_ENDPOINT")
-        ?? "http://localhost:11434/api/generate";
+        ?? DefaultOllamaEndpoint + "/api/generate";
 
     private static string Model => Environment.GetEnvironmentVariable("OLLAMA_MODEL") ?? "codellama";
 

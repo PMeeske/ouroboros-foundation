@@ -11,7 +11,7 @@ namespace Ouroboros.Core.Synthesis;
 /// Neural-guided program synthesis engine with library learning capabilities.
 /// Implements DreamCoder-style wake-sleep algorithm for program synthesis.
 /// </summary>
-public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
+public sealed partial class ProgramSynthesisEngine : IProgramSynthesisEngine
 {
     private readonly int beamWidth;
     private readonly int maxDepth;

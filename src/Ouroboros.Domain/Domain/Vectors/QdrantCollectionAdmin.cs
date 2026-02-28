@@ -13,7 +13,7 @@ namespace Ouroboros.Domain.Vectors;
 /// Ouroboros's self-administered Qdrant collection manager.
 /// Provides capabilities for managing, linking, and self-healing vector collections.
 /// </summary>
-public sealed class QdrantCollectionAdmin : IAsyncDisposable
+public sealed partial class QdrantCollectionAdmin : IAsyncDisposable
 {
     private const int DefaultVectorSize = 768; // nomic-embed-text
 
@@ -82,7 +82,7 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
     /// </summary>
     /// <param name="endpoint">Qdrant endpoint (e.g., "http://localhost:6333").</param>
     [Obsolete("Use the constructor accepting QdrantClient + IQdrantCollectionRegistry from DI.")]
-    public QdrantCollectionAdmin(string endpoint = "http://localhost:6333")
+    public QdrantCollectionAdmin(string endpoint = DefaultEndpoints.Qdrant)
     {
         _endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
         Uri uri = new Uri(endpoint);

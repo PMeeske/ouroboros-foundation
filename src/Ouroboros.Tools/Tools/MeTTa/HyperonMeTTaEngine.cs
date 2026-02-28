@@ -16,7 +16,7 @@ using Ouroboros.Core.Hyperon.Parsing;
 /// Native C# Hyperon-based MeTTa engine implementation.
 /// Uses the in-process AtomSpace and Interpreter for high-performance symbolic reasoning.
 /// </summary>
-public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
+public sealed partial class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
 {
     private readonly AtomSpace space;
     private readonly Interpreter interpreter;

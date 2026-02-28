@@ -13,7 +13,7 @@ public class LlmProviderConfiguration
     /// <summary>
     /// Gets or sets ollama endpoint URL.
     /// </summary>
-    public string OllamaEndpoint { get; set; } = "http://localhost:11434";
+    public string OllamaEndpoint { get; set; } = DefaultEndpoints.Ollama;
 
     /// <summary>
     /// Gets or sets default model name for chat operations.
