@@ -434,6 +434,8 @@ public sealed class IntentionBus : IDisposable
     {
         _isActive = false;
         _cts.Cancel();
+        try { _expirationTask?.Wait(TimeSpan.FromSeconds(2)); }
+        catch { /* timeout or cancellation — proceed with disposal */ }
         _cts.Dispose();
         _intentionEvents.Dispose();
         _newIntentions.Dispose();

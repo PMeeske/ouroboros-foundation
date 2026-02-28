@@ -726,7 +726,7 @@ public sealed partial class CausalReasoningEngine
     private static void TopologicalSort(string varName, CausalGraph model,
         HashSet<string> visited, List<string> order, HashSet<string>? inStack = null)
     {
-        if (!visited.Add(varName)) return;
+        if (visited.Contains(varName)) return;
 
         inStack ??= new HashSet<string>();
 
@@ -745,6 +745,7 @@ public sealed partial class CausalReasoningEngine
         }
 
         inStack.Remove(varName);
+        visited.Add(varName);
         order.Add(varName);
     }
 
