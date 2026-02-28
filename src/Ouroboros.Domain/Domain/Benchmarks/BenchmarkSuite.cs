@@ -91,7 +91,8 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
 
             return Result<BenchmarkReport, string>.Success(report);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<BenchmarkReport, string>.Failure($"ARC benchmark failed: {ex.Message}");
         }
@@ -166,7 +167,8 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
 
             return Result<BenchmarkReport, string>.Success(report);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<BenchmarkReport, string>.Failure($"MMLU benchmark failed: {ex.Message}");
         }
@@ -243,7 +245,8 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
 
             return Result<BenchmarkReport, string>.Success(report);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<BenchmarkReport, string>.Failure($"Continual learning benchmark failed: {ex.Message}");
         }
@@ -298,7 +301,8 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
 
             return Result<BenchmarkReport, string>.Success(report);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<BenchmarkReport, string>.Failure($"Cognitive benchmark failed: {ex.Message}");
         }
@@ -366,7 +370,8 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
 
             return Result<ComprehensiveReport, string>.Success(report);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<ComprehensiveReport, string>.Failure($"Full evaluation failed: {ex.Message}");
         }

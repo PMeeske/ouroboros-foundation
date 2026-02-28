@@ -119,7 +119,8 @@ public static class MultiAgentCoordinatorPipeline
                 PlanningContext updatedContext = context with { Capabilities = capabilities };
                 return Result<PlanningContext, string>.Success(updatedContext);
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 return Result<PlanningContext, string>.Failure($"Failed to gather capabilities: {ex.Message}");
             }
@@ -144,7 +145,7 @@ public static class MultiAgentCoordinatorPipeline
                 PlanningContext updatedContext = context with { Tasks = tasks };
                 return Result<PlanningContext, string>.Success(updatedContext);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
                 return Result<PlanningContext, string>.Failure($"Failed to decompose tasks: {ex.Message}");
             }
@@ -174,7 +175,8 @@ public static class MultiAgentCoordinatorPipeline
                 PlanningContext updatedContext = context with { Assignments = allocationResult.Value };
                 return Result<PlanningContext, string>.Success(updatedContext);
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 return Result<PlanningContext, string>.Failure($"Failed to allocate tasks: {ex.Message}");
             }
@@ -205,7 +207,7 @@ public static class MultiAgentCoordinatorPipeline
                 PlanningContext updatedContext = context with { Dependencies = dependencies };
                 return Result<PlanningContext, string>.Success(updatedContext);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
                 return Result<PlanningContext, string>.Failure($"Failed to identify dependencies: {ex.Message}");
             }
@@ -236,7 +238,7 @@ public static class MultiAgentCoordinatorPipeline
                 PlanningContext updatedContext = context with { EstimatedDuration = duration };
                 return Result<PlanningContext, string>.Success(updatedContext);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
                 return Result<PlanningContext, string>.Failure($"Failed to estimate duration: {ex.Message}");
             }

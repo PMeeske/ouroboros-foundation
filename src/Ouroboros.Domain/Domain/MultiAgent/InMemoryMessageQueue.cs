@@ -30,7 +30,7 @@ public sealed class InMemoryMessageQueue : IMessageQueue
             queue.Enqueue(message);
             return Task.FromResult(Result<Unit, string>.Success(Unit.Value));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Task.FromResult(Result<Unit, string>.Failure($"Failed to enqueue message: {ex.Message}"));
         }

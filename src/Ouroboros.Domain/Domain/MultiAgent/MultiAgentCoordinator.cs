@@ -73,7 +73,8 @@ public sealed partial class MultiAgentCoordinator : IMultiAgentCoordinator
 
             return Result<Unit, string>.Success(Unit.Value);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<Unit, string>.Failure($"Broadcast failed: {ex.Message}");
         }
@@ -115,7 +116,8 @@ public sealed partial class MultiAgentCoordinator : IMultiAgentCoordinator
                 _ => Result<Dictionary<AgentId, TaskAssignment>, string>.Failure($"Unknown allocation strategy: {strategy}"),
             };
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<Dictionary<AgentId, TaskAssignment>, string>.Failure($"Task allocation failed: {ex.Message}");
         }
@@ -157,7 +159,8 @@ public sealed partial class MultiAgentCoordinator : IMultiAgentCoordinator
                 _ => Result<Decision, string>.Failure($"Unknown consensus protocol: {protocol}"),
             };
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<Decision, string>.Failure($"Consensus failed: {ex.Message}");
         }
@@ -190,7 +193,8 @@ public sealed partial class MultiAgentCoordinator : IMultiAgentCoordinator
                 _ => Result<Unit, string>.Failure($"Unknown knowledge sync strategy: {strategy}"),
             };
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<Unit, string>.Failure($"Knowledge synchronization failed: {ex.Message}");
         }
@@ -253,7 +257,8 @@ public sealed partial class MultiAgentCoordinator : IMultiAgentCoordinator
             CollaborativePlan plan = new CollaborativePlan(goal, assignments, dependencies, duration);
             return Result<CollaborativePlan, string>.Success(plan);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<CollaborativePlan, string>.Failure($"Collaborative planning failed: {ex.Message}");
         }

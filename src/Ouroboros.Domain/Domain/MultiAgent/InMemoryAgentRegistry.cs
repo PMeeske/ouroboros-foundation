@@ -24,7 +24,7 @@ public sealed class InMemoryAgentRegistry : IAgentRegistry
             this.agents[capabilities.Id] = capabilities;
             return Task.FromResult(Result<Unit, string>.Success(Unit.Value));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Task.FromResult(Result<Unit, string>.Failure($"Failed to register agent: {ex.Message}"));
         }
