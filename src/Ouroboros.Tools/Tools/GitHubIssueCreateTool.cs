@@ -82,7 +82,12 @@ public sealed class GitHubIssueCreateTool : ITool
                 $"Title: {issue.Title}\n" +
                 $"URL: {issue.HtmlUrl}");
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (ApiException ex)
+        {
+            return Result<string, string>.Failure($"Failed to create issue: {ex.Message}");
+        }
+        catch (System.Text.Json.JsonException ex)
         {
             return Result<string, string>.Failure($"Failed to create issue: {ex.Message}");
         }

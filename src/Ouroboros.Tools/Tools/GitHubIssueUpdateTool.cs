@@ -86,7 +86,12 @@ public sealed class GitHubIssueUpdateTool : ITool
                 $"State: {updatedIssue.State}\n" +
                 $"URL: {updatedIssue.HtmlUrl}");
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (ApiException ex)
+        {
+            return Result<string, string>.Failure($"Failed to update issue: {ex.Message}");
+        }
+        catch (System.Text.Json.JsonException ex)
         {
             return Result<string, string>.Failure($"Failed to update issue: {ex.Message}");
         }

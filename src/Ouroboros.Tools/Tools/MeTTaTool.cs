@@ -103,7 +103,12 @@ public sealed class MeTTaTool : ITool
                 _ => Result<string, string>.Failure($"Unknown operation: {operation}. Valid operations: query, add_fact, apply_rule, verify_plan")
             };
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (InvalidOperationException ex)
+        {
+            return Result<string, string>.Failure($"MeTTa execution failed: {ex.Message}");
+        }
+        catch (HttpRequestException ex)
         {
             return Result<string, string>.Failure($"MeTTa execution failed: {ex.Message}");
         }

@@ -58,7 +58,12 @@ public sealed class GitHubIssueReadTool : ITool
 
             return Result<string, string>.Success(result);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (ApiException ex)
+        {
+            return Result<string, string>.Failure($"Failed to read issue: {ex.Message}");
+        }
+        catch (System.Text.Json.JsonException ex)
         {
             return Result<string, string>.Failure($"Failed to read issue: {ex.Message}");
         }

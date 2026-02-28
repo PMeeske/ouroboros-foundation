@@ -91,7 +91,7 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
         {
             return Result<Program, string>.Failure("Synthesis was cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<Program, string>.Failure($"Synthesis failed: {ex.Message}");
         }
@@ -124,7 +124,7 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
         {
             return Result<List<Primitive>, string>.Failure("Primitive extraction was cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<List<Primitive>, string>.Failure($"Primitive extraction failed: {ex.Message}");
         }
@@ -168,7 +168,7 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
         {
             return Result<Unit, string>.Failure("Training was cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<Unit, string>.Failure($"Training failed: {ex.Message}");
         }
@@ -225,7 +225,7 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
         {
             return Result<DomainSpecificLanguage, string>.Failure("DSL evolution was cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<DomainSpecificLanguage, string>.Failure($"DSL evolution failed: {ex.Message}");
         }
@@ -320,7 +320,8 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
                     validPrograms.Add(program);
                 }
             }
-            catch (Exception)
+            catch (OperationCanceledException) { throw; }
+            catch (InvalidOperationException)
             {
                 // Skip programs that fail to execute
                 continue;

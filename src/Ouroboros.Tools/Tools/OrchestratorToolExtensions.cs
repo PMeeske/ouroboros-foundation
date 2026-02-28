@@ -31,7 +31,8 @@ public static class OrchestratorToolExtensions
                     metricsCallback(tool.Name, sw.Elapsed.TotalMilliseconds, result.IsSuccess);
                     return result;
                 }
-                catch (Exception ex)
+                catch (OperationCanceledException) { throw; }
+                catch (Exception ex) when (ex is not OperationCanceledException)
                 {
                     sw.Stop();
                     metricsCallback(tool.Name, sw.Elapsed.TotalMilliseconds, false);

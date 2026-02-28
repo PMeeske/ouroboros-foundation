@@ -201,7 +201,7 @@ public sealed class QdrantCollectionRegistry : IQdrantCollectionRegistry
                 "Using configuration defaults.",
                 ex.StatusCode);
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
             _logger?.LogWarning(ex,
                 "Qdrant collection discovery failed, using configuration defaults. " +

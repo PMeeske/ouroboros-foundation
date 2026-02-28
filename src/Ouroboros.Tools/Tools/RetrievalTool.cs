@@ -47,7 +47,12 @@ public sealed class RetrievalTool(TrackedVectorStore store, IEmbeddingModel embe
 
             return Result<string, string>.Success(result);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (HttpRequestException ex)
+        {
+            return Result<string, string>.Failure($"Search failed: {ex.Message}");
+        }
+        catch (System.Text.Json.JsonException ex)
         {
             return Result<string, string>.Failure($"Search failed: {ex.Message}");
         }

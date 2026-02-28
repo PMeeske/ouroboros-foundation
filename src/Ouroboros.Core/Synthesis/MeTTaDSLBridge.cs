@@ -24,7 +24,7 @@ public static class MeTTaDSLBridge
             Atom atom = ConvertNode(node);
             return Result<Atom, string>.Success(atom);
         }
-        catch (Exception ex)
+        catch (ArgumentException ex)
         {
             return Result<Atom, string>.Failure($"Failed to convert AST to MeTTa: {ex.Message}");
         }
@@ -42,7 +42,7 @@ public static class MeTTaDSLBridge
             ASTNode node = ConvertAtom(atom);
             return Result<ASTNode, string>.Success(node);
         }
-        catch (Exception ex)
+        catch (ArgumentException ex)
         {
             return Result<ASTNode, string>.Failure($"Failed to convert MeTTa to AST: {ex.Message}");
         }

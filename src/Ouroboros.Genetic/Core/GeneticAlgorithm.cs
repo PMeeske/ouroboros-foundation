@@ -83,7 +83,8 @@ public sealed class GeneticAlgorithm<TGene> : IGeneticAlgorithm<TGene>
 
             return Result<IChromosome<TGene>, string>.Success(population.BestChromosome);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (InvalidOperationException ex)
         {
             return Result<IChromosome<TGene>, string>.Failure($"Evolution failed: {ex.Message}");
         }
