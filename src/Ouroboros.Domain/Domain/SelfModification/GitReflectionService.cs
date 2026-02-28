@@ -122,6 +122,7 @@ public sealed partial class GitReflectionService : IDisposable
                 psi.ArgumentList.Add(arg);
             }
 
+            // SECURITY: safe — hardcoded "git" command; ArgumentList prevents injection
             using Process? process = Process.Start(psi);
             if (process == null)
             {

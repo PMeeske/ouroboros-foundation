@@ -98,6 +98,10 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
                 StandardErrorEncoding = Encoding.UTF8,
             };
 
+            // SECURITY: validated — FileName is either a caller-provided executable path
+            // or "docker" (hardcoded). Arguments are built from hardcoded strings and
+            // environment variable names (not values injected into the command line).
+            // UseShellExecute = false prevents shell interpretation.
             this.process = Process.Start(startInfo);
 
             if (this.process != null)
