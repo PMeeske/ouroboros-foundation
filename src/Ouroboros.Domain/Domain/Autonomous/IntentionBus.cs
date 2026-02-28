@@ -141,7 +141,17 @@ public sealed class IntentionBus : IDisposable
         _isActive = false;
         _cts.Cancel();
 
-        if (_expirationTask != null) await _expirationTask;
+        if (_expirationTask != null)
+        {
+            try
+            {
+                await _expirationTask.WaitAsync(TimeSpan.FromSeconds(5));
+            }
+            catch (TimeoutException)
+            {
+                // Expiration loop did not stop in time — proceed with shutdown
+            }
+        }
     }
 
     /// <summary>

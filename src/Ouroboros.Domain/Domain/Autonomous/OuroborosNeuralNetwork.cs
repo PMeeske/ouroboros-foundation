@@ -302,83 +302,17 @@ public sealed class OuroborosNeuralNetwork : IDisposable
         }
 
         // Apply message filters (if configured)
-        if (_filters != null && _filters.Count > 0)
+        IReadOnlyList<IMessageFilter>? filters = _filters;
+        if (filters != null && filters.Count > 0)
         {
-            // Capture a local snapshot to avoid concurrent modifications during async processing
-            IReadOnlyList<IMessageFilter> filters = _filters;
-
-            // First, attempt a synchronous fast-path by checking whether all filters
-            // complete synchronously. Only fall back to async await if any
-            // filter is incomplete.
-            List<Task<bool>> filterTasks = new List<Task<bool>>(filters.Count);
-            bool allCompletedSynchronously = true;
-
-            foreach (IMessageFilter filter in filters)
+            if (!await RunFiltersAsync(filters, message))
             {
-                Task<bool> task = filter.ShouldRouteAsync(message, CancellationToken.None);
-                filterTasks.Add(task);
-                if (!task.IsCompletedSuccessfully)
-                {
-                    allCompletedSynchronously = false;
-                }
-            }
-
-            if (allCompletedSynchronously)
-            {
-                // Evaluate all filter results synchronously
-                foreach (Task<bool> task in filterTasks)
-                {
-                    if (!task.Result)
-                    {
-                        // Message blocked by filter (synchronous path)
-                        System.Diagnostics.Trace.TraceWarning(
-                            $"[NeuralNetwork] Message {message.Id} with topic '{message.Topic}' from {message.SourceNeuron} blocked by filter (sync)");
-                        return;
-                    }
-                }
-
-                // All filters approved - broadcast to stream and deliver
-                _messageStream.OnNext(message);
-                DeliverMessage(message);
-            }
-            else
-            {
-                // Await async filter results without blocking the thread pool
-                try
-                {
-                    foreach (Task<bool> task in filterTasks)
-                    {
-                        bool allowed = task.IsCompletedSuccessfully
-                            ? task.Result
-                            : await task;
-
-                        if (!allowed)
-                        {
-                            // Message blocked by filter (async path)
-                            System.Diagnostics.Trace.TraceWarning(
-                                $"[NeuralNetwork] Message {message.Id} with topic '{message.Topic}' from {message.SourceNeuron} blocked by filter (async)");
-                            return;
-                        }
-                    }
-
-                    // All filters approved - broadcast to stream and deliver
-                    _messageStream.OnNext(message);
-                    DeliverMessage(message);
-                }
-                catch (Exception ex) when (ex is not OperationCanceledException)
-                {
-                    System.Diagnostics.Trace.TraceWarning(
-                        $"[NeuralNetwork] Error during message filtering for message {message.Id} with topic '{message.Topic}': {ex.GetType().Name} - {ex.Message}");
-                    // Fail-safe: don't deliver messages that fail filtering
-                }
+                return;
             }
         }
-        else
-        {
-            // No filters configured - broadcast to stream and deliver immediately (backward compatibility)
-            _messageStream.OnNext(message);
-            DeliverMessage(message);
-        }
+
+        _messageStream.OnNext(message);
+        DeliverMessage(message);
     }
 
     private void DeliverMessage(NeuronMessage message)
@@ -462,70 +396,77 @@ public sealed class OuroborosNeuralNetwork : IDisposable
         IReadOnlyList<IMessageFilter>? filters = _filters;
         if (filters != null && filters.Count > 0)
         {
-            List<Task<bool>> filterTasks = new List<Task<bool>>(filters.Count);
-            bool allCompletedSynchronously = true;
-
-            foreach (IMessageFilter filter in filters)
+            if (!await RunFiltersAsync(filters, message))
             {
-                Task<bool> task = filter.ShouldRouteAsync(message, CancellationToken.None);
-                filterTasks.Add(task);
-                if (!task.IsCompletedSuccessfully)
-                {
-                    allCompletedSynchronously = false;
-                }
-            }
-
-            if (allCompletedSynchronously)
-            {
-                foreach (Task<bool> task in filterTasks)
-                {
-                    if (!task.Result)
-                    {
-                        System.Diagnostics.Trace.TraceWarning(
-                            $"[NeuralNetwork] Broadcast message with topic '{message.Topic}' from {message.SourceNeuron} blocked by filter (sync)");
-                        return;
-                    }
-                }
-
-                // All filters approved - broadcast to stream and deliver
-                _messageStream.OnNext(message);
-                DeliverBroadcast(message, sourceNeuron);
-            }
-            else
-            {
-                // Await async filter results without blocking the thread pool
-                try
-                {
-                    foreach (Task<bool> task in filterTasks)
-                    {
-                        bool allowed = task.IsCompletedSuccessfully
-                            ? task.Result
-                            : await task;
-
-                        if (!allowed)
-                        {
-                            System.Diagnostics.Trace.TraceWarning(
-                                $"[NeuralNetwork] Broadcast message with topic '{message.Topic}' from {message.SourceNeuron} blocked by filter (async)");
-                            return;
-                        }
-                    }
-
-                    // All filters approved - broadcast to stream and deliver
-                    _messageStream.OnNext(message);
-                    DeliverBroadcast(message, sourceNeuron);
-                }
-                catch (Exception ex) when (ex is not OperationCanceledException)
-                {
-                    System.Diagnostics.Trace.TraceWarning(
-                        $"[NeuralNetwork] Error during broadcast filtering for topic '{message.Topic}': {ex.GetType().Name} - {ex.Message}");
-                }
+                return;
             }
         }
-        else
+
+        _messageStream.OnNext(message);
+        DeliverBroadcast(message, sourceNeuron);
+    }
+
+    /// <summary>
+    /// Evaluates all message filters against the given message.
+    /// Returns true if the message is allowed, false if blocked by any filter.
+    /// </summary>
+    private async Task<bool> RunFiltersAsync(IReadOnlyList<IMessageFilter> filters, NeuronMessage message)
+    {
+        // First, attempt a synchronous fast-path by checking whether all filters
+        // complete synchronously. Only fall back to async await if any filter is incomplete.
+        List<Task<bool>> filterTasks = new List<Task<bool>>(filters.Count);
+        bool allCompletedSynchronously = true;
+
+        foreach (IMessageFilter filter in filters)
         {
-            // No filters configured - broadcast to stream and deliver immediately
-            _messageStream.OnNext(message);
-            DeliverBroadcast(message, sourceNeuron);
+            Task<bool> task = filter.ShouldRouteAsync(message, CancellationToken.None);
+            filterTasks.Add(task);
+            if (!task.IsCompletedSuccessfully)
+            {
+                allCompletedSynchronously = false;
+            }
+        }
+
+        if (allCompletedSynchronously)
+        {
+            foreach (Task<bool> task in filterTasks)
+            {
+                if (!task.Result)
+                {
+                    System.Diagnostics.Trace.TraceWarning(
+                        $"[NeuralNetwork] Message {message.Id} with topic '{message.Topic}' from {message.SourceNeuron} blocked by filter (sync)");
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        // Await async filter results without blocking the thread pool
+        try
+        {
+            foreach (Task<bool> task in filterTasks)
+            {
+                bool allowed = task.IsCompletedSuccessfully
+                    ? task.Result
+                    : await task;
+
+                if (!allowed)
+                {
+                    System.Diagnostics.Trace.TraceWarning(
+                        $"[NeuralNetwork] Message {message.Id} with topic '{message.Topic}' from {message.SourceNeuron} blocked by filter (async)");
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            System.Diagnostics.Trace.TraceWarning(
+                $"[NeuralNetwork] Error during message filtering for message {message.Id} with topic '{message.Topic}': {ex.GetType().Name} - {ex.Message}");
+            // Fail-safe: don't deliver messages that fail filtering
+            return false;
         }
     }
 

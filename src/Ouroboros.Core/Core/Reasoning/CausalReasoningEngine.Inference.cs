@@ -680,9 +680,10 @@ public sealed partial class CausalReasoningEngine
         // are re-evaluated with intervened values before the outcome is computed.
         var visited = new HashSet<string>();
         var order = new List<string>();
+        var inStack = new HashSet<string>();
 
         foreach (var v in model.Variables)
-            TopologicalSort(v.Name, model, visited, order);
+            TopologicalSort(v.Name, model, visited, order, inStack);
 
         // Re-evaluate all variables in topological order using structural equations
         double lastValue = 0;
@@ -723,14 +724,27 @@ public sealed partial class CausalReasoningEngine
     }
 
     private void TopologicalSort(string varName, CausalGraph model,
-        HashSet<string> visited, List<string> order)
+        HashSet<string> visited, List<string> order, HashSet<string>? inStack = null)
     {
         if (!visited.Add(varName)) return;
+
+        inStack ??= new HashSet<string>();
+
+        if (!inStack.Add(varName))
+        {
+            // Cycle detected — break it to prevent infinite recursion
+            System.Diagnostics.Trace.TraceWarning(
+                $"[CausalReasoningEngine] Cycle detected in causal graph at variable '{varName}'. Breaking cycle.");
+            return;
+        }
+
         if (model.Equations.TryGetValue(varName, out StructuralEquation? eq) && eq.Parents != null)
         {
             foreach (var parent in eq.Parents)
-                TopologicalSort(parent, model, visited, order);
+                TopologicalSort(parent, model, visited, order, inStack);
         }
+
+        inStack.Remove(varName);
         order.Add(varName);
     }
 

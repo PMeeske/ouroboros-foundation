@@ -100,7 +100,7 @@ public sealed partial class ProgramSynthesisEngine
 
                 if (allExamplesPass)
                 {
-                    Program program = CreateProgram(node, trace);
+                    Program program = CreateProgram(node, trace, dsl);
                     validPrograms.Add(program);
                 }
             }
@@ -154,7 +154,7 @@ public sealed partial class ProgramSynthesisEngine
         return null;
     }
 
-    private Program CreateProgram(ASTNode node, List<ExecutionStep> trace)
+    private Program CreateProgram(ASTNode node, List<ExecutionStep> trace, DomainSpecificLanguage dsl)
     {
         string sourceCode = ASTToSourceCode(node);
         int depth = CalculateDepth(node);
@@ -165,7 +165,7 @@ public sealed partial class ProgramSynthesisEngine
         return new Program(
             sourceCode,
             ast,
-            new DomainSpecificLanguage("temp", new List<Primitive>(), new List<TypeRule>(), new List<RewriteRule>()),
+            dsl,
             logProb,
             new ExecutionTrace(trace, trace.LastOrDefault()?.Output ?? new object(), TimeSpan.Zero));
     }
