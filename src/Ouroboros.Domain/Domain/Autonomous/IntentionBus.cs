@@ -373,6 +373,11 @@ public sealed class IntentionBus : IDisposable
             {
                 break;
             }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceWarning($"IntentionBus expiration loop error: {ex.Message}");
+                // Continue the loop -- don't let a transient error kill cleanup
+            }
         }
     }
 

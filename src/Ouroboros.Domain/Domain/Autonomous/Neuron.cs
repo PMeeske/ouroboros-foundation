@@ -12,7 +12,7 @@ public abstract class Neuron : IDisposable
     private readonly Channel<NeuronMessage> _messageChannel = Channel.CreateUnbounded<NeuronMessage>();
     private readonly CancellationTokenSource _cts = new();
 
-    private bool _isActive;
+    private volatile bool _isActive;
     private Task? _processingTask;
 
     /// <summary>

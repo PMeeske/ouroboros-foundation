@@ -19,7 +19,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
     private ConnectionTopology? _topology;
 
     private IReadOnlyList<IMessageFilter>? _filters;
-    private bool _isActive;
+    private volatile bool _isActive;
 
     /// <summary>
     /// Creates a new neural network.
@@ -279,9 +279,6 @@ public sealed class OuroborosNeuralNetwork : IDisposable
             _messageHistory.TryDequeue(out _);
         }
 
-        // Broadcast to stream
-        _messageStream.OnNext(message);
-
         // Persist to Qdrant (async, fire-and-forget)
         if (PersistMessageFunction != null)
         {
@@ -332,7 +329,8 @@ public sealed class OuroborosNeuralNetwork : IDisposable
                     }
                 }
 
-                // All filters approved - deliver the message immediately
+                // All filters approved - broadcast to stream and deliver
+                _messageStream.OnNext(message);
                 DeliverMessage(message);
             }
             else
@@ -358,7 +356,8 @@ public sealed class OuroborosNeuralNetwork : IDisposable
                             }
                         }
 
-                        // All filters approved - deliver the message
+                        // All filters approved - broadcast to stream and deliver
+                        _messageStream.OnNext(message);
                         DeliverMessage(message);
                     }
                     catch (Exception ex) when (ex is not OperationCanceledException)
@@ -372,7 +371,8 @@ public sealed class OuroborosNeuralNetwork : IDisposable
         }
         else
         {
-            // No filters configured - deliver immediately (backward compatibility)
+            // No filters configured - broadcast to stream and deliver immediately (backward compatibility)
+            _messageStream.OnNext(message);
             DeliverMessage(message);
         }
     }
@@ -435,8 +435,6 @@ public sealed class OuroborosNeuralNetwork : IDisposable
             Payload = payload,
         };
 
-        _messageStream.OnNext(message);
-
         // Apply message filters before broadcasting (same pipeline as RouteMessage)
         IReadOnlyList<IMessageFilter>? filters = _filters;
         if (filters != null && filters.Count > 0)
@@ -466,7 +464,8 @@ public sealed class OuroborosNeuralNetwork : IDisposable
                     }
                 }
 
-                // All filters approved - deliver immediately
+                // All filters approved - broadcast to stream and deliver
+                _messageStream.OnNext(message);
                 DeliverBroadcast(message, sourceNeuron);
             }
             else
@@ -487,6 +486,8 @@ public sealed class OuroborosNeuralNetwork : IDisposable
                             }
                         }
 
+                        // All filters approved - broadcast to stream and deliver
+                        _messageStream.OnNext(message);
                         DeliverBroadcast(message, sourceNeuron);
                     }
                     catch (Exception ex) when (ex is not OperationCanceledException)
@@ -499,7 +500,8 @@ public sealed class OuroborosNeuralNetwork : IDisposable
         }
         else
         {
-            // No filters configured - deliver immediately
+            // No filters configured - broadcast to stream and deliver immediately
+            _messageStream.OnNext(message);
             DeliverBroadcast(message, sourceNeuron);
         }
     }

@@ -643,9 +643,10 @@ public sealed partial class CausalReasoningEngine
                     // Residual = actual - predicted (the exogenous noise term)
                     exogenous[variable.Name] = actual - predicted;
                 }
-                catch
+                catch (Exception ex) when (ex is not OperationCanceledException)
                 {
                     // Non-numeric or missing values: fall back to observed value
+                    System.Diagnostics.Trace.TraceWarning($"Abduction failed for variable: {ex.Message}");
                     exogenous[variable.Name] = factual.Values.TryGetValue(variable.Name, out var v)
                         ? v
                         : 0.0;
@@ -669,24 +670,62 @@ public sealed partial class CausalReasoningEngine
         CausalGraph model,
         Dictionary<string, object> exogenousVars)
     {
-        // Use structural equation to compute outcome, adding exogenous noise term
-        // per Pearl's twin-network counterfactual: outcome = f(parents) + U_outcome
-        if (model.Equations.TryGetValue(outcome, out StructuralEquation? equation))
+        // Propagate effects through ALL downstream variables in topological order,
+        // not just the single outcome variable. This ensures intermediate variables
+        // are re-evaluated with intervened values before the outcome is computed.
+        var visited = new HashSet<string>();
+        var order = new List<string>();
+
+        foreach (var v in model.Variables)
+            TopologicalSort(v.Name, model, visited, order);
+
+        // Re-evaluate all variables in topological order using structural equations
+        double lastValue = 0;
+        foreach (var varName in order)
         {
-            double predicted = Convert.ToDouble(equation.Function(values));
-
-            // Add exogenous noise term (residual from abduction step)
-            if (exogenousVars.TryGetValue(outcome, out var noise))
+            if (model.Equations.TryGetValue(varName, out StructuralEquation? eq) && eq.Parents.Count > 0)
             {
-                predicted += Convert.ToDouble(noise);
-            }
+                // Skip variables whose value was set by intervention (they keep their intervened value)
+                // Only re-evaluate downstream variables
+                try
+                {
+                    double predicted = Convert.ToDouble(eq.Function(values));
 
-            values[outcome] = predicted;
-            return predicted;
+                    // Add exogenous noise term (residual from abduction step)
+                    if (exogenousVars.TryGetValue(varName, out var noise))
+                    {
+                        predicted += Convert.ToDouble(noise);
+                    }
+
+                    values[varName] = predicted;
+                    lastValue = predicted;
+                }
+                catch
+                {
+                    // Non-numeric variable -- skip
+                }
+            }
         }
 
-        // Fallback: return existing value or default
-        return values.GetValueOrDefault(outcome, 0.0);
+        // Return the outcome variable's value specifically
+        if (values.TryGetValue(outcome, out var outcomeValue))
+        {
+            return outcomeValue;
+        }
+
+        return lastValue;
+    }
+
+    private void TopologicalSort(string varName, CausalGraph model,
+        HashSet<string> visited, List<string> order)
+    {
+        if (!visited.Add(varName)) return;
+        if (model.Equations.TryGetValue(varName, out StructuralEquation? eq) && eq.Parents != null)
+        {
+            foreach (var parent in eq.Parents)
+                TopologicalSort(parent, model, visited, order);
+        }
+        order.Add(varName);
     }
 
     private Result<Explanation, string> GenerateCausalExplanation(
