@@ -21,6 +21,7 @@ public static class SyncStepExtensions
     /// Uses Task.Run to avoid capturing the synchronization context.
     /// </summary>
     public static SyncStep<TIn, TOut> ToSync<TIn, TOut>(this Step<TIn, TOut> asyncStep)
+        // Intentional: sync wrapper for non-async callers
         => new(input => Task.Run(() => asyncStep(input)).GetAwaiter().GetResult());
 
     /// <summary>

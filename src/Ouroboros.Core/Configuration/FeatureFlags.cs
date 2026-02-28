@@ -19,19 +19,19 @@ public sealed record FeatureFlags
     /// Gets or sets a value indicating whether embodiment features are enabled.
     /// Embodiment enables the system to interact with physical or virtual environments.
     /// </summary>
-    public bool Embodiment { get; set; } = false;
+    public bool Embodiment { get; init; } = false;
 
     /// <summary>
     /// Gets or sets a value indicating whether self-model features are enabled.
     /// Self-model enables the system to maintain and reason about its own capabilities and state.
     /// </summary>
-    public bool SelfModel { get; set; } = false;
+    public bool SelfModel { get; init; } = false;
 
     /// <summary>
     /// Gets or sets a value indicating whether affect features are enabled.
     /// Affect enables the system to model and respond to emotional and affective states.
     /// </summary>
-    public bool Affect { get; set; } = false;
+    public bool Affect { get; init; } = false;
 
     /// <summary>
     /// Checks if any evolutionary features are enabled.

@@ -31,6 +31,7 @@ public static class SkillRegistryExtensions
             AverageExecutionTime: 0,
             Tags: new List<string>());
 
+        // Intentional: sync wrapper for non-async callers
         Task.Run(() => registry.RegisterSkillAsync(agentSkill)).GetAwaiter().GetResult();
     }
 
@@ -41,6 +42,7 @@ public static class SkillRegistryExtensions
     {
         ArgumentNullException.ThrowIfNull(registry);
 
+        // Intentional: sync wrapper for non-async callers
         var result = Task.Run(() => registry.GetSkillAsync(skillName)).GetAwaiter().GetResult();
         if (!result.IsSuccess)
             return null;
@@ -97,6 +99,7 @@ public static class SkillRegistryExtensions
     {
         ArgumentNullException.ThrowIfNull(registry);
 
+        // Intentional: sync wrapper for non-async callers
         var result = Task.Run(() => registry.GetAllSkillsAsync()).GetAwaiter().GetResult();
         if (!result.IsSuccess)
             return Array.Empty<Skill>();
@@ -125,6 +128,7 @@ public static class SkillRegistryExtensions
     {
         ArgumentNullException.ThrowIfNull(registry);
 
+        // Intentional: sync wrapper for non-async callers
         Task.Run(() => registry.RecordExecutionAsync(skillName, success, executionTimeMs)).GetAwaiter().GetResult();
     }
 

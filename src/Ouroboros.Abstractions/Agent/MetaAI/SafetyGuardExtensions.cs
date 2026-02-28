@@ -18,6 +18,7 @@ public static class SafetyGuardExtensions
         PermissionLevel permissionLevel)
     {
         ArgumentNullException.ThrowIfNull(guard);
+        // Intentional: sync wrapper for non-async callers
         return Task.Run(() => guard.CheckSafetyAsync(action, permissionLevel)).GetAwaiter().GetResult();
     }
 
@@ -29,6 +30,7 @@ public static class SafetyGuardExtensions
         ArgumentNullException.ThrowIfNull(guard);
         ArgumentNullException.ThrowIfNull(step);
 
+        // Intentional: sync wrapper for non-async callers
         var result = Task.Run(() => guard.SandboxStepAsync(step)).GetAwaiter().GetResult();
         return result.Success && result.SandboxedStep != null
             ? result.SandboxedStep

@@ -50,7 +50,7 @@ public sealed partial class QdrantNeuralMemory : IDisposable
     /// <summary>
     /// Creates a new Qdrant neural memory instance.
     /// </summary>
-    /// <param name="qdrantEndpoint">Qdrant gRPC endpoint (e.g., http://localhost:6334).</param>
+    /// <param name="qdrantEndpoint">Qdrant gRPC endpoint (defaults to <see cref="DefaultEndpoints.QdrantGrpc"/>).</param>
     [Obsolete("Use the constructor accepting QdrantClient + IQdrantCollectionRegistry from DI.")]
     public QdrantNeuralMemory(string qdrantEndpoint = DefaultEndpoints.QdrantGrpc)
     {

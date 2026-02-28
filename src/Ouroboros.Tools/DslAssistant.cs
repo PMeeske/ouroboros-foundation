@@ -233,6 +233,7 @@ public class Result<T>
         /// <returns>Response output.</returns>
         public string ProcessCommand(string command)
         {
+            // Intentional: sync wrapper for non-async callers
             return Task.Run(() => ProcessCommandAsync(command)).GetAwaiter().GetResult();
         }
     }

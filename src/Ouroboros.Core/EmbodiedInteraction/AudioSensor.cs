@@ -233,6 +233,7 @@ public sealed class AudioSensor : IDisposable
         _isListening = false;
         try
         {
+            // Intentional: sync disposal in Dispose() — cannot use async
             Task.Run(async () =>
             {
                 if (_streamingSession != null)

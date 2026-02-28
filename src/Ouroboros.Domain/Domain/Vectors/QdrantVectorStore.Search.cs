@@ -156,6 +156,7 @@ public sealed partial class QdrantVectorStore
     public IEnumerable<LCVector> GetAll()
     {
         // Use Task.Run to avoid deadlocks from synchronization context capture
+        // Intentional: sync wrapper for non-async callers
         return Task.Run(() => GetAllAsync()).GetAwaiter().GetResult();
     }
 

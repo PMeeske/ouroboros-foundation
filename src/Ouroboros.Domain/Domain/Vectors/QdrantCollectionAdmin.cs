@@ -80,7 +80,7 @@ public sealed partial class QdrantCollectionAdmin : IAsyncDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="QdrantCollectionAdmin"/> class.
     /// </summary>
-    /// <param name="endpoint">Qdrant endpoint (e.g., "http://localhost:6333").</param>
+    /// <param name="endpoint">Qdrant endpoint (defaults to <see cref="DefaultEndpoints.Qdrant"/>).</param>
     [Obsolete("Use the constructor accepting QdrantClient + IQdrantCollectionRegistry from DI.")]
     public QdrantCollectionAdmin(string endpoint = DefaultEndpoints.Qdrant)
     {

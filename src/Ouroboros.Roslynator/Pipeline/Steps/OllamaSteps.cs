@@ -2,24 +2,22 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Ouroboros.Core.Configuration;
 
 namespace Ouroboros.Roslynator.Pipeline.Steps;
 
 /// <summary>
 /// Ollama AI pipeline step implemented as a self-contained Kleisli-like function.
 /// Reads configuration from environment variables:
-///  - OLLAMA_ENDPOINT (default http://localhost:11434/api/generate)
+///  - OLLAMA_ENDPOINT (default <see cref="DefaultEndpoints.Ollama"/>/api/generate)
 ///  - OLLAMA_MODEL (default "codellama")
 /// </summary>
 public static class OllamaSteps
 {
     private static readonly HttpClient _http = new() { Timeout = TimeSpan.FromMinutes(2) };
 
-    /// <summary>Default Ollama endpoint base URL.</summary>
-    private const string DefaultOllamaEndpoint = "http://localhost:11434";
-
     private static string Endpoint => Environment.GetEnvironmentVariable("OLLAMA_ENDPOINT")
-        ?? DefaultOllamaEndpoint + "/api/generate";
+        ?? DefaultEndpoints.Ollama + "/api/generate";
 
     private static string Model => Environment.GetEnvironmentVariable("OLLAMA_MODEL") ?? "codellama";
 

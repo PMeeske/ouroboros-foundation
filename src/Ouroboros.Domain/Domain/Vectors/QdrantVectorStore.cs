@@ -50,7 +50,7 @@ public sealed partial class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisp
     /// <summary>
     /// Initializes a new instance of the <see cref="QdrantVectorStore"/> class.
     /// </summary>
-    /// <param name="connectionString">Qdrant connection string (e.g., "http://localhost:6333").</param>
+    /// <param name="connectionString">Qdrant connection string (e.g., <see cref="DefaultEndpoints.Qdrant"/>).</param>
     /// <param name="collectionName">Name of the collection to use.</param>
     /// <param name="logger">Optional logger instance.</param>
     [Obsolete("Use the constructor accepting QdrantClient + IQdrantCollectionRegistry from DI.")]
