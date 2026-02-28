@@ -31,7 +31,7 @@ public static class SkillRegistryExtensions
             AverageExecutionTime: 0,
             Tags: new List<string>());
 
-        registry.RegisterSkillAsync(agentSkill).GetAwaiter().GetResult();
+        Task.Run(() => registry.RegisterSkillAsync(agentSkill)).GetAwaiter().GetResult();
     }
 
     /// <summary>
@@ -41,7 +41,7 @@ public static class SkillRegistryExtensions
     {
         ArgumentNullException.ThrowIfNull(registry);
 
-        var result = registry.GetSkillAsync(skillName).GetAwaiter().GetResult();
+        var result = Task.Run(() => registry.GetSkillAsync(skillName)).GetAwaiter().GetResult();
         if (!result.IsSuccess)
             return null;
 
@@ -97,7 +97,7 @@ public static class SkillRegistryExtensions
     {
         ArgumentNullException.ThrowIfNull(registry);
 
-        var result = registry.GetAllSkillsAsync().GetAwaiter().GetResult();
+        var result = Task.Run(() => registry.GetAllSkillsAsync()).GetAwaiter().GetResult();
         if (!result.IsSuccess)
             return Array.Empty<Skill>();
 
@@ -125,7 +125,7 @@ public static class SkillRegistryExtensions
     {
         ArgumentNullException.ThrowIfNull(registry);
 
-        registry.RecordExecutionAsync(skillName, success, executionTimeMs).GetAwaiter().GetResult();
+        Task.Run(() => registry.RecordExecutionAsync(skillName, success, executionTimeMs)).GetAwaiter().GetResult();
     }
 
     /// <summary>

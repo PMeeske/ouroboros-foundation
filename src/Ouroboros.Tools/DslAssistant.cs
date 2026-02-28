@@ -205,18 +205,18 @@ public class Result<T>
         /// </summary>
         /// <param name="command">The command string.</param>
         /// <returns>Response output.</returns>
-        public string ProcessCommand(string command)
+        public async Task<string> ProcessCommandAsync(string command)
         {
             if (command.StartsWith("suggest"))
             {
                 var dsl = command.Substring(8);
-                var suggestions = SuggestNextSteps(dsl).Result;
+                var suggestions = await SuggestNextSteps(dsl);
                 return $"Suggestions: {string.Join(", ", suggestions.Select(s => s.Step))}";
             }
             if (command.StartsWith("complete"))
             {
                 var partial = command.Substring(9);
-                var completions = GetTokenCompletions(partial).Result;
+                var completions = await GetTokenCompletions(partial);
                 return $"Completions: {string.Join(", ", completions)}";
             }
             if (command == "help")
@@ -224,6 +224,16 @@ public class Result<T>
             if (command == "exit")
                 return "Session terminated";
             return "Unknown command";
+        }
+
+        /// <summary>
+        /// Processes interactive commands synchronously. Prefer <see cref="ProcessCommandAsync"/> for async callers.
+        /// </summary>
+        /// <param name="command">The command string.</param>
+        /// <returns>Response output.</returns>
+        public string ProcessCommand(string command)
+        {
+            return Task.Run(() => ProcessCommandAsync(command)).GetAwaiter().GetResult();
         }
     }
 }

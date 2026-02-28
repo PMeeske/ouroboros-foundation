@@ -44,6 +44,7 @@
         <Compile Include="Agent\MetaAI\RoutingDecision.cs" />
         <Compile Include="Agent\MetaAI\SafetyCheckResult.cs" />
         <Compile Include="Agent\MetaAI\SandboxResult.cs" />
+        <Compile Include="Agent\MetaAI\SelfImprovement\IPlan.cs" />
         <Compile Include="Agent\MetaAI\SelfImprovement\Plan.cs" />
         <Compile Include="Agent\MetaAI\SelfImprovement\PlanExecutionResult.cs" />
         <Compile Include="Agent\MetaAI\SelfImprovement\PlanVerificationResult.cs" />

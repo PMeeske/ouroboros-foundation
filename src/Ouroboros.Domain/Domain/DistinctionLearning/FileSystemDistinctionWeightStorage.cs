@@ -16,6 +16,8 @@ using Ouroboros.Core.Monads;
 /// </summary>
 public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStorage
 {
+    private static readonly JsonSerializerOptions SharedJsonOptions = new() { WriteIndented = true };
+
     private readonly DistinctionStorageConfig _config;
     private readonly ILogger<FileSystemDistinctionWeightStorage>? _logger;
     private readonly string _metadataPath;
@@ -190,7 +192,7 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
 
     private async Task SaveMetadataAsync(List<DistinctionWeightMetadata> metadata, CancellationToken ct)
     {
-        string json = JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true });
+        string json = JsonSerializer.Serialize(metadata, SharedJsonOptions);
         await File.WriteAllTextAsync(_metadataPath, json, ct);
     }
 }

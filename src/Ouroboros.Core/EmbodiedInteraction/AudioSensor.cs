@@ -216,7 +216,18 @@ public sealed class AudioSensor : IDisposable
         _disposed = true;
 
         _isListening = false;
-        _streamingSession?.DisposeAsync().AsTask().Wait();
+        try
+        {
+            Task.Run(async () =>
+            {
+                if (_streamingSession != null)
+                    await _streamingSession.DisposeAsync();
+            }).GetAwaiter().GetResult();
+        }
+        catch
+        {
+            // Best-effort disposal; do not throw from Dispose
+        }
 
         _audioChunks.OnCompleted();
         _transcriptions.OnCompleted();

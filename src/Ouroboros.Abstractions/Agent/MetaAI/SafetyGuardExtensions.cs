@@ -18,7 +18,7 @@ public static class SafetyGuardExtensions
         PermissionLevel permissionLevel)
     {
         ArgumentNullException.ThrowIfNull(guard);
-        return guard.CheckSafetyAsync(action, permissionLevel).GetAwaiter().GetResult();
+        return Task.Run(() => guard.CheckSafetyAsync(action, permissionLevel)).GetAwaiter().GetResult();
     }
 
     /// <summary>
@@ -29,7 +29,7 @@ public static class SafetyGuardExtensions
         ArgumentNullException.ThrowIfNull(guard);
         ArgumentNullException.ThrowIfNull(step);
 
-        var result = guard.SandboxStepAsync(step).GetAwaiter().GetResult();
+        var result = Task.Run(() => guard.SandboxStepAsync(step)).GetAwaiter().GetResult();
         return result.Success && result.SandboxedStep != null
             ? result.SandboxedStep
             : step;
