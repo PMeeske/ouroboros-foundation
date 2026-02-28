@@ -72,9 +72,10 @@ public class VectorStoreFactory
         _logger?.LogInformation("Creating Qdrant vector store with connection: {Connection}",
             MaskConnectionString(_config.ConnectionString));
 
-#pragma warning disable CS0618 // Obsolete
-        return new QdrantVectorStore(_config.ConnectionString, _config.DefaultCollection, _logger);
-#pragma warning restore CS0618
+        // Create a QdrantClient from the connection string, then use the non-obsolete constructor
+        var uri = new Uri(_config.ConnectionString);
+        var client = new QdrantClient(uri.Host, uri.Port > 0 ? uri.Port : 6334, uri.Scheme == "https");
+        return new QdrantVectorStore(client, _config.DefaultCollection, _logger);
     }
 
     private IVectorStore CreatePineconeStore()

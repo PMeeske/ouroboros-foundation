@@ -61,9 +61,8 @@ public sealed partial class UserPersonaNeuron : Neuron
     /// <summary>
     /// Cached research content for current topic.
     /// </summary>
-#pragma warning disable CS0169 // Field is never used - reserved for caching implementation
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "CS0169:Field is never used", Justification = "Reserved for caching implementation")]
     private string? _currentResearchContent;
-#pragma warning restore CS0169
 
     /// <summary>
     /// Last time research was performed.

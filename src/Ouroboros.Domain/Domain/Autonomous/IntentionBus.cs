@@ -21,9 +21,6 @@ public sealed class IntentionBus : IDisposable
     private readonly CancellationTokenSource _cts = new();
 
     private bool _isActive;
-#pragma warning disable CS0649 // Field is assigned dynamically or reserved for future use
-    private Task? _processingTask;
-#pragma warning restore CS0649
     private Task? _expirationTask;
 
     /// <summary>
@@ -145,7 +142,6 @@ public sealed class IntentionBus : IDisposable
         _isActive = false;
         _cts.Cancel();
 
-        if (_processingTask != null) await _processingTask;
         if (_expirationTask != null) await _expirationTask;
     }
 
