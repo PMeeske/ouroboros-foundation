@@ -88,20 +88,23 @@ public sealed class OuroborosNeuralNetwork : IDisposable
     /// <param name="filters">The filters to apply, or null to remove all filters.</param>
     public void SetMessageFilters(IReadOnlyList<IMessageFilter>? filters)
     {
-        // Store an internal snapshot to avoid concurrent modifications of the caller's list.
-        if (filters is null || filters.Count == 0)
+        lock (_filterLock)
         {
-            _filters = null;
-            return;
-        }
+            // Store an internal snapshot to avoid concurrent modifications of the caller's list.
+            if (filters is null || filters.Count == 0)
+            {
+                _filters = null;
+                return;
+            }
 
-        IMessageFilter[] snapshot = new IMessageFilter[filters.Count];
-        for (int i = 0; i < filters.Count; i++)
-        {
-            snapshot[i] = filters[i];
-        }
+            IMessageFilter[] snapshot = new IMessageFilter[filters.Count];
+            for (int i = 0; i < filters.Count; i++)
+            {
+                snapshot[i] = filters[i];
+            }
 
-        _filters = snapshot;
+            _filters = snapshot;
+        }
     }
 
     /// <summary>

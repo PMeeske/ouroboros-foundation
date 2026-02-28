@@ -611,8 +611,9 @@ public sealed partial class CausalReasoningEngine
             counterfactualValues[intervention] = interventionVar.PossibleValues.FirstOrDefault() ?? 0;
         }
 
-        // Step 3: Propagate effects using structural equations
-        object counterfactualOutcome = this.PropagateEffects(outcome, counterfactualValues, model, exogenousVars);
+        // Step 3: Propagate effects using structural equations (hold intervened variables fixed)
+        var interventionSet = interventionVar != null ? new HashSet<string> { intervention } : null;
+        object counterfactualOutcome = this.PropagateEffects(outcome, counterfactualValues, model, exogenousVars, interventionSet);
 
         // Step 4: Create distribution (simplified as point estimate)
         Distribution distribution = new Distribution(
@@ -673,7 +674,8 @@ public sealed partial class CausalReasoningEngine
         string outcome,
         Dictionary<string, object> values,
         CausalGraph model,
-        Dictionary<string, object> exogenousVars)
+        Dictionary<string, object> exogenousVars,
+        HashSet<string>? interventions = null)
     {
         // Propagate effects through ALL downstream variables in topological order,
         // not just the single outcome variable. This ensures intermediate variables
@@ -691,8 +693,10 @@ public sealed partial class CausalReasoningEngine
         {
             if (model.Equations.TryGetValue(varName, out StructuralEquation? eq) && eq.Parents.Count > 0)
             {
-                // Skip variables whose value was set by intervention (they keep their intervened value)
-                // Only re-evaluate downstream variables
+                // Skip variables whose value was set by intervention (do-operator: hold fixed)
+                if (interventions != null && interventions.Contains(varName))
+                    continue;
+
                 try
                 {
                     double predicted = Convert.ToDouble(eq.Function(values));
