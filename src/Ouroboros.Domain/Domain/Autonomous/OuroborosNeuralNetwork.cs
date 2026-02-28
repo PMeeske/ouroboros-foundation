@@ -495,8 +495,8 @@ public sealed class OuroborosNeuralNetwork : IDisposable
     public string GetNetworkState()
     {
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine("🧠 **Ouroboros Neural Network**\n");
-        sb.AppendLine($"**Status:** {(_isActive ? "Active 🟢" : "Inactive 🔴")}");
+        sb.AppendLine("[NET] **Ouroboros Neural Network**\n");
+        sb.AppendLine($"**Status:** {(_isActive ? "Active [ON]" : "Inactive [OFF]")}");
         sb.AppendLine($"**Neurons:** {_neurons.Count}");
         sb.AppendLine($"**Messages in History:** {_messageHistory.Count}");
 
@@ -515,7 +515,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
 
         foreach (Neuron? neuron in _neurons.Values.OrderBy(n => n.Type))
         {
-            string status = neuron.IsActive ? "🟢" : "🔴";
+            string status = neuron.IsActive ? "[ON]" : "[OFF]";
             sb.AppendLine($"  {status} **{neuron.Name}** ({neuron.Type})");
             sb.AppendLine($"     ID: {neuron.Id}, Topics: {string.Join(", ", neuron.SubscribedTopics.Take(3))}");
         }

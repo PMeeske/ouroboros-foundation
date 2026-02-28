@@ -14,7 +14,6 @@ namespace Ouroboros.Domain.Autonomous;
 public sealed class IntentionBus : IDisposable
 {
     private readonly ConcurrentDictionary<Guid, Intention> _intentions = new();
-    private readonly ConcurrentQueue<Intention> _pendingQueue = new();
     private readonly Subject<IntentionEvent> _intentionEvents = new();
     private readonly Subject<Intention> _newIntentions = new();
     private readonly CancellationTokenSource _cts = new();
@@ -37,8 +36,8 @@ public sealed class IntentionBus : IDisposable
 
         return englishMessage switch
         {
-            "🧠 IntentionBus activated. I will now propose actions before executing them."
-                => "🧠 IntentionBus aktiviert. Ich werde jetzt Aktionen vorschlagen, bevor ich sie ausführe.",
+            "[NET] IntentionBus activated. I will now propose actions before executing them."
+                => "[NET] IntentionBus aktiviert. Ich werde jetzt Aktionen vorschlagen, bevor ich sie ausführe.",
             _ => englishMessage
         };
     }
@@ -52,18 +51,18 @@ public sealed class IntentionBus : IDisposable
         {
             return templateKey switch
             {
-                "completed" => $"✅ Intention completed: {param}",
-                "failed" => $"❌ Intention failed: {param} - {param2}",
-                "proposed" => $"💭 **Intention Proposed:** {param}",
+                "completed" => $"[OK] Intention completed: {param}",
+                "failed" => $"[FAIL] Intention failed: {param} - {param2}",
+                "proposed" => $"[PROPOSED] **Intention Proposed:** {param}",
                 _ => param
             };
         }
 
         return templateKey switch
         {
-            "completed" => $"✅ Absicht abgeschlossen: {param}",
-            "failed" => $"❌ Absicht fehlgeschlagen: {param} - {param2}",
-            "proposed" => $"💭 **Absicht vorgeschlagen:** {param}",
+            "completed" => $"[OK] Absicht abgeschlossen: {param}",
+            "failed" => $"[FAIL] Absicht fehlgeschlagen: {param} - {param2}",
+            "proposed" => $"[PROPOSED] **Absicht vorgeschlagen:** {param}",
             _ => param
         };
     }
@@ -129,7 +128,7 @@ public sealed class IntentionBus : IDisposable
         _isActive = true;
 
         _expirationTask = Task.Run(ExpirationLoopAsync);
-        OnProactiveMessage?.Invoke(Localize("🧠 IntentionBus activated. I will now propose actions before executing them."), IntentionPriority.Normal);
+        OnProactiveMessage?.Invoke(Localize("[NET] IntentionBus activated. I will now propose actions before executing them."), IntentionPriority.Normal);
     }
 
     /// <summary>
@@ -184,14 +183,13 @@ public sealed class IntentionBus : IDisposable
         };
 
         _intentions[intention.Id] = intention;
-        _pendingQueue.Enqueue(intention);
         _newIntentions.OnNext(intention);
 
         if (requiresApproval)
         {
             OnIntentionRequiresAttention?.Invoke(intention);
             OnProactiveMessage?.Invoke(
-                $"💭 **Intention Proposed:** {title}\n" +
+                $"[PROPOSED] **Intention Proposed:** {title}\n" +
                 $"   Category: {category}, Priority: {priority}\n" +
                 $"   Reason: {rationale}\n" +
                 $"   Use `/approve {intention.Id.ToString()[..8]}` or `/reject {intention.Id.ToString()[..8]}`",
@@ -426,7 +424,7 @@ public sealed class IntentionBus : IDisposable
         int rejected = _intentions.Values.Count(i => i.Status == IntentionStatus.Rejected);
         int failed = _intentions.Values.Count(i => i.Status == IntentionStatus.Failed);
 
-        return $"📊 **IntentionBus Status**\n" +
+        return $"[STATUS] **IntentionBus Status**\n" +
                $"  Pending: {pending}, Approved: {approved}, Completed: {completed}\n" +
                $"  Rejected: {rejected}, Failed: {failed}, Total: {_intentions.Count}";
     }
