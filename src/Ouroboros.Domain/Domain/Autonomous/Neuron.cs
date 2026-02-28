@@ -104,7 +104,11 @@ public abstract class Neuron : IDisposable
         };
 
         _outgoingMessages.OnNext(message);
-        Network?.RouteMessage(message);
+        _ = Network?.RouteMessageAsync(message).ContinueWith(t =>
+        {
+            if (t.IsFaulted)
+                System.Diagnostics.Trace.TraceWarning($"[{Id}] RouteMessage failed: {t.Exception?.InnerException?.Message}");
+        }, TaskContinuationOptions.OnlyOnFaulted);
     }
 
     /// <summary>
@@ -122,7 +126,11 @@ public abstract class Neuron : IDisposable
         };
 
         _outgoingMessages.OnNext(response);
-        Network?.RouteMessage(response);
+        _ = Network?.RouteMessageAsync(response).ContinueWith(t =>
+        {
+            if (t.IsFaulted)
+                System.Diagnostics.Trace.TraceWarning($"[{Id}] RouteMessage failed: {t.Exception?.InnerException?.Message}");
+        }, TaskContinuationOptions.OnlyOnFaulted);
     }
 
     /// <summary>

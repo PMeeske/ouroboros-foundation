@@ -177,7 +177,7 @@ public sealed partial class AutonomousCoordinator
                 Console.WriteLine("  [Coordinator] Proactive messages re-enabled");
             }
 
-            _network.Broadcast("training.stop", null!, "coordinator");
+            _ = _network.BroadcastAsync("training.stop", null!, "coordinator");
             (int TotalInteractions, double AverageSatisfaction, int SessionMessages) stats = _userPersonaNeuron.GetStats();
 
             RaiseProactiveMessage(
@@ -196,7 +196,7 @@ public sealed partial class AutonomousCoordinator
     /// </summary>
     public void ConfigureAutoTraining(UserPersonaConfig config)
     {
-        _network.Broadcast("training.configure", config, "coordinator");
+        _ = _network.BroadcastAsync("training.configure", config, "coordinator");
     }
 
     /// <summary>
@@ -259,7 +259,7 @@ public sealed partial class AutonomousCoordinator
             }
 
             // Notify the persona of the response for evaluation
-            _network.Broadcast("response.generated", response, "coordinator");
+            await _network.BroadcastAsync("response.generated", response, "coordinator");
 
             // Record the interaction
             _userPersonaNeuron?.RecordInteraction(message, response);
@@ -391,7 +391,7 @@ public sealed partial class AutonomousCoordinator
                 if (parts.Length > 2)
                 {
                     string topic = string.Join(" ", parts.Skip(2));
-                    _network.Broadcast("user_persona.set_topic", topic, "coordinator");
+                    _ = _network.BroadcastAsync("user_persona.set_topic", topic, "coordinator");
                     RaiseProactiveMessage($"📚 Training topic set to: {topic}", IntentionPriority.Low, "coordinator");
                 }
 
@@ -401,7 +401,7 @@ public sealed partial class AutonomousCoordinator
                 if (parts.Length > 2)
                 {
                     string interest = string.Join(" ", parts.Skip(2));
-                    _network.Broadcast("user_persona.add_interest", interest, "coordinator");
+                    _ = _network.BroadcastAsync("user_persona.add_interest", interest, "coordinator");
                     RaiseProactiveMessage($"⭐ Added training interest: {interest}", IntentionPriority.Low, "coordinator");
                 }
 

@@ -254,7 +254,7 @@ public sealed partial class AutonomousCoordinator : IDisposable
                 }
 
                 // Periodic status broadcast to neurons
-                _network.Broadcast("system.tick", new { Time = DateTime.UtcNow, Pending = pending.Count }, "coordinator");
+                _ = _network.BroadcastAsync("system.tick", new { Time = DateTime.UtcNow, Pending = pending.Count }, "coordinator");
 
                 _lastTick = DateTime.UtcNow;
             }

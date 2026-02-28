@@ -705,9 +705,10 @@ public sealed partial class CausalReasoningEngine
                     values[varName] = predicted;
                     lastValue = predicted;
                 }
-                catch
+                catch (Exception ex) when (ex is not OperationCanceledException)
                 {
-                    // Non-numeric variable -- skip
+                    // Non-numeric variable -- skip but log for diagnostics
+                    System.Diagnostics.Trace.TraceWarning($"PropagateEffects: skipping variable due to error: {ex.Message}");
                 }
             }
         }

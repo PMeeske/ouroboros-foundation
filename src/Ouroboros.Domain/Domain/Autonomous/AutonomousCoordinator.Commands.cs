@@ -314,9 +314,9 @@ public sealed partial class AutonomousCoordinator
     /// <summary>
     /// Injects a goal for autonomous pursuit.
     /// </summary>
-    public void InjectGoal(string goal, IntentionPriority priority = IntentionPriority.Normal)
+    public async Task InjectGoalAsync(string goal, IntentionPriority priority = IntentionPriority.Normal)
     {
-        _network.Broadcast("goal.add", goal, "user");
+        await _network.BroadcastAsync("goal.add", goal, "user");
 
         _intentionBus.ProposeIntention(
             $"Pursue Goal: {goal[..Math.Min(50, goal.Length)]}",
@@ -332,7 +332,7 @@ public sealed partial class AutonomousCoordinator
     /// <summary>
     /// Sends a message to a specific neuron.
     /// </summary>
-    public void SendToNeuron(string neuronId, string topic, object payload)
+    public async Task SendToNeuronAsync(string neuronId, string topic, object payload)
     {
         NeuronMessage message = new NeuronMessage
         {
@@ -341,7 +341,7 @@ public sealed partial class AutonomousCoordinator
             Topic = topic,
             Payload = payload,
         };
-        _network.RouteMessage(message);
+        await _network.RouteMessageAsync(message);
     }
 
     private static string GetHelpText()

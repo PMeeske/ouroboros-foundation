@@ -20,6 +20,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
 
     private IReadOnlyList<IMessageFilter>? _filters;
     private readonly object _filterLock = new();
+    private readonly CancellationTokenSource _lifetimeCts = new();
     private volatile bool _isActive;
 
     /// <summary>
@@ -213,6 +214,8 @@ public sealed class OuroborosNeuralNetwork : IDisposable
         if (!_isActive) return;
         _isActive = false;
 
+        _lifetimeCts.Cancel();
+
         await _intentionBus.StopAsync();
 
         foreach (Neuron neuron in _neurons.Values)
@@ -272,7 +275,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
     /// <summary>
     /// Routes a message to appropriate neurons.
     /// </summary>
-    public void RouteMessage(NeuronMessage message)
+    public async Task RouteMessageAsync(NeuronMessage message)
     {
         ArgumentNullException.ThrowIfNull(message);
 
@@ -290,8 +293,9 @@ public sealed class OuroborosNeuralNetwork : IDisposable
             {
                 try
                 {
-                    await PersistMessageFunction(message, CancellationToken.None);
+                    await PersistMessageFunction(message, _lifetimeCts.Token);
                 }
+                catch (OperationCanceledException) { /* Shutdown — expected */ }
                 catch (HttpRequestException ex) { System.Diagnostics.Trace.TraceWarning($"[NeuralNetwork] Persistence error: {ex.Message}"); }
                 catch (Grpc.Core.RpcException ex) { System.Diagnostics.Trace.TraceWarning($"[NeuralNetwork] Persistence error: {ex.Message}"); }
             });
@@ -304,7 +308,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
             IReadOnlyList<IMessageFilter> filters = _filters;
 
             // First, attempt a synchronous fast-path by checking whether all filters
-            // complete synchronously. Only fall back to background execution if any
+            // complete synchronously. Only fall back to async await if any
             // filter is incomplete.
             List<Task<bool>> filterTasks = new List<Task<bool>>(filters.Count);
             bool allCompletedSynchronously = true;
@@ -339,15 +343,14 @@ public sealed class OuroborosNeuralNetwork : IDisposable
             }
             else
             {
-                // Await async filter results synchronously so the filter verdict
-                // is observed before deciding whether to deliver the message.
+                // Await async filter results without blocking the thread pool
                 try
                 {
                     foreach (Task<bool> task in filterTasks)
                     {
                         bool allowed = task.IsCompletedSuccessfully
                             ? task.Result
-                            : task.GetAwaiter().GetResult();
+                            : await task;
 
                         if (!allowed)
                         {
@@ -446,7 +449,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
     /// <summary>
     /// Broadcasts a message to all neurons, applying message filters before delivery.
     /// </summary>
-    public void Broadcast(string topic, object payload, string sourceNeuron)
+    public async Task BroadcastAsync(string topic, object payload, string sourceNeuron)
     {
         NeuronMessage message = new NeuronMessage
         {
@@ -455,7 +458,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
             Payload = payload,
         };
 
-        // Apply message filters before broadcasting (same pipeline as RouteMessage)
+        // Apply message filters before broadcasting (same pipeline as RouteMessageAsync)
         IReadOnlyList<IMessageFilter>? filters = _filters;
         if (filters != null && filters.Count > 0)
         {
@@ -490,15 +493,14 @@ public sealed class OuroborosNeuralNetwork : IDisposable
             }
             else
             {
-                // Await async filter results synchronously so the filter verdict
-                // is observed before deciding whether to deliver the broadcast.
+                // Await async filter results without blocking the thread pool
                 try
                 {
                     foreach (Task<bool> task in filterTasks)
                     {
                         bool allowed = task.IsCompletedSuccessfully
                             ? task.Result
-                            : task.GetAwaiter().GetResult();
+                            : await task;
 
                         if (!allowed)
                         {
@@ -594,6 +596,8 @@ public sealed class OuroborosNeuralNetwork : IDisposable
     public void Dispose()
     {
         _isActive = false;
+        _lifetimeCts.Cancel();
+        _lifetimeCts.Dispose();
         _intentionBus.Dispose();
 
         foreach (Neuron neuron in _neurons.Values)

@@ -249,7 +249,7 @@ public sealed partial class AutonomousCoordinator
             await RecordExecutionAsMeTTaFactAsync(intention, result, ct);
 
             // Notify network of completion
-            _network.Broadcast("intention.completed", new { IntentionId = intention.Id, Result = result }, "coordinator");
+            await _network.BroadcastAsync("intention.completed", new { IntentionId = intention.Id, Result = result }, "coordinator");
 
             // Raise message so user sees the result
             RaiseProactiveMessage($"✅ {intention.Title}: {result}", IntentionPriority.Normal, "coordinator");
@@ -348,14 +348,14 @@ public sealed partial class AutonomousCoordinator
     private string ExecuteTaskAction(Intention intention)
     {
         string task = intention.Action?.Message ?? intention.Description;
-        _network.Broadcast("task.execute", new { Task = task, IntentionId = intention.Id }, "coordinator");
+        _ = _network.BroadcastAsync("task.execute", new { Task = task, IntentionId = intention.Id }, "coordinator");
         return $"Task dispatched: {task[..Math.Min(50, task.Length)]}...";
     }
 
     private async Task<string> ExecuteGenericIntentionAsync(Intention intention, CancellationToken ct)
     {
         // For unknown action types, broadcast to network
-        _network.Broadcast($"intention.execute.{intention.Action?.ActionType ?? "unknown"}", intention, "coordinator");
+        await _network.BroadcastAsync($"intention.execute.{intention.Action?.ActionType ?? "unknown"}", intention, "coordinator");
         return $"Intention broadcast for execution: {intention.Title}";
     }
 
@@ -397,7 +397,7 @@ public sealed partial class AutonomousCoordinator
 
     private string ExecuteSelfReflection(Intention intention)
     {
-        _network.Broadcast("reflection.execute", new { Description = intention.Description, From = "coordinator" }, "coordinator");
+        _ = _network.BroadcastAsync("reflection.execute", new { Description = intention.Description, From = "coordinator" }, "coordinator");
         return "Self-reflection initiated";
     }
 
@@ -406,13 +406,13 @@ public sealed partial class AutonomousCoordinator
         if (!_config.EnableCodeModification)
             return "Code analysis disabled by configuration";
 
-        _network.Broadcast("code.analyze", new { Description = intention.Description }, "coordinator");
+        await _network.BroadcastAsync("code.analyze", new { Description = intention.Description }, "coordinator");
         return "Code analysis requested";
     }
 
     private string ExecuteGoalPursuit(Intention intention)
     {
-        _network.Broadcast("goal.pursue", intention.Description, "coordinator");
+        _ = _network.BroadcastAsync("goal.pursue", intention.Description, "coordinator");
         return $"Goal pursuit initiated: {intention.Description[..Math.Min(50, intention.Description.Length)]}...";
     }
 
@@ -432,38 +432,38 @@ public sealed partial class AutonomousCoordinator
             return $"Research completed using {preferredTool}: {result[..Math.Min(200, result.Length)]}...";
         }
 
-        _network.Broadcast("research.request", intention.Description, "coordinator");
+        await _network.BroadcastAsync("research.request", intention.Description, "coordinator");
         return "Research request broadcast";
     }
 
     private string ExecuteMemoryOperation(Intention intention)
     {
-        _network.Broadcast("memory.operation", intention.Description, "coordinator");
+        _ = _network.BroadcastAsync("memory.operation", intention.Description, "coordinator");
         return "Memory operation requested";
     }
 
     private string ExecuteLearning(Intention intention)
     {
-        _network.Broadcast("learning.request", intention.Description, "coordinator");
+        _ = _network.BroadcastAsync("learning.request", intention.Description, "coordinator");
         return "Learning activity initiated";
     }
 
     private string ExecuteSafetyCheck(Intention intention)
     {
-        _network.Broadcast("safety.check", intention.Description, "coordinator");
+        _ = _network.BroadcastAsync("safety.check", intention.Description, "coordinator");
         return "Safety check initiated";
     }
 
     private string ExecuteNeuronCommunication(Intention intention)
     {
-        _network.Broadcast("neuron.communicate", intention.Description, "coordinator");
+        _ = _network.BroadcastAsync("neuron.communicate", intention.Description, "coordinator");
         return "Inter-neuron communication sent";
     }
 
     private string ExecuteDefaultIntention(Intention intention)
     {
         // Broadcast to network and let neurons handle it
-        _network.Broadcast("intention.default", intention, "coordinator");
+        _ = _network.BroadcastAsync("intention.default", intention, "coordinator");
         return $"Intention '{intention.Title}' executed (broadcast to network)";
     }
 
@@ -480,13 +480,13 @@ public sealed partial class AutonomousCoordinator
             return "Code modification is disabled";
 
         // Broadcast to code neuron for execution
-        _network.Broadcast("code.execute_change", intention.Action ?? new IntentionAction { ActionType = "code_change" }, "coordinator");
+        await _network.BroadcastAsync("code.execute_change", intention.Action ?? new IntentionAction { ActionType = "code_change" }, "coordinator");
         return "Code change request sent to code neuron";
     }
 
     private string ExecuteGoalAction(Intention intention)
     {
-        _network.Broadcast("goal.activate", intention.Action?.Message ?? intention.Description, "coordinator");
+        _ = _network.BroadcastAsync("goal.activate", intention.Action?.Message ?? intention.Description, "coordinator");
         return "Goal activated";
     }
 }

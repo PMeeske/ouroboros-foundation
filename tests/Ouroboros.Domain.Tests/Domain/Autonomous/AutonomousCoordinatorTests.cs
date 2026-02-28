@@ -788,13 +788,13 @@ public class AutonomousCoordinatorTests : IDisposable
     // ----------------------------------------------------------------
 
     [Fact]
-    public void InjectGoal_IncreasesPendingIntentionsCount()
+    public async Task InjectGoal_IncreasesPendingIntentionsCount()
     {
         // Arrange
         int before = _sut.PendingIntentionsCount;
 
         // Act
-        _sut.InjectGoal("Learn quantum computing");
+        await _sut.InjectGoalAsync("Learn quantum computing");
 
         // Assert
         _sut.PendingIntentionsCount.Should().BeGreaterThanOrEqualTo(before);
