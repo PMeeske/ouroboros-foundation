@@ -106,8 +106,9 @@ public abstract class Neuron : IDisposable
         _outgoingMessages.OnNext(message);
         _ = Network?.RouteMessageAsync(message).ContinueWith(t =>
         {
-            if (t.IsFaulted)
-                System.Diagnostics.Trace.TraceWarning($"[{Id}] RouteMessage failed: {t.Exception?.InnerException?.Message}");
+            if (t.IsFaulted && t.Exception != null)
+                foreach (var ex in t.Exception.InnerExceptions)
+                    System.Diagnostics.Trace.TraceWarning($"[{Id}] RouteMessage failed: {ex.Message}");
         }, TaskContinuationOptions.OnlyOnFaulted);
     }
 
@@ -128,8 +129,9 @@ public abstract class Neuron : IDisposable
         _outgoingMessages.OnNext(response);
         _ = Network?.RouteMessageAsync(response).ContinueWith(t =>
         {
-            if (t.IsFaulted)
-                System.Diagnostics.Trace.TraceWarning($"[{Id}] RouteMessage failed: {t.Exception?.InnerException?.Message}");
+            if (t.IsFaulted && t.Exception != null)
+                foreach (var ex in t.Exception.InnerExceptions)
+                    System.Diagnostics.Trace.TraceWarning($"[{Id}] RouteMessage failed: {ex.Message}");
         }, TaskContinuationOptions.OnlyOnFaulted);
     }
 
