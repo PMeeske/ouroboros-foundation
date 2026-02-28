@@ -122,6 +122,15 @@ public sealed class OuroborosNeuralNetwork : IDisposable
             subscribers.Add(neuron.Id);
         }
 
+        // Auto-register neurons that implement IMessageFilter so their
+        // safety checks are applied before routing any message.
+        if (neuron is IMessageFilter filter)
+        {
+            List<IMessageFilter> currentFilters = _filters?.ToList() ?? new List<IMessageFilter>();
+            currentFilters.Add(filter);
+            SetMessageFilters(currentFilters);
+        }
+
         // Create default connections based on topic overlap
         if (_topology != null)
         {

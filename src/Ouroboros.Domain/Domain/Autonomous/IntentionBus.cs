@@ -17,7 +17,6 @@ public sealed class IntentionBus : IDisposable
     private readonly ConcurrentQueue<Intention> _pendingQueue = new();
     private readonly Subject<IntentionEvent> _intentionEvents = new();
     private readonly Subject<Intention> _newIntentions = new();
-    private readonly SemaphoreSlim _processLock = new(1, 1);
     private readonly CancellationTokenSource _cts = new();
 
     private bool _isActive;
@@ -398,6 +397,5 @@ public sealed class IntentionBus : IDisposable
         _cts.Dispose();
         _intentionEvents.Dispose();
         _newIntentions.Dispose();
-        _processLock.Dispose();
     }
 }

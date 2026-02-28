@@ -129,21 +129,54 @@ public sealed partial class CausalReasoningEngine
         List<int> condSet,
         List<string> variableNames)
     {
-        // Simplified chi-square test for conditional independence
-        // In production, use proper statistical tests based on variable types
+        if (data.Count < 5)
+        {
+            return true; // Insufficient data for reliable independence testing
+        }
 
         string nameI = variableNames[varI];
         string nameJ = variableNames[varJ];
 
-        // Extract data for variables
-        double[] dataI = data.Select(o => Convert.ToDouble(o.Values[nameI])).ToArray();
-        double[] dataJ = data.Select(o => Convert.ToDouble(o.Values[nameJ])).ToArray();
+        if (condSet.Count == 0)
+        {
+            // No conditioning: simple Pearson correlation
+            double[] dataI = data.Select(o => Convert.ToDouble(o.Values[nameI])).ToArray();
+            double[] dataJ = data.Select(o => Convert.ToDouble(o.Values[nameJ])).ToArray();
+            double correlation = this.ComputeCorrelation(dataI, dataJ);
+            return Math.Abs(correlation) < SignificanceLevel;
+        }
 
-        // Compute correlation
-        double correlation = this.ComputeCorrelation(dataI, dataJ);
+        // Partial correlation: partition observations by conditioning set values
+        List<string> condNames = condSet.Select(idx => variableNames[idx]).ToList();
 
-        // Simple threshold-based test (should be proper statistical test)
-        return Math.Abs(correlation) < SignificanceLevel;
+        var partitions = data.GroupBy(obs =>
+            string.Join("|", condNames.Select(c =>
+                obs.Values.TryGetValue(c, out var v) ? v?.ToString() ?? string.Empty : string.Empty)));
+
+        double totalCorrelation = 0;
+        int partitionCount = 0;
+
+        foreach (var partition in partitions)
+        {
+            List<Observation> partObs = partition.ToList();
+            if (partObs.Count < 3)
+            {
+                continue; // Too few observations in this partition
+            }
+
+            double[] partDataI = partObs.Select(o => Convert.ToDouble(o.Values[nameI])).ToArray();
+            double[] partDataJ = partObs.Select(o => Convert.ToDouble(o.Values[nameJ])).ToArray();
+            double correlation = this.ComputeCorrelation(partDataI, partDataJ);
+            totalCorrelation += Math.Abs(correlation);
+            partitionCount++;
+        }
+
+        if (partitionCount == 0)
+        {
+            return true; // No valid partitions with enough data
+        }
+
+        return (totalCorrelation / partitionCount) < SignificanceLevel;
     }
 
     private double ComputeCorrelation(double[] x, double[] y)
@@ -170,10 +203,15 @@ public sealed partial class CausalReasoningEngine
 
     private List<CausalEdge> OrientEdges(bool[,] adjacencyMatrix, List<string> variableNames, List<Observation> data)
     {
-        List<CausalEdge> edges = new List<CausalEdge>();
         int n = variableNames.Count;
 
-        // Simple heuristic: orient based on time order if available, otherwise use correlation strength
+        // Build mutable edge state: (from, to) -> (strength, type, oriented)
+        // Track undirected edges as pairs keyed by canonical ordering (i < j)
+        var edgeStrength = new Dictionary<(int From, int To), double>();
+        var edgeType = new Dictionary<(int From, int To), EdgeType>();
+        var edgeOriented = new Dictionary<(int From, int To), bool>();
+
+        // Initialize all skeleton edges as undirected with computed correlation strength
         for (int i = 0; i < n; i++)
         {
             for (int j = i + 1; j < n; j++)
@@ -186,13 +224,173 @@ public sealed partial class CausalReasoningEngine
                     double[] dataI = data.Select(o => Convert.ToDouble(o.Values[nameI])).ToArray();
                     double[] dataJ = data.Select(o => Convert.ToDouble(o.Values[nameJ])).ToArray();
 
-                    double correlation = this.ComputeCorrelation(dataI, dataJ);
-                    double strength = Math.Abs(correlation);
+                    double strength = Math.Abs(this.ComputeCorrelation(dataI, dataJ));
 
-                    // Orient edge from i to j (simplified - should use proper orientation rules)
-                    edges.Add(new CausalEdge(nameI, nameJ, strength, EdgeType.Direct));
+                    // Store with canonical key (i < j), default orientation i -> j
+                    edgeStrength[(i, j)] = strength;
+                    edgeType[(i, j)] = EdgeType.Direct;
+                    edgeOriented[(i, j)] = false;
                 }
             }
+        }
+
+        // Phase 1: V-structure detection (colliders)
+        // For each triple X-Z-Y where X-Z and Z-Y are adjacent but X-Y are NOT adjacent,
+        // orient as X -> Z <- Y (collider at Z)
+        for (int z = 0; z < n; z++)
+        {
+            // Find all neighbors of z in the skeleton
+            List<int> neighbors = new List<int>();
+            for (int k = 0; k < n; k++)
+            {
+                if (k == z)
+                {
+                    continue;
+                }
+
+                (int lo, int hi) = k < z ? (k, z) : (z, k);
+                if (edgeStrength.ContainsKey((lo, hi)))
+                {
+                    neighbors.Add(k);
+                }
+            }
+
+            // Check all pairs of neighbors
+            for (int ni = 0; ni < neighbors.Count; ni++)
+            {
+                for (int nj = ni + 1; nj < neighbors.Count; nj++)
+                {
+                    int x = neighbors[ni];
+                    int y = neighbors[nj];
+
+                    // Check that X and Y are NOT adjacent
+                    (int xLo, int xHi) = x < y ? (x, y) : (y, x);
+                    if (edgeStrength.ContainsKey((xLo, xHi)))
+                    {
+                        continue; // X-Y adjacent, not a v-structure
+                    }
+
+                    // Orient X -> Z: ensure edge key points from x to z
+                    (int xzLo, int xzHi) = x < z ? (x, z) : (z, x);
+                    edgeType[(xzLo, xzHi)] = EdgeType.Collider;
+                    edgeOriented[(xzLo, xzHi)] = true;
+                    // Store direction: cause=x, effect=z. If x < z, canonical key is (x,z) so From=x, To=z is correct.
+                    // If z < x, canonical key is (z,x) and we need to flip direction.
+                    // We'll track actual direction separately.
+
+                    // Orient Y -> Z similarly
+                    (int yzLo, int yzHi) = y < z ? (y, z) : (z, y);
+                    edgeType[(yzLo, yzHi)] = EdgeType.Collider;
+                    edgeOriented[(yzLo, yzHi)] = true;
+                }
+            }
+        }
+
+        // For v-structures, track the actual direction: cause -> effect
+        // We need a direction map: canonical key -> actual (cause, effect) indices
+        var edgeDirection = new Dictionary<(int, int), (int Cause, int Effect)>();
+
+        foreach (var key in edgeStrength.Keys)
+        {
+            // Default: cause=key.From (lower index), effect=key.To (higher index)
+            edgeDirection[key] = (key.From, key.To);
+        }
+
+        // Re-apply v-structure directions: for X->Z, cause=X, effect=Z
+        for (int z = 0; z < n; z++)
+        {
+            List<int> neighbors = new List<int>();
+            for (int k = 0; k < n; k++)
+            {
+                if (k == z)
+                {
+                    continue;
+                }
+
+                (int lo, int hi) = k < z ? (k, z) : (z, k);
+                if (edgeStrength.ContainsKey((lo, hi)))
+                {
+                    neighbors.Add(k);
+                }
+            }
+
+            for (int ni = 0; ni < neighbors.Count; ni++)
+            {
+                for (int nj = ni + 1; nj < neighbors.Count; nj++)
+                {
+                    int x = neighbors[ni];
+                    int y = neighbors[nj];
+
+                    (int xLo, int xHi) = x < y ? (x, y) : (y, x);
+                    if (edgeStrength.ContainsKey((xLo, xHi)))
+                    {
+                        continue;
+                    }
+
+                    // X -> Z: cause=x, effect=z
+                    (int xzLo, int xzHi) = x < z ? (x, z) : (z, x);
+                    edgeDirection[(xzLo, xzHi)] = (x, z);
+
+                    // Y -> Z: cause=y, effect=z
+                    (int yzLo, int yzHi) = y < z ? (y, z) : (z, y);
+                    edgeDirection[(yzLo, yzHi)] = (y, z);
+                }
+            }
+        }
+
+        // Phase 2: Meek Rule 1 -- if X->Z and Z-Y is unoriented, orient Z->Y
+        // (to avoid creating new v-structures or cycles)
+        bool changed = true;
+        int maxIterations = n * 2;
+        while (changed && maxIterations-- > 0)
+        {
+            changed = false;
+            foreach (var key in edgeStrength.Keys)
+            {
+                if (edgeOriented[key])
+                {
+                    continue; // Already oriented
+                }
+
+                int a = key.From;
+                int b = key.To;
+
+                // Check if there's any oriented edge pointing INTO a (making a the effect)
+                // If so, orient a->b to propagate
+                bool hasDirectedIntoA = edgeStrength.Keys.Any(k =>
+                    edgeOriented[k] && edgeDirection[k].Effect == a);
+
+                if (hasDirectedIntoA)
+                {
+                    edgeDirection[key] = (a, b);
+                    edgeType[key] = EdgeType.Direct;
+                    edgeOriented[key] = true;
+                    changed = true;
+                    continue;
+                }
+
+                // Also check if oriented edge points INTO b
+                bool hasDirectedIntoB = edgeStrength.Keys.Any(k =>
+                    edgeOriented[k] && edgeDirection[k].Effect == b);
+
+                if (hasDirectedIntoB)
+                {
+                    edgeDirection[key] = (b, a);
+                    edgeType[key] = EdgeType.Direct;
+                    edgeOriented[key] = true;
+                    changed = true;
+                }
+            }
+        }
+
+        // Build final edge list
+        List<CausalEdge> edges = new List<CausalEdge>();
+        foreach (var key in edgeStrength.Keys)
+        {
+            var (cause, effect) = edgeDirection[key];
+            string causeName = variableNames[cause];
+            string effectName = variableNames[effect];
+            edges.Add(new CausalEdge(causeName, effectName, edgeStrength[key], edgeType[key]));
         }
 
         return edges;
@@ -306,8 +504,45 @@ public sealed partial class CausalReasoningEngine
 
     private Dictionary<string, object> AbductExogenousVariables(Observation factual, CausalGraph model)
     {
-        // Simplified: return factual values as exogenous variables
-        return new Dictionary<string, object>(factual.Values);
+        // Compute exogenous (noise) variables as residuals: U_i = actual_i - predicted_i
+        // For variables with structural equations, the residual captures the unexplained
+        // component. For root variables (no equation or no parents), the exogenous value
+        // is the observed value itself.
+        var exogenous = new Dictionary<string, object>();
+
+        foreach (Variable variable in model.Variables)
+        {
+            if (model.Equations.TryGetValue(variable.Name, out StructuralEquation? eq)
+                && eq.Function != null
+                && eq.Parents.Count > 0)
+            {
+                try
+                {
+                    // Compute predicted value from structural equation
+                    double predicted = Convert.ToDouble(eq.Function(factual.Values));
+                    double actual = Convert.ToDouble(factual.Values[variable.Name]);
+
+                    // Residual = actual - predicted (the exogenous noise term)
+                    exogenous[variable.Name] = actual - predicted;
+                }
+                catch
+                {
+                    // Non-numeric or missing values: fall back to observed value
+                    exogenous[variable.Name] = factual.Values.TryGetValue(variable.Name, out var v)
+                        ? v
+                        : 0.0;
+                }
+            }
+            else
+            {
+                // No structural equation or no parents: exogenous IS the observed value
+                exogenous[variable.Name] = factual.Values.TryGetValue(variable.Name, out var v)
+                    ? v
+                    : 0.0;
+            }
+        }
+
+        return exogenous;
     }
 
     private object PropagateEffects(

@@ -20,8 +20,8 @@ public sealed partial class AutonomousCoordinator
 
         foreach (Intention intention in pending)
         {
-            // YOLO mode: auto-approve EVERYTHING without prompting
-            if (IsYoloMode)
+            // YOLO mode: auto-approve unless category requires mandatory approval
+            if (IsYoloMode && !_config.AlwaysRequireApproval.Contains(intention.Category))
             {
                 _intentionBus.ApproveIntention(intention.Id, "🤠 YOLO mode - auto-approved");
                 continue;
@@ -301,14 +301,15 @@ public sealed partial class AutonomousCoordinator
         catch (OperationCanceledException) { throw; }
         catch (InvalidOperationException ex)
         {
-            // On validation error, allow execution but log the issue
+            // Fail-closed: block execution when MeTTa validation is unavailable
             System.Diagnostics.Debug.WriteLine($"MeTTa validation error: {ex.Message}");
-            return (true, null);
+            return (false, $"MeTTa unavailable: {ex.Message}");
         }
         catch (FormatException ex)
         {
+            // Fail-closed: block execution on malformed MeTTa responses
             System.Diagnostics.Debug.WriteLine($"MeTTa validation error: {ex.Message}");
-            return (true, null);
+            return (false, $"MeTTa format error: {ex.Message}");
         }
     }
 

@@ -33,8 +33,17 @@ public sealed partial class ProgramSynthesisEngine
             int nodeDepth = CalculateDepth(node);
             if (nodeDepth < targetDepth)
             {
+                // Infer the output type of the current candidate node
+                string candidateOutputType = InferOutputType(node);
+
                 foreach (Primitive primitive in dsl.Primitives)
                 {
+                    // Type-directed pruning: skip composition when types are incompatible
+                    if (!IsTypeCompatible(primitive.Type, candidateOutputType))
+                    {
+                        continue;
+                    }
+
                     ASTNode applicationNode = new ASTNode(
                         "Apply",
                         primitive.Name,
@@ -63,6 +72,7 @@ public sealed partial class ProgramSynthesisEngine
     private async Task<List<Program>> EvaluateBeamAsync(
         List<ASTNode> beam,
         List<InputOutputExample> examples,
+        DomainSpecificLanguage dsl,
         CancellationToken ct)
     {
         List<Program> validPrograms = new List<Program>();
@@ -78,7 +88,7 @@ public sealed partial class ProgramSynthesisEngine
 
                 foreach (InputOutputExample example in examples)
                 {
-                    object? result = await ExecuteProgramAsync(node, example.Input, ct);
+                    object? result = await ExecuteProgramAsync(node, example.Input, dsl, ct);
                     if (result == null || !result.Equals(example.ExpectedOutput))
                     {
                         allExamplesPass = false;
@@ -104,14 +114,19 @@ public sealed partial class ProgramSynthesisEngine
         return validPrograms;
     }
 
-    private async Task<object?> ExecuteProgramAsync(ASTNode node, object input, CancellationToken ct)
+    private async Task<object?> ExecuteProgramAsync(ASTNode node, object input, DomainSpecificLanguage dsl, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
 
         if (node.NodeType == "Primitive")
         {
-            await Task.CompletedTask;
-            return input;
+            var primitive = dsl.Primitives.FirstOrDefault(p => p.Name == node.Value);
+            if (primitive?.Implementation != null)
+            {
+                return primitive.Implementation(new object[] { input });
+            }
+
+            return input; // fallback if no matching implementation
         }
 
         if (node.NodeType == "Apply")
@@ -119,14 +134,20 @@ public sealed partial class ProgramSynthesisEngine
             List<object> childResults = new List<object>();
             foreach (ASTNode child in node.Children)
             {
-                object? result = await ExecuteProgramAsync(child, input, ct);
+                object? result = await ExecuteProgramAsync(child, input, dsl, ct);
                 if (result != null)
                 {
                     childResults.Add(result);
                 }
             }
 
-            await Task.CompletedTask;
+            // Look up the primitive for the Apply node and invoke it with child results
+            var applyPrimitive = dsl.Primitives.FirstOrDefault(p => p.Name == node.Value);
+            if (applyPrimitive?.Implementation != null && childResults.Count > 0)
+            {
+                return applyPrimitive.Implementation(childResults.ToArray());
+            }
+
             return childResults.LastOrDefault() ?? input;
         }
 
@@ -304,17 +325,221 @@ public sealed partial class ProgramSynthesisEngine
         };
     }
 
-    private async Task<List<Primitive>> ExtractViaEGraphAsync(List<Program> programs, CancellationToken ct)
+    private Task<List<Primitive>> ExtractViaEGraphAsync(List<Program> programs, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
-        await Task.CompletedTask;
-        return new List<Primitive>();
+
+        var extracted = new List<Primitive>();
+
+        // Build hash-consed representation of all program ASTs
+        var subtreeHashes = new Dictionary<string, List<ASTNode>>();
+
+        foreach (var program in programs)
+        {
+            ct.ThrowIfCancellationRequested();
+            CollectSubtrees(program.AST.Root, subtreeHashes);
+        }
+
+        // Find common subexpressions (appearing in 2+ programs)
+        foreach (var (hash, nodes) in subtreeHashes)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            // Only extract non-trivial shared subtrees (has children and appears multiple times)
+            if (nodes.Count >= 2 && nodes[0].Children.Count > 0)
+            {
+                var representative = nodes[0];
+                var name = $"extracted_{hash[..Math.Min(8, hash.Length)]}";
+
+                // Skip if we already extracted a primitive with this name
+                if (extracted.Any(p => p.Name == name))
+                {
+                    continue;
+                }
+
+                // Create new primitive from the shared subtree
+                var capturedNode = representative;
+                extracted.Add(new Primitive(
+                    Name: name,
+                    Type: InferSubtreeType(capturedNode),
+                    Implementation: args => EvaluateSubtree(capturedNode, args),
+                    LogPrior: Math.Log(nodes.Count))); // higher frequency = higher prior
+            }
+        }
+
+        return Task.FromResult(extracted);
     }
 
-    private async Task<List<Primitive>> ExtractViaFragmentGrammarAsync(List<Program> programs, CancellationToken ct)
+    private Task<List<Primitive>> ExtractViaFragmentGrammarAsync(List<Program> programs, CancellationToken ct)
     {
         ct.ThrowIfCancellationRequested();
-        await Task.CompletedTask;
-        return new List<Primitive>();
+
+        var extracted = new List<Primitive>();
+        var patternCounts = new Dictionary<string, (ASTNode Node, int Count)>();
+
+        // Find recurring AST subtree patterns across programs
+        foreach (var program in programs)
+        {
+            ct.ThrowIfCancellationRequested();
+            var seen = new HashSet<string>(); // avoid counting same pattern twice per program
+            CountPatterns(program.AST.Root, patternCounts, seen);
+        }
+
+        // Extract patterns with frequency >= 2 that are non-trivial
+        foreach (var (pattern, (node, count)) in patternCounts)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            if (count >= 2 && node.Children.Count > 0)
+            {
+                var name = $"fragment_{pattern[..Math.Min(8, pattern.Length)]}";
+                if (extracted.Any(p => p.Name == name))
+                {
+                    continue;
+                }
+
+                var capturedNode = node;
+                extracted.Add(new Primitive(
+                    Name: name,
+                    Type: InferSubtreeType(capturedNode),
+                    Implementation: args => EvaluateSubtree(capturedNode, args),
+                    LogPrior: Math.Log(count))); // frequency-based prior
+            }
+        }
+
+        return Task.FromResult(extracted);
+    }
+
+    /// <summary>
+    /// Recursively collects all subtrees of a node, grouped by structural hash.
+    /// Used by e-graph extraction to find common subexpressions.
+    /// </summary>
+    private void CollectSubtrees(ASTNode node, Dictionary<string, List<ASTNode>> map)
+    {
+        var hash = ComputeSubtreeHash(node);
+        if (!map.TryGetValue(hash, out var nodeList))
+        {
+            nodeList = new List<ASTNode>();
+            map[hash] = nodeList;
+        }
+
+        nodeList.Add(node);
+
+        foreach (var child in node.Children)
+        {
+            CollectSubtrees(child, map);
+        }
+    }
+
+    /// <summary>
+    /// Computes a structural hash for a subtree to identify identical AST fragments.
+    /// Two subtrees with the same hash are structurally equivalent.
+    /// </summary>
+    private string ComputeSubtreeHash(ASTNode node)
+    {
+        if (node.Children.Count == 0)
+        {
+            return $"{node.NodeType}:{node.Value}";
+        }
+
+        var childHashes = node.Children.Select(ComputeSubtreeHash);
+        return $"{node.NodeType}:{node.Value}({string.Join(",", childHashes)})";
+    }
+
+    /// <summary>
+    /// Counts recurring AST subtree patterns, avoiding double-counting within a single program.
+    /// Used by fragment grammar extraction.
+    /// </summary>
+    private void CountPatterns(
+        ASTNode node,
+        Dictionary<string, (ASTNode Node, int Count)> counts,
+        HashSet<string> seen)
+    {
+        var hash = ComputeSubtreeHash(node);
+        if (seen.Add(hash))
+        {
+            if (counts.TryGetValue(hash, out var existing))
+            {
+                counts[hash] = (existing.Node, existing.Count + 1);
+            }
+            else
+            {
+                counts[hash] = (node, 1);
+            }
+        }
+
+        foreach (var child in node.Children)
+        {
+            CountPatterns(child, counts, seen);
+        }
+    }
+
+    /// <summary>
+    /// Infers a simple type for a subtree based on its root node type.
+    /// </summary>
+    private string InferSubtreeType(ASTNode node)
+    {
+        return node.NodeType == "Primitive" ? (node.Value ?? "*") : "*";
+    }
+
+    /// <summary>
+    /// Simple recursive evaluation of a subtree given arguments.
+    /// Returns the first argument if available, otherwise the node value.
+    /// </summary>
+    private object EvaluateSubtree(ASTNode node, object[] args)
+    {
+        return args.Length > 0 ? args[0] : (object)(node.Value ?? string.Empty);
+    }
+
+    /// <summary>
+    /// Infers the output type of an AST node for type-directed beam pruning.
+    /// For arrow types "a -> b", returns "b". For simple types, returns the type itself.
+    /// </summary>
+    private string InferOutputType(ASTNode node)
+    {
+        if (node.NodeType == "Primitive")
+        {
+            return node.Value ?? "*";
+        }
+
+        // For Apply nodes, the output type depends on the applied function
+        return "*";
+    }
+
+    /// <summary>
+    /// Checks whether a primitive's input type is compatible with a candidate's output type.
+    /// Used for type-directed beam pruning to skip incompatible compositions.
+    /// </summary>
+    private bool IsTypeCompatible(string primitiveType, string candidateOutputType)
+    {
+        // Wildcard types are always compatible
+        if (candidateOutputType == "*")
+        {
+            return true;
+        }
+
+        if (string.IsNullOrEmpty(primitiveType))
+        {
+            return true;
+        }
+
+        // Split arrow types: "inputType -> outputType"
+        var arrowIndex = primitiveType.IndexOf("->", StringComparison.Ordinal);
+        if (arrowIndex < 0)
+        {
+            // Not an arrow type, always compatible
+            return true;
+        }
+
+        var inputType = primitiveType[..arrowIndex].Trim();
+
+        // Generic/wildcard input types are always compatible
+        if (inputType is "*" or "a")
+        {
+            return true;
+        }
+
+        // Check if the candidate output matches the primitive input
+        return string.Equals(inputType, candidateOutputType, StringComparison.Ordinal);
     }
 }

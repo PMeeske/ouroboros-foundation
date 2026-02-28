@@ -2,8 +2,10 @@
 
 /// <summary>
 /// The safety neuron monitors for unsafe operations and enforces constraints.
+/// Implements <see cref="IMessageFilter"/> so the neural network can block
+/// dangerous messages before they are routed to other neurons.
 /// </summary>
-public sealed class SafetyNeuron : Neuron
+public sealed class SafetyNeuron : Neuron, IMessageFilter
 {
     private readonly HashSet<string> _blockedOperations = [];
     private readonly List<string> _violations = [];
@@ -66,18 +68,48 @@ public sealed class SafetyNeuron : Neuron
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc/>
+    public Task<bool> ShouldRouteAsync(NeuronMessage message, CancellationToken ct = default)
+    {
+        string payload = message.Payload?.ToString() ?? string.Empty;
+        bool blocked = ContainsDangerousPattern(payload);
+        if (blocked)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"[SafetyNeuron] Blocked message: topic '{message.Topic}' from {message.SourceNeuron}");
+        }
+
+        return Task.FromResult(!blocked);
+    }
+
     private static bool ContainsDangerousPattern(string content)
     {
-        string[] dangerousPatterns = new[]
-        {
+        // Plain substring patterns (case-insensitive).
+        string[] substringPatterns =
+        [
             "rm -rf /",
             "format c:",
             "DROP TABLE",
             "DELETE FROM",
             "shutdown",
             ":(){:|:&};:",
-        };
+            "Invoke-Expression",
+            "Invoke-WebRequest",
+        ];
 
-        return dangerousPatterns.Any(p => content.Contains(p, StringComparison.OrdinalIgnoreCase));
+        if (substringPatterns.Any(p => content.Contains(p, StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
+        // Regex patterns for threats that require wildcard / whitespace matching.
+        System.Text.RegularExpressions.Regex[] regexPatterns =
+        [
+            new(@"curl.*\|.*sh", System.Text.RegularExpressions.RegexOptions.IgnoreCase),
+            new(@"wget.*\|.*bash", System.Text.RegularExpressions.RegexOptions.IgnoreCase),
+            new(@"chmod\s+777", System.Text.RegularExpressions.RegexOptions.IgnoreCase),
+        ];
+
+        return regexPatterns.Any(r => r.IsMatch(content));
     }
 }

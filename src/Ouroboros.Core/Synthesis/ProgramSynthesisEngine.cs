@@ -71,7 +71,7 @@ public sealed partial class ProgramSynthesisEngine : IProgramSynthesisEngine
                 beam = await ExpandBeamAsync(beam, dsl, depth, cts.Token);
 
                 // Evaluate programs against examples
-                List<Program> validPrograms = await EvaluateBeamAsync(beam, examples, cts.Token);
+                List<Program> validPrograms = await EvaluateBeamAsync(beam, examples, dsl, cts.Token);
 
                 // Check if we found a solution
                 if (validPrograms.Count > 0)
