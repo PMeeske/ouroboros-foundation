@@ -190,6 +190,17 @@ public sealed class QdrantCollectionRegistry : IQdrantCollectionRegistry
                 "{Total} total mappings",
                 discoveredCount, _mappings.Count);
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger?.LogWarning(ex,
+                "Qdrant gRPC error during collection discovery (status: {Status}). " +
+                "Using configuration defaults.",
+                ex.StatusCode);
+        }
         catch (Exception ex)
         {
             _logger?.LogWarning(ex,

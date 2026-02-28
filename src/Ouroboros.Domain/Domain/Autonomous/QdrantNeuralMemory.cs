@@ -144,6 +144,14 @@ public sealed class QdrantNeuralMemory : IDisposable
 
             _initializedCollections[collectionName] = true;
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Grpc.Core.RpcException ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Qdrant RPC error ensuring collection {collectionName}: {ex.Status.Detail}");
+        }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Failed to ensure collection {collectionName}: {ex.Message}");
@@ -204,13 +212,25 @@ public sealed class QdrantNeuralMemory : IDisposable
                     await _client.UpsertAsync(collectionName, new[] { point }, cancellationToken: ct);
                     migrated++;
                 }
-                catch
+                catch (Grpc.Core.RpcException)
                 {
                     failed++;
                 }
             }
 
             Console.WriteLine($"    \u2713 Migrated {migrated} points ({failed} failed)");
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Grpc.Core.RpcException ex)
+        {
+            Console.WriteLine($"    \u26a0 Migration RPC error: {ex.Status.Detail}");
+            await _client.CreateCollectionAsync(
+                collectionName,
+                new VectorParams { Size = (ulong)newVectorSize, Distance = Distance.Cosine },
+                cancellationToken: ct);
         }
         catch (Exception ex)
         {
@@ -269,7 +289,7 @@ public sealed class QdrantNeuralMemory : IDisposable
                 offset = scrollResult.Result.Count > 0 ? scrollResult.Result.Last().Id : null;
                 if (offset == null) break;
             }
-            catch
+            catch (Grpc.Core.RpcException)
             {
                 break;
             }
@@ -393,6 +413,15 @@ public sealed class QdrantNeuralMemory : IDisposable
                 };
             }).ToList();
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Grpc.Core.RpcException ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Qdrant RPC search error: {ex.Status.Detail}");
+            return Array.Empty<NeuronMessage>();
+        }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Search failed: {ex.Message}");
@@ -420,6 +449,15 @@ public sealed class QdrantNeuralMemory : IDisposable
 
             return results.Select(r =>
                 r.Payload.TryGetValue("content", out Value? c) ? c.StringValue : "").ToList();
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Grpc.Core.RpcException ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Qdrant RPC search error: {ex.Status.Detail}");
+            return Array.Empty<string>();
         }
         catch (Exception ex)
         {
@@ -461,6 +499,15 @@ public sealed class QdrantNeuralMemory : IDisposable
                 };
             }).ToList();
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Grpc.Core.RpcException ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Qdrant RPC search error: {ex.Status.Detail}");
+            return Array.Empty<Intention>();
+        }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Search failed: {ex.Message}");
@@ -493,7 +540,7 @@ public sealed class QdrantNeuralMemory : IDisposable
                 VectorSize = vectorSize,
             };
         }
-        catch
+        catch (Grpc.Core.RpcException)
         {
             return new QdrantCollectionStats { Name = collectionName, Exists = false };
         }

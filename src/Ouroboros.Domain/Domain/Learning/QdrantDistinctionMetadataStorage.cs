@@ -121,6 +121,15 @@ public sealed class QdrantDistinctionMetadataStorage
             _logger.LogInformation("Stored metadata for distinction {Id}", weights.Id);
             return Result<Unit, string>.Success(Unit.Value);
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger.LogError(ex, "Qdrant RPC error storing metadata for distinction {Id}", weights.Id);
+            return Result<Unit, string>.Failure($"Metadata storage RPC failed: {ex.Status.Detail}");
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to store metadata for distinction {Id}", weights.Id);
@@ -147,6 +156,15 @@ public sealed class QdrantDistinctionMetadataStorage
             _logger.LogWarning("Semantic search not yet implemented - requires embedding model");
             return await Task.FromResult(Result<IReadOnlyList<DistinctionMetadata>, string>.Success(
                 (IReadOnlyList<DistinctionMetadata>)Array.Empty<DistinctionMetadata>()));
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger.LogError(ex, "Qdrant RPC error searching similar distinctions");
+            return Result<IReadOnlyList<DistinctionMetadata>, string>.Failure($"Search RPC failed: {ex.Status.Detail}");
         }
         catch (Exception ex)
         {
@@ -178,6 +196,15 @@ public sealed class QdrantDistinctionMetadataStorage
 
             _logger.LogInformation("Marked distinction {Id} as dissolved (deleted from Qdrant)", id);
             return Result<Unit, string>.Success(Unit.Value);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger.LogError(ex, "Qdrant RPC error marking distinction {Id} as dissolved", id);
+            return Result<Unit, string>.Failure($"Update RPC failed: {ex.Status.Detail}");
         }
         catch (Exception ex)
         {
@@ -217,6 +244,15 @@ public sealed class QdrantDistinctionMetadataStorage
             _logger.LogInformation("Retrieved metadata for distinction {Id}", id);
             return Result<DistinctionMetadata, string>.Success(metadata);
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger.LogError(ex, "Qdrant RPC error getting metadata for distinction {Id}", id);
+            return Result<DistinctionMetadata, string>.Failure($"Retrieval RPC failed: {ex.Status.Detail}");
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to get metadata for distinction {Id}", id);
@@ -240,6 +276,14 @@ public sealed class QdrantDistinctionMetadataStorage
                 _logger.LogInformation("Created collection {Collection} with dimension {Dimension}",
                     _collectionName, vectorDimension);
             }
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger.LogWarning(ex, "Qdrant RPC error ensuring collection exists (status: {Status})", ex.StatusCode);
         }
         catch (Exception ex)
         {

@@ -174,6 +174,10 @@ public abstract class Neuron : IDisposable
                     {
                         await ProcessMessageAsync(message, _cts.Token);
                     }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
                     catch (Exception ex)
                     {
                         System.Diagnostics.Debug.WriteLine($"[{Id}] Error processing message: {ex.Message}");

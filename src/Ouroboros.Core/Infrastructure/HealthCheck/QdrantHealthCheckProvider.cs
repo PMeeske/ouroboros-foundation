@@ -102,6 +102,19 @@ public sealed class QdrantHealthCheckProvider : IHealthCheckProvider, IDisposabl
                     { "timeout", this.timeoutSeconds },
                 });
         }
+        catch (HttpRequestException ex)
+        {
+            sw.Stop();
+            return HealthCheckResult.Unhealthy(
+                this.ComponentName,
+                sw.ElapsedMilliseconds,
+                $"HTTP request error: {ex.Message}",
+                new Dictionary<string, object>
+                {
+                    { "endpoint", this.endpoint },
+                    { "exceptionType", ex.GetType().Name },
+                });
+        }
         catch (Exception ex)
         {
             sw.Stop();

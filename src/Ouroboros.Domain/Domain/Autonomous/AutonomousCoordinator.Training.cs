@@ -81,7 +81,7 @@ public sealed partial class AutonomousCoordinator
                             return Math.Clamp(score, 0.0, 1.0);
                         }
                     }
-                    catch { /* ignore */ }
+                    catch (Exception) { /* LLM evaluation failed */ }
 
                     return 0.5; // Default neutral score
                 };
@@ -464,7 +464,7 @@ public sealed partial class AutonomousCoordinator
             // If LLM returned something unexpected, fallback
             return InferDeliverableTypeFallback(problem);
         }
-        catch
+        catch (Exception)
         {
             return InferDeliverableTypeFallback(problem);
         }

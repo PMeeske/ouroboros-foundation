@@ -58,6 +58,15 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
             _logger?.LogDebug("Stored weights {Id} at {Path}", id, filePath);
             return Result<string, string>.Success(filePath);
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (IOException ex)
+        {
+            _logger?.LogError(ex, "I/O error storing weights {Id}", id);
+            return Result<string, string>.Failure($"Storage I/O failed: {ex.Message}");
+        }
         catch (Exception ex)
         {
             _logger?.LogError(ex, "Failed to store weights {Id}", id);
@@ -82,6 +91,15 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
 
             byte[] weights = await File.ReadAllBytesAsync(filePath, ct);
             return Result<byte[], string>.Success(weights);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (IOException ex)
+        {
+            _logger?.LogError(ex, "I/O error loading weights {Id}", id);
+            return Result<byte[], string>.Failure($"Load I/O failed: {ex.Message}");
         }
         catch (Exception ex)
         {
@@ -108,6 +126,20 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
                 ?? new List<DistinctionWeightMetadata>();
 
             return Result<List<DistinctionWeightMetadata>, string>.Success(metadata);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (IOException ex)
+        {
+            _logger?.LogError(ex, "I/O error listing weights");
+            return Result<List<DistinctionWeightMetadata>, string>.Failure($"List I/O failed: {ex.Message}");
+        }
+        catch (JsonException ex)
+        {
+            _logger?.LogError(ex, "JSON parse error listing weights");
+            return Result<List<DistinctionWeightMetadata>, string>.Failure($"List deserialization failed: {ex.Message}");
         }
         catch (Exception ex)
         {
@@ -146,6 +178,15 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
             _logger?.LogDebug("Dissolved weights at {Path}", path);
             return Result<Unit, string>.Success(Unit.Value);
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (IOException ex)
+        {
+            _logger?.LogError(ex, "I/O error dissolving weights at {Path}", path);
+            return Result<Unit, string>.Failure($"Dissolution I/O failed: {ex.Message}");
+        }
         catch (Exception ex)
         {
             _logger?.LogError(ex, "Failed to dissolve weights at {Path}", path);
@@ -163,6 +204,11 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
             long totalSize = files.Sum(f => new FileInfo(f).Length);
 
             return Result<long, string>.Success(totalSize);
+        }
+        catch (IOException ex)
+        {
+            _logger?.LogError(ex, "I/O error getting total storage size");
+            return Result<long, string>.Failure($"Failed to calculate size (I/O): {ex.Message}");
         }
         catch (Exception ex)
         {

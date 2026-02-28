@@ -107,6 +107,11 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
                 this.stderr = this.process.StandardError;
             }
         }
+        catch (System.ComponentModel.Win32Exception ex)
+        {
+            // Executable not found or not accessible
+            Console.WriteLine($"Warning: MeTTa executable not found: {ex.Message}");
+        }
         catch (Exception ex)
         {
             // If MeTTa executable is not found, we continue with null process
@@ -147,6 +152,10 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
         {
             return Result<string, string>.Failure("Query execution timed out");
         }
+        catch (IOException ex)
+        {
+            return Result<string, string>.Failure($"Query I/O error: {ex.Message}");
+        }
         catch (Exception ex)
         {
             return Result<string, string>.Failure($"Query execution failed: {ex.Message}");
@@ -174,6 +183,14 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
             await this.stdin.FlushAsync();
 
             return Result<Unit, string>.Success(Unit.Value);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (IOException ex)
+        {
+            return Result<Unit, string>.Failure($"Add fact I/O error: {ex.Message}");
         }
         catch (Exception ex)
         {
@@ -212,6 +229,10 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
         catch (OperationCanceledException)
         {
             return Result<string, string>.Failure("Rule application timed out");
+        }
+        catch (IOException ex)
+        {
+            return Result<string, string>.Failure($"Rule application I/O error: {ex.Message}");
         }
         catch (Exception ex)
         {
@@ -254,6 +275,14 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
             await this.stdin.FlushAsync();
 
             return Result<Unit, string>.Success(Unit.Value);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (IOException ex)
+        {
+            return Result<Unit, string>.Failure($"Reset I/O error: {ex.Message}");
         }
         catch (Exception ex)
         {

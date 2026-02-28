@@ -201,7 +201,7 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
                 Purpose: purpose,
                 LinkedCollections: links);
         }
-        catch
+        catch (Grpc.Core.RpcException)
         {
             return null;
         }
@@ -239,7 +239,7 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
 
             return true;
         }
-        catch
+        catch (Grpc.Core.RpcException)
         {
             return false;
         }
@@ -264,7 +264,7 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
 
             return true;
         }
-        catch
+        catch (Grpc.Core.RpcException)
         {
             return false;
         }
@@ -333,7 +333,7 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
 
                 healed.Add(report.CollectionName);
             }
-            catch
+            catch (Grpc.Core.RpcException)
             {
                 // Skip collections that can't be healed
             }
@@ -487,7 +487,7 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
                 }
             }
         }
-        catch
+        catch (Grpc.Core.RpcException)
         {
             // Keep existing cache on error
         }

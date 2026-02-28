@@ -320,7 +320,7 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
                     validPrograms.Add(program);
                 }
             }
-            catch
+            catch (Exception)
             {
                 // Skip programs that fail to execute
                 continue;

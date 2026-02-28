@@ -224,7 +224,7 @@ public sealed class AudioSensor : IDisposable
                     await _streamingSession.DisposeAsync();
             }).GetAwaiter().GetResult();
         }
-        catch
+        catch (Exception)
         {
             // Best-effort disposal; do not throw from Dispose
         }

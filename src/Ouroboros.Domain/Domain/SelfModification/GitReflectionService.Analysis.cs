@@ -38,7 +38,7 @@ public sealed partial class GitReflectionService
                 {
                     lineCount = (await File.ReadAllLinesAsync(file, ct)).Length;
                 }
-                catch
+                catch (IOException)
                 {
                     // Ignore read errors
                 }
@@ -165,7 +165,7 @@ public sealed partial class GitReflectionService
                     }
                 }
             }
-            catch
+            catch (IOException)
             {
                 // Skip files that can't be read
             }

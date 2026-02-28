@@ -83,7 +83,7 @@ public sealed partial class AutonomousCoordinator
                         contextBuilder.AppendLine();
                     }
                 }
-                catch { /* Ignore search errors */ }
+                catch (Exception) { /* Ignore search errors */ }
             }
 
             contextBuilder.AppendLine("Respond with a JSON object in this exact format:");
@@ -167,7 +167,7 @@ public sealed partial class AutonomousCoordinator
                 );
             }
         }
-        catch { /* Parse error, return null */ }
+        catch (System.Text.Json.JsonException) { /* Parse error, return null */ }
 
         // Fallback: use response as description
         if (!string.IsNullOrWhiteSpace(response) && response.Length > 10)

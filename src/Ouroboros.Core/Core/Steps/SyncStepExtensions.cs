@@ -78,7 +78,7 @@ public static class SyncStepExtensions
                 TOut? result = syncStep.Invoke(input);
                 return predicate(result) ? Option<TOut>.Some(result) : Option<TOut>.None();
             }
-            catch
+            catch (Exception)
             {
                 return Option<TOut>.None();
             }

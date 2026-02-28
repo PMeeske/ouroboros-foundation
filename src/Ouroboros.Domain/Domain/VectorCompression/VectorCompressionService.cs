@@ -87,6 +87,10 @@ public static class VectorCompressionService
 
             return Result<(byte[], VectorCompressionEvent)>.Success((result, compressionEvent));
         }
+        catch (ArgumentNullException ex)
+        {
+            return Result<(byte[], VectorCompressionEvent)>.Failure($"Compression input error: {ex.Message}");
+        }
         catch (Exception ex)
         {
             return Result<(byte[], VectorCompressionEvent)>.Failure($"Compression failed: {ex.Message}");
@@ -127,6 +131,10 @@ public static class VectorCompressionService
             };
 
             return Result<float[]>.Success(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Result<float[]>.Failure($"Decompression format error: {ex.Message}");
         }
         catch (Exception ex)
         {
@@ -185,6 +193,10 @@ public static class VectorCompressionService
 
             return Result<double>.Success(similarity);
         }
+        catch (InvalidOperationException ex)
+        {
+            return Result<double>.Failure($"Compressed similarity format error: {ex.Message}");
+        }
         catch (Exception ex)
         {
             return Result<double>.Failure($"Compressed similarity failed: {ex.Message}");
@@ -234,6 +246,10 @@ public static class VectorCompressionService
 
             return Result<VectorCompressionStats>.Success(stats);
         }
+        catch (ArgumentNullException ex)
+        {
+            return Result<VectorCompressionStats>.Failure($"Stats input error: {ex.Message}");
+        }
         catch (Exception ex)
         {
             return Result<VectorCompressionStats>.Failure($"Failed to compute stats: {ex.Message}");
@@ -276,6 +292,14 @@ public static class VectorCompressionService
             return Result<(IReadOnlyList<byte[]>, IReadOnlyList<VectorCompressionEvent>)>.Success(
                 (compressedResults.AsReadOnly(), compressionEvents.AsReadOnly()));
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (AggregateException ex)
+        {
+            return Result<(IReadOnlyList<byte[]>, IReadOnlyList<VectorCompressionEvent>)>.Failure($"Batch compression failed (aggregate): {ex.InnerException?.Message ?? ex.Message}");
+        }
         catch (Exception ex)
         {
             return Result<(IReadOnlyList<byte[]>, IReadOnlyList<VectorCompressionEvent>)>.Failure($"Batch compression failed: {ex.Message}");
@@ -314,6 +338,10 @@ public static class VectorCompressionService
                 QuantizedDCTSize: dctCompressor.Quantize(dct, 8).ToBytes().Length);
 
             return Result<CompressionPreview>.Success(preview);
+        }
+        catch (ArgumentNullException ex)
+        {
+            return Result<CompressionPreview>.Failure($"Preview input error: {ex.Message}");
         }
         catch (Exception ex)
         {

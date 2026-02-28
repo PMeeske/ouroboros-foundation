@@ -59,7 +59,7 @@ public sealed class MeTTaFactTool : ITool
                 fact = input;
             }
         }
-        catch
+        catch (System.Text.Json.JsonException)
         {
             fact = input;
         }

@@ -108,6 +108,14 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
 
             _initialized = true;
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Grpc.Core.RpcException ex)
+        {
+            throw new InvalidOperationException($"Qdrant RPC error initializing neuro-symbolic collections: {ex.Status.Detail}", ex);
+        }
         catch (Exception ex)
         {
             throw new InvalidOperationException($"Failed to initialize neuro-symbolic collections: {ex.Message}", ex);
@@ -397,7 +405,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
                 MetadataJson = payload.TryGetValue("metadata_json", out Value? meta) ? meta.StringValue : null
             };
         }
-        catch
+        catch (Exception)
         {
             return null;
         }
@@ -417,7 +425,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
                 DateTime.Parse(p["created_at"].StringValue),
                 p.TryGetValue("metadata_json", out Value? meta) ? JsonSerializer.Deserialize<Dictionary<string, object>>(meta.StringValue) : null);
         }
-        catch
+        catch (Exception)
         {
             return null;
         }
@@ -439,7 +447,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
                 p.TryGetValue("execution_time_ms", out Value? time) ? TimeSpan.FromMilliseconds(time.DoubleValue) : null,
                 p.TryGetValue("metadata_json", out Value? meta) ? JsonSerializer.Deserialize<Dictionary<string, object>>(meta.StringValue) : null);
         }
-        catch
+        catch (Exception)
         {
             return null;
         }

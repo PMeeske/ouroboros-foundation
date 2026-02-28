@@ -61,7 +61,7 @@ public sealed class MeTTaQueryTool : ITool
                 query = input;
             }
         }
-        catch
+        catch (System.Text.Json.JsonException)
         {
             // If not valid JSON, use input directly
             query = input;

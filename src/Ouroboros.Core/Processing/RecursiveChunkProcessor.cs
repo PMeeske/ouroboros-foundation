@@ -212,7 +212,7 @@ public sealed class RecursiveChunkProcessor : IRecursiveChunkProcessor
 
                     results.Add(chunkResult);
                 }
-                catch
+                catch (Exception)
                 {
                     stopwatch.Stop();
 

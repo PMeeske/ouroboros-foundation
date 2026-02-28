@@ -280,7 +280,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
                 {
                     await PersistMessageFunction(message, CancellationToken.None);
                 }
-                catch { /* Ignore persistence errors */ }
+                catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[NeuralNetwork] Persistence error: {ex.Message}"); }
             });
         }
 

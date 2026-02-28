@@ -17,7 +17,7 @@ public static class MachineCapabilities
             {
                 return GC.GetGCMemoryInfo().TotalAvailableMemoryBytes / (1024 * 1024);
             }
-            catch
+            catch (Exception)
             {
                 return 4096; // fallback
             }
