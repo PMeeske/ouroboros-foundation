@@ -116,7 +116,7 @@ public sealed class AdapterLearningEngine : IAdapterLearningEngine
             _logger?.LogWarning("Adapter creation cancelled for task: {TaskName}", taskName);
             return Result<AdapterId, string>.Failure("Operation cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger?.LogError(ex, "Error creating adapter for task: {TaskName}", taskName);
             return Result<AdapterId, string>.Failure($"Unexpected error: {ex.Message}");
@@ -216,7 +216,7 @@ public sealed class AdapterLearningEngine : IAdapterLearningEngine
             _logger?.LogWarning("Training cancelled for adapter: {AdapterId}", adapterId);
             return Result<Unit, string>.Failure("Operation cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger?.LogError(ex, "Error training adapter: {AdapterId}", adapterId);
             return Result<Unit, string>.Failure($"Unexpected error: {ex.Message}");
@@ -288,7 +288,7 @@ public sealed class AdapterLearningEngine : IAdapterLearningEngine
             _logger?.LogWarning("Merge operation cancelled");
             return Result<Unit, string>.Failure("Operation cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger?.LogError(ex, "Error merging adapters");
             return Result<Unit, string>.Failure($"Unexpected error: {ex.Message}");
@@ -344,7 +344,7 @@ public sealed class AdapterLearningEngine : IAdapterLearningEngine
             _logger?.LogWarning("Generation cancelled");
             return Result<string, string>.Failure("Operation cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger?.LogError(ex, "Error during generation");
             return Result<string, string>.Failure($"Unexpected error: {ex.Message}");
@@ -394,7 +394,7 @@ public sealed class AdapterLearningEngine : IAdapterLearningEngine
             _logger?.LogWarning("Feedback learning cancelled");
             return Result<Unit, string>.Failure("Operation cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger?.LogError(ex, "Error learning from feedback");
             return Result<Unit, string>.Failure($"Unexpected error: {ex.Message}");

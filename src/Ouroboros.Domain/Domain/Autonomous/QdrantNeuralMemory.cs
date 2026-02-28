@@ -152,7 +152,7 @@ public sealed class QdrantNeuralMemory : IDisposable
         {
             System.Diagnostics.Debug.WriteLine($"Qdrant RPC error ensuring collection {collectionName}: {ex.Status.Detail}");
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
             System.Diagnostics.Debug.WriteLine($"Failed to ensure collection {collectionName}: {ex.Message}");
         }
@@ -232,7 +232,7 @@ public sealed class QdrantNeuralMemory : IDisposable
                 new VectorParams { Size = (ulong)newVectorSize, Distance = Distance.Cosine },
                 cancellationToken: ct);
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
             Console.WriteLine($"    \u26a0 Migration failed: {ex.Message}");
             await _client.CreateCollectionAsync(
@@ -422,7 +422,7 @@ public sealed class QdrantNeuralMemory : IDisposable
             System.Diagnostics.Debug.WriteLine($"Qdrant RPC search error: {ex.Status.Detail}");
             return Array.Empty<NeuronMessage>();
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
             System.Diagnostics.Debug.WriteLine($"Search failed: {ex.Message}");
             return Array.Empty<NeuronMessage>();
@@ -459,7 +459,7 @@ public sealed class QdrantNeuralMemory : IDisposable
             System.Diagnostics.Debug.WriteLine($"Qdrant RPC search error: {ex.Status.Detail}");
             return Array.Empty<string>();
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
             System.Diagnostics.Debug.WriteLine($"Search failed: {ex.Message}");
             return Array.Empty<string>();
@@ -508,7 +508,7 @@ public sealed class QdrantNeuralMemory : IDisposable
             System.Diagnostics.Debug.WriteLine($"Qdrant RPC search error: {ex.Status.Detail}");
             return Array.Empty<Intention>();
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
             System.Diagnostics.Debug.WriteLine($"Search failed: {ex.Message}");
             return Array.Empty<Intention>();

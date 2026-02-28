@@ -81,7 +81,9 @@ public sealed partial class AutonomousCoordinator
                             return Math.Clamp(score, 0.0, 1.0);
                         }
                     }
-                    catch (Exception) { /* LLM evaluation failed */ }
+                    catch (OperationCanceledException) { throw; }
+                    catch (HttpRequestException) { /* LLM evaluation failed */ }
+                    catch (InvalidOperationException) { /* LLM evaluation failed */ }
 
                     return 0.5; // Default neutral score
                 };
@@ -114,7 +116,7 @@ public sealed partial class AutonomousCoordinator
                 Console.WriteLine("  [Coordinator] Starting training directly on neuron...");
                 await _userPersonaNeuron.StartTrainingDirectAsync(trainingConfig);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 Console.WriteLine($"  [Coordinator] Training start error: {ex.Message}");
             }
@@ -262,7 +264,8 @@ public sealed partial class AutonomousCoordinator
             // Record the interaction
             _userPersonaNeuron?.RecordInteraction(message, response);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             RaiseProactiveMessage(
                 $"❌ Auto-training error: {ex.Message}",
@@ -464,7 +467,12 @@ public sealed partial class AutonomousCoordinator
             // If LLM returned something unexpected, fallback
             return InferDeliverableTypeFallback(problem);
         }
-        catch (Exception)
+        catch (OperationCanceledException) { throw; }
+        catch (HttpRequestException)
+        {
+            return InferDeliverableTypeFallback(problem);
+        }
+        catch (InvalidOperationException)
         {
             return InferDeliverableTypeFallback(problem);
         }

@@ -463,7 +463,7 @@ public sealed partial class AutonomousCoordinator : IDisposable
             {
                 break;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 System.Diagnostics.Debug.WriteLine($"Coordination error: {ex.Message}");
             }
@@ -489,7 +489,7 @@ public sealed partial class AutonomousCoordinator : IDisposable
             {
                 break;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 System.Diagnostics.Debug.WriteLine($"Execution error: {ex.Message}");
             }
@@ -513,7 +513,11 @@ public sealed partial class AutonomousCoordinator : IDisposable
                     await StoreIntentionFunction(intention, CancellationToken.None);
                 }
             }
-            catch (Exception ex)
+            catch (HttpRequestException ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Failed to store intention: {ex.Message}");
+            }
+            catch (Grpc.Core.RpcException ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Failed to store intention: {ex.Message}");
             }

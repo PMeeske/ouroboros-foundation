@@ -83,7 +83,8 @@ public sealed partial class AutonomousCoordinator
                         contextBuilder.AppendLine();
                     }
                 }
-                catch (Exception) { /* Ignore search errors */ }
+                catch (HttpRequestException) { /* Ignore search errors */ }
+                catch (Grpc.Core.RpcException) { /* Ignore search errors */ }
             }
 
             contextBuilder.AppendLine("Respond with a JSON object in this exact format:");
@@ -136,7 +137,16 @@ public sealed partial class AutonomousCoordinator
                     requiresApproval: true);
             }
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (HttpRequestException ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Topic discovery error: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Topic discovery error: {ex.Message}");
+        }
+        catch (JsonException ex)
         {
             System.Diagnostics.Debug.WriteLine($"Topic discovery error: {ex.Message}");
         }
@@ -244,7 +254,8 @@ public sealed partial class AutonomousCoordinator
             // Raise message so user sees the result
             RaiseProactiveMessage($"✅ {intention.Title}: {result}", IntentionPriority.Normal, "coordinator");
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _intentionBus.MarkFailed(intention.Id, ex.Message);
             RaiseProactiveMessage($"❌ {intention.Title} failed: {ex.Message}", IntentionPriority.Normal, "coordinator");
@@ -287,9 +298,15 @@ public sealed partial class AutonomousCoordinator
 
             return (true, null);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (InvalidOperationException ex)
         {
             // On validation error, allow execution but log the issue
+            System.Diagnostics.Debug.WriteLine($"MeTTa validation error: {ex.Message}");
+            return (true, null);
+        }
+        catch (FormatException ex)
+        {
             System.Diagnostics.Debug.WriteLine($"MeTTa validation error: {ex.Message}");
             return (true, null);
         }
@@ -316,7 +333,12 @@ public sealed partial class AutonomousCoordinator
             string outcomeFact = $"(intention-outcome \"{intention.Id}\" {outcomeKind} success)";
             await MeTTaAddFactFunction(outcomeFact, ct);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (InvalidOperationException ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Failed to record MeTTa fact: {ex.Message}");
+        }
+        catch (FormatException ex)
         {
             System.Diagnostics.Debug.WriteLine($"Failed to record MeTTa fact: {ex.Message}");
         }

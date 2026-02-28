@@ -74,7 +74,7 @@ public sealed partial class UserPersonaNeuron
             {
                 break;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 System.Diagnostics.Debug.WriteLine($"Training loop error: {ex.Message}");
             }
@@ -194,7 +194,14 @@ public sealed partial class UserPersonaNeuron
                 _pendingQuestions.Enqueue(question);
             }
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (HttpRequestException ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Question generation failed: {ex.Message}");
+            // Fallback to template
+            _pendingQuestions.Enqueue(GenerateTemplateQuestion());
+        }
+        catch (InvalidOperationException ex)
         {
             System.Diagnostics.Debug.WriteLine($"Question generation failed: {ex.Message}");
             // Fallback to template

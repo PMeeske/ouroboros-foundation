@@ -64,7 +64,7 @@ public sealed class FileSystemBlobStorage : IAdapterBlobStorage
             _logger?.LogWarning("Store operation cancelled for adapter {AdapterId}", adapterId);
             return Result<string, string>.Failure("Operation cancelled");
         }
-        catch (Exception ex)
+        catch (IOException ex)
         {
             _logger?.LogError(ex, "Error storing adapter weights for {AdapterId}", adapterId);
             return Result<string, string>.Failure($"Failed to store weights: {ex.Message}");
@@ -97,7 +97,7 @@ public sealed class FileSystemBlobStorage : IAdapterBlobStorage
             _logger?.LogWarning("Get operation cancelled for path {Path}", path);
             return Result<byte[], string>.Failure("Operation cancelled");
         }
-        catch (Exception ex)
+        catch (IOException ex)
         {
             _logger?.LogError(ex, "Error retrieving adapter weights from {Path}", path);
             return Result<byte[], string>.Failure($"Failed to retrieve weights: {ex.Message}");
@@ -131,7 +131,7 @@ public sealed class FileSystemBlobStorage : IAdapterBlobStorage
             _logger?.LogWarning("Delete operation cancelled for path {Path}", path);
             return Result<Unit, string>.Failure("Operation cancelled");
         }
-        catch (Exception ex)
+        catch (IOException ex)
         {
             _logger?.LogError(ex, "Error deleting adapter weights from {Path}", path);
             return Result<Unit, string>.Failure($"Failed to delete weights: {ex.Message}");
@@ -163,7 +163,7 @@ public sealed class FileSystemBlobStorage : IAdapterBlobStorage
             _logger?.LogWarning("Get size operation cancelled for path {Path}", path);
             return Result<long, string>.Failure("Operation cancelled");
         }
-        catch (Exception ex)
+        catch (IOException ex)
         {
             _logger?.LogError(ex, "Error getting adapter weights size from {Path}", path);
             return Result<long, string>.Failure($"Failed to get weights size: {ex.Message}");

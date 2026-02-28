@@ -178,7 +178,7 @@ public abstract class Neuron : IDisposable
                     {
                         throw;
                     }
-                    catch (Exception ex)
+                    catch (Exception ex) when (ex is not OperationCanceledException)
                     {
                         System.Diagnostics.Debug.WriteLine($"[{Id}] Error processing message: {ex.Message}");
                     }

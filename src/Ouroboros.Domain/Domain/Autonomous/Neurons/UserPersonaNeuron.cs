@@ -254,7 +254,12 @@ public sealed partial class UserPersonaNeuron : Neuron
                     ?.Replace("User: ", "") ?? "";
                 satisfaction = await EvaluateFunction(lastUserMsg, response, ct);
             }
-            catch (Exception)
+            catch (OperationCanceledException) { throw; }
+            catch (HttpRequestException)
+            {
+                // Ignore evaluation errors
+            }
+            catch (InvalidOperationException)
             {
                 // Ignore evaluation errors
             }

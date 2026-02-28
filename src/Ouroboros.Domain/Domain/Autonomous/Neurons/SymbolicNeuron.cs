@@ -135,7 +135,12 @@ public sealed class SymbolicNeuron : Neuron
             {
                 return await MeTTaQueryFunction(query, ct);
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (InvalidOperationException ex)
+            {
+                return $"MeTTa query error: {ex.Message}";
+            }
+            catch (FormatException ex)
             {
                 return $"MeTTa query error: {ex.Message}";
             }
@@ -164,7 +169,12 @@ public sealed class SymbolicNeuron : Neuron
                 string relevantQuery = $"!(match &self ($rel \"{context}\" $obj) ($rel $obj))";
                 mettaResult = await MeTTaQueryFunction(relevantQuery, ct);
             }
-            catch (Exception)
+            catch (OperationCanceledException) { throw; }
+            catch (InvalidOperationException)
+            {
+                // Ignore errors
+            }
+            catch (FormatException)
             {
                 // Ignore errors
             }
@@ -205,7 +215,12 @@ public sealed class SymbolicNeuron : Neuron
                    result.Trim() == "()" ||
                    result.Contains("True", StringComparison.OrdinalIgnoreCase);
         }
-        catch (Exception)
+        catch (OperationCanceledException) { throw; }
+        catch (InvalidOperationException)
+        {
+            return true; // On error, allow
+        }
+        catch (FormatException)
         {
             return true; // On error, allow
         }

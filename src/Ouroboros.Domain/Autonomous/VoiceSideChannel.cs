@@ -197,7 +197,13 @@ public sealed partial class VoiceSideChannel : IAsyncDisposable
                     sanitized = llmSanitized;
                 }
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (HttpRequestException ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[VoiceSideChannel] LLM sanitization failed: {ex.Message}");
+                // Fall back to regex-sanitized version
+            }
+            catch (InvalidOperationException ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[VoiceSideChannel] LLM sanitization failed: {ex.Message}");
                 // Fall back to regex-sanitized version
@@ -338,7 +344,7 @@ Voice-friendly version:";
                 {
                     break;
                 }
-                catch (Exception)
+                catch (Exception ex) when (ex is not OperationCanceledException)
                 {
                     // Log but don't crash the channel
                     MessageSkipped?.Invoke(this, message);

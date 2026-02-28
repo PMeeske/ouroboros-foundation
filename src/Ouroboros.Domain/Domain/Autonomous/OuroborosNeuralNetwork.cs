@@ -280,7 +280,8 @@ public sealed class OuroborosNeuralNetwork : IDisposable
                 {
                     await PersistMessageFunction(message, CancellationToken.None);
                 }
-                catch (Exception ex) { System.Diagnostics.Debug.WriteLine($"[NeuralNetwork] Persistence error: {ex.Message}"); }
+                catch (HttpRequestException ex) { System.Diagnostics.Debug.WriteLine($"[NeuralNetwork] Persistence error: {ex.Message}"); }
+                catch (Grpc.Core.RpcException ex) { System.Diagnostics.Debug.WriteLine($"[NeuralNetwork] Persistence error: {ex.Message}"); }
             });
         }
 
@@ -349,7 +350,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
                         // All filters approved - deliver the message
                         DeliverMessage(message);
                     }
-                    catch (Exception ex)
+                    catch (Exception ex) when (ex is not OperationCanceledException)
                     {
                         System.Diagnostics.Debug.WriteLine(
                             $"[NeuralNetwork] Error during message filtering for message {message.Id} with topic '{message.Topic}': {ex.GetType().Name} - {ex.Message}");
