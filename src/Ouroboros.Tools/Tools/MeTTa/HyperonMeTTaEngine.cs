@@ -4,8 +4,6 @@
 
 using Ouroboros.Abstractions;
 
-#pragma warning disable SA1101 // Prefix local calls with this
-
 namespace Ouroboros.Tools.MeTTa;
 
 using System.Collections.Concurrent;

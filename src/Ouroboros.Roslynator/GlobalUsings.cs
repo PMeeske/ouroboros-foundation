@@ -1,5 +1,3 @@
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 // Roslyn Code Analysis
 global using Microsoft.CodeAnalysis;
 global using Microsoft.CodeAnalysis.CSharp;

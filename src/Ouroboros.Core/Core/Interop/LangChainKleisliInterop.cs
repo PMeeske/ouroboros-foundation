@@ -1,4 +1,3 @@
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 // ==========================================================
 // Kleisli <-> LangChain pipe interop
 // Enhanced integration with our unified monadic operations

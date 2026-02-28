@@ -1,4 +1,3 @@
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 // ==========================================================
 // Metrics Store Interface
 // Defines contract for persistent storage of performance metrics
