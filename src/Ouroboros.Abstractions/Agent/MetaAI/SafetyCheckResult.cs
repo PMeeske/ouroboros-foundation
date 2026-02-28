@@ -23,7 +23,7 @@ public sealed record SafetyCheckResult(
     /// <summary>
     /// Gets any warnings (empty list, for compatibility).
     /// </summary>
-    public IReadOnlyList<string> Warnings => Array.Empty<string>();
+    public static IReadOnlyList<string> Warnings => Array.Empty<string>();
 
     /// <summary>
     /// Gets the required permission level (first permission's level or None).

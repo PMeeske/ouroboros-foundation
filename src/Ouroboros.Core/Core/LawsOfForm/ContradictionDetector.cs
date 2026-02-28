@@ -118,7 +118,7 @@ public sealed class ContradictionDetector
         ArgumentNullException.ThrowIfNull(claim2);
 
         // Check if claims are about the same topic
-        double similarity = this.CalculateSimilarity(claim1.Statement, claim2.Statement);
+        double similarity = CalculateSimilarity(claim1.Statement, claim2.Statement);
 
         if (similarity < this.similarityThreshold)
         {
@@ -136,7 +136,7 @@ public sealed class ContradictionDetector
         if (claim1Form.IsMark() && claim2Form.IsMark())
         {
             // Both confident - check semantic opposition
-            if (this.AreOpposite(claim1.Statement, claim2.Statement))
+            if (AreOpposite(claim1.Statement, claim2.Statement))
             {
                 // Re-entry detected: f = ⌐f → Imaginary
                 return Form.Imaginary;
@@ -157,7 +157,7 @@ public sealed class ContradictionDetector
     /// <param name="statement1">The first statement.</param>
     /// <param name="statement2">The second statement.</param>
     /// <returns>Similarity score from 0.0 to 1.0.</returns>
-    private double CalculateSimilarity(string statement1, string statement2)
+    private static double CalculateSimilarity(string statement1, string statement2)
     {
         // Simple implementation: word overlap
         // In production, use embeddings or semantic similarity models
@@ -187,7 +187,7 @@ public sealed class ContradictionDetector
     /// <param name="statement1">The first statement.</param>
     /// <param name="statement2">The second statement.</param>
     /// <returns>True if the statements are opposite.</returns>
-    private bool AreOpposite(string statement1, string statement2)
+    private static bool AreOpposite(string statement1, string statement2)
     {
         // Simple heuristic: check for negation words
         HashSet<string> negationWords = new HashSet<string> { "not", "no", "never", "cannot", "can't", "won't", "don't", "doesn't", "isn't", "aren't" };

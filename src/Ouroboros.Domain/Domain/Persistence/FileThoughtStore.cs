@@ -216,7 +216,7 @@ public class FileThoughtStore : IThoughtStore
         return _sessionLocks.GetOrAdd(sessionId, _ => new SemaphoreSlim(1, 1));
     }
 
-    private async Task<List<PersistedThought>> LoadThoughtsFromFileAsync(string filePath, CancellationToken ct)
+    private static async Task<List<PersistedThought>> LoadThoughtsFromFileAsync(string filePath, CancellationToken ct)
     {
         if (!File.Exists(filePath))
         {
@@ -235,7 +235,7 @@ public class FileThoughtStore : IThoughtStore
         }
     }
 
-    private async Task SaveThoughtsToFileAsync(string filePath, List<PersistedThought> thoughts, CancellationToken ct)
+    private static async Task SaveThoughtsToFileAsync(string filePath, List<PersistedThought> thoughts, CancellationToken ct)
     {
         string json = JsonSerializer.Serialize(thoughts, SharedJsonOptions);
         await File.WriteAllTextAsync(filePath, json, ct);

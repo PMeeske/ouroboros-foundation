@@ -6,14 +6,11 @@ namespace Ouroboros.Tools
     /// </summary>
     public class DslAssistant
     {
-        private readonly RoslynCodeTool _codeTool;
-
         /// <summary>
         /// Initializes a new instance of the DslAssistant.
         /// </summary>
         public DslAssistant()
         {
-            _codeTool = new RoslynCodeTool();
         }
 
         /// <summary>
@@ -21,7 +18,7 @@ namespace Ouroboros.Tools
         /// </summary>
         /// <param name="currentDsl">The current DSL string.</param>
         /// <returns>A list of suggestions with explanations and confidence scores.</returns>
-        public Task<List<DslSuggestion>> SuggestNextSteps(string currentDsl)
+        public static Task<List<DslSuggestion>> SuggestNextSteps(string currentDsl)
         {
             if (string.IsNullOrWhiteSpace(currentDsl))
                 return Task.FromResult(new List<DslSuggestion>());
@@ -40,7 +37,7 @@ namespace Ouroboros.Tools
         /// </summary>
         /// <param name="partialToken">The partial token to complete.</param>
         /// <returns>A list of possible completions.</returns>
-        public async Task<List<string>> GetTokenCompletions(string partialToken)
+        public static async Task<List<string>> GetTokenCompletions(string partialToken)
         {
             if (string.IsNullOrWhiteSpace(partialToken))
                 return new List<string>();
@@ -56,7 +53,7 @@ namespace Ouroboros.Tools
         /// </summary>
         /// <param name="dsl">The DSL string to validate.</param>
         /// <returns>Validation result with errors and suggestions.</returns>
-        public ValidationResult ValidateDsl(string dsl)
+        public static ValidationResult ValidateDsl(string dsl)
         {
             if (string.IsNullOrWhiteSpace(dsl))
                 return new ValidationResult(false, new[] { "DSL cannot be empty" }, Array.Empty<string>());
@@ -67,14 +64,11 @@ namespace Ouroboros.Tools
 
             var validTokens = new HashSet<string> { "SetTopic", "SetPrompt", "UseDraft", "UseCritique", "UseImprove", "UseVector", "UseDir" };
 
-            foreach (var token in tokens)
+            foreach (var token in tokens.Where(token => !validTokens.Contains(token.Split('(')[0])))
             {
-                if (!validTokens.Contains(token.Split('(')[0]))
-                {
-                    errors.Add($"Unknown token: {token}");
-                    var similar = validTokens.Where(v => v.Contains(token.Split('(')[0], StringComparison.OrdinalIgnoreCase)).ToList();
-                    suggestions.AddRange(similar);
-                }
+                errors.Add($"Unknown token: {token}");
+                var similar = validTokens.Where(v => v.Contains(token.Split('(')[0], StringComparison.OrdinalIgnoreCase)).ToList();
+                suggestions.AddRange(similar);
             }
 
             return new ValidationResult(!errors.Any(), errors.ToArray(), suggestions.ToArray());
@@ -85,7 +79,7 @@ namespace Ouroboros.Tools
         /// </summary>
         /// <param name="dsl">The DSL pipeline string.</param>
         /// <returns>A natural language explanation.</returns>
-        public string ExplainPipeline(string dsl)
+        public static string ExplainPipeline(string dsl)
         {
             if (string.IsNullOrWhiteSpace(dsl))
                 return "Empty pipeline";
@@ -123,7 +117,7 @@ namespace Ouroboros.Tools
         /// </summary>
         /// <param name="goal">The natural language goal.</param>
         /// <returns>A generated DSL string.</returns>
-        public string GenerateDslFromGoal(string goal)
+        public static string GenerateDslFromGoal(string goal)
         {
             if (string.IsNullOrWhiteSpace(goal))
                 return string.Empty;
@@ -140,7 +134,7 @@ namespace Ouroboros.Tools
         /// </summary>
         /// <param name="topic">The topic for the pipeline.</param>
         /// <returns>A suggested DSL string.</returns>
-        public string BuildDsl(string topic)
+        public static string BuildDsl(string topic)
         {
             return $"SetTopic('{topic}') | UseDraft | UseCritique | UseImprove";
         }
@@ -150,7 +144,7 @@ namespace Ouroboros.Tools
         /// </summary>
         /// <param name="dsl">The current DSL.</param>
         /// <returns>An improved DSL string.</returns>
-        public string SuggestImprovements(string dsl)
+        public static string SuggestImprovements(string dsl)
         {
             if (!dsl.Contains("UseCritique"))
                 return dsl + " | UseCritique";
@@ -164,7 +158,7 @@ namespace Ouroboros.Tools
         /// </summary>
         /// <param name="description">The description.</param>
         /// <returns>Generated C# code.</returns>
-        public string GenerateCode(string description)
+        public static string GenerateCode(string description)
         {
             if (description.Contains("Result<T> monad"))
             {
@@ -195,7 +189,7 @@ public class Result<T>
         /// </summary>
         /// <param name="code">The code to explain.</param>
         /// <returns>An explanation.</returns>
-        public string ExplainCode(string code)
+        public static string ExplainCode(string code)
         {
             return "This code implements a Result monad for functional error handling in C#.";
         }
@@ -205,7 +199,7 @@ public class Result<T>
         /// </summary>
         /// <param name="command">The command string.</param>
         /// <returns>Response output.</returns>
-        public async Task<string> ProcessCommandAsync(string command)
+        public static async Task<string> ProcessCommandAsync(string command)
         {
             if (command.StartsWith("suggest"))
             {
@@ -231,7 +225,7 @@ public class Result<T>
         /// </summary>
         /// <param name="command">The command string.</param>
         /// <returns>Response output.</returns>
-        public string ProcessCommand(string command)
+        public static string ProcessCommand(string command)
         {
             // Intentional: sync wrapper for non-async callers
             return Task.Run(() => ProcessCommandAsync(command)).GetAwaiter().GetResult();

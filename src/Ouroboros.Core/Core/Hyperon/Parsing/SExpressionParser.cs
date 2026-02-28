@@ -112,7 +112,7 @@ public sealed class SExpressionParser
         return false;
     }
 
-    private List<string> Tokenize(string input)
+    private static List<string> Tokenize(string input)
     {
         List<string> tokens = new List<string>();
         StringBuilder current = new StringBuilder();
@@ -268,7 +268,7 @@ public sealed class SExpressionParser
 
     private static Atom ParseSymbolOrVariable(string token)
     {
-        if (token.StartsWith("$"))
+        if (token.StartsWith('$'))
         {
             string varName = token.Substring(1);
             if (string.IsNullOrEmpty(varName))
@@ -280,7 +280,7 @@ public sealed class SExpressionParser
         }
 
         // Handle quoted strings
-        if (token.StartsWith("\"") && token.EndsWith("\"") && token.Length > 1)
+        if (token.StartsWith('"') && token.EndsWith('"') && token.Length > 1)
         {
             string content = token.Substring(1, token.Length - 2);
             return new Symbol(content);

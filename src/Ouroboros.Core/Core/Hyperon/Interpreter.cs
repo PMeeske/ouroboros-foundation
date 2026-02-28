@@ -100,7 +100,7 @@ public sealed class Interpreter
         }
 
         // Case 2: Direct match in atom space (ground query or pattern match)
-        foreach ((Atom? atom, Substitution? bindings) in space.Query(query))
+        foreach ((Atom _, Substitution? bindings) in space.Query(query))
         {
             yield return bindings.Apply(query);
         }
@@ -182,7 +182,7 @@ public sealed class Interpreter
     /// <param name="first">The first query producing intermediate values.</param>
     /// <param name="selector">Function to create the second query from first results.</param>
     /// <returns>Combined enumerable of results.</returns>
-    public IEnumerable<Atom> Bind<T>(IEnumerable<T> first, Func<T, IEnumerable<Atom>> selector)
+    public static IEnumerable<Atom> Bind<T>(IEnumerable<T> first, Func<T, IEnumerable<Atom>> selector)
     {
         return first.SelectMany(selector);
     }

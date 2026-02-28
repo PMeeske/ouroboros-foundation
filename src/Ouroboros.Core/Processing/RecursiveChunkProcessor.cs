@@ -56,7 +56,7 @@ public sealed class RecursiveChunkProcessor : IRecursiveChunkProcessor
                 : maxChunkSize;
 
             // Split context into chunks
-            List<string> chunks = this.SplitIntoChunks(textContext, chunkSize);
+            List<string> chunks = SplitIntoChunks(textContext, chunkSize);
 
             if (chunks.Count == 0)
             {
@@ -118,7 +118,7 @@ public sealed class RecursiveChunkProcessor : IRecursiveChunkProcessor
     /// Splits text into chunks of approximately the specified size.
     /// Uses token-aware splitting to avoid breaking semantic units.
     /// </summary>
-    private List<string> SplitIntoChunks(string text, int chunkSize)
+    private static List<string> SplitIntoChunks(string text, int chunkSize)
     {
         List<string> chunks = new List<string>();
 

@@ -62,8 +62,6 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
         // Escape double quotes for the command line argument
         string escapedScript = pythonScript.Replace("\"", "\\\"");
 
-        string currentDir = Directory.GetCurrentDirectory();
-        
         // Pass environment variables to Docker container
         StringBuilder envArgs = new StringBuilder();
         string[] envVarsToPass = { "OPENAI_API_KEY", "OPENAI_API_BASE", "OPENAI_API_MODEL" };

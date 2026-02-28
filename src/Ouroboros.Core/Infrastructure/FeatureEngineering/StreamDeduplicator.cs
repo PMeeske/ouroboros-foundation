@@ -141,16 +141,7 @@ public sealed class StreamDeduplicator
             throw new ArgumentNullException(nameof(vectors));
         }
 
-        List<float[]> result = new List<float[]>();
-        foreach (float[] vector in vectors)
-        {
-            if (!this.IsDuplicate(vector))
-            {
-                result.Add(vector);
-            }
-        }
-
-        return result;
+        return vectors.Where(vector => !this.IsDuplicate(vector)).ToList();
     }
 
     /// <summary>

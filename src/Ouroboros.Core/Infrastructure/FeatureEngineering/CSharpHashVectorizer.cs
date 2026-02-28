@@ -176,29 +176,13 @@ public sealed class CSharpHashVectorizer
 
     private List<string> ExtractTokens(string code)
     {
-        List<string> tokens = new List<string>();
         MatchCollection matches = TokenPattern.Matches(code);
 
-        foreach (Match match in matches)
-        {
-            string token = match.Value;
-
-            // Normalize keywords
-            if (CSharpKeywords.Contains(token.ToLowerInvariant()))
-            {
-                tokens.Add(token.ToLowerInvariant());
-            }
-            else if (this.lowercase)
-            {
-                tokens.Add(token.ToLowerInvariant());
-            }
-            else
-            {
-                tokens.Add(token);
-            }
-        }
-
-        return tokens;
+        return matches.Select(match => match.Value)
+            .Select(token => CSharpKeywords.Contains(token.ToLowerInvariant()) || this.lowercase
+                ? token.ToLowerInvariant()
+                : token)
+            .ToList();
     }
 
     private float[] BuildVector(List<string> tokens)

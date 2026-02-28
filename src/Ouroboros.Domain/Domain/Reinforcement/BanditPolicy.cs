@@ -48,7 +48,7 @@ public sealed class BanditPolicy : IPolicy
 
         foreach (EnvironmentAction action in availableActions)
         {
-            string actionKey = this.GetActionKey(action);
+            string actionKey = GetActionKey(action);
             ActionStats stats = this.actionStats.GetOrAdd(actionKey, _ => new ActionStats());
 
             double ucbValue;
@@ -81,7 +81,7 @@ public sealed class BanditPolicy : IPolicy
         Observation observation,
         CancellationToken cancellationToken = default)
     {
-        string actionKey = this.GetActionKey(action);
+        string actionKey = GetActionKey(action);
         ActionStats stats = this.actionStats.GetOrAdd(actionKey, _ => new ActionStats());
 
         // Update running average
@@ -91,7 +91,7 @@ public sealed class BanditPolicy : IPolicy
         return ValueTask.FromResult(Result<Unit>.Success(Unit.Value));
     }
 
-    private string GetActionKey(EnvironmentAction action)
+    private static string GetActionKey(EnvironmentAction action)
     {
         if (action.Parameters == null || action.Parameters.Count == 0)
         {

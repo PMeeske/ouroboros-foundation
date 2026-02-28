@@ -130,7 +130,7 @@ public sealed partial class QdrantVectorStore
                     });
                 }
 
-                offset = scrollResult.Result.Count > 0 ? scrollResult.Result.Last().Id : null;
+                offset = scrollResult.Result.Count > 0 ? scrollResult.Result[^1].Id : null;
             }
             while (offset != null);
 
@@ -273,7 +273,7 @@ public sealed partial class QdrantVectorStore
             }).ToList();
 
             string? nextOffset = scrollResult.Result.Count > 0
-                ? scrollResult.Result.Last().Id.Uuid ?? scrollResult.Result.Last().Id.Num.ToString()
+                ? scrollResult.Result[^1].Id.Uuid ?? scrollResult.Result[^1].Id.Num.ToString()
                 : null;
 
             _logger?.LogDebug("Scrolled {Count} documents from collection {Collection}", documents.Count, _collectionName);

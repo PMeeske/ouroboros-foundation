@@ -9,7 +9,6 @@ namespace Ouroboros.Core.Tracing
         private bool _isEnabled = false;
         private Action? _startedCallback;
         private Action? _stoppedCallback;
-        private Activity? _currentActivity;
 
         public async Task<Result<Unit, string>> EnableTracing()
         {
@@ -45,7 +44,6 @@ namespace Ouroboros.Core.Tracing
             if (!_isEnabled) return Result<Activity, string>.Failure("Tracing is disabled");
             Activity? activity = DistributedTracing.StartActivity(name, tags: tags?.ToDictionary(kv => kv.Key, kv => (object?)kv.Value));
             if (activity == null) return Result<Activity, string>.Failure("Failed to start activity");
-            _currentActivity = activity;
             return Result<Activity, string>.Success(activity);
         }
 

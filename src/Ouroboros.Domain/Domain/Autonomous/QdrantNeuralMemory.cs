@@ -286,7 +286,7 @@ public sealed partial class QdrantNeuralMemory : IDisposable
                     results.Add((id, payloadDict));
                 }
 
-                offset = scrollResult.Result.Count > 0 ? scrollResult.Result.Last().Id : null;
+                offset = scrollResult.Result.Count > 0 ? scrollResult.Result[^1].Id : null;
                 if (offset == null) break;
             }
             catch (Grpc.Core.RpcException)

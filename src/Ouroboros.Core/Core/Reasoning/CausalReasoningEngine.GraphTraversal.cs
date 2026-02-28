@@ -15,7 +15,7 @@ using Ouroboros.Core.Monads;
 /// </summary>
 public sealed partial class CausalReasoningEngine
 {
-    private string GenerateNarrativeExplanation(
+    private static string GenerateNarrativeExplanation(
         string effect,
         Dictionary<string, double> attributions,
         List<CausalPath> paths)
@@ -68,7 +68,7 @@ public sealed partial class CausalReasoningEngine
                 maxEffect = effect;
 
                 // Find variables affected by this intervention
-                List<string> sideEffects = this.FindAffectedVariables(variable, desiredOutcome, model);
+                List<string> sideEffects = FindAffectedVariables(variable, desiredOutcome, model);
 
                 Variable? targetVar = model.Variables.FirstOrDefault(v => v.Name == variable);
                 object newValue = targetVar?.PossibleValues.LastOrDefault() ?? 1.0;
@@ -90,7 +90,7 @@ public sealed partial class CausalReasoningEngine
         return Result<Intervention, string>.Success(bestIntervention);
     }
 
-    private List<string> FindAffectedVariables(string source, string target, CausalGraph model)
+    private static List<string> FindAffectedVariables(string source, string target, CausalGraph model)
     {
         List<string> affected = new List<string>();
 
@@ -104,14 +104,11 @@ public sealed partial class CausalReasoningEngine
         {
             string current = queue.Dequeue();
 
-            foreach (CausalEdge? edge in model.Edges.Where(e => e.Cause == current))
+            foreach (string effect in model.Edges.Where(e => e.Cause == current && !visited.Contains(e.Effect) && e.Effect != target).Select(edge => edge.Effect))
             {
-                if (!visited.Contains(edge.Effect) && edge.Effect != target)
-                {
-                    affected.Add(edge.Effect);
-                    visited.Add(edge.Effect);
-                    queue.Enqueue(edge.Effect);
-                }
+                affected.Add(effect);
+                visited.Add(effect);
+                queue.Enqueue(effect);
             }
         }
 
@@ -154,20 +151,17 @@ public sealed partial class CausalReasoningEngine
         }
 
         // Explore neighbors
-        foreach (CausalEdge? edge in model.Edges.Where(e => e.Cause == current))
+        foreach (CausalEdge? edge in model.Edges.Where(e => e.Cause == current && !visited.Contains(e.Effect)))
         {
-            if (!visited.Contains(edge.Effect))
-            {
-                visited.Add(edge.Effect);
-                currentPath.Add(edge.Effect);
-                currentEdges.Add(edge);
+            visited.Add(edge.Effect);
+            currentPath.Add(edge.Effect);
+            currentEdges.Add(edge);
 
-                this.FindPathsRecursive(edge.Effect, target, model, currentPath, currentEdges, allPaths, visited);
+            this.FindPathsRecursive(edge.Effect, target, model, currentPath, currentEdges, allPaths, visited);
 
-                currentPath.RemoveAt(currentPath.Count - 1);
-                currentEdges.RemoveAt(currentEdges.Count - 1);
-                visited.Remove(edge.Effect);
-            }
+            currentPath.RemoveAt(currentPath.Count - 1);
+            currentEdges.RemoveAt(currentEdges.Count - 1);
+            visited.Remove(edge.Effect);
         }
     }
 }

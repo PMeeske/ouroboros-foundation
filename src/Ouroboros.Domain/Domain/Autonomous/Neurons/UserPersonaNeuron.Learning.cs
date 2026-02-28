@@ -12,7 +12,6 @@ namespace Ouroboros.Domain.Autonomous.Neurons;
 /// </summary>
 public sealed partial class UserPersonaNeuron
 {
-    private Task? _trainingLoopTask;
     private CancellationTokenSource? _trainingCts;
 
     private async Task StartTrainingAsync(object? payload, CancellationToken ct)
@@ -32,7 +31,7 @@ public sealed partial class UserPersonaNeuron
 
         // Start background training loop
         _trainingCts = new CancellationTokenSource();
-        _trainingLoopTask = Task.Run(() => TrainingLoopAsync(_trainingCts.Token));
+        _ = Task.Run(() => TrainingLoopAsync(_trainingCts.Token));
 
         // Generate and send initial question immediately
         await GenerateAndSendQuestionAsync(ct);

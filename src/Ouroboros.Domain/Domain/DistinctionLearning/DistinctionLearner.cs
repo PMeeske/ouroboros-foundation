@@ -173,17 +173,11 @@ public sealed class DistinctionLearner : IDistinctionLearner
 
             // Calculate fitness based on match rate and weighted certainty:
             // Fitness = (proportion of observations containing distinction) * (average certainty of matching observations)
-            int matchCount = 0;
-            double totalCertainty = 0.0;
-
-            foreach (Observation? obs in observationList)
-            {
-                if (obs.Content.Contains(distinction, StringComparison.OrdinalIgnoreCase))
-                {
-                    matchCount++;
-                    totalCertainty += obs.PriorCertainty;
-                }
-            }
+            List<Observation> matchingObs = observationList
+                .Where(obs => obs.Content.Contains(distinction, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            int matchCount = matchingObs.Count;
+            double totalCertainty = matchingObs.Sum(obs => obs.PriorCertainty);
 
             // Fitness = (match rate * average certainty)
             double matchRate = (double)matchCount / observationList.Count;

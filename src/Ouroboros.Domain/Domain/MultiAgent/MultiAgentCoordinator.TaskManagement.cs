@@ -36,20 +36,17 @@ public sealed partial class MultiAgentCoordinator
         foreach (AgentId agentId in agents)
         {
             Result<AgentCapabilities, string> capResult = await this.agentRegistry.GetAgentCapabilitiesAsync(agentId);
-            if (capResult.IsSuccess && capResult.Value.IsAvailable)
+            if (capResult.IsSuccess && capResult.Value.IsAvailable && capResult.Value.CurrentLoad < minLoad)
             {
-                if (capResult.Value.CurrentLoad < minLoad)
-                {
-                    minLoad = capResult.Value.CurrentLoad;
-                    leastLoaded = agentId;
-                }
+                minLoad = capResult.Value.CurrentLoad;
+                leastLoaded = agentId;
             }
         }
 
         return leastLoaded ?? agents[0];
     }
 
-    private List<string> DecomposeGoalIntoTasks(string goal)
+    private static List<string> DecomposeGoalIntoTasks(string goal)
     {
         // Simplified task decomposition - in production would use LLM
         // For now, create simple subtasks
@@ -62,7 +59,7 @@ public sealed partial class MultiAgentCoordinator
         };
     }
 
-    private Result<Dictionary<AgentId, TaskAssignment>, string> AllocateRoundRobin(
+    private static Result<Dictionary<AgentId, TaskAssignment>, string> AllocateRoundRobin(
         List<string> tasks,
         List<AgentCapabilities> agents)
     {
@@ -148,7 +145,7 @@ public sealed partial class MultiAgentCoordinator
         foreach (string task in tasks)
         {
             // Assign to least loaded agent
-            AgentCapabilities agent = sortedAgents.First();
+            AgentCapabilities agent = sortedAgents[0];
             TaskAssignment assignment = new TaskAssignment(
                 TaskDescription: task,
                 AssignedTo: agent.Id,
@@ -188,7 +185,7 @@ public sealed partial class MultiAgentCoordinator
                 .Select(a => new
                 {
                     Agent = a,
-                    Bid = this.CalculateBid(a, task),
+                    Bid = CalculateBid(a, task),
                 })
                 .OrderByDescending(x => x.Bid)
                 .First();
@@ -206,7 +203,7 @@ public sealed partial class MultiAgentCoordinator
         return Task.FromResult(Result<Dictionary<AgentId, TaskAssignment>, string>.Success(assignments));
     }
 
-    private double CalculateBid(AgentCapabilities agent, string task)
+    private static double CalculateBid(AgentCapabilities agent, string task)
     {
         // Bid calculation: skill match score - current load
         double skillScore = agent.Skills.Count(skill =>
@@ -241,7 +238,7 @@ public sealed partial class MultiAgentCoordinator
         return votes;
     }
 
-    private Result<Decision, string> ApplyMajorityProtocol(string proposal, Dictionary<AgentId, Vote> votes)
+    private static Result<Decision, string> ApplyMajorityProtocol(string proposal, Dictionary<AgentId, Vote> votes)
     {
         int totalVotes = votes.Count;
         int votesInFavor = votes.Values.Count(v => v.InFavor);
@@ -252,7 +249,7 @@ public sealed partial class MultiAgentCoordinator
         return Result<Decision, string>.Success(decision);
     }
 
-    private Result<Decision, string> ApplyUnanimousProtocol(string proposal, Dictionary<AgentId, Vote> votes)
+    private static Result<Decision, string> ApplyUnanimousProtocol(string proposal, Dictionary<AgentId, Vote> votes)
     {
         bool accepted = votes.Values.All(v => v.InFavor);
         double consensusScore = accepted ? 1.0 : 0.0;
@@ -261,7 +258,7 @@ public sealed partial class MultiAgentCoordinator
         return Result<Decision, string>.Success(decision);
     }
 
-    private Result<Decision, string> ApplyWeightedProtocol(string proposal, Dictionary<AgentId, Vote> votes)
+    private static Result<Decision, string> ApplyWeightedProtocol(string proposal, Dictionary<AgentId, Vote> votes)
     {
         double totalWeight = votes.Values.Sum(v => v.Confidence);
         double weightedInFavor = votes.Values.Where(v => v.InFavor).Sum(v => v.Confidence);
@@ -272,7 +269,7 @@ public sealed partial class MultiAgentCoordinator
         return Result<Decision, string>.Success(decision);
     }
 
-    private Task<Result<Decision, string>> ApplyRaftProtocolAsync(
+    private static Task<Result<Decision, string>> ApplyRaftProtocolAsync(
         string proposal,
         Dictionary<AgentId, Vote> votes,
         CancellationToken ct)
@@ -416,7 +413,7 @@ public sealed partial class MultiAgentCoordinator
         return Result<Unit, string>.Success(Unit.Value);
     }
 
-    private List<Dependency> IdentifyDependencies(List<TaskAssignment> assignments)
+    private static List<Dependency> IdentifyDependencies(List<TaskAssignment> assignments)
     {
         List<Dependency> dependencies = new List<Dependency>();
 
@@ -444,7 +441,7 @@ public sealed partial class MultiAgentCoordinator
         return dependencies;
     }
 
-    private TimeSpan EstimateDuration(List<TaskAssignment> assignments, List<Dependency> dependencies)
+    private static TimeSpan EstimateDuration(List<TaskAssignment> assignments, List<Dependency> dependencies)
     {
         // Simplified duration estimation
         // In a real implementation, would analyze critical path through dependency graph

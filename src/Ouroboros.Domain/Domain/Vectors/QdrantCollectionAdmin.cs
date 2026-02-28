@@ -19,7 +19,6 @@ public sealed partial class QdrantCollectionAdmin : IAsyncDisposable
 
     private readonly QdrantClient _client;
     private readonly IQdrantCollectionRegistry? _registry;
-    private readonly string _endpoint;
     private readonly bool _disposeClient;
     private readonly Dictionary<string, CollectionInfo> _collectionCache = new();
     private readonly List<CollectionLink> _collectionLinks = new();
@@ -73,7 +72,6 @@ public sealed partial class QdrantCollectionAdmin : IAsyncDisposable
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
         _registry = registry ?? throw new ArgumentNullException(nameof(registry));
-        _endpoint = "di-managed";
         _disposeClient = false;
     }
 
@@ -84,7 +82,7 @@ public sealed partial class QdrantCollectionAdmin : IAsyncDisposable
     [Obsolete("Use the constructor accepting QdrantClient + IQdrantCollectionRegistry from DI.")]
     public QdrantCollectionAdmin(string endpoint = DefaultEndpoints.Qdrant)
     {
-        _endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
+        ArgumentNullException.ThrowIfNull(endpoint);
         Uri uri = new Uri(endpoint);
         _client = new QdrantClient(uri.Host, uri.Port > 0 ? uri.Port : 6334, uri.Scheme == "https");
         _disposeClient = true;
@@ -96,7 +94,6 @@ public sealed partial class QdrantCollectionAdmin : IAsyncDisposable
     public QdrantCollectionAdmin(QdrantClient client)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
-        _endpoint = "external";
         _disposeClient = false;
     }
 

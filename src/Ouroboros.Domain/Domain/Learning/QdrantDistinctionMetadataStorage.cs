@@ -291,7 +291,7 @@ public sealed class QdrantDistinctionMetadataStorage
         }
     }
 
-    private DistinctionMetadata PayloadToMetadata(DistinctionId id, IDictionary<string, Value> payload)
+    private static DistinctionMetadata PayloadToMetadata(DistinctionId id, IDictionary<string, Value> payload)
     {
         string circumstance = payload.TryGetValue("circumstance", out Value? c) ? c.StringValue : string.Empty;
         string storagePath = payload.TryGetValue("storage_path", out Value? sp) ? sp.StringValue : string.Empty;

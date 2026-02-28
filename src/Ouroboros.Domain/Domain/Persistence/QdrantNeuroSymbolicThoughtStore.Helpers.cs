@@ -170,7 +170,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore
         }
     }
 
-    private string InferRelationType(PersistedThought newThought, PersistedThought existingThought)
+    private static string InferRelationType(PersistedThought newThought, PersistedThought existingThought)
     {
         // Use thought types to infer symbolic relation
         return (existingThought.Type, newThought.Type) switch

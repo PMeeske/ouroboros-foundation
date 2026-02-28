@@ -31,9 +31,7 @@ public sealed partial class FormMeTTaBridge
         }
 
         // Expression evaluation
-        if (expression is Expression expr && expr.Children.Count > 0)
-        {
-            if (expr.Children[0] is Symbol head)
+        if (expression is Expression expr && expr.Children.Count > 0 && expr.Children[0] is Symbol head)
             {
                 return head.Name switch
                 {
@@ -46,7 +44,6 @@ public sealed partial class FormMeTTaBridge
                     "implies" => EvaluateImplies(expr, trace),
                     _ => EvaluateGeneric(expr, trace)
                 };
-            }
         }
 
         // Query the interpreter
@@ -141,7 +138,7 @@ public sealed partial class FormMeTTaBridge
         return result;
     }
 
-    private Form EvaluateReentry(ImmutableList<string>.Builder trace)
+    private static Form EvaluateReentry(ImmutableList<string>.Builder trace)
     {
         trace.Add("ReEntry = Imaginary");
         return Form.Imaginary;
@@ -183,7 +180,7 @@ public sealed partial class FormMeTTaBridge
         return matches.Count > 0 ? Form.Mark : Form.Void;
     }
 
-    private Form ComputeBindingCertainty(Substitution bindings)
+    private static Form ComputeBindingCertainty(Substitution bindings)
     {
         if (bindings.IsEmpty)
         {
@@ -191,15 +188,9 @@ public sealed partial class FormMeTTaBridge
         }
 
         // Check if any binding contains variables (uncertain)
-        foreach (KeyValuePair<string, Atom> kvp in bindings.Bindings)
-        {
-            if (kvp.Value.ContainsVariables())
-            {
-                return Form.Imaginary; // Still has unknowns
-            }
-        }
-
-        return Form.Mark; // All bindings are ground
+        return bindings.Bindings.Any(kvp => kvp.Value.ContainsVariables())
+            ? Form.Imaginary // Still has unknowns
+            : Form.Mark; // All bindings are ground
     }
 
     private void OnDistinctionChanged(DistinctionEventArgs e)

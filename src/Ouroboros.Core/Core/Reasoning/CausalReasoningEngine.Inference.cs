@@ -64,15 +64,12 @@ public sealed partial class CausalReasoningEngine
                     }
 
                     // Test all conditioning sets of current size
-                    foreach (List<int> condSet in this.GetCombinations(neighbors, conditioningSize))
+                    if (GetCombinations(neighbors, conditioningSize)
+                        .Any(condSet => TestConditionalIndependence(data, i, j, condSet, variableNames)))
                     {
-                        if (this.TestConditionalIndependence(data, i, j, condSet, variableNames))
-                        {
-                            // Remove edge between i and j
-                            adjacencyMatrix[i, j] = false;
-                            adjacencyMatrix[j, i] = false;
-                            break;
-                        }
+                        // Remove edge between i and j
+                        adjacencyMatrix[i, j] = false;
+                        adjacencyMatrix[j, i] = false;
                     }
                 }
             }
@@ -82,37 +79,30 @@ public sealed partial class CausalReasoningEngine
         List<CausalEdge> edges = this.OrientEdges(adjacencyMatrix, variableNames, data);
 
         // Create variables
-        List<Variable> variables = variableNames.Select(name => this.CreateVariable(name, data)).ToList();
+        List<Variable> variables = variableNames.Select(name => CreateVariable(name, data)).ToList();
 
         // Create structural equations (simplified)
-        Dictionary<string, StructuralEquation> equations = new Dictionary<string, StructuralEquation>();
-        foreach (Variable variable in variables)
-        {
-            List<string> parents = edges
-                .Where(e => e.Effect == variable.Name)
-                .Select(e => e.Cause)
-                .ToList();
-
-            equations[variable.Name] = new StructuralEquation(
+        Dictionary<string, StructuralEquation> equations = variables.ToDictionary(
+            variable => variable.Name,
+            variable => new StructuralEquation(
                 variable.Name,
-                parents,
-                values => this.ComputeVariableValue(variable.Name, values, data),
-                1.0);
-        }
+                edges.Where(e => e.Effect == variable.Name).Select(e => e.Cause).ToList(),
+                values => ComputeVariableValue(variable.Name, values, data),
+                1.0));
 
         CausalGraph causalGraph = new CausalGraph(variables, edges, equations);
         return Result<CausalGraph, string>.Success(causalGraph);
     }
 
-    private Variable CreateVariable(string name, List<Observation> data)
+    private static Variable CreateVariable(string name, List<Observation> data)
     {
         List<object> values = data.Select(o => o.Values.TryGetValue(name, out var val) ? val : (object)0.0).Distinct().ToList();
-        VariableType type = this.InferVariableType(values);
+        VariableType type = InferVariableType(values);
 
         return new Variable(name, type, values);
     }
 
-    private VariableType InferVariableType(List<object> values)
+    private static VariableType InferVariableType(List<object> values)
     {
         if (values.All(v => v is bool || (v is int i && (i == 0 || i == 1))))
         {
@@ -127,7 +117,7 @@ public sealed partial class CausalReasoningEngine
         return VariableType.Categorical;
     }
 
-    private bool TestConditionalIndependence(
+    private static bool TestConditionalIndependence(
         List<Observation> data,
         int varI,
         int varJ,
@@ -147,7 +137,7 @@ public sealed partial class CausalReasoningEngine
             // No conditioning: simple Pearson correlation
             double[] dataI = data.Select(o => o.Values.TryGetValue(nameI, out var val) ? SafeToDouble(val) : 0.0).ToArray();
             double[] dataJ = data.Select(o => o.Values.TryGetValue(nameJ, out var val) ? SafeToDouble(val) : 0.0).ToArray();
-            double correlation = this.ComputeCorrelation(dataI, dataJ);
+            double correlation = ComputeCorrelation(dataI, dataJ);
             return Math.Abs(correlation) < SignificanceLevel;
         }
 
@@ -171,7 +161,7 @@ public sealed partial class CausalReasoningEngine
 
             double[] partDataI = partObs.Select(o => o.Values.TryGetValue(nameI, out var val) ? SafeToDouble(val) : 0.0).ToArray();
             double[] partDataJ = partObs.Select(o => o.Values.TryGetValue(nameJ, out var val) ? SafeToDouble(val) : 0.0).ToArray();
-            double correlation = this.ComputeCorrelation(partDataI, partDataJ);
+            double correlation = ComputeCorrelation(partDataI, partDataJ);
             totalCorrelation += Math.Abs(correlation);
             partitionCount++;
         }
@@ -184,7 +174,7 @@ public sealed partial class CausalReasoningEngine
         return (totalCorrelation / partitionCount) < SignificanceLevel;
     }
 
-    private double ComputeCorrelation(double[] x, double[] y)
+    private static double ComputeCorrelation(double[] x, double[] y)
     {
         if (x.Length != y.Length || x.Length == 0)
         {
@@ -229,7 +219,7 @@ public sealed partial class CausalReasoningEngine
                     double[] dataI = data.Select(o => o.Values.TryGetValue(nameI, out var valI) ? SafeToDouble(valI) : 0.0).ToArray();
                     double[] dataJ = data.Select(o => o.Values.TryGetValue(nameJ, out var valJ) ? SafeToDouble(valJ) : 0.0).ToArray();
 
-                    double strength = Math.Abs(this.ComputeCorrelation(dataI, dataJ));
+                    double strength = Math.Abs(ComputeCorrelation(dataI, dataJ));
 
                     // Store with canonical key (i < j), default orientation i -> j
                     edgeStrength[(i, j)] = strength;
@@ -519,7 +509,7 @@ public sealed partial class CausalReasoningEngine
         return edges;
     }
 
-    private object ComputeVariableValue(string variable, Dictionary<string, object> values, List<Observation> data)
+    private static object ComputeVariableValue(string variable, Dictionary<string, object> values, List<Observation> data)
     {
         // Simplified computation - in practice, use learned structural equation
         if (values.ContainsKey(variable))
@@ -588,7 +578,7 @@ public sealed partial class CausalReasoningEngine
         return Result<double, string>.Success(totalEffect);
     }
 
-    private Result<Distribution, string> ComputeCounterfactual(
+    private static Result<Distribution, string> ComputeCounterfactual(
         string intervention,
         string outcome,
         Observation factual,
@@ -598,7 +588,7 @@ public sealed partial class CausalReasoningEngine
         // Twin network approach: abduct exogenous variables, modify intervention, predict outcome
 
         // Step 1: Abduct exogenous variables from factual observation
-        Dictionary<string, object> exogenousVars = this.AbductExogenousVariables(factual, model);
+        Dictionary<string, object> exogenousVars = AbductExogenousVariables(factual, model);
 
         // Step 2: Simulate intervention in counterfactual world
         Dictionary<string, object> counterfactualValues = new Dictionary<string, object>(factual.Values);
@@ -613,7 +603,7 @@ public sealed partial class CausalReasoningEngine
 
         // Step 3: Propagate effects using structural equations (hold intervened variables fixed)
         var interventionSet = interventionVar != null ? new HashSet<string> { intervention } : null;
-        object counterfactualOutcome = this.PropagateEffects(outcome, counterfactualValues, model, exogenousVars, interventionSet);
+        object counterfactualOutcome = PropagateEffects(outcome, counterfactualValues, model, exogenousVars, interventionSet);
 
         // Step 4: Create distribution (simplified as point estimate)
         Distribution distribution = new Distribution(
@@ -626,51 +616,49 @@ public sealed partial class CausalReasoningEngine
         return Result<Distribution, string>.Success(distribution);
     }
 
-    private Dictionary<string, object> AbductExogenousVariables(Observation factual, CausalGraph model)
+    private static Dictionary<string, object> AbductExogenousVariables(Observation factual, CausalGraph model)
     {
         // Compute exogenous (noise) variables as residuals: U_i = actual_i - predicted_i
         // For variables with structural equations, the residual captures the unexplained
         // component. For root variables (no equation or no parents), the exogenous value
         // is the observed value itself.
-        var exogenous = new Dictionary<string, object>();
+        return model.Variables.ToDictionary(
+            variable => variable.Name,
+            variable => AbductSingleVariable(variable.Name, factual, model));
+    }
 
-        foreach (Variable variable in model.Variables)
+    private static object AbductSingleVariable(string variableName, Observation factual, CausalGraph model)
+    {
+        if (model.Equations.TryGetValue(variableName, out StructuralEquation? eq)
+            && eq.Function != null
+            && eq.Parents.Count > 0)
         {
-            if (model.Equations.TryGetValue(variable.Name, out StructuralEquation? eq)
-                && eq.Function != null
-                && eq.Parents.Count > 0)
+            try
             {
-                try
-                {
-                    // Compute predicted value from structural equation
-                    double predicted = Convert.ToDouble(eq.Function(factual.Values));
-                    double actual = Convert.ToDouble(factual.Values[variable.Name]);
+                // Compute predicted value from structural equation
+                double predicted = Convert.ToDouble(eq.Function(factual.Values));
+                double actual = Convert.ToDouble(factual.Values[variableName]);
 
-                    // Residual = actual - predicted (the exogenous noise term)
-                    exogenous[variable.Name] = actual - predicted;
-                }
-                catch (Exception ex) when (ex is not OperationCanceledException)
-                {
-                    // Non-numeric or missing values: fall back to observed value
-                    System.Diagnostics.Trace.TraceWarning($"Abduction failed for variable: {ex.Message}");
-                    exogenous[variable.Name] = factual.Values.TryGetValue(variable.Name, out var v)
-                        ? v
-                        : 0.0;
-                }
+                // Residual = actual - predicted (the exogenous noise term)
+                return actual - predicted;
             }
-            else
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                // No structural equation or no parents: exogenous IS the observed value
-                exogenous[variable.Name] = factual.Values.TryGetValue(variable.Name, out var v)
+                // Non-numeric or missing values: fall back to observed value
+                System.Diagnostics.Trace.TraceWarning($"Abduction failed for variable: {ex.Message}");
+                return factual.Values.TryGetValue(variableName, out var v)
                     ? v
                     : 0.0;
             }
         }
 
-        return exogenous;
+        // No structural equation or no parents: exogenous IS the observed value
+        return factual.Values.TryGetValue(variableName, out var val)
+            ? val
+            : 0.0;
     }
 
-    private object PropagateEffects(
+    private static object PropagateEffects(
         string outcome,
         Dictionary<string, object> values,
         CausalGraph model,
@@ -828,7 +816,7 @@ public sealed partial class CausalReasoningEngine
         }
 
         // Generate narrative explanation
-        string narrative = this.GenerateNarrativeExplanation(effect, attributions, allPaths);
+        string narrative = GenerateNarrativeExplanation(effect, attributions, allPaths);
 
         Explanation explanation = new Explanation(effect, allPaths, attributions, narrative);
         return Result<Explanation, string>.Success(explanation);

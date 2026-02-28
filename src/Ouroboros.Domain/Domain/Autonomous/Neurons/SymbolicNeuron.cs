@@ -105,15 +105,12 @@ public sealed class SymbolicNeuron : Neuron
                 IEnumerable<string>? dagFacts = message.Payload as IEnumerable<string>;
                 if (dagFacts != null)
                 {
-                    foreach (string dagFact in dagFacts)
+                    foreach (string dagFact in dagFacts.Where(f => !string.IsNullOrEmpty(f)))
                     {
-                        if (!string.IsNullOrEmpty(dagFact))
+                        _facts.Add(dagFact);
+                        if (MeTTaAddFactFunction != null)
                         {
-                            _facts.Add(dagFact);
-                            if (MeTTaAddFactFunction != null)
-                            {
-                                await MeTTaAddFactFunction(dagFact, ct);
-                            }
+                            await MeTTaAddFactFunction(dagFact, ct);
                         }
                     }
                 }

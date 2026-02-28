@@ -135,13 +135,9 @@ public static class EthicalAtomIntegrity
     {
         List<string> failures = new List<string>();
 
-        foreach (EthicalAtom atom in Enum.GetValues<EthicalAtom>())
-        {
-            if (!Verify(atom))
-            {
-                failures.Add(atom.ToString());
-            }
-        }
+        failures.AddRange(Enum.GetValues<EthicalAtom>()
+            .Where(atom => !Verify(atom))
+            .Select(atom => atom.ToString()));
 
         if (failures.Count > 0)
         {

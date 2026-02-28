@@ -324,7 +324,7 @@ public sealed partial class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
         foreach (string line in lines)
         {
             string trimmed = line.Trim();
-            if (string.IsNullOrEmpty(trimmed) || trimmed.StartsWith(";"))
+            if (string.IsNullOrEmpty(trimmed) || trimmed.StartsWith(';'))
             {
                 continue; // Skip empty lines and comments
             }

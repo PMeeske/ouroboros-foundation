@@ -18,11 +18,11 @@ public sealed record Oscillator(Form StateA, Form StateB)
     /// <summary>
     /// Gets the period of oscillation (always 2 for discrete oscillator).
     /// </summary>
-    public int Period => 2;
+    public static int Period => 2;
 
     /// <summary>
     /// Converts this oscillator to an imaginary form.
     /// </summary>
     /// <returns>An imaginary form representing this oscillation.</returns>
-    public Form ToImaginary() => Form.Imaginary;
+    public static Form ToImaginary() => Form.Imaginary;
 }

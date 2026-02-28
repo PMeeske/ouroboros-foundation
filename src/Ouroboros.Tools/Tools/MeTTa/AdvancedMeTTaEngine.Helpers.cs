@@ -11,7 +11,7 @@ namespace Ouroboros.Tools.MeTTa;
 /// </summary>
 public sealed partial class AdvancedMeTTaEngine
 {
-    private Pattern? ExtractPattern(List<Fact> facts)
+    private static Pattern? ExtractPattern(List<Fact> facts)
     {
         if (facts.Count == 0)
         {
@@ -31,7 +31,7 @@ public sealed partial class AdvancedMeTTaEngine
         return new Pattern(template, variables);
     }
 
-    private double CalculateConfidence(List<Fact> facts)
+    private static double CalculateConfidence(List<Fact> facts)
     {
         if (facts.Count == 0)
         {
@@ -41,7 +41,7 @@ public sealed partial class AdvancedMeTTaEngine
         return facts.Average(f => f.Confidence);
     }
 
-    private Fact? ParseFactPattern(string factString)
+    private static Fact? ParseFactPattern(string factString)
     {
         // Parse (predicate arg1 arg2 ...)
         var match = Regex.Match(factString, @"\((\w+)\s+(.+)\)");
@@ -57,7 +57,7 @@ public sealed partial class AdvancedMeTTaEngine
         return new Fact(predicate, args);
     }
 
-    private Hypothesis? GenerateHypothesis(Fact observation, string knowledge)
+    private static Hypothesis? GenerateHypothesis(Fact observation, string knowledge)
     {
         // Simple hypothesis generation: if knowledge implies observation
         var knowledgeFact = ParseFactPattern(knowledge);
@@ -72,7 +72,7 @@ public sealed partial class AdvancedMeTTaEngine
         return null;
     }
 
-    private string InferTypeFromPattern(string atom, TypeContext context)
+    private static string InferTypeFromPattern(string atom, TypeContext context)
     {
         // Check if atom is in context bindings
         if (context.Bindings.TryGetValue(atom, out var boundType))
@@ -91,17 +91,17 @@ public sealed partial class AdvancedMeTTaEngine
             return "Float";
         }
 
-        if (atom.StartsWith("\"") && atom.EndsWith("\""))
+        if (atom.StartsWith('"') && atom.EndsWith('"'))
         {
             return "String";
         }
 
-        if (atom.StartsWith("$"))
+        if (atom.StartsWith('$'))
         {
             return "Var";
         }
 
-        if (atom.StartsWith("(") && atom.EndsWith(")"))
+        if (atom.StartsWith('(') && atom.EndsWith(')'))
         {
             return "Expr";
         }
@@ -109,7 +109,7 @@ public sealed partial class AdvancedMeTTaEngine
         return "Unknown";
     }
 
-    private List<Dictionary<string, string>> FindMatchingFacts(List<Pattern> premises, List<Fact> facts)
+    private static List<Dictionary<string, string>> FindMatchingFacts(List<Pattern> premises, List<Fact> facts)
     {
         var matches = new List<Dictionary<string, string>>();
 
@@ -132,7 +132,7 @@ public sealed partial class AdvancedMeTTaEngine
         return matches;
     }
 
-    private Dictionary<string, string>? TryUnify(Pattern pattern, Fact fact)
+    private static Dictionary<string, string>? TryUnify(Pattern pattern, Fact fact)
     {
         var bindings = new Dictionary<string, string>();
 
@@ -158,7 +158,7 @@ public sealed partial class AdvancedMeTTaEngine
         for (int i = 0; i < patternVars.Length; i++)
         {
             var patternVar = patternVars[i];
-            if (patternVar.StartsWith("$"))
+            if (patternVar.StartsWith('$'))
             {
                 bindings[patternVar] = fact.Arguments[i];
             }
@@ -171,7 +171,7 @@ public sealed partial class AdvancedMeTTaEngine
         return bindings;
     }
 
-    private Fact? ApplyRule(Rule rule, Dictionary<string, string> bindings)
+    private static Fact? ApplyRule(Rule rule, Dictionary<string, string> bindings)
     {
         // Apply bindings to conclusion
         var match = Regex.Match(rule.Conclusion.Template, @"\((\w+)\s+(.+)\)");
@@ -187,7 +187,7 @@ public sealed partial class AdvancedMeTTaEngine
         return new Fact(predicate, args, rule.Confidence);
     }
 
-    private bool BackwardChainRecursive(
+    private static bool BackwardChainRecursive(
         Fact goal,
         List<Rule> rules,
         List<Fact> knownFacts,
@@ -218,13 +218,10 @@ public sealed partial class AdvancedMeTTaEngine
                 foreach (var premise in rule.Premises)
                 {
                     var premiseFact = InstantiatePremise(premise, bindings);
-                    if (premiseFact != null)
+                    if (premiseFact != null && !BackwardChainRecursive(premiseFact, rules, knownFacts, requiredFacts, visited))
                     {
-                        if (!BackwardChainRecursive(premiseFact, rules, knownFacts, requiredFacts, visited))
-                        {
-                            allPremisesSatisfied = false;
-                            break;
-                        }
+                        allPremisesSatisfied = false;
+                        break;
                     }
                 }
 
@@ -239,14 +236,14 @@ public sealed partial class AdvancedMeTTaEngine
         return false;
     }
 
-    private bool FactsMatch(Fact f1, Fact f2)
+    private static bool FactsMatch(Fact f1, Fact f2)
     {
         return f1.Predicate == f2.Predicate &&
                f1.Arguments.Count == f2.Arguments.Count &&
                f1.Arguments.SequenceEqual(f2.Arguments);
     }
 
-    private Fact? InstantiatePremise(Pattern premise, Dictionary<string, string> bindings)
+    private static Fact? InstantiatePremise(Pattern premise, Dictionary<string, string> bindings)
     {
         var match = Regex.Match(premise.Template, @"\((\w+)\s+(.+)\)");
         if (!match.Success)
@@ -261,7 +258,7 @@ public sealed partial class AdvancedMeTTaEngine
         return new Fact(predicate, args);
     }
 
-    private bool TryResolve(List<string> clauseSet, List<ProofStep> steps)
+    private static bool TryResolve(List<string> clauseSet, List<ProofStep> steps)
     {
         // Simplified resolution - check for basic contradictions
         for (int i = 0; i < clauseSet.Count; i++)
@@ -280,7 +277,7 @@ public sealed partial class AdvancedMeTTaEngine
         return false;
     }
 
-    private bool AreContradictory(string clause1, string clause2)
+    private static bool AreContradictory(string clause1, string clause2)
     {
         // Simple check: one is NOT of the other
         return (clause1.StartsWith("NOT (") && clause1.Contains(clause2)) ||

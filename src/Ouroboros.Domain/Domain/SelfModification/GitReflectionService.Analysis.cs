@@ -98,7 +98,7 @@ public sealed partial class GitReflectionService
             .ToList();
 
         // Count lines
-        int commentLines = lines.Count(l => l.Trim().StartsWith("//") || l.Trim().StartsWith("/*") || l.Trim().StartsWith("*"));
+        int commentLines = lines.Count(l => l.Trim().StartsWith("//") || l.Trim().StartsWith("/*") || l.Trim().StartsWith('*'));
         int codeLines = lines.Count(l => !string.IsNullOrWhiteSpace(l) && !l.Trim().StartsWith("//"));
 
         // Find TODOs
