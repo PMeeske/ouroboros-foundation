@@ -148,7 +148,12 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
 
             _logger?.LogInformation("Added {Count} vectors to Qdrant collection {Collection}", vectorList.Count, _collectionName);
         }
-        catch (Exception ex)
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger?.LogError(ex, "Failed to add vectors to Qdrant collection {Collection}", _collectionName);
+            throw;
+        }
+        catch (InvalidOperationException ex)
         {
             _logger?.LogError(ex, "Failed to add vectors to Qdrant collection {Collection}", _collectionName);
             throw;
@@ -209,7 +214,12 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
             _logger?.LogDebug("Found {Count} similar documents in collection {Collection}", documents.Count, _collectionName);
             return documents.AsReadOnly();
         }
-        catch (Exception ex)
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger?.LogError(ex, "Failed to search vectors in Qdrant collection {Collection}", _collectionName);
+            throw;
+        }
+        catch (InvalidOperationException ex)
         {
             _logger?.LogError(ex, "Failed to search vectors in Qdrant collection {Collection}", _collectionName);
             throw;
@@ -234,7 +244,12 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
                 _logger?.LogDebug("Collection {Collection} does not exist, nothing to clear", _collectionName);
             }
         }
-        catch (Exception ex)
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger?.LogError(ex, "Failed to clear Qdrant collection {Collection}", _collectionName);
+            throw;
+        }
+        catch (InvalidOperationException ex)
         {
             _logger?.LogError(ex, "Failed to clear Qdrant collection {Collection}", _collectionName);
             throw;
@@ -303,7 +318,11 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
 
             _logger?.LogDebug("Retrieved {Count} vectors from collection {Collection}", results.Count, _collectionName);
         }
-        catch (Exception ex)
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger?.LogError(ex, "Failed to get all vectors from Qdrant collection {Collection}", _collectionName);
+        }
+        catch (InvalidOperationException ex)
         {
             _logger?.LogError(ex, "Failed to get all vectors from Qdrant collection {Collection}", _collectionName);
         }
@@ -341,7 +360,12 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
 
             return ConvertToDocuments(searchResult);
         }
-        catch (Exception ex)
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger?.LogError(ex, "Failed to search with filter in Qdrant collection {Collection}", _collectionName);
+            throw;
+        }
+        catch (InvalidOperationException ex)
         {
             _logger?.LogError(ex, "Failed to search with filter in Qdrant collection {Collection}", _collectionName);
             throw;
@@ -365,7 +389,12 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
             _logger?.LogDebug("Count in collection {Collection}: {Count}", _collectionName, count);
             return count;
         }
-        catch (Exception ex)
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger?.LogError(ex, "Failed to count vectors in Qdrant collection {Collection}", _collectionName);
+            throw;
+        }
+        catch (InvalidOperationException ex)
         {
             _logger?.LogError(ex, "Failed to count vectors in Qdrant collection {Collection}", _collectionName);
             throw;
@@ -424,7 +453,12 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
             _logger?.LogDebug("Scrolled {Count} documents from collection {Collection}", documents.Count, _collectionName);
             return new ScrollResult(documents, nextOffset);
         }
-        catch (Exception ex)
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger?.LogError(ex, "Failed to scroll in Qdrant collection {Collection}", _collectionName);
+            throw;
+        }
+        catch (InvalidOperationException ex)
         {
             _logger?.LogError(ex, "Failed to scroll in Qdrant collection {Collection}", _collectionName);
             throw;
@@ -462,7 +496,12 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
                 embeddings.Count, results.Sum(r => r.Count));
             return results;
         }
-        catch (Exception ex)
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger?.LogError(ex, "Failed to batch search in Qdrant collection {Collection}", _collectionName);
+            throw;
+        }
+        catch (InvalidOperationException ex)
         {
             _logger?.LogError(ex, "Failed to batch search in Qdrant collection {Collection}", _collectionName);
             throw;
@@ -503,7 +542,12 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
             _logger?.LogDebug("Recommend returned {Count} results from collection {Collection}", results.Count, _collectionName);
             return ConvertToDocuments(results);
         }
-        catch (Exception ex)
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger?.LogError(ex, "Failed to recommend in Qdrant collection {Collection}", _collectionName);
+            throw;
+        }
+        catch (InvalidOperationException ex)
         {
             _logger?.LogError(ex, "Failed to recommend in Qdrant collection {Collection}", _collectionName);
             throw;
@@ -523,7 +567,12 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
 
             _logger?.LogInformation("Deleted {Count} vectors by ID from collection {Collection}", pointIds.Count, _collectionName);
         }
-        catch (Exception ex)
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger?.LogError(ex, "Failed to delete vectors by ID in Qdrant collection {Collection}", _collectionName);
+            throw;
+        }
+        catch (InvalidOperationException ex)
         {
             _logger?.LogError(ex, "Failed to delete vectors by ID in Qdrant collection {Collection}", _collectionName);
             throw;
@@ -545,7 +594,12 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
 
             _logger?.LogInformation("Deleted vectors by filter from collection {Collection}", _collectionName);
         }
-        catch (Exception ex)
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger?.LogError(ex, "Failed to delete vectors by filter in Qdrant collection {Collection}", _collectionName);
+            throw;
+        }
+        catch (InvalidOperationException ex)
         {
             _logger?.LogError(ex, "Failed to delete vectors by filter in Qdrant collection {Collection}", _collectionName);
             throw;
@@ -582,7 +636,12 @@ public sealed class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisposable
 
             return new VectorStoreInfo(_collectionName, count, (int)vectorDim, status, additionalInfo);
         }
-        catch (Exception ex)
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger?.LogError(ex, "Failed to get info for Qdrant collection {Collection}", _collectionName);
+            throw;
+        }
+        catch (InvalidOperationException ex)
         {
             _logger?.LogError(ex, "Failed to get info for Qdrant collection {Collection}", _collectionName);
             throw;

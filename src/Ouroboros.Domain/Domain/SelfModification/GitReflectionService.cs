@@ -299,9 +299,10 @@ public sealed class GitReflectionService : IDisposable
 
     /// <summary>
     /// Executes a Git command and returns the output.
+    /// Uses ArgumentList instead of Arguments to prevent command injection.
     /// </summary>
     private async Task<(bool Success, string Output, string Error)> ExecuteGitAsync(
-        string arguments,
+        string[] args,
         CancellationToken ct = default)
     {
         await _gitLock.WaitAsync(ct);
@@ -310,13 +311,17 @@ public sealed class GitReflectionService : IDisposable
             ProcessStartInfo psi = new()
             {
                 FileName = "git",
-                Arguments = arguments,
                 WorkingDirectory = _repoRoot,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
             };
+
+            foreach (string arg in args)
+            {
+                psi.ArgumentList.Add(arg);
+            }
 
             using Process? process = Process.Start(psi);
             if (process == null)
@@ -330,6 +335,14 @@ public sealed class GitReflectionService : IDisposable
 
             return (process.ExitCode == 0, output.Trim(), error.Trim());
         }
+        catch (InvalidOperationException ex)
+        {
+            return (false, "", $"Failed to start git process: {ex.Message}");
+        }
+        catch (System.ComponentModel.Win32Exception ex)
+        {
+            return (false, "", $"Git executable not found: {ex.Message}");
+        }
         finally
         {
             _gitLock.Release();
@@ -341,7 +354,7 @@ public sealed class GitReflectionService : IDisposable
     /// </summary>
     public async Task<string> GetStatusAsync(CancellationToken ct = default)
     {
-        (bool success, string output, string error) = await ExecuteGitAsync("status --porcelain", ct);
+        (bool success, string output, string error) = await ExecuteGitAsync(["status", "--porcelain"], ct);
         if (!success)
         {
             return $"Git status failed: {error}";
@@ -377,7 +390,7 @@ public sealed class GitReflectionService : IDisposable
     /// </summary>
     public async Task<string> GetCurrentBranchAsync(CancellationToken ct = default)
     {
-        (bool success, string output, _) = await ExecuteGitAsync("branch --show-current", ct);
+        (bool success, string output, _) = await ExecuteGitAsync(["branch", "--show-current"], ct);
         return success ? output : "unknown";
     }
 
@@ -393,7 +406,9 @@ public sealed class GitReflectionService : IDisposable
         string safeName = Regex.Replace(branchName, @"[^a-zA-Z0-9_-]", "-").ToLowerInvariant();
         string fullName = $"ouroboros/self-modify/{safeName}";
 
-        string args = checkout ? $"checkout -b {fullName}" : $"branch {fullName}";
+        string[] args = checkout
+            ? ["checkout", "-b", fullName]
+            : ["branch", fullName];
         (bool success, string output, string error) = await ExecuteGitAsync(args, ct);
 
         return new GitOperationResult(
@@ -412,7 +427,7 @@ public sealed class GitReflectionService : IDisposable
         List<string> staged = new();
         foreach (string file in files)
         {
-            (bool success, _, string error) = await ExecuteGitAsync($"add \"{file}\"", ct);
+            (bool success, _, _) = await ExecuteGitAsync(["add", "--", file], ct);
             if (success)
             {
                 staged.Add(file);
@@ -435,7 +450,7 @@ public sealed class GitReflectionService : IDisposable
         // Add Ouroboros signature to commit message
         string fullMessage = $"[Ouroboros Self-Modification] {message}";
 
-        (bool success, string output, string error) = await ExecuteGitAsync($"commit -m \"{fullMessage}\"", ct);
+        (bool success, string output, string error) = await ExecuteGitAsync(["commit", "-m", fullMessage], ct);
 
         // Extract commit hash
         string? hash = null;
@@ -462,7 +477,7 @@ public sealed class GitReflectionService : IDisposable
         CancellationToken ct = default)
     {
         (bool success, string output, _) = await ExecuteGitAsync(
-            $"log --oneline --date=iso -n {count} --format=\"%h|%s|%ai\"", ct);
+            ["log", "--oneline", "--date=iso", $"-n{count}", "--format=%h|%s|%ai"], ct);
 
         if (!success || string.IsNullOrWhiteSpace(output))
         {
@@ -487,7 +502,7 @@ public sealed class GitReflectionService : IDisposable
     /// </summary>
     public async Task<string> GetFileDiffAsync(string filePath, CancellationToken ct = default)
     {
-        (bool success, string output, _) = await ExecuteGitAsync($"diff \"{filePath}\"", ct);
+        (bool success, string output, _) = await ExecuteGitAsync(["diff", "--", filePath], ct);
         return success ? output : "No changes or file not tracked";
     }
 
@@ -636,7 +651,16 @@ public sealed class GitReflectionService : IDisposable
                 $"Applied change to {proposal.FilePath}",
                 AffectedFiles: new[] { proposal.FilePath });
         }
-        catch (Exception ex)
+        catch (IOException ex)
+        {
+            int index = _proposals.FindIndex(p => p.Id == proposalId);
+            if (index >= 0)
+            {
+                _proposals[index] = _proposals[index] with { Status = ProposalStatus.Failed };
+            }
+            return new GitOperationResult(false, $"Failed to apply change: {ex.Message}");
+        }
+        catch (UnauthorizedAccessException ex)
         {
             int index = _proposals.FindIndex(p => p.Id == proposalId);
             if (index >= 0)

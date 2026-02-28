@@ -47,15 +47,15 @@ public static class SemanticDistance
         Math.Clamp(1.0 - CosineSimilarity(a, b), 0.0, 1.0);
 
     /// <summary>
-    /// Computes the semantic distance between two concepts using an embedding provider.
+    /// Computes the semantic distance between two concepts using an embedding model.
     /// </summary>
     public static async ValueTask<double> ComputeAsync(
-        IEmbeddingProvider provider,
+        Ouroboros.Domain.IEmbeddingModel provider,
         string from,
         string to)
     {
-        float[] embeddingA = await provider.GetEmbeddingAsync(from);
-        float[] embeddingB = await provider.GetEmbeddingAsync(to);
+        float[] embeddingA = await provider.CreateEmbeddingsAsync(from);
+        float[] embeddingB = await provider.CreateEmbeddingsAsync(to);
         return Compute(embeddingA, embeddingB);
     }
 }

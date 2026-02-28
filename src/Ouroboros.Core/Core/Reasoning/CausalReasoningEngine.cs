@@ -45,9 +45,17 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
                 _ => Result<CausalGraph, string>.Failure($"Unknown algorithm: {algorithm}"),
             };
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Result<CausalGraph, string>.Failure($"Causal discovery failed: {ex.Message}");
+        }
+        catch (ArgumentException ex)
+        {
+            return Result<CausalGraph, string>.Failure($"Causal discovery failed: {ex.Message}");
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
     }
 
@@ -79,9 +87,17 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
         {
             return await Task.Run(() => this.ComputeInterventionEffect(intervention, outcome, model, ct), ct);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Result<double, string>.Failure($"Intervention effect estimation failed: {ex.Message}");
+        }
+        catch (ArgumentException ex)
+        {
+            return Result<double, string>.Failure($"Intervention effect estimation failed: {ex.Message}");
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
     }
 
@@ -119,9 +135,17 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
         {
             return await Task.Run(() => this.ComputeCounterfactual(intervention, outcome, factual, model, ct), ct);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Result<Distribution, string>.Failure($"Counterfactual estimation failed: {ex.Message}");
+        }
+        catch (ArgumentException ex)
+        {
+            return Result<Distribution, string>.Failure($"Counterfactual estimation failed: {ex.Message}");
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
     }
 
@@ -153,9 +177,17 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
         {
             return await Task.Run(() => this.GenerateCausalExplanation(effect, possibleCauses, model, ct), ct);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Result<Explanation, string>.Failure($"Causal explanation failed: {ex.Message}");
+        }
+        catch (ArgumentException ex)
+        {
+            return Result<Explanation, string>.Failure($"Causal explanation failed: {ex.Message}");
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
     }
 
@@ -187,9 +219,17 @@ public sealed class CausalReasoningEngine : ICausalReasoningEngine
         {
             return await Task.Run(() => this.PlanOptimalIntervention(desiredOutcome, model, controllableVariables, ct), ct);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Result<Intervention, string>.Failure($"Intervention planning failed: {ex.Message}");
+        }
+        catch (ArgumentException ex)
+        {
+            return Result<Intervention, string>.Failure($"Intervention planning failed: {ex.Message}");
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
     }
 

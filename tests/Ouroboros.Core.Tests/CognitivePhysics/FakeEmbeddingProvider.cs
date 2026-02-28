@@ -2,28 +2,28 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using Ouroboros.Core.CognitivePhysics;
+using Ouroboros.Domain;
 
 namespace Ouroboros.Tests.CognitivePhysics;
 
 /// <summary>
-/// A deterministic fake embedding provider for testing.
+/// A deterministic fake embedding model for testing.
 /// Returns configurable embeddings per text key, or a hash-based default.
 /// </summary>
-internal sealed class FakeEmbeddingProvider : IEmbeddingProvider
+internal sealed class FakeEmbeddingProvider : IEmbeddingModel
 {
     private readonly Dictionary<string, float[]> _embeddings = new();
 
     public void SetEmbedding(string text, float[] embedding) =>
         _embeddings[text] = embedding;
 
-    public ValueTask<float[]> GetEmbeddingAsync(string text)
+    public Task<float[]> CreateEmbeddingsAsync(string input, CancellationToken ct = default)
     {
-        if (_embeddings.TryGetValue(text, out float[]? embedding))
-            return ValueTask.FromResult(embedding);
+        if (_embeddings.TryGetValue(input, out float[]? embedding))
+            return Task.FromResult(embedding);
 
         // Generate a deterministic pseudo-embedding from hash
-        long hash = unchecked((long)text.GetHashCode());
+        long hash = unchecked((long)input.GetHashCode());
         float[] generated =
         [
             (float)Math.Sin(hash),
@@ -31,6 +31,6 @@ internal sealed class FakeEmbeddingProvider : IEmbeddingProvider
             (float)Math.Sin(hash * 2L),
             (float)Math.Cos(hash * 2L)
         ];
-        return ValueTask.FromResult(generated);
+        return Task.FromResult(generated);
     }
 }

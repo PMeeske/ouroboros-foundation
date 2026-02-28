@@ -90,6 +90,7 @@
         <Compile Include="Monads\Option.cs" />
         <Compile Include="Core\IChatCompletionModel.cs" />
         <Compile Include="Core\ToolRegistry.cs" />
+        <Compile Include="Domain\IEmbeddingModel.cs" />
         <Compile Include="Domain\ActionPrediction.cs" />
         <Compile Include="Domain\AgentModel.cs" />
         <Compile Include="Domain\AgentObservation.cs" />
@@ -111,7 +112,6 @@
         <Compile Include="Agent\MetaAI\ExperienceFactory.cs" />
         <Compile Include="Agent\MetaAI\MemoryQueryExtensions.cs" />
         <Compile Include="Agent\MetaAI\IUncertaintyRouter.cs" />
-        <Compile Include="Agent\MetaAI\PerformanceMetrics.cs" />
         <Compile Include="Agent\MetaAI\MetaLearning\IMetaLearner.cs" />
         <Compile Include="Agent\MetaAI\MetaLearning\PerformanceSnapshot.cs" />
         <Compile Include="Agent\MetaAI\SelfImprovement\ITransferLearner.cs" />

@@ -6,16 +6,13 @@ namespace Ouroboros.Tools
     /// </summary>
     public class DslAssistant
     {
-        private readonly ILlmProvider _llm;
         private readonly RoslynCodeTool _codeTool;
 
         /// <summary>
         /// Initializes a new instance of the DslAssistant.
         /// </summary>
-        /// <param name="llm">The LLM provider for AI assistance.</param>
-        public DslAssistant(ILlmProvider llm)
+        public DslAssistant()
         {
-            _llm = llm ?? throw new ArgumentNullException(nameof(llm));
             _codeTool = new RoslynCodeTool();
         }
 
@@ -24,25 +21,18 @@ namespace Ouroboros.Tools
         /// </summary>
         /// <param name="currentDsl">The current DSL string.</param>
         /// <returns>A list of suggestions with explanations and confidence scores.</returns>
-        public async Task<List<DslSuggestion>> SuggestNextSteps(string currentDsl)
+        public Task<List<DslSuggestion>> SuggestNextSteps(string currentDsl)
         {
             if (string.IsNullOrWhiteSpace(currentDsl))
-                return new List<DslSuggestion>();
+                return Task.FromResult(new List<DslSuggestion>());
 
-            var prompt = $"Given the current DSL pipeline: '{currentDsl}', suggest the next logical steps. " +
-                        "Provide 3-5 suggestions with explanations and confidence scores (0-1). " +
-                        "Format as JSON array of objects with 'step', 'explanation', 'confidence' fields.";
-
-            var response = await _llm.GenerateAsync(prompt);
-
-            // Parse response and return suggestions
-            // For simulation, return mock suggestions
-            return new List<DslSuggestion>
+            var suggestions = new List<DslSuggestion>
             {
                 new DslSuggestion("UseDraft", "Generate an initial draft response", 0.9),
                 new DslSuggestion("UseCritique", "Critique the draft for improvements", 0.8),
                 new DslSuggestion("UseImprove", "Improve the response based on critique", 0.7)
             };
+            return Task.FromResult(suggestions);
         }
 
         /// <summary>

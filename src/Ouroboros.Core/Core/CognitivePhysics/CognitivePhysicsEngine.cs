@@ -19,7 +19,7 @@ public sealed class CognitivePhysicsEngine
     private readonly EvolutionaryAdapter _evolution;
 
     public CognitivePhysicsEngine(
-        IEmbeddingProvider embeddingProvider,
+        Ouroboros.Domain.IEmbeddingModel embeddingProvider,
         IEthicsGate ethicsGate,
         CognitivePhysicsConfig? config = null)
     {

@@ -103,7 +103,11 @@ public sealed class ImmutableEthicsFramework : IEthicsFramework
 
             return Result<EthicalClearance, string>.Success(clearance);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            return Result<EthicalClearance, string>.Failure($"Ethics evaluation failed: {ex.Message}");
+        }
+        catch (IOException ex)
         {
             return Result<EthicalClearance, string>.Failure($"Ethics evaluation failed: {ex.Message}");
         }
@@ -195,7 +199,11 @@ public sealed class ImmutableEthicsFramework : IEthicsFramework
 
             return Result<EthicalClearance, string>.Success(clearance);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            return Result<EthicalClearance, string>.Failure($"Plan evaluation failed: {ex.Message}");
+        }
+        catch (IOException ex)
         {
             return Result<EthicalClearance, string>.Failure($"Plan evaluation failed: {ex.Message}");
         }
@@ -280,7 +288,11 @@ public sealed class ImmutableEthicsFramework : IEthicsFramework
 
             return Result<EthicalClearance, string>.Success(clearance);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            return Result<EthicalClearance, string>.Failure($"Goal evaluation failed: {ex.Message}");
+        }
+        catch (IOException ex)
         {
             return Result<EthicalClearance, string>.Failure($"Goal evaluation failed: {ex.Message}");
         }
@@ -355,7 +367,11 @@ public sealed class ImmutableEthicsFramework : IEthicsFramework
 
             return Result<EthicalClearance, string>.Success(clearance);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            return Result<EthicalClearance, string>.Failure($"Skill evaluation failed: {ex.Message}");
+        }
+        catch (IOException ex)
         {
             return Result<EthicalClearance, string>.Failure($"Skill evaluation failed: {ex.Message}");
         }
@@ -428,7 +444,11 @@ public sealed class ImmutableEthicsFramework : IEthicsFramework
 
             return Result<EthicalClearance, string>.Success(clearance);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            return Result<EthicalClearance, string>.Failure($"Research evaluation failed: {ex.Message}");
+        }
+        catch (IOException ex)
         {
             return Result<EthicalClearance, string>.Failure($"Research evaluation failed: {ex.Message}");
         }
@@ -512,7 +532,11 @@ public sealed class ImmutableEthicsFramework : IEthicsFramework
 
             return Result<EthicalClearance, string>.Success(clearance);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            return Result<EthicalClearance, string>.Failure($"Self-modification evaluation failed: {ex.Message}");
+        }
+        catch (IOException ex)
         {
             return Result<EthicalClearance, string>.Failure($"Self-modification evaluation failed: {ex.Message}");
         }

@@ -11,9 +11,9 @@ namespace Ouroboros.Core.CognitivePhysics;
 public sealed class SuperpositionEngine
 {
     private readonly IEthicsGate _ethicsGate;
-    private readonly IEmbeddingProvider _embeddingProvider;
+    private readonly Ouroboros.Domain.IEmbeddingModel _embeddingProvider;
 
-    public SuperpositionEngine(IEmbeddingProvider embeddingProvider, IEthicsGate ethicsGate)
+    public SuperpositionEngine(Ouroboros.Domain.IEmbeddingModel embeddingProvider, IEthicsGate ethicsGate)
     {
         _embeddingProvider = embeddingProvider ?? throw new ArgumentNullException(nameof(embeddingProvider));
         _ethicsGate = ethicsGate ?? throw new ArgumentNullException(nameof(ethicsGate));

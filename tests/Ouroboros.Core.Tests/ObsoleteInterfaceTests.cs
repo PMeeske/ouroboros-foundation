@@ -8,8 +8,7 @@ using Ouroboros.Core.EmbodiedInteraction;
 namespace Ouroboros.Tests;
 
 /// <summary>
-/// Tests for obsolete interfaces to ensure backward compatibility.
-/// These interfaces should still compile but generate compiler warnings.
+/// Tests for interfaces in the cognitive physics and embodied interaction subsystems.
 /// </summary>
 [Trait("Category", "Unit")]
 public class ObsoleteInterfaceTests
@@ -17,20 +16,8 @@ public class ObsoleteInterfaceTests
     [Fact]
     public void IEthicsGate_InterfaceIsAccessible()
     {
-        // Verify the obsolete interface type exists and is accessible
         Type interfaceType = typeof(IEthicsGate);
-        
-        interfaceType.Should().NotBeNull();
-        interfaceType.IsInterface.Should().BeTrue();
-        interfaceType.Namespace.Should().Be("Ouroboros.Core.CognitivePhysics");
-    }
 
-    [Fact]
-    public void IEmbeddingProvider_InterfaceIsAccessible()
-    {
-        // Verify the obsolete interface type exists and is accessible
-        Type interfaceType = typeof(IEmbeddingProvider);
-        
         interfaceType.Should().NotBeNull();
         interfaceType.IsInterface.Should().BeTrue();
         interfaceType.Namespace.Should().Be("Ouroboros.Core.CognitivePhysics");
@@ -39,9 +26,8 @@ public class ObsoleteInterfaceTests
     [Fact]
     public void IVisionModel_InterfaceIsAccessible()
     {
-        // Verify the obsolete interface type exists and is accessible
         Type interfaceType = typeof(IVisionModel);
-        
+
         interfaceType.Should().NotBeNull();
         interfaceType.IsInterface.Should().BeTrue();
         interfaceType.Namespace.Should().Be("Ouroboros.Core.EmbodiedInteraction");
@@ -50,11 +36,8 @@ public class ObsoleteInterfaceTests
     [Fact]
     public void PermissiveEthicsGate_CanBeInstantiated()
     {
-        // Verify that implementations of obsolete interfaces still work
-        // This ensures backward compatibility
-
         PermissiveEthicsGate gate = new PermissiveEthicsGate();
-        
+
         gate.Should().NotBeNull();
         gate.Should().BeAssignableTo<IEthicsGate>();
     }
@@ -62,11 +45,9 @@ public class ObsoleteInterfaceTests
     [Fact]
     public async Task PermissiveEthicsGate_FunctionsCorrectly()
     {
-        // Verify that obsolete interface implementations still function
-
         PermissiveEthicsGate gate = new PermissiveEthicsGate();
         EthicsGateResult result = await gate.EvaluateAsync("from", "to");
-        
+
         result.Should().NotBeNull();
         result.IsAllowed.Should().BeTrue();
     }
@@ -74,10 +55,8 @@ public class ObsoleteInterfaceTests
     [Fact]
     public void EthicsGateResult_CanBeCreated()
     {
-        // Verify that types related to obsolete interfaces still work
-
         EthicsGateResult result = EthicsGateResult.Allow("test reason");
-        
+
         result.Should().NotBeNull();
         result.IsAllowed.Should().BeTrue();
         result.Reason.Should().Be("test reason");

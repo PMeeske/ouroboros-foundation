@@ -15,12 +15,12 @@ namespace Ouroboros.Core.CognitivePhysics;
 /// </summary>
 public sealed class ZeroShiftOperator
 {
-    private readonly IEmbeddingProvider _embeddingProvider;
+    private readonly Ouroboros.Domain.IEmbeddingModel _embeddingProvider;
     private readonly IEthicsGate _ethicsGate;
     private readonly ZeroShiftConfig _config;
 
     public ZeroShiftOperator(
-        IEmbeddingProvider embeddingProvider,
+        Ouroboros.Domain.IEmbeddingModel embeddingProvider,
         IEthicsGate ethicsGate,
         ZeroShiftConfig? config = null)
     {

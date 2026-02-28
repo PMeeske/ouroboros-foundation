@@ -1,5 +1,4 @@
-using Ouroboros.Abstractions.Agent.MetaAI;
-using PerformanceMetricsMetaAI = Ouroboros.Abstractions.Agent.MetaAI.PerformanceMetrics;
+using Ouroboros.Agent;
 
 namespace Ouroboros.Abstractions.Tests.Agent.MetaAI;
 
@@ -13,8 +12,8 @@ public class PerformanceMetricsMetaAITests
         var customMetrics = new Dictionary<string, double> { ["throughput"] = 1000.0 };
 
         // Act
-        var metrics = new PerformanceMetricsMetaAI(
-            "resource-1", 100, 0.95, 50.0, DateTime.UtcNow, customMetrics);
+        var metrics = new PerformanceMetrics(
+            "resource-1", 100, AverageLatencyMs: 50.0, SuccessRate: 0.95, DateTime.UtcNow, customMetrics);
 
         // Assert
         metrics.ResourceName.Should().Be("resource-1");
@@ -25,33 +24,20 @@ public class PerformanceMetricsMetaAITests
     }
 
     [Fact]
-    public void Constructor_NullResourceName_ThrowsArgumentNullException()
+    public void Initial_NullResourceName_ThrowsArgumentNullException()
     {
         // Act
-        var act = () => new PerformanceMetricsMetaAI(
-            null!, 0, 0, 0, DateTime.UtcNow, new Dictionary<string, double>());
+        var act = () => PerformanceMetrics.Initial(null!);
 
         // Assert
         act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
-    public void Constructor_NullCustomMetrics_CreatesEmptyDictionary()
-    {
-        // Act
-        var metrics = new PerformanceMetricsMetaAI(
-            "resource", 0, 0, 0, DateTime.UtcNow, null!);
-
-        // Assert
-        metrics.CustomMetrics.Should().NotBeNull();
-        metrics.CustomMetrics.Should().BeEmpty();
-    }
-
-    [Fact]
     public void Initial_CreatesMetricsWithZeroValues()
     {
         // Act
-        var metrics = PerformanceMetricsMetaAI.Initial("new-resource");
+        var metrics = PerformanceMetrics.Initial("new-resource");
 
         // Assert
         metrics.ResourceName.Should().Be("new-resource");
@@ -65,7 +51,7 @@ public class PerformanceMetricsMetaAITests
     public void WithExpression_CreatesModifiedCopy()
     {
         // Arrange
-        var original = PerformanceMetricsMetaAI.Initial("res");
+        var original = PerformanceMetrics.Initial("res");
 
         // Act
         var modified = original with { ExecutionCount = 50, SuccessRate = 0.8 };
