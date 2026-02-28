@@ -11,13 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Additional Analyzers -->
-    <PackageReference Include="SonarAnalyzer.CSharp" Version="10.19.0.132793" PrivateAssets="all">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-
-  <ItemGroup>
     <!-- Dependencies -->
     <PackageReference Include="LangChain" Version="0.17.0" />
     <PackageReference Include="System.Reactive" Version="6.1.0" />

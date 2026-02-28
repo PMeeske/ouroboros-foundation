@@ -13,5 +13,5 @@ public static class ExternalChainRegistry
         Chains[name] = chain;
     }
     public static bool TryGet(string name, out object? chain) => Chains.TryGetValue(name, out chain);
-    public static IReadOnlyCollection<string> Names => Chains.Keys.ToArray();
+    public static IReadOnlyCollection<string> GetNames() => Chains.Keys.ToArray();
 }

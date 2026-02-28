@@ -12,7 +12,6 @@ using Microsoft.Extensions.Configuration;
 public class PipelineConfigurationBuilder
 {
     private readonly IConfigurationBuilder configurationBuilder;
-    private string? basePath;
     private string environmentName = "Production";
 
     /// <summary>
@@ -30,7 +29,6 @@ public class PipelineConfigurationBuilder
     /// <returns></returns>
     public PipelineConfigurationBuilder SetBasePath(string basePath)
     {
-        this.basePath = basePath;
         this.configurationBuilder.SetBasePath(basePath);
         return this;
     }

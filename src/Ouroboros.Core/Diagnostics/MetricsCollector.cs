@@ -16,7 +16,6 @@ public class MetricsCollector
     private readonly ConcurrentDictionary<string, double> gauges = new();
     private readonly ConcurrentDictionary<string, ConcurrentBag<double>> histograms = new();
     private readonly ConcurrentDictionary<string, (double Sum, long Count)> summaries = new();
-    private readonly object @lock = new();
 
     /// <summary>
     /// Gets the singleton instance of the metrics collector.
@@ -261,7 +260,7 @@ public class MetricsCollector
         return (parts[0], labels);
     }
 
-    private class DurationMeasurement : IDisposable
+    private sealed class DurationMeasurement : IDisposable
     {
         private readonly MetricsCollector collector;
         private readonly string name;

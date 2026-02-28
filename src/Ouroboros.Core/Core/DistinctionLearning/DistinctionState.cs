@@ -31,7 +31,7 @@ public sealed record DistinctionState(
     /// <summary>
     /// Gets active distinction names as a read-only list.
     /// </summary>
-    public IReadOnlyList<string> ActiveDistinctionNames =>
+    public IReadOnlyList<string> GetActiveDistinctionNames() =>
         ActiveDistinctions.Select(d => d.Content).ToList();
 
     /// <summary>
