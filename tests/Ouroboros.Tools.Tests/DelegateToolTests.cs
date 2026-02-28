@@ -149,6 +149,42 @@ public class DelegateToolTests
             new DelegateTool("name", null!, (string s) => s));
     }
 
+    [Fact]
+    public async Task Constructor_NullSyncExecutor_InvokeReturnsFailure()
+    {
+        // Arrange - sync/async overloads wrap the executor in a lambda,
+        // so the null is captured but not checked at construction time.
+        // Invoking the tool triggers a NullReferenceException caught internally.
+        var tool = new DelegateTool("name", "desc", (Func<string, string>)null!);
+
+        // Act
+        var result = await tool.InvokeAsync("input");
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Constructor_NullAsyncExecutor_InvokeReturnsFailure()
+    {
+        // Arrange - async overload wraps the executor in a lambda,
+        // so the null is captured but not checked at construction time.
+        var tool = new DelegateTool("name", "desc", (Func<string, Task<string>>)null!);
+
+        // Act
+        var result = await tool.InvokeAsync("input");
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Constructor_NullFullExecutor_ThrowsArgumentNullException()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            new DelegateTool("name", "desc", (Func<string, CancellationToken, Task<Result<string, string>>>)null!));
+    }
+
     // --- FromJson ---
 
     [Fact]
