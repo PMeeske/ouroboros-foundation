@@ -82,7 +82,8 @@ public sealed class EthicsEnforcementWrapper<TAction, TResult> : IActionExecutor
             // Execute the action
             return await _innerExecutor.ExecuteAsync(action, ct);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<TResult, string>.Failure($"Execution failed: {ex.Message}");
         }

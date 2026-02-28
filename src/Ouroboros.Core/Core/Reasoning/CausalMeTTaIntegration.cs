@@ -77,7 +77,11 @@ public static class CausalMeTTaIntegration
 
             return Result<string, string>.Success(sb.ToString());
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            return Result<string, string>.Failure($"Conversion to MeTTa failed: {ex.Message}");
+        }
+        catch (FormatException ex)
         {
             return Result<string, string>.Failure($"Conversion to MeTTa failed: {ex.Message}");
         }
@@ -256,7 +260,11 @@ public static class CausalMeTTaIntegration
 
             return Result<string, string>.Success(sb.ToString());
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            return Result<string, string>.Failure($"Conversion to MeTTa failed: {ex.Message}");
+        }
+        catch (FormatException ex)
         {
             return Result<string, string>.Failure($"Conversion to MeTTa failed: {ex.Message}");
         }

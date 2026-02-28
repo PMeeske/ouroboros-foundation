@@ -68,7 +68,8 @@ public static class OrchestratorToolExtensions
 
                     return await selected.InvokeAsync(input, ct);
                 }
-                catch (Exception ex)
+                catch (OperationCanceledException) { throw; }
+                catch (InvalidOperationException ex)
                 {
                     return Result<string, string>.Failure(
                         $"Tool selection failed: {ex.Message}");
@@ -110,7 +111,8 @@ public static class OrchestratorToolExtensions
                     string combined = combiner(successes);
                     return Result<string, string>.Success(combined);
                 }
-                catch (Exception ex)
+                catch (OperationCanceledException) { throw; }
+                catch (Exception ex) when (ex is not OperationCanceledException)
                 {
                     return Result<string, string>.Failure(
                         $"Parallel execution failed: {ex.Message}");

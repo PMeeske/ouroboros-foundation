@@ -48,7 +48,7 @@ public sealed class HealthCheckAggregator
             {
                 throw;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 results.Add(HealthCheckResult.Unhealthy(
                     provider.ComponentName,

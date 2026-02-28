@@ -133,7 +133,7 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
                 {
                     break;
                 }
-                catch (Exception)
+                catch (InvalidOperationException)
                 {
                     // Continue loop on errors
                 }
@@ -181,7 +181,7 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
                     subscription.Handler(match);
                     OnPatternMatch?.Invoke(match);
                 }
-                catch (Exception)
+                catch (InvalidOperationException)
                 {
                     // Swallow handler exceptions
                 }
@@ -213,7 +213,11 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
                 return true;
             }
         }
-        catch (Exception)
+        catch (InvalidOperationException)
+        {
+            // Pattern match failed
+        }
+        catch (FormatException)
         {
             // Pattern match failed
         }

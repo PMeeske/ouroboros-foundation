@@ -57,7 +57,11 @@ public sealed class EvaluateCertaintyTool : ITool
 
             return Task.FromResult(Result<string, string>.Success($"Certainty of '{expression}': {certainty}"));
         }
-        catch (Exception ex)
+        catch (System.Text.Json.JsonException ex)
+        {
+            return Task.FromResult(Result<string, string>.Failure($"Error: {ex.Message}"));
+        }
+        catch (InvalidOperationException ex)
         {
             return Task.FromResult(Result<string, string>.Failure($"Error: {ex.Message}"));
         }

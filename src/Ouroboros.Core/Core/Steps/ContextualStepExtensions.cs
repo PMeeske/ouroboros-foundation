@@ -156,6 +156,7 @@ public static class ContextualStepExtensions
                 (TOut result, List<string> logs) = await step(input, context).ConfigureAwait(false);
                 return (Result<TOut, Exception>.Success(result), logs);
             }
+            catch (OperationCanceledException) { throw; }
             catch (Exception ex)
             {
                 return (Result<TOut, Exception>.Failure(ex), new List<string> { $"Error: {ex.Message}" });
@@ -183,6 +184,7 @@ public static class ContextualStepExtensions
                 Option<TOut> option = predicate(result) ? Option<TOut>.Some(result) : Option<TOut>.None();
                 return (option, logs);
             }
+            catch (OperationCanceledException) { throw; }
             catch (Exception ex)
             {
                 return (Option<TOut>.None(), new List<string> { $"Exception converted to None: {ex.Message}" });

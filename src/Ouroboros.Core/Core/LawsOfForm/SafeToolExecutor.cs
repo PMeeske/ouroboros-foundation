@@ -98,7 +98,8 @@ public sealed class SafeToolExecutor
 
                 evidence.Add(new Evidence(criterion.Name, form, description));
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 // Treat exceptions as uncertain
                 criteriaForms.Add(Form.Imaginary);
@@ -158,7 +159,8 @@ public sealed class SafeToolExecutor
                 "All safety criteria passed, tool executed successfully",
                 evidence.ToArray());
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             TimeSpan duration = DateTime.UtcNow - startTime;
             ToolResult toolResult = ToolResult.Failure(ex.Message, toolCall, duration);
@@ -238,7 +240,8 @@ public sealed class SafeToolExecutor
                     evidence.ToArray());
             }
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return AuditableDecision<ToolResult>.Uncertain(
                 $"Uncertainty handler failed: {ex.Message}",

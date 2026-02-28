@@ -52,7 +52,8 @@ public sealed class AdvancedMeTTaEngine : IAdvancedMeTTaEngine
                 _ => Result<List<Rule>, string>.Failure($"Unknown induction strategy: {strategy}"),
             };
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (InvalidOperationException ex)
         {
             return Result<List<Rule>, string>.Failure($"Rule induction failed: {ex.Message}");
         }
@@ -85,7 +86,8 @@ public sealed class AdvancedMeTTaEngine : IAdvancedMeTTaEngine
                 _ => Result<ProofTrace, string>.Failure($"Unknown proof strategy: {strategy}"),
             };
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (InvalidOperationException ex)
         {
             return Result<ProofTrace, string>.Failure($"Theorem proving failed: {ex.Message}");
         }
@@ -139,7 +141,8 @@ public sealed class AdvancedMeTTaEngine : IAdvancedMeTTaEngine
 
             return Result<List<Hypothesis>, string>.Success(hypotheses);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (InvalidOperationException ex)
         {
             return Result<List<Hypothesis>, string>.Failure($"Hypothesis generation failed: {ex.Message}");
         }
@@ -169,7 +172,11 @@ public sealed class AdvancedMeTTaEngine : IAdvancedMeTTaEngine
 
             return Task.FromResult(Result<TypedAtom, string>.Success(typedAtom));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            return Task.FromResult(Result<TypedAtom, string>.Failure($"Type inference failed: {ex.Message}"));
+        }
+        catch (FormatException ex)
         {
             return Task.FromResult(Result<TypedAtom, string>.Failure($"Type inference failed: {ex.Message}"));
         }
@@ -231,7 +238,8 @@ public sealed class AdvancedMeTTaEngine : IAdvancedMeTTaEngine
 
             return Result<List<Fact>, string>.Success(derivedFacts.ToList());
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (InvalidOperationException ex)
         {
             return Result<List<Fact>, string>.Failure($"Forward chaining failed: {ex.Message}");
         }
@@ -266,7 +274,8 @@ public sealed class AdvancedMeTTaEngine : IAdvancedMeTTaEngine
 
             return Result<List<Fact>, string>.Failure("Goal cannot be proved with given rules and facts");
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (InvalidOperationException ex)
         {
             return Result<List<Fact>, string>.Failure($"Backward chaining failed: {ex.Message}");
         }

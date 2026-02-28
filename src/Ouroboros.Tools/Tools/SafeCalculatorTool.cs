@@ -166,7 +166,15 @@ public sealed class SafeCalculatorTool : ITool
             double value = Convert.ToDouble(result, CultureInfo.InvariantCulture);
             return Result<double, string>.Success(value);
         }
-        catch (Exception ex)
+        catch (InvalidExpressionException ex)
+        {
+            return Result<double, string>.Failure($"Expression evaluation failed: {ex.Message}");
+        }
+        catch (FormatException ex)
+        {
+            return Result<double, string>.Failure($"Expression evaluation failed: {ex.Message}");
+        }
+        catch (OverflowException ex)
         {
             return Result<double, string>.Failure($"Expression evaluation failed: {ex.Message}");
         }
@@ -188,7 +196,12 @@ public sealed class SafeCalculatorTool : ITool
                 .Bind(this.TryParseMeTTaNumber)
                 .Bind(symbolicResult => this.ValidateCalculationMatch(symbolicResult, result, "Symbolic result does not match computed result"));
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (HttpRequestException ex)
+        {
+            return Result<bool, string>.Failure($"Symbolic verification exception: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
         {
             return Result<bool, string>.Failure($"Symbolic verification exception: {ex.Message}");
         }
@@ -202,7 +215,11 @@ public sealed class SafeCalculatorTool : ITool
                 .Bind(_ => this.ComputeExpression(expression))
                 .Bind(recomputed => this.ValidateCalculationMatch(recomputed, result, "Recomputation verification failed"));
         }
-        catch (Exception ex)
+        catch (InvalidExpressionException ex)
+        {
+            return Result<bool, string>.Failure($"Simulated verification exception: {ex.Message}");
+        }
+        catch (FormatException ex)
         {
             return Result<bool, string>.Failure($"Simulated verification exception: {ex.Message}");
         }

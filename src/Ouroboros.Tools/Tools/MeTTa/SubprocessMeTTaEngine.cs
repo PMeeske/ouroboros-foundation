@@ -112,7 +112,7 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
             // Executable not found or not accessible
             Console.WriteLine($"Warning: MeTTa executable not found: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             // If MeTTa executable is not found, we continue with null process
             // Methods will return appropriate errors when called
@@ -156,7 +156,7 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
         {
             return Result<string, string>.Failure($"Query I/O error: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Result<string, string>.Failure($"Query execution failed: {ex.Message}");
         }
@@ -192,7 +192,7 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
         {
             return Result<Unit, string>.Failure($"Add fact I/O error: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Result<Unit, string>.Failure($"Failed to add fact: {ex.Message}");
         }
@@ -234,7 +234,7 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
         {
             return Result<string, string>.Failure($"Rule application I/O error: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Result<string, string>.Failure($"Rule application failed: {ex.Message}");
         }
@@ -284,7 +284,7 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
         {
             return Result<Unit, string>.Failure($"Reset I/O error: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Result<Unit, string>.Failure($"Failed to reset: {ex.Message}");
         }

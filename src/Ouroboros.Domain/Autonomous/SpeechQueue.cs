@@ -37,7 +37,8 @@ public sealed class SpeechQueue : IDisposable
                     {
                         await _synthesizer(request.Text, request.Persona, ct);
                     }
-                    catch (Exception ex)
+                    catch (OperationCanceledException) { throw; }
+                    catch (Exception ex) when (ex is not OperationCanceledException)
                     {
                         Console.WriteLine($"  [SpeechQueue] Error: {ex.Message}");
                     }

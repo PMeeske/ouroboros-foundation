@@ -110,7 +110,11 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
             string resultStr = string.Join(" ", results.Select(a => a.ToSExpr()));
             return Task.FromResult(Result<string, string>.Success(resultStr));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            return Task.FromResult(Result<string, string>.Failure($"Evaluation error: {ex.Message}"));
+        }
+        catch (FormatException ex)
         {
             return Task.FromResult(Result<string, string>.Failure($"Evaluation error: {ex.Message}"));
         }
@@ -135,7 +139,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
             AddAtom(parseResult.Value);
             return Task.FromResult(Result<Unit, string>.Success(Unit.Value));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Task.FromResult(Result<Unit, string>.Failure($"Add fact error: {ex.Message}"));
         }
@@ -168,7 +172,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
 
             return Task.FromResult(Result<string, string>.Success(resultStr));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Task.FromResult(Result<string, string>.Failure($"Apply rule error: {ex.Message}"));
         }
@@ -197,7 +201,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
 
             return Task.FromResult(Result<bool, string>.Success(isValid));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Task.FromResult(Result<bool, string>.Failure($"Verification error: {ex.Message}"));
         }
@@ -237,7 +241,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
 
             return Task.FromResult(Result<bool, string>.Success(true));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Task.FromResult(Result<bool, string>.Failure($"Verification error: {ex.Message}"));
         }
@@ -258,7 +262,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
             InitializeCoreAtoms();
             return Task.FromResult(Result<Unit, string>.Success(Unit.Value));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Task.FromResult(Result<Unit, string>.Failure($"Reset error: {ex.Message}"));
         }

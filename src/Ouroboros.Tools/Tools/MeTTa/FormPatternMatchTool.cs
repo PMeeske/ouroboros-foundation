@@ -65,7 +65,11 @@ public sealed class FormPatternMatchTool : ITool
 
             return Task.FromResult(Result<string, string>.Success(output));
         }
-        catch (Exception ex)
+        catch (System.Text.Json.JsonException ex)
+        {
+            return Task.FromResult(Result<string, string>.Failure($"Error: {ex.Message}"));
+        }
+        catch (InvalidOperationException ex)
         {
             return Task.FromResult(Result<string, string>.Failure($"Error: {ex.Message}"));
         }

@@ -38,7 +38,15 @@ public sealed class MathTool : ITool
             string resultString = Convert.ToString(result, CultureInfo.InvariantCulture) ?? "null";
             return Task.FromResult(Result<string, string>.Success(resultString));
         }
-        catch (Exception ex)
+        catch (System.Data.InvalidExpressionException ex)
+        {
+            return Task.FromResult(Result<string, string>.Failure($"Math evaluation failed: {ex.Message}"));
+        }
+        catch (FormatException ex)
+        {
+            return Task.FromResult(Result<string, string>.Failure($"Math evaluation failed: {ex.Message}"));
+        }
+        catch (OverflowException ex)
         {
             return Task.FromResult(Result<string, string>.Failure($"Math evaluation failed: {ex.Message}"));
         }

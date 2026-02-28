@@ -91,7 +91,11 @@ public static class VectorCompressionService
         {
             return Result<(byte[], VectorCompressionEvent)>.Failure($"Compression input error: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            return Result<(byte[], VectorCompressionEvent)>.Failure($"Compression failed: {ex.Message}");
+        }
+        catch (OverflowException ex)
         {
             return Result<(byte[], VectorCompressionEvent)>.Failure($"Compression failed: {ex.Message}");
         }
@@ -136,7 +140,7 @@ public static class VectorCompressionService
         {
             return Result<float[]>.Failure($"Decompression format error: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (ArgumentException ex)
         {
             return Result<float[]>.Failure($"Decompression failed: {ex.Message}");
         }
@@ -197,7 +201,7 @@ public static class VectorCompressionService
         {
             return Result<double>.Failure($"Compressed similarity format error: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (ArgumentException ex)
         {
             return Result<double>.Failure($"Compressed similarity failed: {ex.Message}");
         }
@@ -250,7 +254,7 @@ public static class VectorCompressionService
         {
             return Result<VectorCompressionStats>.Failure($"Stats input error: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Result<VectorCompressionStats>.Failure($"Failed to compute stats: {ex.Message}");
         }
@@ -300,7 +304,7 @@ public static class VectorCompressionService
         {
             return Result<(IReadOnlyList<byte[]>, IReadOnlyList<VectorCompressionEvent>)>.Failure($"Batch compression failed (aggregate): {ex.InnerException?.Message ?? ex.Message}");
         }
-        catch (Exception ex)
+        catch (ArgumentNullException ex)
         {
             return Result<(IReadOnlyList<byte[]>, IReadOnlyList<VectorCompressionEvent>)>.Failure($"Batch compression failed: {ex.Message}");
         }
@@ -343,7 +347,7 @@ public static class VectorCompressionService
         {
             return Result<CompressionPreview>.Failure($"Preview input error: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Result<CompressionPreview>.Failure($"Preview generation failed: {ex.Message}");
         }

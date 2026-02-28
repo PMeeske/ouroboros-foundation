@@ -62,7 +62,11 @@ public sealed class CreateReEntryTool : ITool
 
             return Task.FromResult(Result<string, string>.Success($"Re-entry created in '{context}': {formState}"));
         }
-        catch (Exception ex)
+        catch (System.Text.Json.JsonException ex)
+        {
+            return Task.FromResult(Result<string, string>.Failure($"Error: {ex.Message}"));
+        }
+        catch (InvalidOperationException ex)
         {
             return Task.FromResult(Result<string, string>.Failure($"Error: {ex.Message}"));
         }

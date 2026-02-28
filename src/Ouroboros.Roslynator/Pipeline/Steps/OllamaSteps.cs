@@ -69,11 +69,15 @@ public static class OllamaSteps
             SyntaxNode newRoot = state.CurrentRoot.ReplaceNode(node, fixedNode);
             return state.WithNewRoot(newRoot, "Ollama AI Fix");
         }
-#pragma warning disable CA1031 // Fail gracefully on any LLM/parsing errors
-        catch (Exception ex)
-#pragma warning restore CA1031
+        catch (OperationCanceledException) { throw; }
+        catch (HttpRequestException ex)
         {
             // Fail gracefully: log and return unchanged state
+            System.Diagnostics.Debug.WriteLine($"[OllamaStep] Error: {ex.Message}");
+            return state;
+        }
+        catch (System.Text.Json.JsonException ex)
+        {
             System.Diagnostics.Debug.WriteLine($"[OllamaStep] Error: {ex.Message}");
             return state;
         }

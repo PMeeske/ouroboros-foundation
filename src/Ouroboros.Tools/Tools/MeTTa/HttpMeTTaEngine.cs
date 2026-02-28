@@ -61,7 +61,8 @@ public sealed class HttpMeTTaEngine : IMeTTaEngine
         {
             return Result<string, string>.Failure($"HTTP request failed: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (System.Text.Json.JsonException ex)
         {
             return Result<string, string>.Failure($"Query execution failed: {ex.Message}");
         }
@@ -86,7 +87,8 @@ public sealed class HttpMeTTaEngine : IMeTTaEngine
         {
             return Result<Unit, string>.Failure($"HTTP request failed: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (System.Text.Json.JsonException ex)
         {
             return Result<Unit, string>.Failure($"Failed to add fact: {ex.Message}");
         }
@@ -115,7 +117,8 @@ public sealed class HttpMeTTaEngine : IMeTTaEngine
         {
             return Result<string, string>.Failure($"HTTP request failed: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (System.Text.Json.JsonException ex)
         {
             return Result<string, string>.Failure($"Rule application failed: {ex.Message}");
         }
@@ -144,7 +147,8 @@ public sealed class HttpMeTTaEngine : IMeTTaEngine
         {
             return Result<bool, string>.Failure($"HTTP request failed: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (System.Text.Json.JsonException ex)
         {
             return Result<bool, string>.Failure($"Plan verification failed: {ex.Message}");
         }
@@ -168,7 +172,7 @@ public sealed class HttpMeTTaEngine : IMeTTaEngine
         {
             return Result<Unit, string>.Failure($"HTTP request failed: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (TaskCanceledException ex)
         {
             return Result<Unit, string>.Failure($"Failed to reset: {ex.Message}");
         }

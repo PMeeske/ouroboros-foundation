@@ -138,6 +138,7 @@ public static class KleisliExtensions
                 TB? result = await arrow(input).ConfigureAwait(false);
                 return Result<TB, Exception>.Success(result);
             }
+            catch (OperationCanceledException) { throw; }
             catch (Exception ex)
             {
                 return Result<TB, Exception>.Failure(ex);
@@ -157,6 +158,7 @@ public static class KleisliExtensions
                 TB? result = await arrow(input).ConfigureAwait(false);
                 return Result<TB, Exception>.Success(result);
             }
+            catch (OperationCanceledException) { throw; }
             catch (Exception ex)
             {
                 return Result<TB, Exception>.Failure(ex);

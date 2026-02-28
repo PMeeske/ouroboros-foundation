@@ -76,7 +76,8 @@ public static class ToolBuilder
                 ITool selectedTool = selector(input);
                 return await selectedTool.InvokeAsync(input, ct);
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (InvalidOperationException ex)
             {
                 return Result<string, string>.Failure($"Tool selection failed: {ex.Message}");
             }

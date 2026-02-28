@@ -48,7 +48,7 @@ public static class Arrow
             {
                 return Task.FromResult(Result<TOutput, Exception>.Success(func(input)));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 return Task.FromResult(Result<TOutput, Exception>.Failure(ex));
             }
@@ -69,6 +69,7 @@ public static class Arrow
                 TOutput? result = await func(input);
                 return Result<TOutput, Exception>.Success(result);
             }
+            catch (OperationCanceledException) { throw; }
             catch (Exception ex)
             {
                 return Result<TOutput, Exception>.Failure(ex);

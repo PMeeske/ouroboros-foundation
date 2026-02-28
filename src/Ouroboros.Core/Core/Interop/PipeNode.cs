@@ -62,6 +62,7 @@ public readonly struct PipeNode<TIn, TOut>
                 TOut? result = await currentNode.InvokeAsync(input).ConfigureAwait(false);
                 return Result<TOut, Exception>.Success(result);
             }
+            catch (OperationCanceledException) { throw; }
             catch (Exception ex)
             {
                 return Result<TOut, Exception>.Failure(ex);

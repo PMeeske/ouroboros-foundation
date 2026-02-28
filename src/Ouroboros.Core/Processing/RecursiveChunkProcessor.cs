@@ -108,7 +108,7 @@ public sealed class RecursiveChunkProcessor : IRecursiveChunkProcessor
         {
             return Result<TOutput>.Failure("Processing was cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<TOutput>.Failure($"Unexpected error during recursive processing: {ex.Message}");
         }
@@ -212,7 +212,8 @@ public sealed class RecursiveChunkProcessor : IRecursiveChunkProcessor
 
                     results.Add(chunkResult);
                 }
-                catch (Exception)
+                catch (OperationCanceledException) { throw; }
+                catch (InvalidOperationException)
                 {
                     stopwatch.Stop();
 
@@ -248,7 +249,8 @@ public sealed class RecursiveChunkProcessor : IRecursiveChunkProcessor
             Result<string> result = await this.combineResultsFunc(chunkOutputs);
             return result;
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (InvalidOperationException ex)
         {
             return Result<string>.Failure($"Error combining results: {ex.Message}");
         }

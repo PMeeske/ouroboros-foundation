@@ -115,19 +115,6 @@ public sealed class OllamaHealthCheckProvider : IHealthCheckProvider, IDisposabl
                     { "exceptionType", ex.GetType().Name },
                 });
         }
-        catch (Exception ex)
-        {
-            sw.Stop();
-            return HealthCheckResult.Unhealthy(
-                this.ComponentName,
-                sw.ElapsedMilliseconds,
-                ex.Message,
-                new Dictionary<string, object>
-                {
-                    { "endpoint", this.endpoint },
-                    { "exceptionType", ex.GetType().Name },
-                });
-        }
     }
 
     /// <summary>

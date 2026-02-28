@@ -49,7 +49,8 @@ public sealed class DelegateTool : ITool
                 string result = await executor(s);
                 return Result<string, string>.Success(result);
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 return Result<string, string>.Failure(ex.Message);
             }
@@ -71,7 +72,7 @@ public sealed class DelegateTool : ITool
                 string result = executor(s);
                 return Task.FromResult(Result<string, string>.Success(result));
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 return Task.FromResult(Result<string, string>.Failure(ex.Message));
             }
@@ -98,7 +99,8 @@ public sealed class DelegateTool : ITool
                 string result = await function(args);
                 return Result<string, string>.Success(result);
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (System.Text.Json.JsonException ex)
             {
                 return Result<string, string>.Failure($"JSON parse failed: {ex.Message}");
             }
