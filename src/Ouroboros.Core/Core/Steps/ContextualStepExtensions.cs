@@ -157,7 +157,7 @@ public static class ContextualStepExtensions
                 return (Result<TOut, Exception>.Success(result), logs);
             }
             catch (OperationCanceledException) { throw; }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 return (Result<TOut, Exception>.Failure(ex), new List<string> { $"Error: {ex.Message}" });
             }
@@ -185,7 +185,7 @@ public static class ContextualStepExtensions
                 return (option, logs);
             }
             catch (OperationCanceledException) { throw; }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 return (Option<TOut>.None(), new List<string> { $"Exception converted to None: {ex.Message}" });
             }

@@ -224,7 +224,8 @@ public sealed class EmbodimentAggregate : IDisposable
                     errors.Add($"{providerId}: {connectResult.Error}");
                 }
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 errors.Add($"{providerId}: {ex.Message}");
             }

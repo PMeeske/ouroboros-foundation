@@ -102,7 +102,8 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
                 Metadata = result.IsSuccess ? new Dictionary<string, object> { ["result"] = result.Value } : new Dictionary<string, object>()
             };
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             execution = execution with
             {
@@ -191,7 +192,11 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
                             {
                                 await ExecuteTaskAsync(task, ct);
                             }
-                            catch (Exception)
+                            catch (OperationCanceledException)
+                            {
+                                // Expected during shutdown
+                            }
+                            catch (Exception) when (true)
                             {
                                 // Logged in ExecuteTaskAsync
                             }

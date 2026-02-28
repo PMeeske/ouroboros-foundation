@@ -116,7 +116,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
         {
             throw new InvalidOperationException($"Qdrant RPC error initializing neuro-symbolic collections: {ex.Status.Detail}", ex);
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
             throw new InvalidOperationException($"Failed to initialize neuro-symbolic collections: {ex.Message}", ex);
         }
@@ -405,7 +405,11 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
                 MetadataJson = payload.TryGetValue("metadata_json", out Value? meta) ? meta.StringValue : null
             };
         }
-        catch (Exception)
+        catch (FormatException)
+        {
+            return null;
+        }
+        catch (KeyNotFoundException)
         {
             return null;
         }
@@ -425,7 +429,15 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
                 DateTime.Parse(p["created_at"].StringValue),
                 p.TryGetValue("metadata_json", out Value? meta) ? JsonSerializer.Deserialize<Dictionary<string, object>>(meta.StringValue) : null);
         }
-        catch (Exception)
+        catch (FormatException)
+        {
+            return null;
+        }
+        catch (KeyNotFoundException)
+        {
+            return null;
+        }
+        catch (JsonException)
         {
             return null;
         }
@@ -447,7 +459,15 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
                 p.TryGetValue("execution_time_ms", out Value? time) ? TimeSpan.FromMilliseconds(time.DoubleValue) : null,
                 p.TryGetValue("metadata_json", out Value? meta) ? JsonSerializer.Deserialize<Dictionary<string, object>>(meta.StringValue) : null);
         }
-        catch (Exception)
+        catch (FormatException)
+        {
+            return null;
+        }
+        catch (KeyNotFoundException)
+        {
+            return null;
+        }
+        catch (JsonException)
         {
             return null;
         }

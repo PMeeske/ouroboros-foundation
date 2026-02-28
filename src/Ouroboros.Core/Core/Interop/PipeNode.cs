@@ -63,7 +63,7 @@ public readonly struct PipeNode<TIn, TOut>
                 return Result<TOut, Exception>.Success(result);
             }
             catch (OperationCanceledException) { throw; }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 return Result<TOut, Exception>.Failure(ex);
             }
