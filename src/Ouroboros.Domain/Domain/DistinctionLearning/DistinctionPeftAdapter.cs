@@ -120,7 +120,8 @@ public sealed class DistinctionPeftAdapter
 
             return Result<Unit, string>.Success(Unit.Value);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger?.LogError(ex, "Failed to train from distinctions");
             return Result<Unit, string>.Failure($"Training failed: {ex.Message}");

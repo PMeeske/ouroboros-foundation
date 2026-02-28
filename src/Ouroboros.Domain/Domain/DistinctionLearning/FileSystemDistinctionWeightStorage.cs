@@ -67,7 +67,7 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
             _logger?.LogError(ex, "I/O error storing weights {Id}", id);
             return Result<string, string>.Failure($"Storage I/O failed: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (UnauthorizedAccessException ex)
         {
             _logger?.LogError(ex, "Failed to store weights {Id}", id);
             return Result<string, string>.Failure($"Storage failed: {ex.Message}");
@@ -101,7 +101,7 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
             _logger?.LogError(ex, "I/O error loading weights {Id}", id);
             return Result<byte[], string>.Failure($"Load I/O failed: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (UnauthorizedAccessException ex)
         {
             _logger?.LogError(ex, "Failed to load weights {Id}", id);
             return Result<byte[], string>.Failure($"Load failed: {ex.Message}");
@@ -141,7 +141,7 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
             _logger?.LogError(ex, "JSON parse error listing weights");
             return Result<List<DistinctionWeightMetadata>, string>.Failure($"List deserialization failed: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (UnauthorizedAccessException ex)
         {
             _logger?.LogError(ex, "Failed to list weights");
             return Result<List<DistinctionWeightMetadata>, string>.Failure($"List failed: {ex.Message}");
@@ -187,7 +187,7 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
             _logger?.LogError(ex, "I/O error dissolving weights at {Path}", path);
             return Result<Unit, string>.Failure($"Dissolution I/O failed: {ex.Message}");
         }
-        catch (Exception ex)
+        catch (UnauthorizedAccessException ex)
         {
             _logger?.LogError(ex, "Failed to dissolve weights at {Path}", path);
             return Result<Unit, string>.Failure($"Dissolution failed: {ex.Message}");
@@ -210,7 +210,7 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
             _logger?.LogError(ex, "I/O error getting total storage size");
             return Result<long, string>.Failure($"Failed to calculate size (I/O): {ex.Message}");
         }
-        catch (Exception ex)
+        catch (UnauthorizedAccessException ex)
         {
             _logger?.LogError(ex, "Failed to get total storage size");
             return Result<long, string>.Failure($"Failed to calculate size: {ex.Message}");

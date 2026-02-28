@@ -66,7 +66,8 @@ public sealed class DistinctionLearner : IDistinctionLearner
 
             return Result<DistinctionState, string>.Success(newState);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger?.LogError(ex, "Failed to update from distinction");
             return Result<DistinctionState, string>.Failure($"Update failed: {ex.Message}");
@@ -98,7 +99,8 @@ public sealed class DistinctionLearner : IDistinctionLearner
 
             return Result<DistinctionState, string>.Success(newState);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger?.LogError(ex, "Failed to apply recognition");
             return Result<DistinctionState, string>.Failure($"Recognition failed: {ex.Message}");
@@ -145,7 +147,8 @@ public sealed class DistinctionLearner : IDistinctionLearner
 
             return Result<Unit, string>.Success(Unit.Value);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger?.LogError(ex, "Failed to dissolve distinctions");
             return Result<Unit, string>.Failure($"Dissolution failed: {ex.Message}");
@@ -196,7 +199,8 @@ public sealed class DistinctionLearner : IDistinctionLearner
 
             return Result<double, string>.Success(fitness);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger?.LogError(ex, "Failed to evaluate distinction fitness");
             return Result<double, string>.Failure($"Fitness evaluation failed: {ex.Message}");
