@@ -18,7 +18,7 @@ public sealed partial class ProgramSynthesisEngine
             .ToList();
     }
 
-    private async Task<List<ASTNode>> ExpandBeamAsync(
+    private Task<List<ASTNode>> ExpandBeamAsync(
         List<ASTNode> currentBeam,
         DomainSpecificLanguage dsl,
         int targetDepth,
@@ -65,8 +65,7 @@ public sealed partial class ProgramSynthesisEngine
             }
         }
 
-        await Task.CompletedTask;
-        return expandedBeam.Any() ? expandedBeam : currentBeam;
+        return Task.FromResult(expandedBeam.Any() ? expandedBeam : currentBeam);
     }
 
     private async Task<List<Program>> EvaluateBeamAsync(
@@ -250,7 +249,7 @@ public sealed partial class ProgramSynthesisEngine
         }
     }
 
-    private async Task<List<Primitive>> ExtractViaAntiUnificationAsync(List<Program> programs, CancellationToken ct)
+    private Task<List<Primitive>> ExtractViaAntiUnificationAsync(List<Program> programs, CancellationToken ct)
     {
         List<Primitive> extractedPrimitives = new List<Primitive>();
 
@@ -283,8 +282,7 @@ public sealed partial class ProgramSynthesisEngine
             }
         }
 
-        await Task.CompletedTask;
-        return extractedPrimitives.DistinctBy(p => p.Name).ToList();
+        return Task.FromResult(extractedPrimitives.DistinctBy(p => p.Name).ToList());
     }
 
     private ASTNode? AntiUnify(ASTNode node1, ASTNode node2)

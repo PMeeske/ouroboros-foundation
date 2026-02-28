@@ -106,7 +106,7 @@ public sealed partial class CausalReasoningEngine
 
     private Variable CreateVariable(string name, List<Observation> data)
     {
-        List<object> values = data.Select(o => o.Values[name]).Distinct().ToList();
+        List<object> values = data.Select(o => o.Values.TryGetValue(name, out var val) ? val : (object)0.0).Distinct().ToList();
         VariableType type = this.InferVariableType(values);
 
         return new Variable(name, type, values);
@@ -145,8 +145,8 @@ public sealed partial class CausalReasoningEngine
         if (condSet.Count == 0)
         {
             // No conditioning: simple Pearson correlation
-            double[] dataI = data.Select(o => SafeToDouble(o.Values[nameI])).ToArray();
-            double[] dataJ = data.Select(o => SafeToDouble(o.Values[nameJ])).ToArray();
+            double[] dataI = data.Select(o => o.Values.TryGetValue(nameI, out var val) ? SafeToDouble(val) : 0.0).ToArray();
+            double[] dataJ = data.Select(o => o.Values.TryGetValue(nameJ, out var val) ? SafeToDouble(val) : 0.0).ToArray();
             double correlation = this.ComputeCorrelation(dataI, dataJ);
             return Math.Abs(correlation) < SignificanceLevel;
         }
@@ -169,8 +169,8 @@ public sealed partial class CausalReasoningEngine
                 continue; // Too few observations in this partition
             }
 
-            double[] partDataI = partObs.Select(o => SafeToDouble(o.Values[nameI])).ToArray();
-            double[] partDataJ = partObs.Select(o => SafeToDouble(o.Values[nameJ])).ToArray();
+            double[] partDataI = partObs.Select(o => o.Values.TryGetValue(nameI, out var val) ? SafeToDouble(val) : 0.0).ToArray();
+            double[] partDataJ = partObs.Select(o => o.Values.TryGetValue(nameJ, out var val) ? SafeToDouble(val) : 0.0).ToArray();
             double correlation = this.ComputeCorrelation(partDataI, partDataJ);
             totalCorrelation += Math.Abs(correlation);
             partitionCount++;
@@ -226,8 +226,8 @@ public sealed partial class CausalReasoningEngine
                     string nameI = variableNames[i];
                     string nameJ = variableNames[j];
 
-                    double[] dataI = data.Select(o => SafeToDouble(o.Values[nameI])).ToArray();
-                    double[] dataJ = data.Select(o => SafeToDouble(o.Values[nameJ])).ToArray();
+                    double[] dataI = data.Select(o => o.Values.TryGetValue(nameI, out var valI) ? SafeToDouble(valI) : 0.0).ToArray();
+                    double[] dataJ = data.Select(o => o.Values.TryGetValue(nameJ, out var valJ) ? SafeToDouble(valJ) : 0.0).ToArray();
 
                     double strength = Math.Abs(this.ComputeCorrelation(dataI, dataJ));
 
@@ -528,7 +528,7 @@ public sealed partial class CausalReasoningEngine
         }
 
         // Return mean value from data
-        double[] samples = data.Select(o => SafeToDouble(o.Values[variable])).ToArray();
+        double[] samples = data.Select(o => o.Values.TryGetValue(variable, out var val) ? SafeToDouble(val) : 0.0).ToArray();
         return samples.Average();
     }
 
@@ -723,10 +723,10 @@ public sealed partial class CausalReasoningEngine
         return lastValue;
     }
 
-    private void TopologicalSort(string varName, CausalGraph model,
+    private static void TopologicalSort(string varName, CausalGraph model,
         HashSet<string> visited, List<string> order, HashSet<string>? inStack = null)
     {
-        if (!visited.Add(varName)) return;
+        if (visited.Contains(varName)) return;
 
         inStack ??= new HashSet<string>();
 
@@ -745,6 +745,7 @@ public sealed partial class CausalReasoningEngine
         }
 
         inStack.Remove(varName);
+        visited.Add(varName);
         order.Add(varName);
     }
 
