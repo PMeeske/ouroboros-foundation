@@ -1,4 +1,7 @@
-﻿namespace Ouroboros.Domain.Autonomous.Neurons;
+﻿using System.Collections.Concurrent;
+using System.Text.RegularExpressions;
+
+namespace Ouroboros.Domain.Autonomous.Neurons;
 
 /// <summary>
 /// The safety neuron monitors for unsafe operations and enforces constraints.
@@ -7,8 +10,27 @@
 /// </summary>
 public sealed class SafetyNeuron : Neuron, IMessageFilter
 {
-    private readonly HashSet<string> _blockedOperations = [];
-    private readonly List<string> _violations = [];
+    private static readonly string[] DangerousSubstringPatterns =
+    [
+        "rm -rf /",
+        "format c:",
+        "DROP TABLE",
+        "DELETE FROM",
+        "shutdown",
+        ":(){:|:&};:",
+        "Invoke-Expression",
+        "Invoke-WebRequest",
+    ];
+
+    private static readonly Regex[] DangerousRegexPatterns =
+    [
+        new(@"curl.*\|.*sh", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        new(@"wget.*\|.*bash", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        new(@"chmod\s+777", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+    ];
+
+    private readonly ConcurrentDictionary<string, byte> _blockedOperations = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentBag<string> _violations = [];
 
     /// <inheritdoc/>
     public override string Id => "neuron.safety";
@@ -28,7 +50,7 @@ public sealed class SafetyNeuron : Neuron, IMessageFilter
     /// <summary>
     /// Gets violations detected.
     /// </summary>
-    public IReadOnlyList<string> Violations => _violations.AsReadOnly();
+    public IReadOnlyList<string> Violations => _violations.ToArray();
 
     /// <inheritdoc/>
     protected override Task ProcessMessageAsync(NeuronMessage message, CancellationToken ct)
@@ -51,7 +73,7 @@ public sealed class SafetyNeuron : Neuron, IMessageFilter
             });
 
             // Block the operation
-            _blockedOperations.Add(message.Id.ToString());
+            _blockedOperations.TryAdd(message.Id.ToString(), 0);
         }
 
         // Respond to reflection requests
@@ -84,32 +106,11 @@ public sealed class SafetyNeuron : Neuron, IMessageFilter
 
     private static bool ContainsDangerousPattern(string content)
     {
-        // Plain substring patterns (case-insensitive).
-        string[] substringPatterns =
-        [
-            "rm -rf /",
-            "format c:",
-            "DROP TABLE",
-            "DELETE FROM",
-            "shutdown",
-            ":(){:|:&};:",
-            "Invoke-Expression",
-            "Invoke-WebRequest",
-        ];
-
-        if (substringPatterns.Any(p => content.Contains(p, StringComparison.OrdinalIgnoreCase)))
+        if (DangerousSubstringPatterns.Any(p => content.Contains(p, StringComparison.OrdinalIgnoreCase)))
         {
             return true;
         }
 
-        // Regex patterns for threats that require wildcard / whitespace matching.
-        System.Text.RegularExpressions.Regex[] regexPatterns =
-        [
-            new(@"curl.*\|.*sh", System.Text.RegularExpressions.RegexOptions.IgnoreCase),
-            new(@"wget.*\|.*bash", System.Text.RegularExpressions.RegexOptions.IgnoreCase),
-            new(@"chmod\s+777", System.Text.RegularExpressions.RegexOptions.IgnoreCase),
-        ];
-
-        return regexPatterns.Any(r => r.IsMatch(content));
+        return DangerousRegexPatterns.Any(r => r.IsMatch(content));
     }
 }

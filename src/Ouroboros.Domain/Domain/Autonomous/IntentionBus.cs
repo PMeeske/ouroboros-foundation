@@ -365,11 +365,38 @@ public sealed class IntentionBus : IDisposable
                     _intentions[intention.Id] = updated;
                     _intentionEvents.OnNext(new IntentionEvent(updated, intention.Status, IntentionStatus.Expired, now));
                 }
+
+                // Evict terminal intentions older than 1 hour to prevent unbounded growth
+                EvictTerminalIntentions(now);
             }
             catch (OperationCanceledException)
             {
                 break;
             }
+        }
+    }
+
+    /// <summary>
+    /// Removes completed, failed, expired, rejected, and cancelled intentions
+    /// that have been in a terminal state for longer than the retention period.
+    /// </summary>
+    private void EvictTerminalIntentions(DateTime now)
+    {
+        DateTime cutoff = now.AddHours(-1);
+
+        List<Guid> keysToRemove = _intentions
+            .Where(kvp => kvp.Value.Status is IntentionStatus.Completed
+                                           or IntentionStatus.Failed
+                                           or IntentionStatus.Expired
+                                           or IntentionStatus.Rejected
+                                           or IntentionStatus.Cancelled)
+            .Where(kvp => (kvp.Value.ActedAt ?? kvp.Value.CreatedAt) < cutoff)
+            .Select(kvp => kvp.Key)
+            .ToList();
+
+        foreach (Guid key in keysToRemove)
+        {
+            _intentions.TryRemove(key, out _);
         }
     }
 

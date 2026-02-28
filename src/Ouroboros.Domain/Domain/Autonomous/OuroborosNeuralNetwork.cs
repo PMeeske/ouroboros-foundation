@@ -111,15 +111,14 @@ public sealed class OuroborosNeuralNetwork : IDisposable
         neuron.IntentionBus = _intentionBus;
         _neurons[neuron.Id] = neuron;
 
-        // Subscribe to topics
+        // Subscribe to topics (thread-safe inner set access)
         foreach (string topic in neuron.SubscribedTopics)
         {
-            if (!_topicSubscribers.TryGetValue(topic, out HashSet<string>? subscribers))
+            HashSet<string> subscribers = _topicSubscribers.GetOrAdd(topic, _ => new HashSet<string>());
+            lock (subscribers)
             {
-                subscribers = [];
-                _topicSubscribers[topic] = subscribers;
+                subscribers.Add(neuron.Id);
             }
-            subscribers.Add(neuron.Id);
         }
 
         // Auto-register neurons that implement IMessageFilter so their
@@ -175,7 +174,10 @@ public sealed class OuroborosNeuralNetwork : IDisposable
             {
                 if (_topicSubscribers.TryGetValue(topic, out HashSet<string>? subscribers))
                 {
-                    subscribers.Remove(neuronId);
+                    lock (subscribers)
+                    {
+                        subscribers.Remove(neuronId);
+                    }
                 }
             }
 
@@ -389,10 +391,13 @@ public sealed class OuroborosNeuralNetwork : IDisposable
             return;
         }
 
-        // Route by topic subscription WITH weight modulation
+        // Route by topic subscription WITH weight modulation (snapshot for thread safety)
         if (_topicSubscribers.TryGetValue(message.Topic, out HashSet<string>? subscribers))
         {
-            foreach (string subscriberId in subscribers)
+            string[] subscriberSnapshot;
+            lock (subscribers) { subscriberSnapshot = subscribers.ToArray(); }
+
+            foreach (string subscriberId in subscriberSnapshot)
             {
                 if (subscriberId != message.SourceNeuron && _neurons.TryGetValue(subscriberId, out Neuron? subscriber))
                 {
@@ -401,11 +406,14 @@ public sealed class OuroborosNeuralNetwork : IDisposable
             }
         }
 
-        // Also match wildcard subscriptions
+        // Also match wildcard subscriptions (snapshot for thread safety)
         string wildcardTopic = message.Topic.Contains('.') ? message.Topic[..message.Topic.LastIndexOf('.')] + ".*" : "*";
         if (_topicSubscribers.TryGetValue(wildcardTopic, out HashSet<string>? wildcardSubscribers))
         {
-            foreach (string subscriberId in wildcardSubscribers)
+            string[] wildcardSnapshot;
+            lock (wildcardSubscribers) { wildcardSnapshot = wildcardSubscribers.ToArray(); }
+
+            foreach (string subscriberId in wildcardSnapshot)
             {
                 if (subscriberId != message.SourceNeuron && _neurons.TryGetValue(subscriberId, out Neuron? subscriber))
                 {
@@ -416,7 +424,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
     }
 
     /// <summary>
-    /// Broadcasts a message to all neurons.
+    /// Broadcasts a message to all neurons, applying message filters before delivery.
     /// </summary>
     public void Broadcast(string topic, object payload, string sourceNeuron)
     {
@@ -427,6 +435,77 @@ public sealed class OuroborosNeuralNetwork : IDisposable
             Payload = payload,
         };
 
+        _messageStream.OnNext(message);
+
+        // Apply message filters before broadcasting (same pipeline as RouteMessage)
+        IReadOnlyList<IMessageFilter>? filters = _filters;
+        if (filters != null && filters.Count > 0)
+        {
+            List<Task<bool>> filterTasks = new List<Task<bool>>(filters.Count);
+            bool allCompletedSynchronously = true;
+
+            foreach (IMessageFilter filter in filters)
+            {
+                Task<bool> task = filter.ShouldRouteAsync(message, CancellationToken.None);
+                filterTasks.Add(task);
+                if (!task.IsCompletedSuccessfully)
+                {
+                    allCompletedSynchronously = false;
+                }
+            }
+
+            if (allCompletedSynchronously)
+            {
+                foreach (Task<bool> task in filterTasks)
+                {
+                    if (!task.Result)
+                    {
+                        System.Diagnostics.Debug.WriteLine(
+                            $"[NeuralNetwork] Broadcast message with topic '{message.Topic}' from {message.SourceNeuron} blocked by filter (sync)");
+                        return;
+                    }
+                }
+
+                // All filters approved - deliver immediately
+                DeliverBroadcast(message, sourceNeuron);
+            }
+            else
+            {
+                // Fire-and-forget async filtering
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        foreach (Task<bool> task in filterTasks)
+                        {
+                            bool allowed = task.IsCompletedSuccessfully ? task.Result : await task;
+                            if (!allowed)
+                            {
+                                System.Diagnostics.Debug.WriteLine(
+                                    $"[NeuralNetwork] Broadcast message with topic '{message.Topic}' from {message.SourceNeuron} blocked by filter (async)");
+                                return;
+                            }
+                        }
+
+                        DeliverBroadcast(message, sourceNeuron);
+                    }
+                    catch (Exception ex) when (ex is not OperationCanceledException)
+                    {
+                        System.Diagnostics.Debug.WriteLine(
+                            $"[NeuralNetwork] Error during broadcast filtering for topic '{message.Topic}': {ex.GetType().Name} - {ex.Message}");
+                    }
+                });
+            }
+        }
+        else
+        {
+            // No filters configured - deliver immediately
+            DeliverBroadcast(message, sourceNeuron);
+        }
+    }
+
+    private void DeliverBroadcast(NeuronMessage message, string sourceNeuron)
+    {
         foreach (Neuron neuron in _neurons.Values)
         {
             if (neuron.Id != sourceNeuron)
@@ -434,8 +513,6 @@ public sealed class OuroborosNeuralNetwork : IDisposable
                 neuron.ReceiveMessage(message);
             }
         }
-
-        _messageStream.OnNext(message);
     }
 
     /// <summary>

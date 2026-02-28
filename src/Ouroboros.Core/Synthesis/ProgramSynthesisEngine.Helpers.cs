@@ -483,17 +483,31 @@ public sealed partial class ProgramSynthesisEngine
     }
 
     /// <summary>
-    /// Simple recursive evaluation of a subtree given arguments.
-    /// Returns the first argument if available, otherwise the node value.
+    /// Recursively evaluates a subtree given arguments.
+    /// For leaf nodes, returns the first argument or the node value.
+    /// For compound nodes, threads the result through each child sequentially.
     /// </summary>
-    private object EvaluateSubtree(ASTNode node, object[] args)
+    private static object EvaluateSubtree(ASTNode node, object[] args)
     {
-        return args.Length > 0 ? args[0] : (object)(node.Value ?? string.Empty);
+        if (node.Children == null || node.Children.Count == 0)
+        {
+            return args.Length > 0 ? args[0] : (object)(node.Value ?? string.Empty);
+        }
+
+        // For compound nodes, recursively evaluate children in sequence
+        object current = args.Length > 0 ? args[0] : (object)string.Empty;
+        foreach (var child in node.Children)
+        {
+            current = EvaluateSubtree(child, new[] { current });
+        }
+
+        return current;
     }
 
     /// <summary>
     /// Infers the output type of an AST node for type-directed beam pruning.
-    /// For arrow types "a -> b", returns "b". For simple types, returns the type itself.
+    /// For Primitive nodes, returns the node value as the type.
+    /// For Apply nodes, inspects the applied function's arrow type and returns its output part.
     /// </summary>
     private string InferOutputType(ASTNode node)
     {
@@ -502,7 +516,47 @@ public sealed partial class ProgramSynthesisEngine
             return node.Value ?? "*";
         }
 
-        // For Apply nodes, the output type depends on the applied function
+        if (node.NodeType == "Apply" && node.Children?.Count > 0)
+        {
+            // The function being applied is identified by node.Value (the primitive name).
+            // Look up its type from the DSL primitives via the log-probability table (which
+            // contains the same primitives). Alternatively, use the arrow type convention:
+            // if the value looks like "inputType -> outputType", extract the output part.
+            var funcType = node.Value ?? "*";
+
+            // Check for Unicode arrow (used in some DSL definitions)
+            var parts = funcType.Split("\u2192", StringSplitOptions.TrimEntries);
+            if (parts.Length == 2)
+            {
+                return parts[1];
+            }
+
+            // Check for ASCII arrow
+            var arrowIndex = funcType.IndexOf("->", StringComparison.Ordinal);
+            if (arrowIndex >= 0)
+            {
+                return funcType[(arrowIndex + 2)..].Trim();
+            }
+
+            // If child is a primitive with an arrow type, infer from that
+            var firstChild = node.Children[0];
+            if (firstChild.NodeType == "Primitive")
+            {
+                var childType = firstChild.Value ?? "*";
+                var childParts = childType.Split("\u2192", StringSplitOptions.TrimEntries);
+                if (childParts.Length == 2)
+                {
+                    return childParts[1];
+                }
+
+                var childArrow = childType.IndexOf("->", StringComparison.Ordinal);
+                if (childArrow >= 0)
+                {
+                    return childType[(childArrow + 2)..].Trim();
+                }
+            }
+        }
+
         return "*";
     }
 

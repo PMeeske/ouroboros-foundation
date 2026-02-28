@@ -338,13 +338,49 @@ public sealed partial class CausalReasoningEngine
             }
         }
 
-        // Phase 2: Meek Rule 1 -- if X->Z and Z-Y is unoriented, orient Z->Y
-        // (to avoid creating new v-structures or cycles)
+        // Phase 2: Meek Rules -- iteratively orient edges to complete the CPDAG
+        // Helper: check whether two node indices are adjacent in the skeleton
+        bool AreAdjacent(int x, int y)
+        {
+            (int lo, int hi) = x < y ? (x, y) : (y, x);
+            return edgeStrength.ContainsKey((lo, hi));
+        }
+
+        // Helper: check if there is an oriented edge from 'cause' to 'effect'
+        bool HasDirectedEdge(int cause, int effect)
+        {
+            (int lo, int hi) = cause < effect ? (cause, effect) : (effect, cause);
+            return edgeStrength.ContainsKey((lo, hi))
+                && edgeOriented[(lo, hi)]
+                && edgeDirection[(lo, hi)].Cause == cause
+                && edgeDirection[(lo, hi)].Effect == effect;
+        }
+
+        // Helper: orient an unoriented edge from 'cause' to 'effect'
+        bool TryOrient(int cause, int effect, ref bool changedFlag)
+        {
+            (int lo, int hi) = cause < effect ? (cause, effect) : (effect, cause);
+            if (!edgeStrength.ContainsKey((lo, hi)) || edgeOriented[(lo, hi)])
+            {
+                return false;
+            }
+
+            edgeDirection[(lo, hi)] = (cause, effect);
+            edgeType[(lo, hi)] = EdgeType.Direct;
+            edgeOriented[(lo, hi)] = true;
+            changedFlag = true;
+            return true;
+        }
+
+        // All node indices for iteration
+        var allNodes = Enumerable.Range(0, n).ToList();
+
         bool changed = true;
-        int maxIterations = n * 2;
+        int maxIterations = n * n;
         while (changed && maxIterations-- > 0)
         {
             changed = false;
+
             foreach (var key in edgeStrength.Keys)
             {
                 if (edgeOriented[key])
@@ -355,30 +391,112 @@ public sealed partial class CausalReasoningEngine
                 int a = key.From;
                 int b = key.To;
 
-                // Check if there's any oriented edge pointing INTO a (making a the effect)
-                // If so, orient a->b to propagate
-                bool hasDirectedIntoA = edgeStrength.Keys.Any(k =>
-                    edgeOriented[k] && edgeDirection[k].Effect == a);
-
-                if (hasDirectedIntoA)
+                // Meek Rule 1: If X->Z-Y and X is NOT adjacent to Y, orient Z->Y
+                // Check direction a->b: is there X->a where X is not adjacent to b?
+                bool rule1AB = allNodes.Any(x =>
+                    x != a && x != b && HasDirectedEdge(x, a) && !AreAdjacent(x, b));
+                if (rule1AB)
                 {
-                    edgeDirection[key] = (a, b);
-                    edgeType[key] = EdgeType.Direct;
-                    edgeOriented[key] = true;
-                    changed = true;
+                    TryOrient(a, b, ref changed);
                     continue;
                 }
 
-                // Also check if oriented edge points INTO b
-                bool hasDirectedIntoB = edgeStrength.Keys.Any(k =>
-                    edgeOriented[k] && edgeDirection[k].Effect == b);
-
-                if (hasDirectedIntoB)
+                // Check direction b->a: is there X->b where X is not adjacent to a?
+                bool rule1BA = allNodes.Any(x =>
+                    x != a && x != b && HasDirectedEdge(x, b) && !AreAdjacent(x, a));
+                if (rule1BA)
                 {
-                    edgeDirection[key] = (b, a);
-                    edgeType[key] = EdgeType.Direct;
-                    edgeOriented[key] = true;
-                    changed = true;
+                    TryOrient(b, a, ref changed);
+                    continue;
+                }
+
+                // Meek Rule 2: If X->Z->Y and X-Y unoriented, orient X->Y
+                // Check a->b: is there Z such that a->Z and Z->b?
+                bool rule2AB = allNodes.Any(z =>
+                    z != a && z != b && HasDirectedEdge(a, z) && HasDirectedEdge(z, b));
+                if (rule2AB)
+                {
+                    TryOrient(a, b, ref changed);
+                    continue;
+                }
+
+                // Check b->a: is there Z such that b->Z and Z->a?
+                bool rule2BA = allNodes.Any(z =>
+                    z != a && z != b && HasDirectedEdge(b, z) && HasDirectedEdge(z, a));
+                if (rule2BA)
+                {
+                    TryOrient(b, a, ref changed);
+                    continue;
+                }
+
+                // Meek Rule 3: If X-Y, and there exist Z1,Z2 both adjacent to X and both
+                // with oriented edges Z1->Y and Z2->Y, and Z1 not adjacent to Z2, orient X->Y
+                // Check a->b direction
+                var neighborsOfA = allNodes.Where(x => x != a && x != b && AreAdjacent(x, a)).ToList();
+                var directedIntoB = neighborsOfA.Where(z => HasDirectedEdge(z, b)).ToList();
+                bool rule3AB = false;
+                for (int zi = 0; zi < directedIntoB.Count && !rule3AB; zi++)
+                {
+                    for (int zj = zi + 1; zj < directedIntoB.Count && !rule3AB; zj++)
+                    {
+                        if (!AreAdjacent(directedIntoB[zi], directedIntoB[zj]))
+                        {
+                            rule3AB = true;
+                        }
+                    }
+                }
+
+                if (rule3AB)
+                {
+                    TryOrient(a, b, ref changed);
+                    continue;
+                }
+
+                // Check b->a direction
+                var neighborsOfB = allNodes.Where(x => x != a && x != b && AreAdjacent(x, b)).ToList();
+                var directedIntoA = neighborsOfB.Where(z => HasDirectedEdge(z, a)).ToList();
+                bool rule3BA = false;
+                for (int zi = 0; zi < directedIntoA.Count && !rule3BA; zi++)
+                {
+                    for (int zj = zi + 1; zj < directedIntoA.Count && !rule3BA; zj++)
+                    {
+                        if (!AreAdjacent(directedIntoA[zi], directedIntoA[zj]))
+                        {
+                            rule3BA = true;
+                        }
+                    }
+                }
+
+                if (rule3BA)
+                {
+                    TryOrient(b, a, ref changed);
+                    continue;
+                }
+
+                // Meek Rule 4: If X-Y, and there exists Z such that Z->Y, and W such that
+                // W->Z and W-X (undirected) and W not adjacent to Y, orient X->Y
+                // Check a->b direction
+                bool rule4AB = allNodes.Any(z =>
+                    z != a && z != b && HasDirectedEdge(z, b) &&
+                    allNodes.Any(w =>
+                        w != a && w != b && w != z &&
+                        HasDirectedEdge(w, z) && AreAdjacent(w, a) && !AreAdjacent(w, b)));
+                if (rule4AB)
+                {
+                    TryOrient(a, b, ref changed);
+                    continue;
+                }
+
+                // Check b->a direction
+                bool rule4BA = allNodes.Any(z =>
+                    z != a && z != b && HasDirectedEdge(z, a) &&
+                    allNodes.Any(w =>
+                        w != a && w != b && w != z &&
+                        HasDirectedEdge(w, z) && AreAdjacent(w, b) && !AreAdjacent(w, a)));
+                if (rule4BA)
+                {
+                    TryOrient(b, a, ref changed);
+                    continue;
                 }
             }
         }
@@ -551,10 +669,20 @@ public sealed partial class CausalReasoningEngine
         CausalGraph model,
         Dictionary<string, object> exogenousVars)
     {
-        // Use structural equation to compute outcome
+        // Use structural equation to compute outcome, adding exogenous noise term
+        // per Pearl's twin-network counterfactual: outcome = f(parents) + U_outcome
         if (model.Equations.TryGetValue(outcome, out StructuralEquation? equation))
         {
-            return equation.Function(values);
+            double predicted = Convert.ToDouble(equation.Function(values));
+
+            // Add exogenous noise term (residual from abduction step)
+            if (exogenousVars.TryGetValue(outcome, out var noise))
+            {
+                predicted += Convert.ToDouble(noise);
+            }
+
+            values[outcome] = predicted;
+            return predicted;
         }
 
         // Fallback: return existing value or default

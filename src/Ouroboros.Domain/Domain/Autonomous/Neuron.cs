@@ -8,7 +8,6 @@ namespace Ouroboros.Domain.Autonomous;
 /// </summary>
 public abstract class Neuron : IDisposable
 {
-    private readonly Subject<NeuronMessage> _incomingMessages = new();
     private readonly Subject<NeuronMessage> _outgoingMessages = new();
     private readonly Channel<NeuronMessage> _messageChannel = Channel.CreateUnbounded<NeuronMessage>();
     private readonly CancellationTokenSource _cts = new();
@@ -86,7 +85,6 @@ public abstract class Neuron : IDisposable
     public void ReceiveMessage(NeuronMessage message)
     {
         _messageChannel.Writer.TryWrite(message);
-        _incomingMessages.OnNext(message);
     }
 
     /// <summary>
@@ -171,7 +169,7 @@ public abstract class Neuron : IDisposable
             {
                 try
                 {
-                    await Task.Delay(100, _cts.Token);
+                    await Task.Delay(1000, _cts.Token);
                     await OnTickAsync(_cts.Token);
                 }
                 catch (OperationCanceledException)
@@ -215,7 +213,6 @@ public abstract class Neuron : IDisposable
         _messageChannel.Writer.TryComplete();
         _cts.Cancel();
         _cts.Dispose();
-        _incomingMessages.Dispose();
         _outgoingMessages.Dispose();
     }
 }
