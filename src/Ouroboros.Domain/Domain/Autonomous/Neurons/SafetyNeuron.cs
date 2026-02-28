@@ -20,6 +20,11 @@ public sealed class SafetyNeuron : Neuron, IMessageFilter
         ":(){:|:&};:",
         "Invoke-Expression",
         "Invoke-WebRequest",
+        "mkfs.",
+        "dd if=/dev/zero",
+        "dd if=/dev/random",
+        "> /dev/sda",
+        "TRUNCATE TABLE",
     ];
 
     private static readonly Regex[] DangerousRegexPatterns =
@@ -27,6 +32,11 @@ public sealed class SafetyNeuron : Neuron, IMessageFilter
         new(@"curl.*\|.*sh", RegexOptions.IgnoreCase | RegexOptions.Compiled),
         new(@"wget.*\|.*bash", RegexOptions.IgnoreCase | RegexOptions.Compiled),
         new(@"chmod\s+777", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        new(@"python[23]?\s+-c\s+['""].*(?:import\s+(?:os|subprocess|shutil)|exec|eval)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        new(@"powershell(?:\.exe)?\s+.*-(?:enc|encodedcommand)", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        new(@"base64\s+(?:-d|--decode)\s*\|", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        new(@"eval\s*\(\s*base64", RegexOptions.IgnoreCase | RegexOptions.Compiled),
+        new(@"nc\s+-[elp].*\d+", RegexOptions.IgnoreCase | RegexOptions.Compiled),
     ];
 
     private const int MaxViolations = 1000;

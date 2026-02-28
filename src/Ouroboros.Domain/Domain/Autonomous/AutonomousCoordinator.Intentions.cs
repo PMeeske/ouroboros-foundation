@@ -12,6 +12,17 @@ namespace Ouroboros.Domain.Autonomous;
 /// </summary>
 public sealed partial class AutonomousCoordinator
 {
+    /// <summary>
+    /// Categories that must NEVER be auto-approved, regardless of configuration.
+    /// This is a hardcoded safety floor that cannot be overridden by config changes.
+    /// </summary>
+    private static readonly HashSet<IntentionCategory> CriticalCategories =
+    [
+        IntentionCategory.CodeModification,
+        IntentionCategory.GoalPursuit,
+        IntentionCategory.SafetyCheck,
+    ];
+
     private void AutoApproveConfiguredCategories()
     {
         if (!_config.PushBasedMode) return;
@@ -20,10 +31,14 @@ public sealed partial class AutonomousCoordinator
 
         foreach (Intention intention in pending)
         {
-            // YOLO mode: auto-approve unless category requires mandatory approval
-            if (IsYoloMode && !_config.AlwaysRequireApproval.Contains(intention.Category))
+            // YOLO mode: auto-approve unless category is critical or requires mandatory approval.
+            // CriticalCategories is a hardcoded safety floor — even if AlwaysRequireApproval
+            // is misconfigured or empty, these categories will never be auto-approved.
+            if (IsYoloMode
+                && !CriticalCategories.Contains(intention.Category)
+                && !_config.AlwaysRequireApproval.Contains(intention.Category))
             {
-                _intentionBus.ApproveIntention(intention.Id, "🤠 YOLO mode - auto-approved");
+                _intentionBus.ApproveIntention(intention.Id, "YOLO mode - auto-approved");
                 continue;
             }
 
@@ -299,17 +314,12 @@ public sealed partial class AutonomousCoordinator
             return (true, null);
         }
         catch (OperationCanceledException) { throw; }
-        catch (InvalidOperationException ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            // Fail-closed: block execution when MeTTa validation is unavailable
-            System.Diagnostics.Debug.WriteLine($"MeTTa validation error: {ex.Message}");
-            return (false, $"MeTTa unavailable: {ex.Message}");
-        }
-        catch (FormatException ex)
-        {
-            // Fail-closed: block execution on malformed MeTTa responses
-            System.Diagnostics.Debug.WriteLine($"MeTTa validation error: {ex.Message}");
-            return (false, $"MeTTa format error: {ex.Message}");
+            // Fail-closed: block execution on ANY MeTTa validation error.
+            // Never allow an intention through when validation cannot confirm safety.
+            System.Diagnostics.Debug.WriteLine($"MeTTa validation error ({ex.GetType().Name}): {ex.Message}");
+            return (false, $"MeTTa validation failed: {ex.Message}");
         }
     }
 
