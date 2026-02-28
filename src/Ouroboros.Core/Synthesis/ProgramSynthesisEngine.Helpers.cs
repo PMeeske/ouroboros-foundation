@@ -284,7 +284,7 @@ public sealed partial class ProgramSynthesisEngine
         }
 
         await Task.CompletedTask;
-        return extractedPrimitives.Distinct().ToList();
+        return extractedPrimitives.DistinctBy(p => p.Name).ToList();
     }
 
     private ASTNode? AntiUnify(ASTNode node1, ASTNode node2)

@@ -176,6 +176,10 @@ public abstract class Neuron : IDisposable
                 {
                     break;
                 }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.TraceWarning($"[{Id}] Error in tick loop: {ex.Message}");
+                }
             }
         }, _cts.Token);
 
@@ -194,7 +198,7 @@ public abstract class Neuron : IDisposable
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[{Id}] Error processing message: {ex.Message}");
+                    System.Diagnostics.Trace.TraceWarning($"[{Id}] Error processing message: {ex.Message}");
                 }
             }
         }

@@ -19,7 +19,7 @@ public sealed class IntentionBus : IDisposable
     private readonly Subject<Intention> _newIntentions = new();
     private readonly CancellationTokenSource _cts = new();
 
-    private bool _isActive;
+    private volatile bool _isActive;
     private Task? _expirationTask;
 
     /// <summary>

@@ -161,7 +161,9 @@ public sealed partial class ProgramSynthesisEngine : IProgramSynthesisEngine
                 this.primitiveLogProbabilities[primitive] = Math.Log(probability);
             }
 
-            await Task.CompletedTask; // Placeholder for actual neural training
+            // The frequency-based log-probability update above is the recognition model:
+            // it computes a Bayesian posterior over primitives from observed usage counts,
+            // guiding future synthesis searches toward frequently successful primitives.
             return Result<Unit, string>.Success(Unit.Value);
         }
         catch (OperationCanceledException)

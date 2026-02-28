@@ -19,6 +19,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
     private ConnectionTopology? _topology;
 
     private IReadOnlyList<IMessageFilter>? _filters;
+    private readonly object _filterLock = new();
     private volatile bool _isActive;
 
     /// <summary>
@@ -125,9 +126,12 @@ public sealed class OuroborosNeuralNetwork : IDisposable
         // safety checks are applied before routing any message.
         if (neuron is IMessageFilter filter)
         {
-            List<IMessageFilter> currentFilters = _filters?.ToList() ?? new List<IMessageFilter>();
-            currentFilters.Add(filter);
-            SetMessageFilters(currentFilters);
+            lock (_filterLock)
+            {
+                var filters = new List<IMessageFilter>(_filters ?? (IReadOnlyList<IMessageFilter>)Array.Empty<IMessageFilter>());
+                filters.Add(filter);
+                SetMessageFilters(filters);
+            }
         }
 
         // Create default connections based on topic overlap
@@ -279,7 +283,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
             _messageHistory.TryDequeue(out _);
         }
 
-        // Persist to Qdrant (async, fire-and-forget)
+        // Persist to Qdrant (async, fire-and-forget — persistence failure is non-critical)
         if (PersistMessageFunction != null)
         {
             _ = Task.Run(async () =>
@@ -288,8 +292,8 @@ public sealed class OuroborosNeuralNetwork : IDisposable
                 {
                     await PersistMessageFunction(message, CancellationToken.None);
                 }
-                catch (HttpRequestException ex) { System.Diagnostics.Debug.WriteLine($"[NeuralNetwork] Persistence error: {ex.Message}"); }
-                catch (Grpc.Core.RpcException ex) { System.Diagnostics.Debug.WriteLine($"[NeuralNetwork] Persistence error: {ex.Message}"); }
+                catch (HttpRequestException ex) { System.Diagnostics.Trace.TraceWarning($"[NeuralNetwork] Persistence error: {ex.Message}"); }
+                catch (Grpc.Core.RpcException ex) { System.Diagnostics.Trace.TraceWarning($"[NeuralNetwork] Persistence error: {ex.Message}"); }
             });
         }
 
@@ -323,7 +327,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
                     if (!task.Result)
                     {
                         // Message blocked by filter (synchronous path)
-                        System.Diagnostics.Debug.WriteLine(
+                        System.Diagnostics.Trace.TraceWarning(
                             $"[NeuralNetwork] Message {message.Id} with topic '{message.Topic}' from {message.SourceNeuron} blocked by filter (sync)");
                         return;
                     }
@@ -335,38 +339,35 @@ public sealed class OuroborosNeuralNetwork : IDisposable
             }
             else
             {
-                // Fire-and-forget async filtering - message will be delivered only after approval
-                _ = Task.Run(async () =>
+                // Await async filter results synchronously so the filter verdict
+                // is observed before deciding whether to deliver the message.
+                try
                 {
-                    try
+                    foreach (Task<bool> task in filterTasks)
                     {
-                        // Check all filters, using already-started tasks where possible
-                        foreach (Task<bool> task in filterTasks)
+                        bool allowed = task.IsCompletedSuccessfully
+                            ? task.Result
+                            : task.GetAwaiter().GetResult();
+
+                        if (!allowed)
                         {
-                            bool allowed = task.IsCompletedSuccessfully
-                                ? task.Result
-                                : await task;
-
-                            if (!allowed)
-                            {
-                                // Message blocked by filter (async path)
-                                System.Diagnostics.Debug.WriteLine(
-                                    $"[NeuralNetwork] Message {message.Id} with topic '{message.Topic}' from {message.SourceNeuron} blocked by filter (async)");
-                                return;
-                            }
+                            // Message blocked by filter (async path)
+                            System.Diagnostics.Trace.TraceWarning(
+                                $"[NeuralNetwork] Message {message.Id} with topic '{message.Topic}' from {message.SourceNeuron} blocked by filter (async)");
+                            return;
                         }
+                    }
 
-                        // All filters approved - broadcast to stream and deliver
-                        _messageStream.OnNext(message);
-                        DeliverMessage(message);
-                    }
-                    catch (Exception ex) when (ex is not OperationCanceledException)
-                    {
-                        System.Diagnostics.Debug.WriteLine(
-                            $"[NeuralNetwork] Error during message filtering for message {message.Id} with topic '{message.Topic}': {ex.GetType().Name} - {ex.Message}");
-                        // Fail-safe: don't deliver messages that fail filtering
-                    }
-                });
+                    // All filters approved - broadcast to stream and deliver
+                    _messageStream.OnNext(message);
+                    DeliverMessage(message);
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    System.Diagnostics.Trace.TraceWarning(
+                        $"[NeuralNetwork] Error during message filtering for message {message.Id} with topic '{message.Topic}': {ex.GetType().Name} - {ex.Message}");
+                    // Fail-safe: don't deliver messages that fail filtering
+                }
             }
         }
         else
@@ -407,13 +408,32 @@ public sealed class OuroborosNeuralNetwork : IDisposable
         }
 
         // Also match wildcard subscriptions (snapshot for thread safety)
-        string wildcardTopic = message.Topic.Contains('.') ? message.Topic[..message.Topic.LastIndexOf('.')] + ".*" : "*";
-        if (_topicSubscribers.TryGetValue(wildcardTopic, out HashSet<string>? wildcardSubscribers))
+        int dotIndex = message.Topic.LastIndexOf('.');
+        if (dotIndex > 0)
         {
-            string[] wildcardSnapshot;
-            lock (wildcardSubscribers) { wildcardSnapshot = wildcardSubscribers.ToArray(); }
+            string wildcardTopic = message.Topic[..dotIndex] + ".*";
+            if (_topicSubscribers.TryGetValue(wildcardTopic, out HashSet<string>? wildcardSubscribers))
+            {
+                string[] wildcardSnapshot;
+                lock (wildcardSubscribers) { wildcardSnapshot = wildcardSubscribers.ToArray(); }
 
-            foreach (string subscriberId in wildcardSnapshot)
+                foreach (string subscriberId in wildcardSnapshot)
+                {
+                    if (subscriberId != message.SourceNeuron && _neurons.TryGetValue(subscriberId, out Neuron? subscriber))
+                    {
+                        DeliverWeightedMessage(message, subscriber, subscriberId);
+                    }
+                }
+            }
+        }
+
+        // Match global wildcard subscribers
+        if (_topicSubscribers.TryGetValue("*", out HashSet<string>? globalWildcardSubscribers))
+        {
+            string[] globalSnapshot;
+            lock (globalWildcardSubscribers) { globalSnapshot = globalWildcardSubscribers.ToArray(); }
+
+            foreach (string subscriberId in globalSnapshot)
             {
                 if (subscriberId != message.SourceNeuron && _neurons.TryGetValue(subscriberId, out Neuron? subscriber))
                 {
@@ -458,7 +478,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
                 {
                     if (!task.Result)
                     {
-                        System.Diagnostics.Debug.WriteLine(
+                        System.Diagnostics.Trace.TraceWarning(
                             $"[NeuralNetwork] Broadcast message with topic '{message.Topic}' from {message.SourceNeuron} blocked by filter (sync)");
                         return;
                     }
@@ -470,32 +490,33 @@ public sealed class OuroborosNeuralNetwork : IDisposable
             }
             else
             {
-                // Fire-and-forget async filtering
-                _ = Task.Run(async () =>
+                // Await async filter results synchronously so the filter verdict
+                // is observed before deciding whether to deliver the broadcast.
+                try
                 {
-                    try
+                    foreach (Task<bool> task in filterTasks)
                     {
-                        foreach (Task<bool> task in filterTasks)
-                        {
-                            bool allowed = task.IsCompletedSuccessfully ? task.Result : await task;
-                            if (!allowed)
-                            {
-                                System.Diagnostics.Debug.WriteLine(
-                                    $"[NeuralNetwork] Broadcast message with topic '{message.Topic}' from {message.SourceNeuron} blocked by filter (async)");
-                                return;
-                            }
-                        }
+                        bool allowed = task.IsCompletedSuccessfully
+                            ? task.Result
+                            : task.GetAwaiter().GetResult();
 
-                        // All filters approved - broadcast to stream and deliver
-                        _messageStream.OnNext(message);
-                        DeliverBroadcast(message, sourceNeuron);
+                        if (!allowed)
+                        {
+                            System.Diagnostics.Trace.TraceWarning(
+                                $"[NeuralNetwork] Broadcast message with topic '{message.Topic}' from {message.SourceNeuron} blocked by filter (async)");
+                            return;
+                        }
                     }
-                    catch (Exception ex) when (ex is not OperationCanceledException)
-                    {
-                        System.Diagnostics.Debug.WriteLine(
-                            $"[NeuralNetwork] Error during broadcast filtering for topic '{message.Topic}': {ex.GetType().Name} - {ex.Message}");
-                    }
-                });
+
+                    // All filters approved - broadcast to stream and deliver
+                    _messageStream.OnNext(message);
+                    DeliverBroadcast(message, sourceNeuron);
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    System.Diagnostics.Trace.TraceWarning(
+                        $"[NeuralNetwork] Error during broadcast filtering for topic '{message.Topic}': {ex.GetType().Name} - {ex.Message}");
+                }
             }
         }
         else

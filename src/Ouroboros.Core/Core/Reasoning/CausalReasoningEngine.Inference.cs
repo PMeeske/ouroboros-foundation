@@ -17,6 +17,11 @@ public sealed partial class CausalReasoningEngine
 {
     private Result<CausalGraph, string> DiscoverUsingPC(List<Observation> data, CancellationToken ct)
     {
+        if (data.Count == 0)
+        {
+            return Result<CausalGraph, string>.Failure("Cannot discover causal structure: observation data is empty");
+        }
+
         // Extract variable names from first observation
         List<string> variableNames = data[0].Values.Keys.ToList();
         int n = variableNames.Count;
@@ -140,8 +145,8 @@ public sealed partial class CausalReasoningEngine
         if (condSet.Count == 0)
         {
             // No conditioning: simple Pearson correlation
-            double[] dataI = data.Select(o => Convert.ToDouble(o.Values[nameI])).ToArray();
-            double[] dataJ = data.Select(o => Convert.ToDouble(o.Values[nameJ])).ToArray();
+            double[] dataI = data.Select(o => SafeToDouble(o.Values[nameI])).ToArray();
+            double[] dataJ = data.Select(o => SafeToDouble(o.Values[nameJ])).ToArray();
             double correlation = this.ComputeCorrelation(dataI, dataJ);
             return Math.Abs(correlation) < SignificanceLevel;
         }
@@ -164,8 +169,8 @@ public sealed partial class CausalReasoningEngine
                 continue; // Too few observations in this partition
             }
 
-            double[] partDataI = partObs.Select(o => Convert.ToDouble(o.Values[nameI])).ToArray();
-            double[] partDataJ = partObs.Select(o => Convert.ToDouble(o.Values[nameJ])).ToArray();
+            double[] partDataI = partObs.Select(o => SafeToDouble(o.Values[nameI])).ToArray();
+            double[] partDataJ = partObs.Select(o => SafeToDouble(o.Values[nameJ])).ToArray();
             double correlation = this.ComputeCorrelation(partDataI, partDataJ);
             totalCorrelation += Math.Abs(correlation);
             partitionCount++;
@@ -221,8 +226,8 @@ public sealed partial class CausalReasoningEngine
                     string nameI = variableNames[i];
                     string nameJ = variableNames[j];
 
-                    double[] dataI = data.Select(o => Convert.ToDouble(o.Values[nameI])).ToArray();
-                    double[] dataJ = data.Select(o => Convert.ToDouble(o.Values[nameJ])).ToArray();
+                    double[] dataI = data.Select(o => SafeToDouble(o.Values[nameI])).ToArray();
+                    double[] dataJ = data.Select(o => SafeToDouble(o.Values[nameJ])).ToArray();
 
                     double strength = Math.Abs(this.ComputeCorrelation(dataI, dataJ));
 
@@ -523,7 +528,7 @@ public sealed partial class CausalReasoningEngine
         }
 
         // Return mean value from data
-        double[] samples = data.Select(o => Convert.ToDouble(o.Values[variable])).ToArray();
+        double[] samples = data.Select(o => SafeToDouble(o.Values[variable])).ToArray();
         return samples.Average();
     }
 
@@ -726,6 +731,45 @@ public sealed partial class CausalReasoningEngine
                 TopologicalSort(parent, model, visited, order);
         }
         order.Add(varName);
+    }
+
+    /// <summary>
+    /// Safely converts a value to double, returning 0.0 for non-numeric or null values
+    /// instead of throwing FormatException or InvalidCastException.
+    /// </summary>
+    private static double SafeToDouble(object? value)
+    {
+        if (value == null)
+        {
+            return 0.0;
+        }
+
+        if (value is double d)
+        {
+            return d;
+        }
+
+        if (value is int i)
+        {
+            return i;
+        }
+
+        if (value is float f)
+        {
+            return f;
+        }
+
+        if (value is long l)
+        {
+            return l;
+        }
+
+        if (value is bool b)
+        {
+            return b ? 1.0 : 0.0;
+        }
+
+        return double.TryParse(value.ToString(), out double result) ? result : 0.0;
     }
 
     private Result<Explanation, string> GenerateCausalExplanation(
