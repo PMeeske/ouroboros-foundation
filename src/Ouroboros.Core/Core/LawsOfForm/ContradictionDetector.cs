@@ -131,11 +131,18 @@ public sealed class ContradictionDetector
         Form claim1Form = claim1.Confidence.ToForm();
         Form claim2Form = claim2.Confidence.ToForm();
 
-        // If one claim is positive (Mark) and the other is negative (Void) about the same thing
-        // and both are confident, we have a contradiction
+        // If one claim is positive (Mark) and the other is negative (Void) about the same thing,
+        // we have a direct contradiction: one confidently asserts, the other confidently denies
+        if ((claim1Form.IsMark() && claim2Form.IsVoid()) ||
+            (claim1Form.IsVoid() && claim2Form.IsMark()))
+        {
+            // Re-entry detected: f = ⌐f → Imaginary
+            return Form.Imaginary;
+        }
+
+        // Both claims are confident (Mark) - check for semantic opposition
         if (claim1Form.IsMark() && claim2Form.IsMark())
         {
-            // Both confident - check semantic opposition
             if (AreOpposite(claim1.Statement, claim2.Statement))
             {
                 // Re-entry detected: f = ⌐f → Imaginary
@@ -146,7 +153,7 @@ public sealed class ContradictionDetector
             return Form.Mark;
         }
 
-        // At least one claim is uncertain or weak - not enough confidence to detect contradiction
+        // At least one claim is uncertain (Imaginary) - not enough confidence to detect contradiction
         return Form.Void;
     }
 

@@ -68,6 +68,9 @@ public static class VectorConvolution
 
         int n = thought1.Length;
 
+        if (n == 0 || (n & (n - 1)) != 0)
+            throw new ArgumentException("FastCircularConvolve requires power-of-2 length vectors. Use CircularConvolve for arbitrary lengths.");
+
         // Convert to complex for FFT
         Complex[] complex1 = new Complex[n];
         Complex[] complex2 = new Complex[n];

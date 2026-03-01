@@ -14,7 +14,7 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
 {
     private readonly ConcurrentBag<MaintenanceTask> _tasks = new();
     private readonly ConcurrentBag<MaintenanceExecution> _history = new();
-    private readonly ConcurrentBag<AnomalyAlert> _alerts = new();
+    private readonly ConcurrentDictionary<Guid, AnomalyAlert> _alerts = new();
     private CancellationTokenSource? _schedulerCts;
     private Task? _schedulerTask;
 
@@ -133,7 +133,7 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
     /// </summary>
     public IReadOnlyList<AnomalyAlert> GetAlerts(bool unresolvedOnly = true)
     {
-        IEnumerable<AnomalyAlert> alerts = _alerts.AsEnumerable();
+        IEnumerable<AnomalyAlert> alerts = _alerts.Values;
         if (unresolvedOnly)
         {
             alerts = alerts.Where(a => !a.IsResolved);
@@ -147,7 +147,7 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
     public Result<AnomalyAlert> CreateAlert(AnomalyAlert alert)
     {
         ArgumentNullException.ThrowIfNull(alert);
-        _alerts.Add(alert);
+        _alerts[alert.Id] = alert;
         return Result<AnomalyAlert>.Success(alert);
     }
 
@@ -156,13 +156,11 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
     /// </summary>
     public Result<AnomalyAlert> ResolveAlert(Guid alertId, string resolution)
     {
-        AnomalyAlert? alert = _alerts.FirstOrDefault(a => a.Id == alertId);
-        if (alert == null)
+        if (!_alerts.TryGetValue(alertId, out AnomalyAlert? alert))
         {
             return Result<AnomalyAlert>.Failure($"Alert {alertId} not found");
         }
 
-        // Since ConcurrentBag doesn't support updates, we add a resolved copy
         AnomalyAlert resolved = alert with
         {
             IsResolved = true,
@@ -170,7 +168,7 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
             Resolution = resolution
         };
 
-        _alerts.Add(resolved);
+        _alerts[alertId] = resolved;
         return Result<AnomalyAlert>.Success(resolved);
     }
 

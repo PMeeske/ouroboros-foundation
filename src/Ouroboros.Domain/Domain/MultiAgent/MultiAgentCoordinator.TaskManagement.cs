@@ -445,9 +445,9 @@ public sealed partial class MultiAgentCoordinator
     {
         // Simplified duration estimation
         // In a real implementation, would analyze critical path through dependency graph
-        int tasksPerAgent = assignments.GroupBy(a => a.AssignedTo).Count();
+        int agentCount = assignments.GroupBy(a => a.AssignedTo).Count();
         double estimatedHoursPerTask = 0.5;
-        int parallelization = Math.Max(1, tasksPerAgent);
+        int parallelization = Math.Max(1, agentCount);
 
         double totalHours = (assignments.Count * estimatedHoursPerTask) / parallelization;
         return TimeSpan.FromHours(Math.Max(0.5, totalHours));

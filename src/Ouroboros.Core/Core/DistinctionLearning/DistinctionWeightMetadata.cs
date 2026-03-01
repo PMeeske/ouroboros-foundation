@@ -14,4 +14,10 @@ public sealed record DistinctionWeightMetadata(
     string LearnedAtStage,
     DateTime CreatedAt,
     bool IsDissolved,
-    long SizeBytes);
+    long SizeBytes)
+{
+    /// <summary>
+    /// When this weight was last accessed. Defaults to CreatedAt for backward compatibility.
+    /// </summary>
+    public DateTime LastAccessedAt { get; init; } = CreatedAt;
+}
