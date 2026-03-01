@@ -32,7 +32,7 @@ public static class StreamingTtsExtensions
                     int lastEnder = text.LastIndexOfAny(SentenceEnders);
 
                     // Emit if we have a sentence boundary and enough content
-                    if (lastEnder >= MinChunkSize)
+                    if (lastEnder + 1 >= MinChunkSize)
                     {
                         string sentence = text[..(lastEnder + 1)].Trim();
                         if (!string.IsNullOrWhiteSpace(sentence))

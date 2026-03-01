@@ -29,7 +29,7 @@ public static class DistinctionStateExtensions
     /// <returns>True if certainty is high (greater than 0.7) or low (less than 0.3), indicating a definite state.</returns>
     public static bool IsCertain(this double certainty)
     {
-        // Certain state: either marked (high certainty) or void (low certainty)
-        return certainty > 0.7 || certainty < 0.3;
+        // Certain state: exact complement of imaginary (neither clearly true nor false)
+        return !certainty.IsImaginary();
     }
 }

@@ -797,7 +797,7 @@ public class AutonomousCoordinatorTests : IDisposable
         await _sut.InjectGoalAsync("Learn quantum computing");
 
         // Assert
-        _sut.PendingIntentionsCount.Should().BeGreaterThanOrEqualTo(before);
+        _sut.PendingIntentionsCount.Should().BeGreaterThan(before);
     }
 
     // ----------------------------------------------------------------

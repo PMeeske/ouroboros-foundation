@@ -78,17 +78,24 @@ public sealed class StreamDeduplicator
         lock (this.@lock)
         {
             // Check against cached vectors
+            VectorEntry? match = null;
             foreach (VectorEntry node in this.lruList)
             {
                 float similarity = CSharpHashVectorizer.CosineSimilarity(vector, node.Vector);
                 if (similarity >= this.similarityThreshold)
                 {
-                    // Move to front (most recently used)
-                    LinkedListNode<VectorEntry> cacheNode = this.cache[node.Id];
-                    this.lruList.Remove(cacheNode);
-                    this.lruList.AddFirst(cacheNode);
-                    return true;
+                    match = node;
+                    break;
                 }
+            }
+
+            if (match is not null)
+            {
+                // Move to front (most recently used)
+                LinkedListNode<VectorEntry> cacheNode = this.cache[match.Id];
+                this.lruList.Remove(cacheNode);
+                this.lruList.AddFirst(cacheNode);
+                return true;
             }
 
             // Not a duplicate, add to cache
