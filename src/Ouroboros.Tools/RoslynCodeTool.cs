@@ -70,7 +70,7 @@ namespace {@namespace}
             if (classDecl == null) return existingCode;
 
             var methodDecl = SyntaxFactory.MethodDeclaration(
-                SyntaxFactory.ParseTypeName("int"),
+                SyntaxFactory.ParseTypeName(signature.Split(' ')[1]),
                 signature.Split(' ')[2].Split('(')[0])
                 .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword)))
                 .WithParameterList(SyntaxFactory.ParseParameterList(signature.Split('(')[1].Split(')')[0]))
@@ -123,7 +123,7 @@ namespace {@namespace}
     }}";
 
             lines[startLine - 1] = $"{methodName}();";
-            for (int i = startLine; i <= endLine; i++)
+            for (int i = startLine; i < endLine; i++)
                 lines[i] = string.Empty;
 
             return string.Join(Environment.NewLine, lines) + newMethod;

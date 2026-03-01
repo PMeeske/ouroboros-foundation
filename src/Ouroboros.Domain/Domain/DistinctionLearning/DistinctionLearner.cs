@@ -126,7 +126,7 @@ public sealed class DistinctionLearner : IDistinctionLearner
             {
                 DissolutionStrategy.FitnessThreshold => weights.Where(w => !w.IsDissolved && w.Fitness < DistinctionLearningConstants.DefaultFitnessThreshold).ToList(),
                 DissolutionStrategy.OldestFirst => weights.Where(w => !w.IsDissolved).OrderBy(w => w.CreatedAt).Take(10).ToList(),
-                DissolutionStrategy.LeastRecentlyUsed => weights.Where(w => !w.IsDissolved).OrderBy(w => w.CreatedAt).Take(10).ToList(),
+                DissolutionStrategy.LeastRecentlyUsed => weights.Where(w => !w.IsDissolved).OrderBy(w => w.LastAccessedAt).Take(10).ToList(),
                 DissolutionStrategy.All => weights.Where(w => !w.IsDissolved).ToList(),
                 _ => new List<DistinctionWeightMetadata>()
             };
