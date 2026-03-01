@@ -42,14 +42,14 @@ public class OscillatorAndWaveTests
     public void Oscillator_Period_IsAlwaysTwo()
     {
         var oscillator = new Oscillator(Form.Mark, Form.Imaginary);
-        oscillator.Period.Should().Be(2);
+        Oscillator.Period.Should().Be(2);
     }
 
     [Fact]
     public void Oscillator_ToImaginary_ReturnsImaginaryForm()
     {
         var oscillator = new Oscillator(Form.Mark, Form.Void);
-        oscillator.ToImaginary().Should().Be(Form.Imaginary);
+        Oscillator.ToImaginary().Should().Be(Form.Imaginary);
     }
 
     [Fact]

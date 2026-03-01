@@ -93,7 +93,7 @@ public class CognitivePhysicsEngineTests
         CognitivePhysicsEngine engine = CreateEngine();
         CognitiveState state = CognitiveState.Create("test") with { Cooldown = 3.0 };
 
-        CognitiveState result = await engine.TickStep(2.0)(state);
+        CognitiveState result = await CognitivePhysicsEngine.TickStep(2.0)(state);
 
         result.Cooldown.Should().Be(1.0);
     }
