@@ -30,7 +30,7 @@ public sealed partial class QdrantVectorStore
         try
         {
             // Ensure collection exists
-            await EnsureCollectionExistsAsync(vectorList.First(), cancellationToken);
+            await EnsureCollectionExistsAsync(vectorList[0], cancellationToken);
 
             // Convert vectors to Qdrant points
             List<PointStruct> points = vectorList.Select(v => new PointStruct
@@ -217,7 +217,6 @@ public sealed partial class QdrantVectorStore
                 throw new InvalidOperationException("Cannot create collection: sample vector has no embedding");
             }
 
-            _vectorDimension = vectorSize;
             _logger?.LogInformation("Creating Qdrant collection {Collection} with vector size {Size}", _collectionName, vectorSize);
 
             await _client.CreateCollectionAsync(

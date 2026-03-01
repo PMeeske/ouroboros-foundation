@@ -334,7 +334,7 @@ public sealed partial class FormMeTTaBridge : IDisposable
         _space.Add(MeTTaSpec.TypeOf(Atom.Sym("Imaginary"), Atom.Sym("Form")));
     }
 
-    private void RegisterFormOperations(GroundedRegistry registry)
+    private static void RegisterFormOperations(GroundedRegistry registry)
     {
         // cross: Apply Law of Crossing (negation)
         registry.Register("cross", (space, args) =>
@@ -356,13 +356,10 @@ public sealed partial class FormMeTTaBridge : IDisposable
             if (inner is Expression expr &&
                 expr.Children.Count > 0 &&
                 expr.Children[0] is Symbol s &&
-                s.Name == "cross")
+                s.Name == "cross" && expr.Children.Count > 1)
             {
                 // Double crossing cancels: (cross (cross X)) = X
-                if (expr.Children.Count > 1)
-                {
-                    return new[] { expr.Children[1] };
-                }
+                return new[] { expr.Children[1] };
             }
 
             return new[] { FormExpression.Cross(inner) };

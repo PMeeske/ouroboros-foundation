@@ -56,21 +56,21 @@ public sealed partial class QdrantCollectionAdmin
         List<string> healed = new List<string>();
         IReadOnlyList<CollectionHealthReport> healthReports = await HealthCheckAsync(targetDimension, ct);
 
-        foreach (CollectionHealthReport? report in healthReports.Where(r => r.DimensionMismatch))
+        foreach (string collectionName in healthReports.Where(r => r.DimensionMismatch).Select(report => report.CollectionName))
         {
             try
             {
-                CollectionInfo? info = _collectionCache.GetValueOrDefault(report.CollectionName);
+                CollectionInfo? info = _collectionCache.GetValueOrDefault(collectionName);
                 Distance distance = info?.DistanceMetric ?? Distance.Cosine;
 
-                await _client.DeleteCollectionAsync(report.CollectionName, cancellationToken: ct);
+                await _client.DeleteCollectionAsync(collectionName, cancellationToken: ct);
 
                 await _client.CreateCollectionAsync(
-                    report.CollectionName,
+                    collectionName,
                     new VectorParams { Size = (ulong)targetDimension, Distance = distance },
                     cancellationToken: ct);
 
-                healed.Add(report.CollectionName);
+                healed.Add(collectionName);
             }
             catch (Grpc.Core.RpcException)
             {

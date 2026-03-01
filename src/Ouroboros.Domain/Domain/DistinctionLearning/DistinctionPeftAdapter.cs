@@ -36,7 +36,7 @@ public sealed class DistinctionPeftAdapter
     /// <summary>
     /// Converts a distinction to a PEFT training example.
     /// </summary>
-    public TrainingExample ToTrainingExample(ActiveDistinction distinction)
+    public static TrainingExample ToTrainingExample(ActiveDistinction distinction)
     {
         return new TrainingExample(
             Input: $"Distinction: {distinction.Content}",
@@ -98,7 +98,7 @@ public sealed class DistinctionPeftAdapter
                 Id: distinctionId,
                 Path: string.Empty, // Will be filled by storage
                 Fitness: distinctions.Average(d => d.Fitness),
-                LearnedAtStage: distinctions.Last().LearnedAtStage,
+                LearnedAtStage: distinctions[^1].LearnedAtStage,
                 CreatedAt: DateTime.UtcNow,
                 IsDissolved: false,
                 SizeBytes: trainResult.Value.Length);

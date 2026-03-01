@@ -107,7 +107,7 @@ public static class StandardOperations
         }
 
         // Check all conjuncts
-        foreach ((Substitution? subst, bool _) in EvaluateConjuncts(space, conjuncts, Substitution.Empty))
+        foreach ((Substitution _, bool _) in EvaluateConjuncts(space, conjuncts, Substitution.Empty))
         {
             yield return Atom.Sym("True");
             yield break; // At least one success
@@ -124,13 +124,9 @@ public static class StandardOperations
             yield break;
         }
 
-        foreach (Atom? disjunct in args.Children.Skip(1))
+        if (args.Children.Skip(1).Any(disjunct => space.Query(disjunct).Any()))
         {
-            if (space.Query(disjunct).Any())
-            {
-                yield return Atom.Sym("True");
-                yield break;
-            }
+            yield return Atom.Sym("True");
         }
     }
 

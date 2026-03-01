@@ -11,7 +11,7 @@ namespace Ouroboros.Core.Synthesis;
 /// </summary>
 public sealed partial class ProgramSynthesisEngine
 {
-    private List<ASTNode> InitializeBeam(DomainSpecificLanguage dsl)
+    private static List<ASTNode> InitializeBeam(DomainSpecificLanguage dsl)
     {
         return dsl.Primitives
             .Select(p => new ASTNode("Primitive", p.Name, new List<ASTNode>()))
@@ -50,17 +50,12 @@ public sealed partial class ProgramSynthesisEngine
                         new List<ASTNode> { node });
                     expandedBeam.Add(applicationNode);
 
-                    foreach (ASTNode otherNode in currentBeam)
-                    {
-                        if (node != otherNode)
-                        {
-                            ASTNode compositionNode = new ASTNode(
-                                "Apply",
-                                primitive.Name,
-                                new List<ASTNode> { node, otherNode });
-                            expandedBeam.Add(compositionNode);
-                        }
-                    }
+                    expandedBeam.AddRange(currentBeam
+                        .Where(otherNode => node != otherNode)
+                        .Select(otherNode => new ASTNode(
+                            "Apply",
+                            primitive.Name,
+                            new List<ASTNode> { node, otherNode })));
                 }
             }
         }
@@ -287,32 +282,29 @@ public sealed partial class ProgramSynthesisEngine
 
     private ASTNode? AntiUnify(ASTNode node1, ASTNode node2)
     {
-        if (node1.NodeType == node2.NodeType && node1.Value == node2.Value)
+        if (node1.NodeType == node2.NodeType && node1.Value == node2.Value && node1.Children.Count == node2.Children.Count)
         {
-            if (node1.Children.Count == node2.Children.Count)
+            List<ASTNode> unifiedChildren = new List<ASTNode>();
+            for (int i = 0; i < node1.Children.Count; i++)
             {
-                List<ASTNode> unifiedChildren = new List<ASTNode>();
-                for (int i = 0; i < node1.Children.Count; i++)
+                ASTNode? unified = AntiUnify(node1.Children[i], node2.Children[i]);
+                if (unified != null)
                 {
-                    ASTNode? unified = AntiUnify(node1.Children[i], node2.Children[i]);
-                    if (unified != null)
-                    {
-                        unifiedChildren.Add(unified);
-                    }
-                    else
-                    {
-                        unifiedChildren.Add(new ASTNode("Variable", $"$x{i}", new List<ASTNode>()));
-                    }
+                    unifiedChildren.Add(unified);
                 }
-
-                return new ASTNode(node1.NodeType, node1.Value, unifiedChildren);
+                else
+                {
+                    unifiedChildren.Add(new ASTNode("Variable", $"$x{i}", new List<ASTNode>()));
+                }
             }
+
+            return new ASTNode(node1.NodeType, node1.Value, unifiedChildren);
         }
 
         return null;
     }
 
-    private string InferType(ASTNode node)
+    private static string InferType(ASTNode node)
     {
         return node.NodeType switch
         {
@@ -475,7 +467,7 @@ public sealed partial class ProgramSynthesisEngine
     /// <summary>
     /// Infers a simple type for a subtree based on its root node type.
     /// </summary>
-    private string InferSubtreeType(ASTNode node)
+    private static string InferSubtreeType(ASTNode node)
     {
         return node.NodeType == "Primitive" ? (node.Value ?? "*") : "*";
     }
@@ -507,7 +499,7 @@ public sealed partial class ProgramSynthesisEngine
     /// For Primitive nodes, returns the node value as the type.
     /// For Apply nodes, inspects the applied function's arrow type and returns its output part.
     /// </summary>
-    private string InferOutputType(ASTNode node)
+    private static string InferOutputType(ASTNode node)
     {
         if (node.NodeType == "Primitive")
         {
@@ -562,7 +554,7 @@ public sealed partial class ProgramSynthesisEngine
     /// Checks whether a primitive's input type is compatible with a candidate's output type.
     /// Used for type-directed beam pruning to skip incompatible compositions.
     /// </summary>
-    private bool IsTypeCompatible(string primitiveType, string candidateOutputType)
+    private static bool IsTypeCompatible(string primitiveType, string candidateOutputType)
     {
         // Wildcard types are always compatible
         if (candidateOutputType == "*")

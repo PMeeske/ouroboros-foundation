@@ -22,7 +22,7 @@ public class InMemoryEventStore : IEventStore
             return Task.FromResult(GetCurrentVersion(branchId));
         }
 
-        EventStream stream = _streams.GetOrAdd(branchId, _ => new EventStream(branchId));
+        EventStream stream = _streams.GetOrAdd(branchId, key => new EventStream(key));
 
         lock (stream.Lock)
         {

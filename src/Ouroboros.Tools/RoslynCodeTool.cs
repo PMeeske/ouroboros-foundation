@@ -14,7 +14,7 @@ namespace Ouroboros.Tools
         /// </summary>
         /// <param name="code">The C# code to analyze.</param>
         /// <returns>Analysis result with classes, methods, and diagnostics.</returns>
-        public async Task<CodeAnalysisResult> AnalyzeCode(string code)
+        public static async Task<CodeAnalysisResult> AnalyzeCode(string code)
         {
             var tree = CSharpSyntaxTree.ParseText(code);
             var compilation = CSharpCompilation.Create("Analysis")
@@ -38,7 +38,7 @@ namespace Ouroboros.Tools
         /// <param name="methods">List of method names.</param>
         /// <param name="properties">List of property declarations.</param>
         /// <returns>Generated C# code.</returns>
-        public string GenerateClass(string className, string @namespace, IEnumerable<string> methods, IEnumerable<string> properties)
+        public static string GenerateClass(string className, string @namespace, IEnumerable<string> methods, IEnumerable<string> properties)
         {
             var props = properties.Select(p => $"    public {p} {{ get; set; }}").ToArray();
             var meths = methods.Select(m => $"    public async Task {m}() => await Task.CompletedTask;").ToArray();
@@ -61,7 +61,7 @@ namespace {@namespace}
         /// <param name="signature">The method signature.</param>
         /// <param name="body">The method body.</param>
         /// <returns>Updated code.</returns>
-        public string AddMethod(string existingCode, string signature, string body)
+        public static string AddMethod(string existingCode, string signature, string body)
         {
             var tree = CSharpSyntaxTree.ParseText(existingCode);
             var root = tree.GetRoot();
@@ -89,7 +89,7 @@ namespace {@namespace}
         /// <param name="oldName">The old name.</param>
         /// <param name="newName">The new name.</param>
         /// <returns>Updated code.</returns>
-        public string RenameSymbol(string code, string oldName, string newName)
+        public static string RenameSymbol(string code, string oldName, string newName)
         {
             var tree = CSharpSyntaxTree.ParseText(code);
             var root = tree.GetRoot();
@@ -111,7 +111,7 @@ namespace {@namespace}
         /// <param name="endLine">End line.</param>
         /// <param name="methodName">New method name.</param>
         /// <returns>Refactored code.</returns>
-        public string ExtractMethod(string code, int startLine, int endLine, string methodName)
+        public static string ExtractMethod(string code, int startLine, int endLine, string methodName)
         {
             // Simplified implementation - in real scenario, use Roslyn refactoring APIs
             var lines = code.Split(Environment.NewLine);
@@ -134,24 +134,21 @@ namespace {@namespace}
         /// </summary>
         /// <param name="code">The code.</param>
         /// <returns>Analysis result with findings.</returns>
-        public async Task<CodeAnalysisResult> AnalyzeWithCustomAnalyzers(string code)
+        public static async Task<CodeAnalysisResult> AnalyzeWithCustomAnalyzers(string code)
         {
             var tree = CSharpSyntaxTree.ParseText(code);
-            var compilation = CSharpCompilation.Create("Analysis")
+            _ = CSharpCompilation.Create("Analysis")
                 .AddSyntaxTrees(tree)
                 .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
 
             // Custom analyzer for async patterns
             var findings = new List<string>();
-            var awaitExpressions = tree.GetRoot().DescendantNodes().OfType<AwaitExpressionSyntax>();
+            _ = tree.GetRoot().DescendantNodes().OfType<AwaitExpressionSyntax>();
             var invocations = tree.GetRoot().DescendantNodes().OfType<InvocationExpressionSyntax>();
 
-            foreach (var invocation in invocations)
+            foreach (var invocation in invocations.Where(invocation => invocation.Expression.ToString().EndsWith(".Result") || invocation.Expression.ToString().EndsWith(".Wait()")))
             {
-                if (invocation.Expression.ToString().EndsWith(".Result") || invocation.Expression.ToString().EndsWith(".Wait()"))
-                {
-                    findings.Add($"Blocking call detected: {invocation}");
-                }
+                findings.Add($"Blocking call detected: {invocation}");
             }
 
             return new CodeAnalysisResult(Array.Empty<string>(), Array.Empty<string>(), Array.Empty<Diagnostic>(), findings.ToArray());
@@ -162,7 +159,7 @@ namespace {@namespace}
         /// </summary>
         /// <param name="code">The code.</param>
         /// <returns>Analysis result with documentation findings.</returns>
-        public async Task<CodeAnalysisResult> AnalyzeDocumentation(string code)
+        public static async Task<CodeAnalysisResult> AnalyzeDocumentation(string code)
         {
             var tree = CSharpSyntaxTree.ParseText(code);
             var methods = tree.GetRoot().DescendantNodes().OfType<MethodDeclarationSyntax>()

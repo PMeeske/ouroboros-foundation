@@ -65,7 +65,7 @@ public sealed class SafeCalculatorTool : ITool
     /// <inheritdoc />
     public async Task<Result<string, string>> InvokeAsync(string input, CancellationToken ct = default)
     {
-        Result<ParsedInput, string> parsedResult = this.ValidateInput(input).Bind(this.ParseInput);
+        Result<ParsedInput, string> parsedResult = ValidateInput(input).Bind(ParseInput);
 
         return await parsedResult.Match(
             parsed => this.ProcessCalculation(parsed, ct),
@@ -74,7 +74,7 @@ public sealed class SafeCalculatorTool : ITool
 
     private async Task<Result<string, string>> ProcessCalculation(ParsedInput parsed, CancellationToken ct)
     {
-        Result<double, string> computeResult = this.ComputeExpression(parsed.Expression);
+        Result<double, string> computeResult = ComputeExpression(parsed.Expression);
         
         return await computeResult.Match(
             calculatedValue => this.VerifyAndFormat(parsed, calculatedValue, ct),
@@ -88,35 +88,35 @@ public sealed class SafeCalculatorTool : ITool
         return verifyResult
             .MapError(error => $"Verification failed: {error}")
             .Where(verified => verified, $"❌ Calculation verification failed for expression: {parsed.Expression}. The result could not be symbolically verified.")
-            .Bind(_ => this.ValidateExpectedResult(calculatedValue, parsed.ExpectedResult))
+            .Bind(_ => ValidateExpectedResult(calculatedValue, parsed.ExpectedResult))
             .Map(_ => this.FormatSuccessMessage(calculatedValue, parsed.Expression));
     }
 
-    private Result<string, string> ValidateInput(string input) =>
+    private static Result<string, string> ValidateInput(string input) =>
         string.IsNullOrWhiteSpace(input)
             ? Result<string, string>.Failure("Expression cannot be empty")
             : Result<string, string>.Success(input);
 
-    private Result<ParsedInput, string> ParseInput(string input) =>
-        this.TryParseJson(input)
+    private static Result<ParsedInput, string> ParseInput(string input) =>
+        TryParseJson(input)
             .Match(
                 parsed => Result<ParsedInput, string>.Success(parsed),
                 _ => Result<ParsedInput, string>.Success(new ParsedInput(input, null)));
 
-    private Result<ParsedInput, string> TryParseJson(string input) =>
-        input.TrimStart().StartsWith("{")
-            ? this.ParseJsonDocument(input)
+    private static Result<ParsedInput, string> TryParseJson(string input) =>
+        input.TrimStart().StartsWith('{')
+            ? ParseJsonDocument(input)
             : Result<ParsedInput, string>.Failure("Not JSON");
 
-    private Result<ParsedInput, string> ParseJsonDocument(string input)
+    private static Result<ParsedInput, string> ParseJsonDocument(string input)
     {
         try
         {
             using JsonDocument json = JsonDocument.Parse(input);
-            return this.ExtractExpression(json.RootElement, input)
+            return ExtractExpression(json.RootElement, input)
                 .Map(expression =>
                 {
-                    Option<double> optExpected = this.ExtractExpectedResult(json.RootElement);
+                    Option<double> optExpected = ExtractExpectedResult(json.RootElement);
                     double? expected = optExpected.Match(val => (double?)val, null);
                     return new ParsedInput(expression, expected);
                 });
@@ -127,18 +127,18 @@ public sealed class SafeCalculatorTool : ITool
         }
     }
 
-    private Result<string, string> ExtractExpression(JsonElement root, string fallback) =>
+    private static Result<string, string> ExtractExpression(JsonElement root, string fallback) =>
         root.TryGetProperty("expression", out JsonElement exprProp)
             ? Result<string, string>.Success(exprProp.GetString() ?? fallback)
             : Result<string, string>.Failure("JSON input must contain 'expression' property");
 
-    private Option<double> ExtractExpectedResult(JsonElement root) =>
+    private static Option<double> ExtractExpectedResult(JsonElement root) =>
         root.TryGetProperty("expected_result", out JsonElement expectedProp) &&
         expectedProp.ValueKind == JsonValueKind.Number
             ? Option<double>.Some(expectedProp.GetDouble())
             : Option<double>.None();
 
-    private Result<Unit, string> ValidateExpectedResult(double calculatedValue, double? expectedResult) =>
+    private static Result<Unit, string> ValidateExpectedResult(double calculatedValue, double? expectedResult) =>
         expectedResult.HasValue
             ? Math.Abs(calculatedValue - expectedResult.Value) <= ComparisonTolerance
                 ? Result<Unit, string>.Success(Unit.Value)
@@ -154,7 +154,7 @@ public sealed class SafeCalculatorTool : ITool
 
     private readonly record struct ParsedInput(string Expression, double? ExpectedResult);
 
-    private Result<double, string> ComputeExpression(string expression)
+    private static Result<double, string> ComputeExpression(string expression)
     {
         try
         {
@@ -183,18 +183,18 @@ public sealed class SafeCalculatorTool : ITool
     private async Task<Result<bool, string>> VerifyCalculationAsync(string expression, double result, CancellationToken ct) =>
         this.useSymbolicVerification && this.symbolicEngine != null
             ? await this.SymbolicVerificationAsync(expression, result, ct)
-            : this.SimulatedVerification(expression, result);
+            : SimulatedVerification(expression, result);
 
     private async Task<Result<bool, string>> SymbolicVerificationAsync(string expression, double result, CancellationToken ct)
     {
         try
         {
-            string mettaExpression = this.ConvertToMeTTaExpression(expression);
+            string mettaExpression = ConvertToMeTTaExpression(expression);
             Result<string, string> mettaResult = await this.symbolicEngine!.ExecuteQueryAsync(mettaExpression, ct);
 
             return mettaResult
-                .Bind(this.TryParseMeTTaNumber)
-                .Bind(symbolicResult => this.ValidateCalculationMatch(symbolicResult, result, "Symbolic result does not match computed result"));
+                .Bind(TryParseMeTTaNumber)
+                .Bind(symbolicResult => ValidateCalculationMatch(symbolicResult, result, "Symbolic result does not match computed result"));
         }
         catch (OperationCanceledException) { throw; }
         catch (HttpRequestException ex)
@@ -207,13 +207,13 @@ public sealed class SafeCalculatorTool : ITool
         }
     }
 
-    private Result<bool, string> SimulatedVerification(string expression, double result)
+    private static Result<bool, string> SimulatedVerification(string expression, double result)
     {
         try
         {
-            return this.ValidateAllowedCharacters(expression)
-                .Bind(_ => this.ComputeExpression(expression))
-                .Bind(recomputed => this.ValidateCalculationMatch(recomputed, result, "Recomputation verification failed"));
+            return ValidateAllowedCharacters(expression)
+                .Bind(_ => ComputeExpression(expression))
+                .Bind(recomputed => ValidateCalculationMatch(recomputed, result, "Recomputation verification failed"));
         }
         catch (InvalidExpressionException ex)
         {
@@ -225,17 +225,17 @@ public sealed class SafeCalculatorTool : ITool
         }
     }
 
-    private Result<bool, string> ValidateCalculationMatch(double calculated, double expected, string errorMessage) =>
+    private static Result<bool, string> ValidateCalculationMatch(double calculated, double expected, string errorMessage) =>
         Math.Abs(calculated - expected) < ComparisonTolerance
             ? Result<bool, string>.Success(true)
             : Result<bool, string>.Failure($"{errorMessage}: calculated={calculated}, expected={expected}");
 
-    private Result<Unit, string> ValidateAllowedCharacters(string expression) =>
+    private static Result<Unit, string> ValidateAllowedCharacters(string expression) =>
         expression.All(c => AllowedCharacters.Contains(c))
             ? Result<Unit, string>.Success(Unit.Value)
             : Result<Unit, string>.Failure("Expression contains invalid characters");
 
-    private string ConvertToMeTTaExpression(string expression)
+    private static string ConvertToMeTTaExpression(string expression)
     {
         string cleaned = expression.Replace(" ", string.Empty);
         
@@ -244,7 +244,7 @@ public sealed class SafeCalculatorTool : ITool
             : $"!({cleaned})";
     }
 
-    private Result<double, string> TryParseMeTTaNumber(string mettaValue)
+    private static Result<double, string> TryParseMeTTaNumber(string mettaValue)
     {
         string cleaned = mettaValue.Trim().Trim('[', ']', '(', ')');
         

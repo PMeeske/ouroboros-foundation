@@ -63,7 +63,7 @@ public sealed class MeTTaTool : ITool
             string expression;
             string operation = "query";
 
-            if (input.TrimStart().StartsWith("{"))
+            if (input.TrimStart().StartsWith('{'))
             {
                 try
                 {

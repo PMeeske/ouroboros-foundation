@@ -315,7 +315,7 @@ public sealed partial class AdvancedMeTTaEngine : IAdvancedMeTTaEngine
     }
 
     // FOIL Algorithm Implementation
-    private async Task<Result<List<Rule>, string>> InduceFoilRulesAsync(List<Fact> observations, CancellationToken ct)
+    private static async Task<Result<List<Rule>, string>> InduceFoilRulesAsync(List<Fact> observations, CancellationToken ct)
     {
         var rules = new List<Rule>();
 
@@ -349,26 +349,26 @@ public sealed partial class AdvancedMeTTaEngine : IAdvancedMeTTaEngine
         return Result<List<Rule>, string>.Success(rules);
     }
 
-    private Task<Result<List<Rule>, string>> InduceGolemRulesAsync(List<Fact> observations, CancellationToken ct)
+    private static Task<Result<List<Rule>, string>> InduceGolemRulesAsync(List<Fact> observations, CancellationToken ct)
     {
         // Simplified GOLEM - uses least general generalization
         return InduceFoilRulesAsync(observations, ct);
     }
 
-    private Task<Result<List<Rule>, string>> InduceProgolRulesAsync(List<Fact> observations, CancellationToken ct)
+    private static Task<Result<List<Rule>, string>> InduceProgolRulesAsync(List<Fact> observations, CancellationToken ct)
     {
         // Simplified Progol - similar to FOIL for this implementation
         return InduceFoilRulesAsync(observations, ct);
     }
 
-    private Task<Result<List<Rule>, string>> InduceIlpRulesAsync(List<Fact> observations, CancellationToken ct)
+    private static Task<Result<List<Rule>, string>> InduceIlpRulesAsync(List<Fact> observations, CancellationToken ct)
     {
         // Generic ILP approach
         return InduceFoilRulesAsync(observations, ct);
     }
 
     // Resolution-based theorem proving
-    private async Task<Result<ProofTrace, string>> ProveByResolutionAsync(
+    private static async Task<Result<ProofTrace, string>> ProveByResolutionAsync(
         string theorem,
         List<string> axioms,
         CancellationToken ct)
@@ -387,7 +387,7 @@ public sealed partial class AdvancedMeTTaEngine : IAdvancedMeTTaEngine
         return Result<ProofTrace, string>.Success(new ProofTrace(steps, proved));
     }
 
-    private Task<Result<ProofTrace, string>> ProveByTableauxAsync(
+    private static Task<Result<ProofTrace, string>> ProveByTableauxAsync(
         string theorem,
         List<string> axioms,
         CancellationToken ct)
@@ -396,7 +396,7 @@ public sealed partial class AdvancedMeTTaEngine : IAdvancedMeTTaEngine
         return ProveByResolutionAsync(theorem, axioms, ct);
     }
 
-    private Task<Result<ProofTrace, string>> ProveByNaturalDeductionAsync(
+    private static Task<Result<ProofTrace, string>> ProveByNaturalDeductionAsync(
         string theorem,
         List<string> axioms,
         CancellationToken ct)

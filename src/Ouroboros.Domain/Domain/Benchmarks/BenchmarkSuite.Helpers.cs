@@ -11,7 +11,7 @@ namespace Ouroboros.Domain.Benchmarks;
 /// </summary>
 public sealed partial class BenchmarkSuite
 {
-    private async Task<(bool success, double score, string? error, string difficulty, string patternType)> ExecuteARCTaskAsync(
+    private static async Task<(bool success, double score, string? error, string difficulty, string patternType)> ExecuteARCTaskAsync(
         string taskId,
         CancellationToken ct)
     {
@@ -46,7 +46,7 @@ public sealed partial class BenchmarkSuite
         return (success, score, success ? null : "Task failed", difficulty, patternType);
     }
 
-    private async Task<(bool success, double score, string? error, int questionCount)> ExecuteMMLUSubjectAsync(
+    private static async Task<(bool success, double score, string? error, int questionCount)> ExecuteMMLUSubjectAsync(
         string subject,
         CancellationToken ct)
     {
@@ -59,7 +59,7 @@ public sealed partial class BenchmarkSuite
         return (true, score, null, questionCount);
     }
 
-    private async Task<(bool success, double retentionScore, string? error, double initialAccuracy, double finalAccuracy)> ExecuteContinualLearningSequenceAsync(
+    private static async Task<(bool success, double retentionScore, string? error, double initialAccuracy, double finalAccuracy)> ExecuteContinualLearningSequenceAsync(
         TaskSequence sequence,
         CancellationToken ct)
     {
@@ -73,7 +73,7 @@ public sealed partial class BenchmarkSuite
         return (true, retentionScore, null, initialAccuracy, finalAccuracy);
     }
 
-    private async Task<(List<TaskResult> tasks, string? error)> ExecuteCognitiveDimensionAsync(
+    private static async Task<(List<TaskResult> tasks, string? error)> ExecuteCognitiveDimensionAsync(
         CognitiveDimension dimension,
         CancellationToken ct)
     {
@@ -85,7 +85,7 @@ public sealed partial class BenchmarkSuite
         int taskCount = 10;
         for (int i = 0; i < taskCount; i++)
         {
-            double score = this.GetDimensionBaseScore(dimension) + (random.NextDouble() * 0.2 - 0.1);
+            double score = GetDimensionBaseScore(dimension) + (random.NextDouble() * 0.2 - 0.1);
             score = Math.Max(0, Math.Min(1.0, score));
 
             tasks.Add(new TaskResult(
@@ -98,14 +98,14 @@ public sealed partial class BenchmarkSuite
                 Metadata: new Dictionary<string, object>
                 {
                     ["dimension"] = dimension.ToString(),
-                    ["category"] = this.GetDimensionCategory(dimension, i),
+                    ["category"] = GetDimensionCategory(dimension, i),
                 }));
         }
 
         return (tasks, null);
     }
 
-    private double GetDimensionBaseScore(CognitiveDimension dimension)
+    private static double GetDimensionBaseScore(CognitiveDimension dimension)
     {
         return dimension switch
         {
@@ -120,7 +120,7 @@ public sealed partial class BenchmarkSuite
         };
     }
 
-    private string GetDimensionCategory(CognitiveDimension dimension, int taskIndex)
+    private static string GetDimensionCategory(CognitiveDimension dimension, int taskIndex)
     {
         return dimension switch
         {
@@ -131,7 +131,7 @@ public sealed partial class BenchmarkSuite
         };
     }
 
-    private List<string> IdentifyStrengths(Dictionary<string, BenchmarkReport> results)
+    private static List<string> IdentifyStrengths(Dictionary<string, BenchmarkReport> results)
     {
         List<string> strengths = new List<string>();
 
@@ -151,7 +151,7 @@ public sealed partial class BenchmarkSuite
         return strengths;
     }
 
-    private List<string> IdentifyWeaknesses(Dictionary<string, BenchmarkReport> results)
+    private static List<string> IdentifyWeaknesses(Dictionary<string, BenchmarkReport> results)
     {
         List<string> weaknesses = new List<string>();
 
@@ -171,7 +171,7 @@ public sealed partial class BenchmarkSuite
         return weaknesses;
     }
 
-    private List<string> GenerateRecommendations(List<string> strengths, List<string> weaknesses)
+    private static List<string> GenerateRecommendations(List<string> strengths, List<string> weaknesses)
     {
         List<string> recommendations = new List<string>();
 

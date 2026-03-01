@@ -178,9 +178,6 @@ public sealed partial class VoiceSideChannel : IAsyncDisposable
         string sanitized = SanitizeForSpeech(text);
         if (string.IsNullOrWhiteSpace(sanitized)) return;
 
-        // Store original for reference - the full text remains the system truth
-        string originalForVoice = sanitized;
-
         // If LLM sanitizer is available and enabled, use it for natural condensation
         // Note: This only affects what is SPOKEN, not what is saved to memory/history
         if (_useLlmSanitization && _llmSanitizer != null && sanitized.Length > 100)

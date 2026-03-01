@@ -105,11 +105,11 @@ public sealed partial class MultiAgentCoordinator : IMultiAgentCoordinator
         try
         {
             // Decompose goal into tasks (simplified - in real implementation would use LLM)
-            List<string> tasks = this.DecomposeGoalIntoTasks(goal);
+            List<string> tasks = DecomposeGoalIntoTasks(goal);
 
             return strategy switch
             {
-                AllocationStrategy.RoundRobin => this.AllocateRoundRobin(tasks, availableAgents),
+                AllocationStrategy.RoundRobin => AllocateRoundRobin(tasks, availableAgents),
                 AllocationStrategy.SkillBased => await this.AllocateSkillBasedAsync(tasks, availableAgents, ct),
                 AllocationStrategy.LoadBalanced => await this.AllocateLoadBalancedAsync(tasks, availableAgents, ct),
                 AllocationStrategy.Auction => await this.AllocateAuctionAsync(tasks, availableAgents, ct),
@@ -152,10 +152,10 @@ public sealed partial class MultiAgentCoordinator : IMultiAgentCoordinator
 
             return protocol switch
             {
-                ConsensusProtocol.Majority => this.ApplyMajorityProtocol(proposal, votes),
-                ConsensusProtocol.Unanimous => this.ApplyUnanimousProtocol(proposal, votes),
-                ConsensusProtocol.Weighted => this.ApplyWeightedProtocol(proposal, votes),
-                ConsensusProtocol.Raft => await this.ApplyRaftProtocolAsync(proposal, votes, ct),
+                ConsensusProtocol.Majority => ApplyMajorityProtocol(proposal, votes),
+                ConsensusProtocol.Unanimous => ApplyUnanimousProtocol(proposal, votes),
+                ConsensusProtocol.Weighted => ApplyWeightedProtocol(proposal, votes),
+                ConsensusProtocol.Raft => await ApplyRaftProtocolAsync(proposal, votes, ct),
                 _ => Result<Decision, string>.Failure($"Unknown consensus protocol: {protocol}"),
             };
         }
@@ -237,7 +237,7 @@ public sealed partial class MultiAgentCoordinator : IMultiAgentCoordinator
             }
 
             // Decompose goal into tasks
-            List<string> tasks = this.DecomposeGoalIntoTasks(goal);
+            List<string> tasks = DecomposeGoalIntoTasks(goal);
 
             // Allocate tasks using skill-based strategy
             Result<Dictionary<AgentId, TaskAssignment>, string> allocationResult = await this.AllocateSkillBasedAsync(tasks, capabilities, ct);
@@ -249,10 +249,10 @@ public sealed partial class MultiAgentCoordinator : IMultiAgentCoordinator
             List<TaskAssignment> assignments = allocationResult.Value.Values.ToList();
 
             // Identify dependencies between tasks
-            List<Dependency> dependencies = this.IdentifyDependencies(assignments);
+            List<Dependency> dependencies = IdentifyDependencies(assignments);
 
             // Estimate duration based on parallel task execution
-            TimeSpan duration = this.EstimateDuration(assignments, dependencies);
+            TimeSpan duration = EstimateDuration(assignments, dependencies);
 
             CollaborativePlan plan = new CollaborativePlan(goal, assignments, dependencies, duration);
             return Result<CollaborativePlan, string>.Success(plan);

@@ -23,7 +23,6 @@ public sealed partial class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisp
     private readonly ILogger? _logger;
     private readonly string _collectionName;
     private readonly bool _disposeClient;
-    private int? _vectorDimension;
 
     /// <summary>
     /// Initializes a new instance using the DI-provided client and collection registry.

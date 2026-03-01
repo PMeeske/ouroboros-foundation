@@ -85,8 +85,8 @@ public sealed class EpsilonGreedyPolicy : IPolicy
         Observation observation,
         CancellationToken cancellationToken = default)
     {
-        string stateKey = this.GetStateKey(state);
-        string actionKey = this.GetActionKey(action);
+        string stateKey = GetStateKey(state);
+        string actionKey = GetActionKey(action);
 
         // Simple Q-learning update
         ConcurrentDictionary<string, double> stateActions = this.qValues.GetOrAdd(stateKey, _ => new ConcurrentDictionary<string, double>());
@@ -109,7 +109,7 @@ public sealed class EpsilonGreedyPolicy : IPolicy
         EnvironmentState state,
         IReadOnlyList<EnvironmentAction> availableActions)
     {
-        string stateKey = this.GetStateKey(state);
+        string stateKey = GetStateKey(state);
         ConcurrentDictionary<string, double> stateActions = this.qValues.GetOrAdd(stateKey, _ => new ConcurrentDictionary<string, double>());
 
         EnvironmentAction? bestAction = null;
@@ -117,7 +117,7 @@ public sealed class EpsilonGreedyPolicy : IPolicy
 
         foreach (EnvironmentAction action in availableActions)
         {
-            string actionKey = this.GetActionKey(action);
+            string actionKey = GetActionKey(action);
             double qValue = stateActions.GetOrAdd(actionKey, 0.0);
 
             if (qValue > bestValue)
@@ -133,7 +133,7 @@ public sealed class EpsilonGreedyPolicy : IPolicy
 
     private double GetMaxQValue(EnvironmentState state)
     {
-        string stateKey = this.GetStateKey(state);
+        string stateKey = GetStateKey(state);
         if (!this.qValues.TryGetValue(stateKey, out ConcurrentDictionary<string, double>? stateActions) || stateActions.IsEmpty)
         {
             return 0.0;
@@ -142,7 +142,7 @@ public sealed class EpsilonGreedyPolicy : IPolicy
         return stateActions.Values.Max();
     }
 
-    private string GetStateKey(EnvironmentState state)
+    private static string GetStateKey(EnvironmentState state)
     {
         // Simple serialization - in production, use proper hashing
         IOrderedEnumerable<string> keys = state.StateData.Keys.OrderBy(k => k);
@@ -150,7 +150,7 @@ public sealed class EpsilonGreedyPolicy : IPolicy
         return string.Join(";", values);
     }
 
-    private string GetActionKey(EnvironmentAction action)
+    private static string GetActionKey(EnvironmentAction action)
     {
         if (action.Parameters == null || action.Parameters.Count == 0)
         {

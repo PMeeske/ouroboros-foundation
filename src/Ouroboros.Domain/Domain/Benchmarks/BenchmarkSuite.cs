@@ -46,7 +46,7 @@ public sealed partial class BenchmarkSuite : IBenchmarkSuite
                 Stopwatch taskStopwatch = Stopwatch.StartNew();
 
                 // Simulate ARC task execution (placeholder implementation)
-                (bool success, double score, string? error, string difficulty, string patternType) taskResult = await this.ExecuteARCTaskAsync($"arc-task-{i}", ct);
+                (bool success, double score, string? error, string difficulty, string patternType) taskResult = await ExecuteARCTaskAsync($"arc-task-{i}", ct);
                 taskStopwatch.Stop();
 
                 results.Add(new TaskResult(
@@ -130,7 +130,7 @@ public sealed partial class BenchmarkSuite : IBenchmarkSuite
                 Stopwatch subjectStopwatch = Stopwatch.StartNew();
 
                 // Execute MMLU tasks for this subject
-                (bool success, double score, string? error, int questionCount) subjectResult = await this.ExecuteMMLUSubjectAsync(subject, ct);
+                (bool success, double score, string? error, int questionCount) subjectResult = await ExecuteMMLUSubjectAsync(subject, ct);
                 subjectStopwatch.Stop();
 
                 results.Add(new TaskResult(
@@ -206,7 +206,7 @@ public sealed partial class BenchmarkSuite : IBenchmarkSuite
                 Stopwatch sequenceStopwatch = Stopwatch.StartNew();
 
                 // Execute continual learning sequence
-                (bool success, double retentionScore, string? error, double initialAccuracy, double finalAccuracy) sequenceResult = await this.ExecuteContinualLearningSequenceAsync(sequence, ct);
+                (bool success, double retentionScore, string? error, double initialAccuracy, double finalAccuracy) sequenceResult = await ExecuteContinualLearningSequenceAsync(sequence, ct);
                 sequenceStopwatch.Stop();
 
                 results.Add(new TaskResult(
@@ -269,7 +269,7 @@ public sealed partial class BenchmarkSuite : IBenchmarkSuite
             Dictionary<string, double> subScores = new Dictionary<string, double>();
 
             // Execute dimension-specific tasks
-            (List<TaskResult> tasks, string? error) dimensionResult = await this.ExecuteCognitiveDimensionAsync(dimension, ct);
+            (List<TaskResult> tasks, string? error) dimensionResult = await ExecuteCognitiveDimensionAsync(dimension, ct);
             stopwatch.Stop();
 
             foreach (TaskResult task in dimensionResult.tasks)
@@ -287,7 +287,7 @@ public sealed partial class BenchmarkSuite : IBenchmarkSuite
                 }
             }
 
-            double overallScore = results.Where(r => r.Success).Any()
+            double overallScore = results.Any(r => r.Success)
                 ? results.Where(r => r.Success).Average(r => r.Score)
                 : 0.0;
 
@@ -356,9 +356,9 @@ public sealed partial class BenchmarkSuite : IBenchmarkSuite
                 : 0.0;
 
             // Analyze strengths and weaknesses
-            List<string> strengths = this.IdentifyStrengths(benchmarkResults);
-            List<string> weaknesses = this.IdentifyWeaknesses(benchmarkResults);
-            List<string> recommendations = this.GenerateRecommendations(strengths, weaknesses);
+            List<string> strengths = IdentifyStrengths(benchmarkResults);
+            List<string> weaknesses = IdentifyWeaknesses(benchmarkResults);
+            List<string> recommendations = GenerateRecommendations(strengths, weaknesses);
 
             ComprehensiveReport report = new ComprehensiveReport(
                 BenchmarkResults: benchmarkResults,

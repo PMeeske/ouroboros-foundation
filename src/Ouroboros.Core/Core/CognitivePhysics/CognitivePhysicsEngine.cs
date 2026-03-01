@@ -110,7 +110,7 @@ public sealed class CognitivePhysicsEngine
     /// </summary>
     /// <param name="elapsed">Time units to decrement from cooldown.</param>
     /// <returns>A Step that applies a cooldown tick.</returns>
-    public Step<CognitiveState, CognitiveState> TickStep(double elapsed = 1.0) =>
+    public static Step<CognitiveState, CognitiveState> TickStep(double elapsed = 1.0) =>
         state => Task.FromResult(state.Tick(elapsed));
 
     /// <summary>

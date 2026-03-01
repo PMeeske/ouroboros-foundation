@@ -306,12 +306,9 @@ public sealed class OuroborosNeuralNetwork : IDisposable
 
         // Apply message filters (if configured)
         IReadOnlyList<IMessageFilter>? filters = _filters;
-        if (filters != null && filters.Count > 0)
+        if (filters != null && filters.Count > 0 && !await RunFiltersAsync(filters, message))
         {
-            if (!await RunFiltersAsync(filters, message))
-            {
-                return;
-            }
+            return;
         }
 
         _messageStream.OnNext(message);
@@ -397,12 +394,9 @@ public sealed class OuroborosNeuralNetwork : IDisposable
 
         // Apply message filters before broadcasting (same pipeline as RouteMessageAsync)
         IReadOnlyList<IMessageFilter>? filters = _filters;
-        if (filters != null && filters.Count > 0)
+        if (filters != null && filters.Count > 0 && !await RunFiltersAsync(filters, message))
         {
-            if (!await RunFiltersAsync(filters, message))
-            {
-                return;
-            }
+            return;
         }
 
         _messageStream.OnNext(message);
@@ -413,7 +407,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
     /// Evaluates all message filters against the given message.
     /// Returns true if the message is allowed, false if blocked by any filter.
     /// </summary>
-    private async Task<bool> RunFiltersAsync(IReadOnlyList<IMessageFilter> filters, NeuronMessage message)
+    private static async Task<bool> RunFiltersAsync(IReadOnlyList<IMessageFilter> filters, NeuronMessage message)
     {
         // First, attempt a synchronous fast-path by checking whether all filters
         // complete synchronously. Only fall back to async await if any filter is incomplete.

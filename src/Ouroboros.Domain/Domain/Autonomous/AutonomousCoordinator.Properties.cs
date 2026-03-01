@@ -172,15 +172,7 @@ public sealed partial class AutonomousCoordinator
     /// <returns>The name of the best available tool.</returns>
     public string GetPreferredTool(IEnumerable<string> priorityList, string fallback = "web_search")
     {
-        foreach (string toolName in priorityList)
-        {
-            if (AvailableTools.Contains(toolName))
-            {
-                return toolName;
-            }
-        }
-
-        return fallback;
+        return priorityList.FirstOrDefault(toolName => AvailableTools.Contains(toolName)) ?? fallback;
     }
 
     /// <summary>

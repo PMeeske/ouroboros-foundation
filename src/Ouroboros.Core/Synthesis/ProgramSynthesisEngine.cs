@@ -15,7 +15,6 @@ public sealed partial class ProgramSynthesisEngine : IProgramSynthesisEngine
 {
     private readonly int beamWidth;
     private readonly int maxDepth;
-    private readonly double temperatureForSampling;
     private readonly Dictionary<string, double> primitiveLogProbabilities;
 
     /// <summary>
@@ -28,7 +27,6 @@ public sealed partial class ProgramSynthesisEngine : IProgramSynthesisEngine
     {
         this.beamWidth = beamWidth;
         this.maxDepth = maxDepth;
-        this.temperatureForSampling = temperature;
         this.primitiveLogProbabilities = new Dictionary<string, double>();
     }
 
@@ -145,7 +143,7 @@ public sealed partial class ProgramSynthesisEngine : IProgramSynthesisEngine
             // Update primitive log probabilities based on training pairs
             Dictionary<string, int> primitiveUsage = new Dictionary<string, int>();
 
-            foreach ((SynthesisTask? task, Program? solution) in pairs)
+            foreach ((SynthesisTask _, Program? solution) in pairs)
             {
                 ct.ThrowIfCancellationRequested();
 

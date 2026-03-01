@@ -151,20 +151,17 @@ public sealed class PolicyEngine : IPolicyEngine
         List<PolicyViolation> violations = new List<PolicyViolation>();
 
         // Evaluate rules
-        foreach (PolicyRule rule in policy.Rules)
+        foreach (PolicyRule rule in policy.Rules.Where(rule => EvaluateCondition(rule.Condition, context)))
         {
-            if (EvaluateCondition(rule.Condition, context))
+            violations.Add(new PolicyViolation
             {
-                violations.Add(new PolicyViolation
-                {
-                    Rule = rule,
-                    Severity = MapActionToSeverity(rule.Action),
-                    Message = $"Rule '{rule.Name}' violated: {rule.Condition}",
-                    RecommendedAction = rule.Action,
-                    ActualValue = context,
-                    DetectedAt = DateTime.UtcNow
-                });
-            }
+                Rule = rule,
+                Severity = MapActionToSeverity(rule.Action),
+                Message = $"Rule '{rule.Name}' violated: {rule.Condition}",
+                RecommendedAction = rule.Action,
+                ActualValue = context,
+                DetectedAt = DateTime.UtcNow
+            });
         }
 
         // Evaluate quotas

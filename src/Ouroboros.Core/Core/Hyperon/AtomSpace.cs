@@ -41,16 +41,7 @@ public sealed class AtomSpace : IAtomSpace
     /// <inheritdoc/>
     public int AddRange(IEnumerable<Atom> atomsToAdd)
     {
-        int count = 0;
-        foreach (Atom atom in atomsToAdd)
-        {
-            if (Add(atom))
-            {
-                count++;
-            }
-        }
-
-        return count;
+        return atomsToAdd.Count(atom => Add(atom));
     }
 
     /// <inheritdoc/>

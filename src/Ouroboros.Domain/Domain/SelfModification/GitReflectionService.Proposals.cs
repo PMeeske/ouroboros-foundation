@@ -27,7 +27,7 @@ public sealed partial class GitReflectionService
         string[] args = checkout
             ? ["checkout", "-b", fullName]
             : ["branch", fullName];
-        (bool success, string output, string error) = await ExecuteGitAsync(args, ct);
+        (bool success, _, string error) = await ExecuteGitAsync(args, ct);
 
         return new GitOperationResult(
             success,
@@ -291,7 +291,7 @@ public sealed partial class GitReflectionService
 
         // Create branch for the change
         string branchName = $"{category.ToString().ToLowerInvariant()}-{proposal.Id}";
-        GitOperationResult branchResult = await CreateBranchAsync(branchName, ct: ct);
+        _ = await CreateBranchAsync(branchName, ct: ct);
 
         // Apply the change
         GitOperationResult applyResult = await ApplyProposalAsync(proposal.Id, autoCommit: true, ct: ct);
@@ -302,7 +302,7 @@ public sealed partial class GitReflectionService
     /// <summary>
     /// Assesses the risk level of a proposed change.
     /// </summary>
-    private RiskLevel AssessRisk(string filePath, string oldCode, string newCode)
+    private static RiskLevel AssessRisk(string filePath, string oldCode, string newCode)
     {
         // Documentation changes are low risk
         if (filePath.EndsWith(".md") || filePath.EndsWith(".txt"))

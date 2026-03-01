@@ -169,7 +169,7 @@ public sealed partial class AutonomousCoordinator
 
     private record TopicSuggestion(string? Title, string? Description, string? Category, string? Tool, string? ToolInput);
 
-    private TopicSuggestion? ParseTopicResponse(string response)
+    private static TopicSuggestion? ParseTopicResponse(string response)
     {
         try
         {

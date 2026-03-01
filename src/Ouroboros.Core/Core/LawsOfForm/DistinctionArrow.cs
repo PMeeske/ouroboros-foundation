@@ -73,12 +73,9 @@ public static class DistinctionArrow
     {
         return input =>
         {
-            foreach (Func<T, Form> predicate in predicates)
+            if (predicates.Any(predicate => !predicate(input).IsMarked()))
             {
-                if (!predicate(input).IsMarked())
-                {
-                    return Task.FromResult<T?>(default);
-                }
+                return Task.FromResult<T?>(default);
             }
 
             return Task.FromResult<T?>(input);
@@ -98,12 +95,9 @@ public static class DistinctionArrow
     {
         return input =>
         {
-            foreach (Func<T, Form> predicate in predicates)
+            if (predicates.Any(predicate => predicate(input).IsMarked()))
             {
-                if (predicate(input).IsMarked())
-                {
-                    return Task.FromResult<T?>(input);
-                }
+                return Task.FromResult<T?>(input);
             }
 
             return Task.FromResult<T?>(default);

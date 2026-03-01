@@ -22,8 +22,6 @@ public sealed partial class AutonomousCoordinator : IDisposable
     private Task? _coordinationTask;
     private Task? _executionTask;
     private bool _isActive;
-    private DateTime _lastTick = DateTime.MinValue;
-
     /// <summary>
     /// Creates a new autonomous coordinator.
     /// </summary>
@@ -256,7 +254,6 @@ public sealed partial class AutonomousCoordinator : IDisposable
                 // Periodic status broadcast to neurons
                 _ = _network.BroadcastAsync("system.tick", new { Time = DateTime.UtcNow, Pending = pending.Count }, "coordinator");
 
-                _lastTick = DateTime.UtcNow;
             }
             catch (OperationCanceledException)
             {

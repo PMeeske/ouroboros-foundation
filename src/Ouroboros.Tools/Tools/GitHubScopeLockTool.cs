@@ -110,7 +110,6 @@ public sealed class GitHubScopeLockTool : ITool
             }
 
             // Add the label to the issue
-            IssueUpdate issueUpdate = new IssueUpdate();
             await this.client.Issue.Labels.AddToIssue(this.owner, this.repo, issueNumber, new[] { "scope-locked" });
 
             return Result<bool, string>.Success(true);

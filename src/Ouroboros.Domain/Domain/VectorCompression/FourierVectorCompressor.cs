@@ -72,7 +72,7 @@ public sealed class FourierVectorCompressor
         FFT(padded, false);
 
         // Select components based on strategy
-        (int[]? indices, double[]? magnitudes) = SelectComponents(padded);
+        (int[]? indices, _) = SelectComponents(padded);
 
         // Extract real and imaginary parts of selected components
         float[] components = new float[_targetDimension * 2]; // Store both real and imaginary
@@ -95,7 +95,7 @@ public sealed class FourierVectorCompressor
     /// </summary>
     /// <param name="compressed">Compressed vector data.</param>
     /// <returns>Reconstructed vector (approximate).</returns>
-    public float[] Decompress(CompressedVector compressed)
+    public static float[] Decompress(CompressedVector compressed)
     {
         int paddedLength = NextPowerOfTwo(compressed.OriginalLength);
         Complex[] spectrum = new Complex[paddedLength];
@@ -136,7 +136,7 @@ public sealed class FourierVectorCompressor
     /// <param name="a">First compressed vector.</param>
     /// <param name="b">Second compressed vector.</param>
     /// <returns>Approximate cosine similarity.</returns>
-    public double CompressedSimilarity(CompressedVector a, CompressedVector b)
+    public static double CompressedSimilarity(CompressedVector a, CompressedVector b)
     {
         // Find common indices
         HashSet<int> commonIndices = a.Indices.Intersect(b.Indices).ToHashSet();

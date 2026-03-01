@@ -71,7 +71,7 @@ public sealed class Dream
     /// </summary>
     /// <param name="phase">The phase to manifest at.</param>
     /// <returns>An imaginary form at the specified phase.</returns>
-    public Form Manifest(double phase) => Form.Imagine(phase);
+    public static Form Manifest(double phase) => Form.Imagine(phase);
 
     /// <inheritdoc/>
     public override string ToString() => "◇ (dream)";

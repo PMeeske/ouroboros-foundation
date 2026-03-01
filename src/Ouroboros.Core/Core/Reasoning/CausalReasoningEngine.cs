@@ -133,7 +133,7 @@ public sealed partial class CausalReasoningEngine : ICausalReasoningEngine
 
         try
         {
-            return await Task.Run(() => this.ComputeCounterfactual(intervention, outcome, factual, model, ct), ct);
+            return await Task.Run(() => ComputeCounterfactual(intervention, outcome, factual, model, ct), ct);
         }
         catch (InvalidOperationException ex)
         {

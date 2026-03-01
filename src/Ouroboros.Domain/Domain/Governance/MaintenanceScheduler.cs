@@ -182,26 +182,23 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
             {
                 DateTime now = DateTime.UtcNow;
 
-                foreach (MaintenanceTask? task in _tasks.Where(t => t.IsEnabled))
+                foreach (MaintenanceTask? task in _tasks.Where(t => t.IsEnabled).Where(task => ShouldExecute(task, now)))
                 {
-                    if (ShouldExecute(task, now))
+                    _ = Task.Run(async () =>
                     {
-                        _ = Task.Run(async () =>
+                        try
                         {
-                            try
-                            {
-                                await ExecuteTaskAsync(task, ct);
-                            }
-                            catch (OperationCanceledException)
-                            {
-                                // Expected during shutdown
-                            }
-                            catch (Exception) when (true)
-                            {
-                                // Logged in ExecuteTaskAsync
-                            }
+                            await ExecuteTaskAsync(task, ct);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            // Expected during shutdown
+                        }
+                        catch (Exception) when (true)
+                        {
+                            // Logged in ExecuteTaskAsync
+                        }
                         }, ct);
-                    }
                 }
 
                 // Check every minute
