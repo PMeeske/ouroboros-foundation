@@ -194,7 +194,7 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
                         {
                             // Expected during shutdown
                         }
-                        catch (Exception) when (true)
+                        catch (Exception)
                         {
                             // Logged in ExecuteTaskAsync
                         }

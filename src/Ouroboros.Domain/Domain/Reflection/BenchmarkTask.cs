@@ -38,7 +38,7 @@ public sealed record BenchmarkTask(
         {
             return false;
         }
-        catch (Exception) when (true)
+        catch (Exception)
         {
             return false;
         }
