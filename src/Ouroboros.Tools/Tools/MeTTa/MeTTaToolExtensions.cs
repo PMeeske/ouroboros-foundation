@@ -30,7 +30,7 @@ public static class MeTTaToolExtensions
     /// Registers MeTTa tools using a subprocess-based engine with custom executable path.
     /// </summary>
     /// <param name="registry">The tool registry to extend.</param>
-    /// <param name="mettaExecutablePath">Path to the MeTTa executable.</param>
+    /// <param name="mettaExecutablePath">Path to the MeTTa executable (null = Docker mode).</param>
     /// <returns>A new ToolRegistry with MeTTa tools registered.</returns>
     public static ToolRegistry WithMeTTaSubprocessTools(this ToolRegistry registry, string? mettaExecutablePath = null)
     {
