@@ -32,7 +32,7 @@ public static class MeTTaToolExtensions
     /// <param name="registry">The tool registry to extend.</param>
     /// <param name="mettaExecutablePath">Path to the MeTTa executable.</param>
     /// <returns>A new ToolRegistry with MeTTa tools registered.</returns>
-    public static ToolRegistry WithMeTTaSubprocessTools(this ToolRegistry registry, string mettaExecutablePath)
+    public static ToolRegistry WithMeTTaSubprocessTools(this ToolRegistry registry, string? mettaExecutablePath = null)
     {
         SubprocessMeTTaEngine engine = new SubprocessMeTTaEngine(mettaExecutablePath);
         return registry.WithMeTTaTools(engine);
