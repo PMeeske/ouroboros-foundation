@@ -4,12 +4,14 @@ using Ouroboros.Diagnostics;
 
 namespace Ouroboros.Core.Tracing
 {
+    /// <summary>Concrete implementation of <see cref="ITracingService"/> using <see cref="System.Diagnostics.Activity"/>.</summary>
     public class TracingService : ITracingService
     {
         private bool _isEnabled = false;
         private Action? _startedCallback;
         private Action? _stoppedCallback;
 
+        /// <inheritdoc/>
         public async Task<Result<Unit, string>> EnableTracing()
         {
             TracingConfiguration.EnableTracing(
@@ -20,6 +22,7 @@ namespace Ouroboros.Core.Tracing
             return Result<Unit, string>.Success(Unit.Value);
         }
 
+        /// <inheritdoc/>
         public async Task<Result<Unit, string>> DisableTracing()
         {
             TracingConfiguration.DisableTracing();
@@ -27,6 +30,7 @@ namespace Ouroboros.Core.Tracing
             return Result<Unit, string>.Success(Unit.Value);
         }
 
+        /// <inheritdoc/>
         public async Task<Result<Unit, string>> EnableTracingWithCallbacks(Action started, Action stopped)
         {
             TracingConfiguration.EnableTracing(
@@ -39,6 +43,7 @@ namespace Ouroboros.Core.Tracing
             return Result<Unit, string>.Success(Unit.Value);
         }
 
+        /// <inheritdoc/>
         public async Task<Result<Activity, string>> StartActivity(string name, Dictionary<string, object>? tags = null)
         {
             if (!_isEnabled) return Result<Activity, string>.Failure("Tracing is disabled");
@@ -47,12 +52,14 @@ namespace Ouroboros.Core.Tracing
             return Result<Activity, string>.Success(activity);
         }
 
+        /// <inheritdoc/>
         public async Task<Result<Unit, string>> RecordEvent(Activity activity, string eventName, string detail)
         {
             activity.AddEvent(new ActivityEvent(eventName, tags: new ActivityTagsCollection { { "detail", detail } }));
             return Result<Unit, string>.Success(Unit.Value);
         }
 
+        /// <inheritdoc/>
         public async Task<Result<Unit, string>> RecordException(Activity activity, Exception exception)
         {
             activity.SetStatus(ActivityStatusCode.Error, exception.Message);
@@ -61,6 +68,7 @@ namespace Ouroboros.Core.Tracing
             return Result<Unit, string>.Success(Unit.Value);
         }
 
+        /// <inheritdoc/>
         public async Task<Result<Unit, string>> SetStatus(Activity activity, string status, string description)
         {
             ActivityStatusCode statusCode = status == "Ok" ? ActivityStatusCode.Ok : ActivityStatusCode.Error;
@@ -68,29 +76,34 @@ namespace Ouroboros.Core.Tracing
             return Result<Unit, string>.Success(Unit.Value);
         }
 
+        /// <inheritdoc/>
         public async Task<Result<Unit, string>> AddTag(Activity activity, string key, string value)
         {
             activity.SetTag(key, value);
             return Result<Unit, string>.Success(Unit.Value);
         }
 
+        /// <inheritdoc/>
         public Option<string> GetTraceId(Activity activity)
         {
             string id = activity.TraceId.ToString();
             return string.IsNullOrEmpty(id) ? Option<string>.None() : Option<string>.Some(id);
         }
 
+        /// <inheritdoc/>
         public Option<string> GetSpanId(Activity activity)
         {
             string id = activity.SpanId.ToString();
             return string.IsNullOrEmpty(id) ? Option<string>.None() : Option<string>.Some(id);
         }
 
+        /// <inheritdoc/>
         public Option<string> GetParentSpanId(Activity activity)
         {
             return activity.ParentSpanId == default(ActivitySpanId) ? Option<string>.None() : Option<string>.Some(activity.ParentSpanId.ToString());
         }
 
+        /// <inheritdoc/>
         public async Task<Result<Activity, string>> TraceToolExecution(string toolName, string input)
         {
             Result<Activity, string> result = await StartActivity($"ToolExecution-{toolName}");
@@ -101,6 +114,7 @@ namespace Ouroboros.Core.Tracing
             return Result<Activity, string>.Success(activity);
         }
 
+        /// <inheritdoc/>
         public async Task<Result<Activity, string>> TracePipelineExecution(string pipelineName)
         {
             Result<Activity, string> result = await StartActivity($"PipelineExecution-{pipelineName}");
@@ -110,6 +124,7 @@ namespace Ouroboros.Core.Tracing
             return Result<Activity, string>.Success(activity);
         }
 
+        /// <inheritdoc/>
         public async Task<Result<Activity, string>> TraceLlmRequest(string model, int maxTokens)
         {
             Result<Activity, string> result = await StartActivity("llm.request");
@@ -120,6 +135,7 @@ namespace Ouroboros.Core.Tracing
             return Result<Activity, string>.Success(activity);
         }
 
+        /// <inheritdoc/>
         public async Task<Result<Activity, string>> TraceVectorOperation(string operation, int dimension)
         {
             Result<Activity, string> result = await StartActivity($"VectorOperation-{operation}");
@@ -130,6 +146,7 @@ namespace Ouroboros.Core.Tracing
             return Result<Activity, string>.Success(activity);
         }
 
+        /// <inheritdoc/>
         public async Task<Result<Unit, string>> CompleteLlmRequest(Activity activity, int responseLength, int tokenCount)
         {
             activity.SetTag("llm.response_length", responseLength);
@@ -138,6 +155,7 @@ namespace Ouroboros.Core.Tracing
             return Result<Unit, string>.Success(Unit.Value);
         }
 
+        /// <inheritdoc/>
         public async Task<Result<Unit, string>> CompleteToolExecution(Activity activity, bool success, int outputLength)
         {
             activity.SetTag("tool.success", success);
@@ -146,6 +164,7 @@ namespace Ouroboros.Core.Tracing
             return Result<Unit, string>.Success(Unit.Value);
         }
 
+        /// <inheritdoc/>
         public async Task<Result<Unit, string>> StopActivity(Activity activity)
         {
             activity.Stop();

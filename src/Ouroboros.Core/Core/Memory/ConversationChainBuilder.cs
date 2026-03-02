@@ -9,6 +9,8 @@ public class ConversationChainBuilder<T>
     private readonly MemoryContext<T> _initialContext;
     private readonly List<Step<MemoryContext<object>, MemoryContext<object>>> _steps = [];
 
+    /// <summary>Initialises the builder with the starting memory context.</summary>
+    /// <param name="initialContext">The initial context passed to the first step in the chain.</param>
     public ConversationChainBuilder(MemoryContext<T> initialContext)
     {
         _initialContext = initialContext;

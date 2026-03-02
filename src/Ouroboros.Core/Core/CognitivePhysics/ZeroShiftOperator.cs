@@ -19,6 +19,10 @@ public sealed class ZeroShiftOperator
     private readonly IEthicsGate _ethicsGate;
     private readonly ZeroShiftConfig _config;
 
+    /// <summary>Initialises the operator with the required embedding provider, ethics gate, and optional configuration.</summary>
+    /// <param name="embeddingProvider">Provider used to compute semantic distance between contexts.</param>
+    /// <param name="ethicsGate">Gate that evaluates ethical permissibility of transitions.</param>
+    /// <param name="config">Optional shift configuration; uses <see cref="ZeroShiftConfig"/> defaults when null.</param>
     public ZeroShiftOperator(
         Ouroboros.Domain.IEmbeddingModel embeddingProvider,
         IEthicsGate ethicsGate,

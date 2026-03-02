@@ -6,5 +6,9 @@ namespace Ouroboros.Domain;
 /// </summary>
 public interface IEmbeddingModel
 {
+    /// <summary>Generates an embedding vector for the given text input.</summary>
+    /// <param name="input">The text to embed.</param>
+    /// <param name="ct">Optional cancellation token.</param>
+    /// <returns>A float array representing the embedding vector.</returns>
     Task<float[]> CreateEmbeddingsAsync(string input, CancellationToken ct = default);
 }

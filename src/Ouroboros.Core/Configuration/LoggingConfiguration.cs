@@ -16,7 +16,9 @@ public static class LoggingConfiguration
     /// <summary>
     /// Configures Serilog with the provided configuration and pipeline settings.
     /// </summary>
-    /// <returns></returns>
+    /// <param name="configuration">The application configuration containing Serilog settings.</param>
+    /// <param name="pipelineConfig">Optional pipeline configuration for minimum log level overrides.</param>
+    /// <returns>A configured <see cref="ILogger"/> instance.</returns>
     public static ILogger CreateLogger(IConfiguration configuration, PipelineConfiguration? pipelineConfig = null)
     {
         LoggerConfiguration loggerConfig = new LoggerConfiguration()
@@ -50,7 +52,8 @@ public static class LoggingConfiguration
     /// <summary>
     /// Configures Serilog with default settings for the given environment.
     /// </summary>
-    /// <returns></returns>
+    /// <param name="environmentName">The environment name; use "Development" to enable debug-level logging.</param>
+    /// <returns>A configured <see cref="ILogger"/> instance.</returns>
     public static ILogger CreateDefaultLogger(string environmentName = "Production")
     {
         LogEventLevel logLevel = environmentName == "Development" ? LogEventLevel.Debug : LogEventLevel.Information;

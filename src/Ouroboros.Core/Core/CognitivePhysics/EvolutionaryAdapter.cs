@@ -16,6 +16,8 @@ public sealed class EvolutionaryAdapter
 {
     private readonly EvolutionaryConfig _config;
 
+    /// <summary>Initialises the adapter with the given evolutionary configuration, or defaults if not provided.</summary>
+    /// <param name="config">Optional evolutionary configuration; uses <see cref="EvolutionaryConfig"/> defaults when null.</param>
     public EvolutionaryAdapter(EvolutionaryConfig? config = null)
     {
         _config = config ?? new EvolutionaryConfig();

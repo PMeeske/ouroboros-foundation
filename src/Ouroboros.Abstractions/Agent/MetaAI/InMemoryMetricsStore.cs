@@ -9,6 +9,7 @@ public sealed class InMemoryMetricsStore : IMetricsStore
     private readonly Dictionary<string, PerformanceMetrics> _metrics = new();
     private readonly object _lock = new();
 
+    /// <inheritdoc/>
     public Task StoreMetricsAsync(PerformanceMetrics metrics, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(metrics);
@@ -21,6 +22,7 @@ public sealed class InMemoryMetricsStore : IMetricsStore
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc/>
     public Task<PerformanceMetrics?> GetMetricsAsync(string resourceName, CancellationToken ct = default)
     {
         lock (_lock)
@@ -29,6 +31,7 @@ public sealed class InMemoryMetricsStore : IMetricsStore
         }
     }
 
+    /// <inheritdoc/>
     public Task<IReadOnlyDictionary<string, PerformanceMetrics>> GetAllMetricsAsync(CancellationToken ct = default)
     {
         lock (_lock)
@@ -38,6 +41,7 @@ public sealed class InMemoryMetricsStore : IMetricsStore
         }
     }
 
+    /// <inheritdoc/>
     public Task<bool> RemoveMetricsAsync(string resourceName, CancellationToken ct = default)
     {
         lock (_lock)
@@ -46,6 +50,7 @@ public sealed class InMemoryMetricsStore : IMetricsStore
         }
     }
 
+    /// <inheritdoc/>
     public Task ClearAsync(CancellationToken ct = default)
     {
         lock (_lock)
@@ -56,6 +61,7 @@ public sealed class InMemoryMetricsStore : IMetricsStore
         return Task.CompletedTask;
     }
 
+    /// <inheritdoc/>
     public Task<MetricsStoreStatistics> GetStatisticsAsync()
     {
         lock (_lock)

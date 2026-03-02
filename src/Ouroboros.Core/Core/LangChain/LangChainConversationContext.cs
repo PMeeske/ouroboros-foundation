@@ -11,6 +11,8 @@ public class LangChainConversationContext
     private readonly Dictionary<string, object> _properties = new();
     private readonly ConversationMemory _memory;
 
+    /// <summary>Initialises the context with an optional maximum number of retained conversation turns.</summary>
+    /// <param name="maxTurns">Maximum turns to retain in memory; 0 means unlimited.</param>
     public LangChainConversationContext(int maxTurns = 0)
     {
         _memory = new ConversationMemory(maxTurns);

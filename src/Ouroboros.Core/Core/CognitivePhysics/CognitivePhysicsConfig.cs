@@ -8,6 +8,7 @@ public sealed record CognitivePhysicsConfig(
     ChaosConfig Chaos,
     EvolutionaryConfig Evolution)
 {
+    /// <summary>Returns a default configuration with standard zero-shift, chaos, and evolutionary settings.</summary>
     public static CognitivePhysicsConfig Default => new(
         new ZeroShiftConfig(),
         new ChaosConfig(),

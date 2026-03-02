@@ -18,6 +18,10 @@ public sealed class CognitivePhysicsEngine
     private readonly ChaosInjector _chaos;
     private readonly EvolutionaryAdapter _evolution;
 
+    /// <summary>Initialises the engine with the given embedding provider, ethics gate, and optional configuration.</summary>
+    /// <param name="embeddingProvider">Provider used to compute semantic distances.</param>
+    /// <param name="ethicsGate">Gate that approves or rejects context transitions.</param>
+    /// <param name="config">Optional configuration; uses <see cref="CognitivePhysicsConfig.Default"/> when null.</param>
     public CognitivePhysicsEngine(
         Ouroboros.Domain.IEmbeddingModel embeddingProvider,
         IEthicsGate ethicsGate,

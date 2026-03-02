@@ -13,6 +13,8 @@ public sealed class ChaosInjector
 {
     private readonly ChaosConfig _config;
 
+    /// <summary>Initialises the injector with the given chaos configuration, or defaults if not provided.</summary>
+    /// <param name="config">Optional chaos configuration; uses <see cref="ChaosConfig"/> defaults when null.</param>
     public ChaosInjector(ChaosConfig? config = null)
     {
         _config = config ?? new ChaosConfig();

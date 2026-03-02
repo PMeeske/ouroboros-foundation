@@ -13,6 +13,9 @@ public sealed class SuperpositionEngine
     private readonly IEthicsGate _ethicsGate;
     private readonly Ouroboros.Domain.IEmbeddingModel _embeddingProvider;
 
+    /// <summary>Initialises the engine with the required embedding provider and ethics gate.</summary>
+    /// <param name="embeddingProvider">Provider used for semantic coherence scoring during collapse.</param>
+    /// <param name="ethicsGate">Gate that excludes denied branches from collapse scoring.</param>
     public SuperpositionEngine(Ouroboros.Domain.IEmbeddingModel embeddingProvider, IEthicsGate ethicsGate)
     {
         _embeddingProvider = embeddingProvider ?? throw new ArgumentNullException(nameof(embeddingProvider));
