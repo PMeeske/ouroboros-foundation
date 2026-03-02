@@ -75,11 +75,8 @@ public class SafetyCheckResultTests
     [Fact]
     public void Warnings_ReturnsEmptyList()
     {
-        // Arrange
-        var result = Ouroboros.Agent.MetaAI.SafetyCheckResult.Allowed();
-
         // Assert
-        result.Warnings.Should().BeEmpty();
+        Ouroboros.Agent.MetaAI.SafetyCheckResult.Warnings.Should().BeEmpty();
     }
 
     [Fact]

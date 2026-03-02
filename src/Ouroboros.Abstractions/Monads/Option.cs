@@ -46,18 +46,6 @@ public readonly struct Option<T>
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="Option{T}"/> struct with explicit hasValue flag.
-    /// Used internally for creating None instances.
-    /// </summary>
-    /// <param name="value">The optional value.</param>
-    /// <param name="hasValue">Whether the option has a value.</param>
-    private Option(T? value, bool hasValue)
-    {
-        this.value = value;
-        this.hasValue = hasValue;
-    }
-
-    /// <summary>
     /// Creates an Option with a value (monadic return/pure operation).
     /// </summary>
     /// <param name="value">The value to wrap.</param>
