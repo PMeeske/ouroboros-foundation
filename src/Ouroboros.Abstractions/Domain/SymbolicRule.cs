@@ -8,7 +8,4 @@ namespace Ouroboros.Abstractions.Domain;
 /// <summary>
 /// Represents a symbolic rule.
 /// </summary>
-public class SymbolicRule
-{
-    // Placeholder class - to be implemented
-}
+public sealed record SymbolicRule;

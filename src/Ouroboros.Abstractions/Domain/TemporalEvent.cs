@@ -8,7 +8,4 @@ namespace Ouroboros.Abstractions.Domain;
 /// <summary>
 /// Represents a temporal event.
 /// </summary>
-public class TemporalEvent
-{
-    // Placeholder class - to be implemented
-}
+public sealed record TemporalEvent;
