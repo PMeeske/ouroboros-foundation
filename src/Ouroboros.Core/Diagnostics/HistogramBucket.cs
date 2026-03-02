@@ -3,7 +3,7 @@ namespace Ouroboros.Diagnostics;
 /// <summary>
 /// Histogram bucket for tracking value distributions.
 /// </summary>
-public class HistogramBucket
+public sealed class HistogramBucket
 {
     /// <summary>
     /// Gets or initializes the upper bound of the bucket.

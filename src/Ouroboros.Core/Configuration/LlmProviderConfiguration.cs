@@ -3,7 +3,7 @@ namespace Ouroboros.Core.Configuration;
 /// <summary>
 /// Configuration for LLM providers (Ollama, OpenAI, etc.).
 /// </summary>
-public class LlmProviderConfiguration
+public sealed class LlmProviderConfiguration
 {
     /// <summary>
     /// Gets or sets the default provider to use (e.g., "Ollama", "OpenAI").

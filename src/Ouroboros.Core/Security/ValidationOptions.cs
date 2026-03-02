@@ -3,7 +3,7 @@ namespace Ouroboros.Core.Security;
 /// <summary>
 /// Options for input validation.
 /// </summary>
-public class ValidationOptions
+public sealed class ValidationOptions
 {
     /// <summary>
     /// Gets or sets a value indicating whether check for injection patterns (SQL, command, script).

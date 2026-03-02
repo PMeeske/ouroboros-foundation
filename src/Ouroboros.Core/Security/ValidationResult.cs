@@ -3,7 +3,7 @@ namespace Ouroboros.Core.Security;
 /// <summary>
 /// Result of input validation.
 /// </summary>
-public class ValidationResult
+public sealed class ValidationResult
 {
     /// <summary>
     /// Gets a value indicating whether indicates whether the input is valid.

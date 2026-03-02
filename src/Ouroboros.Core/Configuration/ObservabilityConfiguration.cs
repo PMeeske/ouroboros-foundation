@@ -3,7 +3,7 @@ namespace Ouroboros.Core.Configuration;
 /// <summary>
 /// Configuration for observability (logging, metrics, tracing).
 /// </summary>
-public class ObservabilityConfiguration
+public sealed class ObservabilityConfiguration
 {
     /// <summary>
     /// Gets or sets a value indicating whether enable structured logging.

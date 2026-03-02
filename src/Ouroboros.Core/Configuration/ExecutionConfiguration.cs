@@ -3,7 +3,7 @@ namespace Ouroboros.Core.Configuration;
 /// <summary>
 /// Configuration for pipeline execution.
 /// </summary>
-public class ExecutionConfiguration
+public sealed class ExecutionConfiguration
 {
     /// <summary>
     /// Gets or sets maximum turns for iterative reasoning.
