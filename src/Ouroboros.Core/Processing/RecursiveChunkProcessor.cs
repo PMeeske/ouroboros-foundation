@@ -157,11 +157,15 @@ public sealed class RecursiveChunkProcessor : IRecursiveChunkProcessor
 
             chunks.Add(chunk.Trim());
 
-            // Move position forward with overlap
+            // If this chunk reached the end of the text, we are done.
+            if (position + currentChunkSize >= text.Length)
+            {
+                break;
+            }
+
+            // Move position forward with overlap, ensuring we always make forward progress.
             int previousPosition = position;
             position += currentChunkSize - overlapCharSize;
-
-            // Ensure we always make forward progress
             if (position <= previousPosition)
             {
                 position = previousPosition + 1;

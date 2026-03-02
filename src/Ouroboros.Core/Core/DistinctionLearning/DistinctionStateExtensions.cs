@@ -24,12 +24,14 @@ public static class DistinctionStateExtensions
     /// <summary>
     /// Checks if the epistemic certainty represents a certain state.
     /// In Laws of Form, certain states correspond to marked (⌐) or unmarked (∅) states.
+    /// NaN and out-of-range values are treated as not certain.
     /// </summary>
     /// <param name="certainty">The epistemic certainty value.</param>
-    /// <returns>True if certainty is high (greater than 0.7) or low (less than 0.3), indicating a definite state.</returns>
+    /// <returns>True if certainty is strictly greater than 0.7 or strictly less than 0.3, indicating a definite state.</returns>
     public static bool IsCertain(this double certainty)
     {
-        // Certain state: exact complement of imaginary (neither clearly true nor false)
-        return !certainty.IsImaginary();
+        // Certain state: strictly outside the imaginary/uncertain range.
+        // Uses explicit comparisons so that NaN (which fails all comparisons) returns false.
+        return certainty < 0.3 || certainty > 0.7;
     }
 }
