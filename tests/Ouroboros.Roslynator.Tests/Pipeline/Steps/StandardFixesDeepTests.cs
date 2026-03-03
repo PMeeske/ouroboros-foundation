@@ -228,12 +228,23 @@ class C {
 }";
         var state = await CreateStateAsync(code, "IDE0001", root =>
         {
-            // Find the First() invocation
-            var invocations = root.DescendantNodes()
-                .OfType<InvocationExpressionSyntax>().ToList();
-            // The outermost invocation is .First()
-            var firstInvocation = invocations.Last();
-            return firstInvocation.Span;
+            // We need to find the .First() invocation -- it is the outermost InvocationExpression
+            // whose MemberAccess name is "First" and whose inner expression is the Where() invocation.
+            var firstInvocation = root.DescendantNodes()
+                .OfType<InvocationExpressionSyntax>()
+                .FirstOrDefault(inv =>
+                    inv.Expression is MemberAccessExpressionSyntax ma &&
+                    ma.Name.Identifier.Text == "First" &&
+                    ma.Expression is InvocationExpressionSyntax innerInv &&
+                    innerInv.Expression is MemberAccessExpressionSyntax innerMa &&
+                    innerMa.Name.Identifier.Text == "Where");
+
+            // Point the diagnostic span at the "First" identifier name inside the member access
+            // so that FindNodeSafe will find a node within the invocation
+            if (firstInvocation?.Expression is MemberAccessExpressionSyntax memberAccess)
+                return memberAccess.Name.Span;
+
+            return firstInvocation?.Span ?? new TextSpan(0, 5);
         });
 
         // Act

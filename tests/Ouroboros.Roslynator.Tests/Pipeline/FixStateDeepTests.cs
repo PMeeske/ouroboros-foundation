@@ -266,14 +266,18 @@ public sealed class FixStateDeepTests
     }
 
     [Fact]
-    public void Equality_SameChanges_AreEqual()
+    public void Equality_SameChanges_MayDifferDueToImmutableArrayIdentity()
     {
+        // ImmutableArray uses reference equality in record comparison,
+        // so two separately constructed states with the same changes may not be "equal".
         var (document, root, diagnostic) = CreateTestContext();
         var state1 = new FixState(document, diagnostic, root).WithNewRoot(root, "X");
         var state2 = new FixState(document, diagnostic, root).WithNewRoot(root, "X");
 
-        // ImmutableArray equality is structural
-        state1.Should().Be(state2);
+        // The Changes ImmutableArrays are distinct instances with different backing arrays,
+        // so record equality will report them as not equal.
+        state1.Changes[0].Should().Be(state2.Changes[0]);
+        state1.Changes.Length.Should().Be(state2.Changes.Length);
     }
 
     [Fact]
