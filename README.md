@@ -2,10 +2,24 @@
 
 [![CI](https://github.com/PMeeske/ouroboros-foundation/actions/workflows/ci.yml/badge.svg)](https://github.com/PMeeske/ouroboros-foundation/actions/workflows/ci.yml)
 [![Mutation Testing](https://github.com/PMeeske/ouroboros-foundation/actions/workflows/mutation.yml/badge.svg)](https://github.com/PMeeske/ouroboros-foundation/actions/workflows/mutation.yml)
-![Tests](https://img.shields.io/badge/tests-1%2C995%20passed-brightgreen)
-![Coverage](https://img.shields.io/badge/coverage-215%20test%20files%20%2F%20931%20src-blue)
+![Tests](https://img.shields.io/badge/tests-409%20passed-brightgreen)
+![Coverage](https://img.shields.io/badge/line%20coverage-40.9%25-yellow)
 
 **Core functional programming abstractions, domain primitives, and AI safety infrastructure for the Ouroboros agent system.**
+
+## Test Coverage
+
+> Coverage is measured by CI via [Coverlet](https://github.com/coverlet-coverage/coverlet) + [ReportGenerator](https://github.com/danielpalme/ReportGenerator). See the latest [CI run](https://github.com/PMeeske/ouroboros-foundation/actions/workflows/ci.yml) for the full HTML report artifact.
+
+| Project | Line Coverage | Status |
+| ------- | :----------: | :----: |
+| Ouroboros.Abstractions | 87.7% | ![87.7%](https://img.shields.io/badge/87.7%25-brightgreen) |
+| Ouroboros.Genetic | 90.2% | ![90.2%](https://img.shields.io/badge/90.2%25-brightgreen) |
+| Ouroboros.Core | 43.5% | ![43.5%](https://img.shields.io/badge/43.5%25-yellow) |
+| Ouroboros.Tools | 42.4% | ![42.4%](https://img.shields.io/badge/42.4%25-yellow) |
+| Ouroboros.Roslynator | 37.8% | ![37.8%](https://img.shields.io/badge/37.8%25-orange) |
+| Ouroboros.Domain | 29.4% | ![29.4%](https://img.shields.io/badge/29.4%25-orange) |
+| **Overall** | **40.9%** | ![40.9%](https://img.shields.io/badge/40.9%25-yellow) |
 
 ## Overview
 
