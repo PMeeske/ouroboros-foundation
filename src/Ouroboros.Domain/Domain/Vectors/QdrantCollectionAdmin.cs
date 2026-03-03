@@ -18,7 +18,7 @@ public sealed partial class QdrantCollectionAdmin : IAsyncDisposable
     private const int DefaultVectorSize = 768; // nomic-embed-text
 
     private readonly QdrantClient _client;
-    private readonly IQdrantCollectionRegistry? _registry;
+    private readonly IQdrantCollectionRegistry _registry;
     private readonly bool _disposeClient;
     private readonly Dictionary<string, CollectionInfo> _collectionCache = new();
     private readonly List<CollectionLink> _collectionLinks = new();
@@ -87,15 +87,8 @@ public sealed partial class QdrantCollectionAdmin : IAsyncDisposable
     {
         if (_initialized) return;
 
-        // Load existing links — prefer registry-driven links when available
-        if (_registry != null)
-        {
-            _collectionLinks.AddRange(GetDefaultLinksFromRegistry());
-        }
-        else
-        {
-            _collectionLinks.AddRange(DefaultLinks);
-        }
+        // Load existing links from registry
+        _collectionLinks.AddRange(GetDefaultLinksFromRegistry());
 
         // Scan existing collections
         await RefreshCollectionCacheAsync(ct);
@@ -108,8 +101,6 @@ public sealed partial class QdrantCollectionAdmin : IAsyncDisposable
     /// </summary>
     public IReadOnlyDictionary<string, string> GetKnownCollections()
     {
-        if (_registry == null) return KnownCollections;
-
         IReadOnlyDictionary<QdrantCollectionRole, string> mappings = _registry.GetAllMappings();
         return mappings.ToDictionary(
             kvp => kvp.Value,
@@ -119,8 +110,7 @@ public sealed partial class QdrantCollectionAdmin : IAsyncDisposable
     private IReadOnlyList<CollectionLink> GetDefaultLinksFromRegistry()
     {
         string R(QdrantCollectionRole role) =>
-            _registry?.GetCollectionName(role)
-            ?? QdrantCollectionRegistry.Defaults.GetValueOrDefault(role, role.ToString());
+            _registry.GetCollectionName(role);
 
         return new List<CollectionLink>
         {
