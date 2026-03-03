@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Microsoft.CodeAnalysis.CodeFixes;
 using Ouroboros.Roslynator.Providers;
 
 namespace Ouroboros.Tests.Providers;
