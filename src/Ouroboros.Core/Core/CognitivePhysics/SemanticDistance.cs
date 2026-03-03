@@ -2,60 +2,30 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Numerics.Tensors;
 using System.Runtime.CompilerServices;
 
 namespace Ouroboros.Core.CognitivePhysics;
 
 /// <summary>
-/// Computes semantic distance between concepts using cosine similarity
-/// over embedding vectors. The metric space is normalized to [0, 1].
+/// Provides SIMD-accelerated semantic distance computations between embedding vectors,
+/// backed by <see cref="TensorPrimitives"/> from System.Numerics.Tensors.
 /// </summary>
 public static class SemanticDistance
 {
     /// <summary>
-    /// Computes the cosine similarity between two vectors.
+    /// Computes cosine similarity between two embedding vectors.
+    /// Returns a value in [-1, 1] where 1 means identical direction.
     /// </summary>
-    /// <returns>A value in [-1, 1] where 1 means identical direction.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static double CosineSimilarity(ReadOnlySpan<float> a, ReadOnlySpan<float> b)
-    {
-        if (a.Length != b.Length)
-            throw new ArgumentException("Vectors must have the same dimensionality.");
-
-        if (a.Length == 0)
-            return 0.0;
-
-        double dot = 0.0, normA = 0.0, normB = 0.0;
-
-        for (int i = 0; i < a.Length; i++)
-        {
-            dot += a[i] * (double)b[i];
-            normA += a[i] * (double)a[i];
-            normB += b[i] * (double)b[i];
-        }
-
-        double denominator = Math.Sqrt(normA) * Math.Sqrt(normB);
-        return denominator < 1e-15 ? 0.0 : dot / denominator;
-    }
+        => TensorPrimitives.CosineSimilarity(a, b);
 
     /// <summary>
-    /// Computes the normalized semantic distance between two embedding vectors.
-    /// Returns a value in [0, 1] where 0 means identical and 1 means maximally distant.
+    /// Computes semantic distance as (1 - cosine_similarity) / 2, normalized to [0, 1].
+    /// 0 = identical, 1 = maximally different.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double Compute(ReadOnlySpan<float> a, ReadOnlySpan<float> b) =>
-        Math.Clamp(1.0 - CosineSimilarity(a, b), 0.0, 1.0);
-
-    /// <summary>
-    /// Computes the semantic distance between two concepts using an embedding model.
-    /// </summary>
-    public static async ValueTask<double> ComputeAsync(
-        Ouroboros.Domain.IEmbeddingModel provider,
-        string from,
-        string to)
-    {
-        float[] embeddingA = await provider.CreateEmbeddingsAsync(from);
-        float[] embeddingB = await provider.CreateEmbeddingsAsync(to);
-        return Compute(embeddingA, embeddingB);
-    }
+    public static double Compute(ReadOnlySpan<float> a, ReadOnlySpan<float> b)
+        => (1.0 - CosineSimilarity(a, b)) / 2.0;
 }

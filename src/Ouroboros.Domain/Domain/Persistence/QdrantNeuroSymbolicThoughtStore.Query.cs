@@ -18,7 +18,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore
         await EnsureInitializedAsync(ct);
 
         Filter filter = CreateSessionFilter(sessionId);
-        ScrollResponse results = await _client.ScrollAsync(_config.ThoughtsCollection, filter: filter, limit: 1000, cancellationToken: ct);
+        ScrollResponse results = await _client.ScrollAsync(_thoughtsCollection, filter: filter, limit: 1000, cancellationToken: ct);
 
         return results.Result
             .Select(DeserializeThought)
@@ -51,7 +51,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore
             }
         };
 
-        ScrollResponse results = await _client.ScrollAsync(_config.ThoughtsCollection, filter: filter, limit: (uint)limit, cancellationToken: ct);
+        ScrollResponse results = await _client.ScrollAsync(_thoughtsCollection, filter: filter, limit: (uint)limit, cancellationToken: ct);
 
         return results.Result
             .Select(DeserializeThought)
@@ -80,7 +80,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore
         Filter filter = CreateSessionFilter(sessionId);
 
         IReadOnlyList<ScoredPoint> results = await _client.SearchAsync(
-            _config.ThoughtsCollection,
+            _thoughtsCollection,
             queryEmbedding,
             filter: filter,
             limit: (ulong)limit,
@@ -116,7 +116,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore
             }
         };
 
-        ScrollResponse relations = await _client.ScrollAsync(_config.RelationsCollection, filter: relFilter, limit: 100, cancellationToken: ct);
+        ScrollResponse relations = await _client.ScrollAsync(_relationsCollection, filter: relFilter, limit: 100, cancellationToken: ct);
         HashSet<string?> targetIds = relations.Result
             .Select(r => r.Payload.TryGetValue("target_thought_id", out Value? v) ? v.StringValue : null)
             .Where(id => id != null)
@@ -152,7 +152,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore
         await EnsureInitializedAsync(ct);
 
         // Get all points and extract unique session IDs
-        ScrollResponse results = await _client.ScrollAsync(_config.ThoughtsCollection, limit: 10000, cancellationToken: ct);
+        ScrollResponse results = await _client.ScrollAsync(_thoughtsCollection, limit: 10000, cancellationToken: ct);
 
         return results.Result
             .Select(p => p.Payload.TryGetValue("session_id", out Value? v) ? v.StringValue : null)
@@ -179,7 +179,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore
             }
         };
 
-        ScrollResponse results = await _client.ScrollAsync(_config.RelationsCollection, filter: filter, limit: 100, cancellationToken: ct);
+        ScrollResponse results = await _client.ScrollAsync(_relationsCollection, filter: filter, limit: 100, cancellationToken: ct);
 
         return results.Result
             .Select(DeserializeRelation)
@@ -204,7 +204,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore
             }
         };
 
-        ScrollResponse results = await _client.ScrollAsync(_config.ResultsCollection, filter: filter, limit: 100, cancellationToken: ct);
+        ScrollResponse results = await _client.ScrollAsync(_resultsCollection, filter: filter, limit: 100, cancellationToken: ct);
 
         return results.Result
             .Select(DeserializeResult)
@@ -246,11 +246,11 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore
 
         // Get relations
         Filter relFilter = CreateSessionFilter(sessionId);
-        ScrollResponse relations = await _client.ScrollAsync(_config.RelationsCollection, filter: relFilter, limit: 10000, cancellationToken: ct);
+        ScrollResponse relations = await _client.ScrollAsync(_relationsCollection, filter: relFilter, limit: 10000, cancellationToken: ct);
         List<ThoughtRelation> relationList = relations.Result.Select(DeserializeRelation).Where(r => r != null).Cast<ThoughtRelation>().ToList();
 
         // Get results
-        ScrollResponse results = await _client.ScrollAsync(_config.ResultsCollection, filter: relFilter, limit: 10000, cancellationToken: ct);
+        ScrollResponse results = await _client.ScrollAsync(_resultsCollection, filter: relFilter, limit: 10000, cancellationToken: ct);
         List<ThoughtResult> resultList = results.Result.Select(DeserializeResult).Where(r => r != null).Cast<ThoughtResult>().ToList();
 
         // Calculate chain statistics
@@ -300,7 +300,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore
             }
         };
 
-        ScrollResponse relResults = await _client.ScrollAsync(_config.RelationsCollection, filter: filter, limit: 1000, cancellationToken: ct);
+        ScrollResponse relResults = await _client.ScrollAsync(_relationsCollection, filter: filter, limit: 1000, cancellationToken: ct);
         List<ThoughtRelation> relations = relResults.Result.Select(DeserializeRelation).Where(r => r != null).Cast<ThoughtRelation>().ToList();
 
         Dictionary<Guid, PersistedThought> allThoughts = (await GetThoughtsAsync(sessionId, ct)).ToDictionary(t => t.Id);

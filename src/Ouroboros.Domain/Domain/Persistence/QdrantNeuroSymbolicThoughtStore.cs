@@ -17,9 +17,12 @@ namespace Ouroboros.Domain.Persistence;
 /// </summary>
 public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAsyncDisposable
 {
-    private readonly QdrantNeuroSymbolicConfig _config;
     private readonly QdrantClient _client;
     private readonly Func<string, Task<float[]>>? _embeddingFunc;
+    private readonly string _thoughtsCollection;
+    private readonly string _relationsCollection;
+    private readonly string _resultsCollection;
+    private readonly int _vectorSize;
     private bool _initialized;
     private bool _disposed;
 
@@ -40,29 +43,10 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
         ArgumentNullException.ThrowIfNull(registry);
         ArgumentNullException.ThrowIfNull(settings);
         _embeddingFunc = embeddingFunc;
-        _config = new QdrantNeuroSymbolicConfig(
-            Endpoint: settings.GrpcEndpoint,
-            ThoughtsCollection: registry.GetCollectionName(QdrantCollectionRole.NeuroThoughts),
-            RelationsCollection: registry.GetCollectionName(QdrantCollectionRole.ThoughtRelations),
-            ResultsCollection: registry.GetCollectionName(QdrantCollectionRole.ThoughtResults),
-            VectorSize: settings.DefaultVectorSize);
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="QdrantNeuroSymbolicThoughtStore"/> class.
-    /// </summary>
-    /// <param name="config">Configuration for the store.</param>
-    /// <param name="embeddingFunc">Function to generate embeddings for thoughts.</param>
-    [Obsolete("Use the constructor accepting QdrantClient + IQdrantCollectionRegistry from DI.")]
-    public QdrantNeuroSymbolicThoughtStore(
-        QdrantNeuroSymbolicConfig config,
-        Func<string, Task<float[]>>? embeddingFunc = null)
-    {
-        _config = config ?? throw new ArgumentNullException(nameof(config));
-        _embeddingFunc = embeddingFunc;
-
-        Uri uri = new Uri(config.Endpoint);
-        _client = new QdrantClient(uri.Host, uri.Port > 0 ? uri.Port : 6334, uri.Scheme == "https");
+        _thoughtsCollection = registry.GetCollectionName(QdrantCollectionRole.NeuroThoughts);
+        _relationsCollection = registry.GetCollectionName(QdrantCollectionRole.ThoughtRelations);
+        _resultsCollection = registry.GetCollectionName(QdrantCollectionRole.ThoughtResults);
+        _vectorSize = settings.DefaultVectorSize;
     }
 
     /// <summary>
@@ -80,29 +64,29 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
         try
         {
             // Create thoughts collection
-            if (!await _client.CollectionExistsAsync(_config.ThoughtsCollection, ct))
+            if (!await _client.CollectionExistsAsync(_thoughtsCollection, ct))
             {
                 await _client.CreateCollectionAsync(
-                    _config.ThoughtsCollection,
-                    new VectorParams { Size = (ulong)_config.VectorSize, Distance = Distance.Cosine },
+                    _thoughtsCollection,
+                    new VectorParams { Size = (ulong)_vectorSize, Distance = Distance.Cosine },
                     cancellationToken: ct);
             }
 
             // Create relations collection
-            if (!await _client.CollectionExistsAsync(_config.RelationsCollection, ct))
+            if (!await _client.CollectionExistsAsync(_relationsCollection, ct))
             {
                 await _client.CreateCollectionAsync(
-                    _config.RelationsCollection,
-                    new VectorParams { Size = (ulong)_config.VectorSize, Distance = Distance.Cosine },
+                    _relationsCollection,
+                    new VectorParams { Size = (ulong)_vectorSize, Distance = Distance.Cosine },
                     cancellationToken: ct);
             }
 
             // Create results collection
-            if (!await _client.CollectionExistsAsync(_config.ResultsCollection, ct))
+            if (!await _client.CollectionExistsAsync(_resultsCollection, ct))
             {
                 await _client.CreateCollectionAsync(
-                    _config.ResultsCollection,
-                    new VectorParams { Size = (ulong)_config.VectorSize, Distance = Distance.Cosine },
+                    _resultsCollection,
+                    new VectorParams { Size = (ulong)_vectorSize, Distance = Distance.Cosine },
                     cancellationToken: ct);
             }
 
@@ -132,7 +116,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
         float[] embedding = await GenerateEmbeddingAsync(thought.Content, ct);
         PointStruct point = CreateThoughtPoint(sessionId, thought, embedding);
 
-        await _client.UpsertAsync(_config.ThoughtsCollection, new[] { point }, cancellationToken: ct);
+        await _client.UpsertAsync(_thoughtsCollection, new[] { point }, cancellationToken: ct);
     }
 
     /// <inheritdoc/>
@@ -154,7 +138,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
             for (int i = 0; i < points.Count; i += batchSize)
             {
                 List<PointStruct> batch = points.Skip(i).Take(batchSize).ToList();
-                await _client.UpsertAsync(_config.ThoughtsCollection, batch, cancellationToken: ct);
+                await _client.UpsertAsync(_thoughtsCollection, batch, cancellationToken: ct);
             }
         }
     }
@@ -169,9 +153,9 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
         Filter filter = CreateSessionFilter(sessionId);
 
         // Delete from all collections
-        await _client.DeleteAsync(_config.ThoughtsCollection, filter, cancellationToken: ct);
-        await _client.DeleteAsync(_config.RelationsCollection, filter, cancellationToken: ct);
-        await _client.DeleteAsync(_config.ResultsCollection, filter, cancellationToken: ct);
+        await _client.DeleteAsync(_thoughtsCollection, filter, cancellationToken: ct);
+        await _client.DeleteAsync(_relationsCollection, filter, cancellationToken: ct);
+        await _client.DeleteAsync(_resultsCollection, filter, cancellationToken: ct);
     }
 
     // Statistics and listing methods are in QdrantNeuroSymbolicThoughtStore.Query.cs
@@ -257,7 +241,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
             Payload = { payload }
         };
 
-        await _client.UpsertAsync(_config.RelationsCollection, new[] { point }, cancellationToken: ct);
+        await _client.UpsertAsync(_relationsCollection, new[] { point }, cancellationToken: ct);
     }
 
     /// <summary>
@@ -298,7 +282,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
             Payload = { payload }
         };
 
-        await _client.UpsertAsync(_config.ResultsCollection, new[] { point }, cancellationToken: ct);
+        await _client.UpsertAsync(_resultsCollection, new[] { point }, cancellationToken: ct);
 
         // Create relation from thought to result
         ThoughtRelation relation = new ThoughtRelation(

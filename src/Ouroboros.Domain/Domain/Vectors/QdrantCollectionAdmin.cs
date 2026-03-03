@@ -76,28 +76,6 @@ public sealed partial class QdrantCollectionAdmin : IAsyncDisposable
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="QdrantCollectionAdmin"/> class.
-    /// </summary>
-    /// <param name="endpoint">Qdrant endpoint (defaults to <see cref="DefaultEndpoints.Qdrant"/>).</param>
-    [Obsolete("Use the constructor accepting QdrantClient + IQdrantCollectionRegistry from DI.")]
-    public QdrantCollectionAdmin(string endpoint = DefaultEndpoints.Qdrant)
-    {
-        ArgumentNullException.ThrowIfNull(endpoint);
-        Uri uri = new Uri(endpoint);
-        _client = new QdrantClient(uri.Host, uri.Port > 0 ? uri.Port : 6334, uri.Scheme == "https");
-        _disposeClient = true;
-    }
-
-    /// <summary>
-    /// Initializes a new instance with an existing client.
-    /// </summary>
-    public QdrantCollectionAdmin(QdrantClient client)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-        _disposeClient = false;
-    }
-
-    /// <summary>
     /// Gets all collection links.
     /// </summary>
     public IReadOnlyList<CollectionLink> CollectionLinks => _collectionLinks.AsReadOnly();

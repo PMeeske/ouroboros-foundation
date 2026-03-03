@@ -27,7 +27,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore
         {
             return await _embeddingFunc(text);
         }
-        return new float[_config.VectorSize]; // Zero vector if no embedding
+        return new float[_vectorSize]; // Zero vector if no embedding
     }
 
     private static Filter CreateSessionFilter(string sessionId)

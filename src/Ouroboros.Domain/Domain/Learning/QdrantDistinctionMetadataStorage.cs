@@ -38,48 +38,6 @@ public sealed class QdrantDistinctionMetadataStorage
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="QdrantDistinctionMetadataStorage"/> class.
-    /// </summary>
-    /// <param name="connectionString">Qdrant connection string.</param>
-    /// <param name="logger">Logger instance.</param>
-    [Obsolete("Use the constructor accepting QdrantClient + IQdrantCollectionRegistry from DI.")]
-    public QdrantDistinctionMetadataStorage(
-        string connectionString,
-        ILogger<QdrantDistinctionMetadataStorage> logger)
-    {
-        if (string.IsNullOrWhiteSpace(connectionString))
-        {
-            throw new ArgumentException("Connection string cannot be null or empty", nameof(connectionString));
-        }
-
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _collectionName = "distinction_states";
-
-        // Parse connection string
-        Uri uri = new Uri(connectionString);
-        string host = uri.Host;
-        int port = uri.Port > 0 ? uri.Port : 6334; // Fixed: use gRPC port
-        bool useHttps = uri.Scheme == "https";
-
-        _client = new QdrantClient(host, port, useHttps);
-        _logger.LogInformation("Initialized Qdrant metadata storage: {Host}:{Port}", host, port);
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="QdrantDistinctionMetadataStorage"/> class with existing client.
-    /// </summary>
-    /// <param name="client">Existing Qdrant client.</param>
-    /// <param name="logger">Logger instance.</param>
-    public QdrantDistinctionMetadataStorage(
-        QdrantClient client,
-        ILogger<QdrantDistinctionMetadataStorage> logger)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _collectionName = "distinction_states";
-    }
-
-    /// <summary>
     /// Stores distinction metadata with semantic embedding for retrieval.
     /// </summary>
     /// <param name="weights">The distinction weights containing metadata.</param>

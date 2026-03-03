@@ -18,19 +18,19 @@ public sealed class CognitivePhysicsEngine
     private readonly ChaosInjector _chaos;
     private readonly EvolutionaryAdapter _evolution;
 
-    /// <summary>Initialises the engine with the given embedding provider, ethics gate, and optional configuration.</summary>
+    /// <summary>Initialises the engine with the given embedding provider, optional ethics evaluator, and configuration.</summary>
     /// <param name="embeddingProvider">Provider used to compute semantic distances.</param>
-    /// <param name="ethicsGate">Gate that approves or rejects context transitions.</param>
+    /// <param name="ethicsEvaluator">Optional delegate that evaluates ethical permissibility of transitions. Defaults to always-allow.</param>
     /// <param name="config">Optional configuration; uses <see cref="CognitivePhysicsConfig.Default"/> when null.</param>
     public CognitivePhysicsEngine(
         Ouroboros.Domain.IEmbeddingModel embeddingProvider,
-        IEthicsGate ethicsGate,
+        Func<string, string, ValueTask<EthicsGateResult>>? ethicsEvaluator = null,
         CognitivePhysicsConfig? config = null)
     {
         CognitivePhysicsConfig cfg = config ?? CognitivePhysicsConfig.Default;
 
-        _zeroShift = new ZeroShiftOperator(embeddingProvider, ethicsGate, cfg.ZeroShift);
-        _superposition = new SuperpositionEngine(embeddingProvider, ethicsGate);
+        _zeroShift = new ZeroShiftOperator(embeddingProvider, ethicsEvaluator, cfg.ZeroShift);
+        _superposition = new SuperpositionEngine(embeddingProvider, ethicsEvaluator);
         _chaos = new ChaosInjector(cfg.Chaos);
         _evolution = new EvolutionaryAdapter(cfg.Evolution);
     }

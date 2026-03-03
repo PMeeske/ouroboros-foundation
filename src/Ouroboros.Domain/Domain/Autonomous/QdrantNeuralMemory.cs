@@ -48,22 +48,6 @@ public sealed partial class QdrantNeuralMemory : IDisposable
     }
 
     /// <summary>
-    /// Creates a new Qdrant neural memory instance.
-    /// </summary>
-    /// <param name="qdrantEndpoint">Qdrant gRPC endpoint (defaults to <see cref="DefaultEndpoints.QdrantGrpc"/>).</param>
-    [Obsolete("Use the constructor accepting QdrantClient + IQdrantCollectionRegistry from DI.")]
-    public QdrantNeuralMemory(string qdrantEndpoint = DefaultEndpoints.QdrantGrpc)
-    {
-        Uri uri = new Uri(qdrantEndpoint.TrimEnd('/'));
-        _client = new QdrantClient(uri.Host, uri.Port > 0 ? uri.Port : 6334, uri.Scheme == "https");
-        _neuronMessagesCollection = "ouroboros_neuron_messages";
-        _intentionsCollection = "ouroboros_intentions";
-        _memoriesCollection = "ouroboros_memories";
-        _defaultVectorSize = 768;
-        _disposeClient = true;
-    }
-
-    /// <summary>
     /// Delegate for embedding text.
     /// </summary>
     public Func<string, CancellationToken, Task<float[]>>? EmbedFunction { get; set; }

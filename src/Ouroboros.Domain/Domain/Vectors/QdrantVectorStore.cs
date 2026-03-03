@@ -44,54 +44,6 @@ public sealed partial class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisp
         _disposeClient = false;
     }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="QdrantVectorStore"/> class.
-    /// </summary>
-    /// <param name="connectionString">Qdrant connection string (e.g., <see cref="DefaultEndpoints.Qdrant"/>).</param>
-    /// <param name="collectionName">Name of the collection to use.</param>
-    /// <param name="logger">Optional logger instance.</param>
-    [Obsolete("Use the constructor accepting QdrantClient + IQdrantCollectionRegistry from DI.")]
-    public QdrantVectorStore(string connectionString, string collectionName = "pipeline_vectors", ILogger? logger = null)
-    {
-        if (string.IsNullOrWhiteSpace(connectionString))
-        {
-            throw new ArgumentException("Connection string cannot be null or empty", nameof(connectionString));
-        }
-
-        if (string.IsNullOrWhiteSpace(collectionName))
-        {
-            throw new ArgumentException("Collection name cannot be null or empty", nameof(collectionName));
-        }
-
-        _collectionName = collectionName;
-        _logger = logger;
-
-        // Parse connection string to extract host and port
-        Uri uri = new Uri(connectionString);
-        string host = uri.Host;
-        int port = uri.Port > 0 ? uri.Port : 6334; // Default to gRPC port
-        bool useHttps = uri.Scheme == "https";
-
-        _logger?.LogInformation("Initializing Qdrant client: {Host}:{Port} (HTTPS: {UseHttps})", host, port, useHttps);
-
-        _client = new QdrantClient(host, port, useHttps);
-        _disposeClient = true;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="QdrantVectorStore"/> class with an existing client.
-    /// </summary>
-    /// <param name="client">Existing Qdrant client instance.</param>
-    /// <param name="collectionName">Name of the collection to use.</param>
-    /// <param name="logger">Optional logger instance.</param>
-    public QdrantVectorStore(QdrantClient client, string collectionName = "pipeline_vectors", ILogger? logger = null)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-        _collectionName = collectionName ?? throw new ArgumentNullException(nameof(collectionName));
-        _logger = logger;
-        _disposeClient = false; // Don't dispose client we don't own
-    }
-
     // Search operations are in QdrantVectorStore.Search.cs
     // Admin operations are in QdrantVectorStore.Admin.cs
 

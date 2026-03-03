@@ -26,6 +26,7 @@
     <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
     <PackageReference Include="OllamaSharp" Version="5.4.18" />
+    <PackageReference Include="System.Numerics.Tensors" Version="10.0.0-preview.3.25171.5" />
   </ItemGroup>
 
   <!-- LangChain integration files re-included after API alignment -->
