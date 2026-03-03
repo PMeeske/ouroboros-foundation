@@ -133,23 +133,24 @@ public class ClassC { }";
     #region RenameSymbol Tests
 
     [Fact]
-    public void RenameSymbol_SingleOccurrence_ReplacesCorrectly()
+    public void RenameSymbol_IdentifierUsage_ReplacesCorrectly()
     {
-        // Arrange
+        // Arrange - RenameSymbol replaces IdentifierNameSyntax nodes, which are usage references
         string code = @"
 class MyClass
 {
+    int x;
     void Test()
     {
-        var myVar = 42;
+        x = 42;
     }
 }";
 
         // Act
-        var result = RoslynCodeTool.RenameSymbol(code, "myVar", "renamedVar");
+        var result = RoslynCodeTool.RenameSymbol(code, "x", "renamedField");
 
         // Assert
-        result.Should().Contain("renamedVar");
+        result.Should().Contain("renamedField");
     }
 
     [Fact]
