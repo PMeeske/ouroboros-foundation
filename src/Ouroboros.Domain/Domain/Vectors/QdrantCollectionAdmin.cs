@@ -23,6 +23,7 @@ public sealed partial class QdrantCollectionAdmin : IAsyncDisposable
     private readonly Dictionary<string, CollectionInfo> _collectionCache = new();
     private readonly List<CollectionLink> _collectionLinks = new();
     private bool _initialized;
+    private bool _disposed;
 
     /// <summary>
     /// Known Ouroboros collections and their purposes.
@@ -299,13 +300,16 @@ public sealed partial class QdrantCollectionAdmin : IAsyncDisposable
     }
 
     /// <inheritdoc/>
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
+        if (_disposed) return ValueTask.CompletedTask;
+        _disposed = true;
+
         if (_disposeClient)
         {
             _client.Dispose();
         }
 
-        await Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 }
