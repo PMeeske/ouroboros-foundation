@@ -16,10 +16,19 @@ public static class SemanticDistance
     /// <summary>
     /// Computes cosine similarity between two embedding vectors.
     /// Returns a value in [-1, 1] where 1 means identical direction.
+    /// Returns 0 for empty or zero-magnitude vectors.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static double CosineSimilarity(ReadOnlySpan<float> a, ReadOnlySpan<float> b)
-        => TensorPrimitives.CosineSimilarity(a, b);
+    {
+        if (a.Length == 0 && b.Length == 0)
+        {
+            return 0.0;
+        }
+
+        double result = TensorPrimitives.CosineSimilarity(a, b);
+        return double.IsNaN(result) ? 0.0 : result;
+    }
 
     /// <summary>
     /// Computes semantic distance as (1 - cosine_similarity) / 2, normalized to [0, 1].

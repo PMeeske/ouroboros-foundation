@@ -15,7 +15,7 @@ concurrency:
 jobs:
   mutate-core:
     name: Mutate Core
-    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-mutation-testing.yml@main
+    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-mutation-testing.yml@develop
     with:
       project: src/Ouroboros.Core/Ouroboros.Core.csproj
       test-project: tests/Ouroboros.Core.Tests/Ouroboros.Core.Tests.csproj
@@ -24,7 +24,7 @@ jobs:
 
   mutate-domain:
     name: Mutate Domain
-    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-mutation-testing.yml@main
+    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-mutation-testing.yml@develop
     with:
       project: src/Ouroboros.Domain/Ouroboros.Domain.csproj
       test-project: tests/Ouroboros.Domain.Tests/Ouroboros.Domain.Tests.csproj
@@ -33,7 +33,7 @@ jobs:
 
   mutate-tools:
     name: Mutate Tools
-    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-mutation-testing.yml@main
+    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-mutation-testing.yml@develop
     with:
       project: src/Ouroboros.Tools/Ouroboros.Tools.csproj
       test-project: tests/Ouroboros.Tools.Tests/Ouroboros.Tools.Tests.csproj
@@ -42,7 +42,7 @@ jobs:
 
   mutate-genetic:
     name: Mutate Genetic
-    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-mutation-testing.yml@main
+    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-mutation-testing.yml@develop
     with:
       project: src/Ouroboros.Genetic/Ouroboros.Genetic.csproj
       test-project: tests/Ouroboros.Genetic.Tests/Ouroboros.Genetic.Tests.csproj
@@ -51,7 +51,7 @@ jobs:
 
   mutate-abstractions:
     name: Mutate Abstractions
-    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-mutation-testing.yml@main
+    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-mutation-testing.yml@develop
     with:
       project: src/Ouroboros.Abstractions/Ouroboros.Abstractions.csproj
       test-project: tests/Ouroboros.Abstractions.Tests/Ouroboros.Abstractions.Tests.csproj
@@ -60,7 +60,7 @@ jobs:
 
   mutate-roslynator:
     name: Mutate Roslynator
-    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-mutation-testing.yml@main
+    uses: PMeeske/ouroboros-build/.github/workflows/_reusable-mutation-testing.yml@develop
     with:
       project: src/Ouroboros.Roslynator/Ouroboros.Roslynator.csproj
       test-project: tests/Ouroboros.Roslynator.Tests/Ouroboros.Roslynator.Tests.csproj

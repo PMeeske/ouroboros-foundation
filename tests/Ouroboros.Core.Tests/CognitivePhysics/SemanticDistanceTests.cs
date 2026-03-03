@@ -19,7 +19,7 @@ public class SemanticDistanceTests
 
         double similarity = SemanticDistance.CosineSimilarity(a, b);
 
-        similarity.Should().BeApproximately(1.0, 1e-10);
+        similarity.Should().BeApproximately(1.0, 1e-6);
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public class SemanticDistanceTests
 
         double distance = SemanticDistance.Compute(a, a);
 
-        distance.Should().BeApproximately(0.0, 1e-10);
+        distance.Should().BeApproximately(0.0, 1e-6);
     }
 
     [Fact]

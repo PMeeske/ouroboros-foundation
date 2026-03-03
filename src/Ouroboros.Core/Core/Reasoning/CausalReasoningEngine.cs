@@ -55,7 +55,7 @@ public sealed partial class CausalReasoningEngine : ICausalReasoningEngine
         }
         catch (OperationCanceledException)
         {
-            throw;
+            return Result<CausalGraph, string>.Failure("Causal discovery was cancelled");
         }
     }
 
