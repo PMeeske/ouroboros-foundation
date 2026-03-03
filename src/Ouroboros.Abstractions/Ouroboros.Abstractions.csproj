@@ -93,8 +93,10 @@
         <Compile Include="Core\IChatClientBridge.cs" />
         <Compile Include="Core\IChatCompletionModel.cs" />
         <Compile Include="Core\IEmbeddingGeneratorBridge.cs" />
+        <Compile Include="Core\IOuroborosChatClient.cs" />
         <Compile Include="Core\ToolRegistry.cs" />
         <Compile Include="Domain\IEmbeddingModel.cs" />
+        <Compile Include="Domain\IOuroborosEmbeddingGenerator.cs" />
         <Compile Include="Domain\ActionPrediction.cs" />
         <Compile Include="Domain\AgentModel.cs" />
         <Compile Include="Domain\AgentObservation.cs" />
