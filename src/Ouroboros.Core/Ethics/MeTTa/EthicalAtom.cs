@@ -48,47 +48,47 @@ public sealed class MeTTaHashAttribute : Attribute
 public enum EthicalAtom
 {
     /// <summary>Core relational ethics: harm-care inseparability, meta-ethics.</summary>
-    [MeTTaHash("b7f19e1a66b4e0459a4ad49fff7233215b25ac35d9a6d2dfe05c1ffd4c66e41c",
+    [MeTTaHash("74a8cadd8d7fbcd70a8f07e05a5508b2577b8454123e1b137fd9f223339f15c4",
                "Ouroboros.Ethics.MeTTa.core_ethics.metta")]
     CoreEthics,
 
     /// <summary>Ahimsa: non-harm across action, inaction, speech, indifference.</summary>
-    [MeTTaHash("2e275945ed960f556010447ec9dc98410ff8f8706de98aba7e512ebe726819e9",
+    [MeTTaHash("27b419a10126caccbe62ad2eb5f30cc1ff4649ecadfb283fdc52d09674941b80",
                "Ouroboros.Ethics.MeTTa.ahimsa.metta")]
     Ahimsa,
 
     /// <summary>Levinas: the face of the Other, infinite obligation, finite capacity.</summary>
-    [MeTTaHash("a7f023ed1366f2ddb9e539a001c0fb0a96b7cd48584d49e65f4f03323fcf8f3d",
+    [MeTTaHash("99560e84fc4d49d04004b46448cbd5002f03fec586acb680a2a8acd186216c9f",
                "Ouroboros.Ethics.MeTTa.levinas.metta")]
     Levinas,
 
     /// <summary>Nagarjuna: emptiness, dependent co-arising, two truths.</summary>
-    [MeTTaHash("ab93b56ba2e8f0e02658333b6f33ff2aaa1fb06ad174ea2359096780221ab108",
+    [MeTTaHash("ca3cc7dbfd0f13176d06d548aa38bbe6b6eb7c75f123b93624fdfa8553c7f06b",
                "Ouroboros.Ethics.MeTTa.nagarjuna.metta")]
     Nagarjuna,
 
     /// <summary>Irresolvable paradoxes: incompleteness, re-entry, open questions.</summary>
-    [MeTTaHash("c2961f22105ef08fec6e02281108dbe0c67d339a7b5cdc2dbdacdf9d31b755b3",
+    [MeTTaHash("33a936bd809ec29645aea4cdcfb13faebdf1d2bfd877742f8f97e577146bbb98",
                "Ouroboros.Ethics.MeTTa.paradox.metta")]
     Paradox,
 
     /// <summary>Ubuntu: relational personhood, mutual flourishing.</summary>
-    [MeTTaHash("98c70b5b8e7c245ad1bdbd36e3f1cf607072ac9eac4d9e27fd19c1e7220d3f41",
+    [MeTTaHash("64eb41e45ace3e57b4be4a2bf7990dfd09673629331aaa95f15270ed79f15f56",
                "Ouroboros.Ethics.MeTTa.ubuntu.metta")]
     Ubuntu,
 
     /// <summary>Kantian: universalizability, inherent dignity, duty.</summary>
-    [MeTTaHash("e9d169f53b357f7fce3b116fd330e90213259b99c1f85537a80f7733a6c67c3c",
+    [MeTTaHash("12937f19032594ff4bafc629ae00f4c1e86e12110521ba623e1a36ab9ad4a454",
                "Ouroboros.Ethics.MeTTa.kantian.metta")]
     Kantian,
 
     /// <summary>Bhagavad Gita: inaction as action, detachment from outcome.</summary>
-    [MeTTaHash("a6e14a0a0f3f47878ccc01b91871290286d9b78da8af55210c665ffbb88c30a0",
+    [MeTTaHash("7ad894bf81dc5eb2db01ab362eb669e4170c8b5eb6994696822c607d2a5afa19",
                "Ouroboros.Ethics.MeTTa.bhagavad_gita.metta")]
     BhagavadGita,
 
     /// <summary>Wisdom of disagreement: tradition collision as wisdom, not defect.</summary>
-    [MeTTaHash("a4ba0a92b50dea81a9ce392174dbf880893861812263b92b2525f906e14333b1",
+    [MeTTaHash("722d307944d79a4b0b214f50ad8deb161c62ad37b6193cdc4ee60cbe73d38648",
                "Ouroboros.Ethics.MeTTa.wisdom_of_disagreement.metta")]
     WisdomOfDisagreement,
 }
@@ -208,9 +208,46 @@ public static class EthicalAtomIntegrity
         return ms.ToArray();
     }
 
+    /// <summary>
+    /// Normalizes line endings to LF (\n) by stripping all CR (\r) bytes.
+    /// This ensures consistent hashing across Windows (CRLF) and Linux/macOS (LF).
+    /// </summary>
+    private static byte[] NormalizeLineEndings(byte[] data)
+    {
+        // Fast path: if no CR bytes exist, return the original array unchanged.
+        bool hasCr = false;
+        for (int i = 0; i < data.Length; i++)
+        {
+            if (data[i] == (byte)'\r')
+            {
+                hasCr = true;
+                break;
+            }
+        }
+
+        if (!hasCr)
+        {
+            return data;
+        }
+
+        // Strip all CR bytes, leaving only LF for line endings.
+        byte[] normalized = new byte[data.Length];
+        int writeIndex = 0;
+        for (int i = 0; i < data.Length; i++)
+        {
+            if (data[i] != (byte)'\r')
+            {
+                normalized[writeIndex++] = data[i];
+            }
+        }
+
+        return normalized.AsSpan(0, writeIndex).ToArray();
+    }
+
     private static string ComputeSha256(byte[] data)
     {
-        byte[] hash = SHA256.HashData(data);
+        byte[] normalized = NormalizeLineEndings(data);
+        byte[] hash = SHA256.HashData(normalized);
         return Convert.ToHexStringLower(hash);
     }
 }
