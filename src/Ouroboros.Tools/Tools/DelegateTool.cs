@@ -100,7 +100,7 @@ public sealed class DelegateTool : ITool
                 return Result<string, string>.Success(result);
             }
             catch (OperationCanceledException) { throw; }
-            catch (System.Text.Json.JsonException ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 return Result<string, string>.Failure($"JSON parse failed: {ex.Message}");
             }
