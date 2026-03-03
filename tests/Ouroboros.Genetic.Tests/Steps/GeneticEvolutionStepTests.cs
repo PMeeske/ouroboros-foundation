@@ -121,24 +121,24 @@ public class GeneticEvolutionStepTests
     [Fact]
     public async Task CreateEvolvedStep_WhenBestChromosomeHasNoGenes_ReturnsFailure()
     {
-        // Arrange
-        var emptyChromosome = new Chromosome<int>(new List<int>(), fitness: 1.0);
-        var mockAlgorithm = new Mock<IGeneticAlgorithm<int>>();
+        // Arrange - use string (reference type) so that FirstOrDefault() returns null
+        var emptyChromosome = new Chromosome<string>(new List<string>(), fitness: 1.0);
+        var mockAlgorithm = new Mock<IGeneticAlgorithm<string>>();
         mockAlgorithm.Setup(a => a.EvolveAsync(
-                It.IsAny<IReadOnlyList<IChromosome<int>>>(),
+                It.IsAny<IReadOnlyList<IChromosome<string>>>(),
                 It.IsAny<int>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<IChromosome<int>, string>.Success(emptyChromosome));
+            .ReturnsAsync(Result<IChromosome<string>, string>.Success(emptyChromosome));
 
-        Func<int, Step<string, string>> stepFactory = gene =>
+        Func<string, Step<string, string>> stepFactory = gene =>
             input => Task.FromResult(input);
 
-        var evolutionStep = new GeneticEvolutionStep<string, string, int>(
+        var evolutionStep = new GeneticEvolutionStep<string, string, string>(
             mockAlgorithm.Object, stepFactory);
 
-        var initialPopulation = new List<IChromosome<int>>
+        var initialPopulation = new List<IChromosome<string>>
         {
-            new Chromosome<int>(new List<int> { 1 }),
+            new Chromosome<string>(new List<string> { "a" }),
         };
 
         // Act
@@ -284,24 +284,24 @@ public class GeneticEvolutionStepTests
     [Fact]
     public async Task CreateEvolvedStepWithMetadata_WhenNoGenes_ReturnsFailure()
     {
-        // Arrange
-        var emptyChromosome = new Chromosome<int>(new List<int>(), fitness: 0.5);
-        var mockAlgorithm = new Mock<IGeneticAlgorithm<int>>();
+        // Arrange - use string (reference type) so that FirstOrDefault() returns null
+        var emptyChromosome = new Chromosome<string>(new List<string>(), fitness: 0.5);
+        var mockAlgorithm = new Mock<IGeneticAlgorithm<string>>();
         mockAlgorithm.Setup(a => a.EvolveAsync(
-                It.IsAny<IReadOnlyList<IChromosome<int>>>(),
+                It.IsAny<IReadOnlyList<IChromosome<string>>>(),
                 It.IsAny<int>(),
                 It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result<IChromosome<int>, string>.Success(emptyChromosome));
+            .ReturnsAsync(Result<IChromosome<string>, string>.Success(emptyChromosome));
 
-        Func<int, Step<string, string>> stepFactory = gene =>
+        Func<string, Step<string, string>> stepFactory = gene =>
             input => Task.FromResult(input);
 
-        var evolutionStep = new GeneticEvolutionStep<string, string, int>(
+        var evolutionStep = new GeneticEvolutionStep<string, string, string>(
             mockAlgorithm.Object, stepFactory);
 
-        var initialPopulation = new List<IChromosome<int>>
+        var initialPopulation = new List<IChromosome<string>>
         {
-            new Chromosome<int>(new List<int> { 1 }),
+            new Chromosome<string>(new List<string> { "a" }),
         };
 
         // Act
