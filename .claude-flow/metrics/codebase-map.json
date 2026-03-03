@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-03T15:52:35.629Z",
+  "timestamp": "2026-03-03T19:22:36.828Z",
   "projectRoot": "D:\\project\\ouroboros-foundation",
   "structure": {
     "hasPackageJson": false,
@@ -7,5 +7,5 @@
     "hasClaudeConfig": true,
     "hasClaudeFlow": true
   },
-  "scannedAt": 1772553155629
+  "scannedAt": 1772565756829
 }
