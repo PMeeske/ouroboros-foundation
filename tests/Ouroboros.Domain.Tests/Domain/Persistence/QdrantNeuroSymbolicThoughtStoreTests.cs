@@ -1,7 +1,5 @@
 // Copyright (c) 2025 Ouroboros contributors. Licensed under the MIT License.
 
-#pragma warning disable CS0618 // Obsolete types under test
-
 namespace Ouroboros.Tests.Domain.Persistence;
 
 using System;
@@ -9,7 +7,10 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 using FluentAssertions;
+using Moq;
+using Ouroboros.Core.Configuration;
 using Ouroboros.Domain.Persistence;
+using Qdrant.Client;
 using Xunit;
 
 /// <summary>
@@ -178,13 +179,13 @@ public class QdrantNeuroSymbolicThoughtStoreTests
 
     private static QdrantNeuroSymbolicThoughtStore CreateStoreForReflection()
     {
-        // Use the obsolete constructor for testing pure logic (no Qdrant connection needed)
-#pragma warning disable CS0618
+        var registry = new Mock<IQdrantCollectionRegistry>();
+        registry.Setup(r => r.GetCollectionName(It.IsAny<QdrantCollectionRole>()))
+            .Returns("test_collection");
         return new QdrantNeuroSymbolicThoughtStore(
-            new QdrantNeuroSymbolicConfig(
-                Endpoint: "http://localhost:6334",
-                VectorSize: 4));
-#pragma warning restore CS0618
+            new QdrantClient("localhost"),
+            registry.Object,
+            new QdrantSettings { DefaultVectorSize = 4 });
     }
 
     [Fact]
@@ -357,12 +358,18 @@ public class QdrantNeuroSymbolicThoughtStoreTests
     // ----------------------------------------------------------------
 
     [Fact]
-    public void Constructor_Obsolete_NullConfig_ThrowsArgumentNull()
+    public void Constructor_NullClient_ThrowsArgumentNull()
     {
+        // Arrange
+        var registry = new Mock<IQdrantCollectionRegistry>();
+        registry.Setup(r => r.GetCollectionName(It.IsAny<QdrantCollectionRole>()))
+            .Returns("test_collection");
+
         // Act
-#pragma warning disable CS0618
-        Action act = () => new QdrantNeuroSymbolicThoughtStore((QdrantNeuroSymbolicConfig)null!);
-#pragma warning restore CS0618
+        Action act = () => new QdrantNeuroSymbolicThoughtStore(
+            null!,
+            registry.Object,
+            new QdrantSettings());
 
         // Assert
         act.Should().Throw<ArgumentNullException>();
@@ -376,11 +383,14 @@ public class QdrantNeuroSymbolicThoughtStoreTests
     public async Task SupportsSemanticSearch_WithEmbeddingFunc_ReturnsTrue()
     {
         // Arrange
-#pragma warning disable CS0618
+        var registry = new Mock<IQdrantCollectionRegistry>();
+        registry.Setup(r => r.GetCollectionName(It.IsAny<QdrantCollectionRole>()))
+            .Returns("test_collection");
         var store = new QdrantNeuroSymbolicThoughtStore(
-            new QdrantNeuroSymbolicConfig(),
+            new QdrantClient("localhost"),
+            registry.Object,
+            new QdrantSettings(),
             embeddingFunc: _ => Task.FromResult(new float[] { 1f, 2f }));
-#pragma warning restore CS0618
 
         try
         {
@@ -397,11 +407,14 @@ public class QdrantNeuroSymbolicThoughtStoreTests
     public async Task SupportsSemanticSearch_WithoutEmbeddingFunc_ReturnsFalse()
     {
         // Arrange
-#pragma warning disable CS0618
+        var registry = new Mock<IQdrantCollectionRegistry>();
+        registry.Setup(r => r.GetCollectionName(It.IsAny<QdrantCollectionRole>()))
+            .Returns("test_collection");
         var store = new QdrantNeuroSymbolicThoughtStore(
-            new QdrantNeuroSymbolicConfig(),
+            new QdrantClient("localhost"),
+            registry.Object,
+            new QdrantSettings(),
             embeddingFunc: null);
-#pragma warning restore CS0618
 
         try
         {

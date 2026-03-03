@@ -1,7 +1,5 @@
 // Copyright (c) 2025 Ouroboros contributors. Licensed under the MIT License.
 
-#pragma warning disable CS0618 // Obsolete constructor under test
-
 namespace Ouroboros.Tests.Domain.Vectors;
 
 using System;
@@ -10,6 +8,8 @@ using System.Linq;
 using System.Reflection;
 using FluentAssertions;
 using Google.Protobuf.Collections;
+using Moq;
+using Ouroboros.Core.Configuration;
 using Ouroboros.Domain.Vectors;
 using Qdrant.Client.Grpc;
 using QdrantClient = global::Qdrant.Client.QdrantClient;
@@ -281,65 +281,32 @@ public class QdrantVectorStoreTests
     // ----------------------------------------------------------------
 
     [Fact]
-    public void Constructor_NullConnectionString_ThrowsArgumentException()
-    {
-        // Act
-#pragma warning disable CS0618
-        Action act = () => new QdrantVectorStore((string)null!, "collection");
-#pragma warning restore CS0618
-
-        // Assert
-        act.Should().Throw<ArgumentException>();
-    }
-
-    [Fact]
-    public void Constructor_EmptyConnectionString_ThrowsArgumentException()
-    {
-        // Act
-#pragma warning disable CS0618
-        Action act = () => new QdrantVectorStore("", "collection");
-#pragma warning restore CS0618
-
-        // Assert
-        act.Should().Throw<ArgumentException>();
-    }
-
-    [Fact]
-    public void Constructor_EmptyCollectionName_ThrowsArgumentException()
-    {
-        // Act
-#pragma warning disable CS0618
-        Action act = () => new QdrantVectorStore("http://localhost:6334", "");
-#pragma warning restore CS0618
-
-        // Assert
-        act.Should().Throw<ArgumentException>();
-    }
-
-    [Fact]
     public void Constructor_NullClient_ThrowsArgumentNullException()
     {
+        // Arrange
+        var registry = new Mock<IQdrantCollectionRegistry>();
+        registry.Setup(r => r.GetCollectionName(It.IsAny<QdrantCollectionRole>()))
+            .Returns("test_collection");
+
         // Act
         Action act = () => new QdrantVectorStore(
             client: (QdrantClient)null!,
-            collectionName: "collection",
-            logger: null);
+            registry: registry.Object);
 
         // Assert
         act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
-    public void Constructor_NullCollectionName_ThrowsArgumentNullException()
+    public void Constructor_NullRegistry_ThrowsArgumentNullException()
     {
-        // Arrange - use the client+collection overload and pass null for collection name
+        // Act
         Action act = () =>
         {
             using var client = new QdrantClient("localhost");
             _ = new QdrantVectorStore(
                 client: client,
-                collectionName: (string)null!,
-                logger: null);
+                registry: (IQdrantCollectionRegistry)null!);
         };
 
         // Assert

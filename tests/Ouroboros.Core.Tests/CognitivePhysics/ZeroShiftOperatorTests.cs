@@ -12,10 +12,14 @@ namespace Ouroboros.Tests.CognitivePhysics;
 public class ZeroShiftOperatorTests
 {
     private readonly FakeEmbeddingProvider _provider = new();
-    private readonly FakeEthicsGate _gate = new();
+    private readonly Dictionary<string, EthicsGateResult> _rules = new();
+
+    private Func<string, string, ValueTask<EthicsGateResult>> EthicsEvaluator =>
+        (_, target) => ValueTask.FromResult(
+            _rules.TryGetValue(target, out var r) ? r : EthicsGateResult.Allow());
 
     private ZeroShiftOperator CreateOperator(ZeroShiftConfig? config = null) =>
-        new(_provider, _gate, config);
+        new(_provider, EthicsEvaluator, config);
 
     [Fact]
     public async Task Shift_EmptyTarget_ShouldFail()
@@ -44,7 +48,7 @@ public class ZeroShiftOperatorTests
     [Fact]
     public async Task Shift_EthicsDenied_ShouldFail()
     {
-        _gate.SetRule("forbidden", EthicsGateResult.Deny("Not allowed"));
+        _rules["forbidden"] = EthicsGateResult.Deny("Not allowed");
         ZeroShiftOperator op = CreateOperator();
         CognitiveState state = CognitiveState.Create("math");
 
@@ -57,7 +61,7 @@ public class ZeroShiftOperatorTests
     [Fact]
     public async Task Shift_EthicsUncertain_ShouldFailWithPenalty()
     {
-        _gate.SetRule("risky", EthicsGateResult.Uncertain("Ambiguous domain"));
+        _rules["risky"] = EthicsGateResult.Uncertain("Ambiguous domain");
         ZeroShiftOperator op = CreateOperator(new ZeroShiftConfig(UncertaintyPenalty: 10.0));
         CognitiveState state = CognitiveState.Create("math", 50.0);
 
@@ -71,7 +75,7 @@ public class ZeroShiftOperatorTests
     [Fact]
     public async Task Shift_EthicsUncertain_ShouldClampResourcesAtZero()
     {
-        _gate.SetRule("risky", EthicsGateResult.Uncertain("Ambiguous domain"));
+        _rules["risky"] = EthicsGateResult.Uncertain("Ambiguous domain");
         ZeroShiftOperator op = CreateOperator(new ZeroShiftConfig(UncertaintyPenalty: 100.0));
         CognitiveState state = CognitiveState.Create("math", 5.0);
 

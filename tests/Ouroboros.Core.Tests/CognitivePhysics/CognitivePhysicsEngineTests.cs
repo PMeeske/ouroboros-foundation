@@ -14,10 +14,14 @@ namespace Ouroboros.Tests.CognitivePhysics;
 public class CognitivePhysicsEngineTests
 {
     private readonly FakeEmbeddingProvider _provider = new();
-    private readonly FakeEthicsGate _gate = new();
+    private readonly Dictionary<string, EthicsGateResult> _rules = new();
+
+    private Func<string, string, ValueTask<EthicsGateResult>> EthicsEvaluator =>
+        (_, target) => ValueTask.FromResult(
+            _rules.TryGetValue(target, out var r) ? r : EthicsGateResult.Allow());
 
     private CognitivePhysicsEngine CreateEngine(CognitivePhysicsConfig? config = null) =>
-        new(_provider, _gate, config);
+        new(_provider, EthicsEvaluator, config);
 
     [Fact]
     public async Task ShiftStep_Success_ShouldReturnSuccessResult()
@@ -36,7 +40,7 @@ public class CognitivePhysicsEngineTests
     [Fact]
     public async Task ShiftStep_Failure_ShouldReturnFailureResult()
     {
-        _gate.SetRule("forbidden", EthicsGateResult.Deny("Nope"));
+        _rules["forbidden"] = EthicsGateResult.Deny("Nope");
         CognitivePhysicsEngine engine = CreateEngine();
         CognitiveState state = CognitiveState.Create("math");
 
@@ -120,7 +124,7 @@ public class CognitivePhysicsEngineTests
     {
         _provider.SetEmbedding("a", [1.0f, 0.0f]);
         _provider.SetEmbedding("b", [0.9f, 0.1f]);
-        _gate.SetRule("blocked", EthicsGateResult.Deny("No"));
+        _rules["blocked"] = EthicsGateResult.Deny("No");
         CognitivePhysicsEngine engine = CreateEngine();
         CognitiveState state = CognitiveState.Create("a", 100.0);
 
