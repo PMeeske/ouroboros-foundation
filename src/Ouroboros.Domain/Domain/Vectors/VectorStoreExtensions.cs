@@ -1,4 +1,5 @@
 using LangChain.DocumentLoaders;
+using Microsoft.Extensions.AI;
 
 namespace Ouroboros.Domain.Vectors;
 
@@ -30,6 +31,35 @@ public static class VectorStoreExtensions
         if (query is null) query = string.Empty;
 
         float[] embedding = await embeddingModel.CreateEmbeddingsAsync(query, cancellationToken).ConfigureAwait(false);
+        return await store.GetSimilarDocumentsAsync(embedding, amount, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Retrieves similar documents from the vector store based on a text query
+    /// using a MEAI <see cref="IEmbeddingGenerator{String, Embedding}"/>.
+    /// </summary>
+    /// <param name="store">The vector store to search.</param>
+    /// <param name="generator">MEAI embedding generator.</param>
+    /// <param name="query">The text query to search for.</param>
+    /// <param name="amount">Number of similar documents to retrieve (default: 5).</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Collection of similar documents.</returns>
+    public static async Task<IReadOnlyCollection<Document>> GetSimilarDocuments(
+        this IVectorStore store,
+        IEmbeddingGenerator<string, Embedding<float>> generator,
+        string query,
+        int amount = 5,
+        CancellationToken cancellationToken = default)
+    {
+        if (store is null) throw new ArgumentNullException(nameof(store));
+        if (generator is null) throw new ArgumentNullException(nameof(generator));
+        if (query is null) query = string.Empty;
+
+        GeneratedEmbeddings<Embedding<float>> result = await generator
+            .GenerateAsync([query], cancellationToken: cancellationToken)
+            .ConfigureAwait(false);
+
+        float[] embedding = result.Count > 0 ? result[0].Vector.ToArray() : [];
         return await store.GetSimilarDocumentsAsync(embedding, amount, cancellationToken).ConfigureAwait(false);
     }
 }
