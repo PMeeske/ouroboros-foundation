@@ -5,7 +5,6 @@
 namespace Ouroboros.Tests.Genetic.Extensions;
 
 using FluentAssertions;
-using Moq;
 using Ouroboros.Core.Steps;
 using Ouroboros.Genetic.Abstractions;
 using Ouroboros.Genetic.Core;
@@ -16,12 +15,13 @@ using Xunit;
 
 /// <summary>
 /// Tests for the EvolutionPipelineExtensions class.
+/// Uses manual test doubles instead of Moq because SimpleChromosome is internal.
 /// </summary>
 [Trait("Category", "Unit")]
 public class EvolutionPipelineExtensionsTests
 {
     [Fact]
-    public async Task Evolve_WithMockedEngine_ReturnsResult()
+    public async Task Evolve_WithFakeEngine_ReturnsResult()
     {
         // Arrange
         var bestChromosome = new SimpleChromosome(50.0, fitness: 0.9);
@@ -30,11 +30,9 @@ public class EvolutionPipelineExtensionsTests
             bestChromosome,
         });
 
-        var mockEngine = new Mock<IEvolutionEngine<SimpleChromosome>>();
-        mockEngine.Setup(e => e.EvolveAsync(It.IsAny<EvolutionPopulation<SimpleChromosome>>(), 5))
-            .ReturnsAsync(Result<EvolutionPopulation<SimpleChromosome>>.Success(evolvedPopulation));
-        mockEngine.Setup(e => e.GetBest(It.IsAny<EvolutionPopulation<SimpleChromosome>>()))
-            .Returns(Option<SimpleChromosome>.Some(bestChromosome));
+        var engine = new FakeEvolutionEngine(
+            Result<EvolutionPopulation<SimpleChromosome>>.Success(evolvedPopulation),
+            Option<SimpleChromosome>.Some(bestChromosome));
 
         Step<int, EvolutionPopulation<SimpleChromosome>> inputStep = input =>
         {
@@ -46,7 +44,7 @@ public class EvolutionPipelineExtensionsTests
         };
 
         // Act
-        var pipeline = inputStep.Evolve(mockEngine.Object, 5);
+        var pipeline = inputStep.Evolve(engine, 5);
         var result = await pipeline(10);
 
         // Assert
@@ -55,7 +53,7 @@ public class EvolutionPipelineExtensionsTests
     }
 
     [Fact]
-    public async Task EvolvePopulation_WithMockedEngine_ReturnsPopulation()
+    public async Task EvolvePopulation_WithFakeEngine_ReturnsPopulation()
     {
         // Arrange
         var evolvedPopulation = new EvolutionPopulation<SimpleChromosome>(new[]
@@ -64,9 +62,9 @@ public class EvolutionPipelineExtensionsTests
             new SimpleChromosome(20.0, fitness: 0.9),
         });
 
-        var mockEngine = new Mock<IEvolutionEngine<SimpleChromosome>>();
-        mockEngine.Setup(e => e.EvolveAsync(It.IsAny<EvolutionPopulation<SimpleChromosome>>(), 10))
-            .ReturnsAsync(Result<EvolutionPopulation<SimpleChromosome>>.Success(evolvedPopulation));
+        var engine = new FakeEvolutionEngine(
+            Result<EvolutionPopulation<SimpleChromosome>>.Success(evolvedPopulation),
+            Option<SimpleChromosome>.None());
 
         Step<int, EvolutionPopulation<SimpleChromosome>> inputStep = input =>
             Task.FromResult(new EvolutionPopulation<SimpleChromosome>(new[]
@@ -75,7 +73,7 @@ public class EvolutionPipelineExtensionsTests
             }));
 
         // Act
-        var pipeline = inputStep.EvolvePopulation(mockEngine.Object, 10);
+        var pipeline = inputStep.EvolvePopulation(engine, 10);
         var result = await pipeline(5);
 
         // Assert
@@ -197,5 +195,56 @@ public class EvolutionPipelineExtensionsTests
         // Assert
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task Evolve_WhenEngineReturnsFailure_PropagatesFailure()
+    {
+        // Arrange
+        var engine = new FakeEvolutionEngine(
+            Result<EvolutionPopulation<SimpleChromosome>>.Failure("Engine broke"),
+            Option<SimpleChromosome>.None());
+
+        Step<int, EvolutionPopulation<SimpleChromosome>> inputStep = input =>
+            Task.FromResult(new EvolutionPopulation<SimpleChromosome>(new[]
+            {
+                new SimpleChromosome(input * 1.0),
+            }));
+
+        // Act
+        var pipeline = inputStep.Evolve(engine, 5);
+        var result = await pipeline(10);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Contain("Engine broke");
+    }
+
+    /// <summary>
+    /// Manual test double for IEvolutionEngine to avoid Moq proxy issues with internal types.
+    /// </summary>
+    private sealed class FakeEvolutionEngine : IEvolutionEngine<SimpleChromosome>
+    {
+        private readonly Result<EvolutionPopulation<SimpleChromosome>> evolveResult;
+        private readonly Option<SimpleChromosome> bestResult;
+
+        public FakeEvolutionEngine(
+            Result<EvolutionPopulation<SimpleChromosome>> evolveResult,
+            Option<SimpleChromosome> bestResult)
+        {
+            this.evolveResult = evolveResult;
+            this.bestResult = bestResult;
+        }
+
+        public Task<Result<EvolutionPopulation<SimpleChromosome>>> EvolveAsync(
+            EvolutionPopulation<SimpleChromosome> initialPopulation, int generations)
+        {
+            return Task.FromResult(this.evolveResult);
+        }
+
+        public Option<SimpleChromosome> GetBest(EvolutionPopulation<SimpleChromosome> population)
+        {
+            return this.bestResult;
+        }
     }
 }

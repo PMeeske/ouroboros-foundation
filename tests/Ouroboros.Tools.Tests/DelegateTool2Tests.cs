@@ -83,7 +83,8 @@ public class DelegateTool2Tests
     public async Task InvokeAsync_SyncFunction_Exception_ReturnsFailure()
     {
         // Arrange
-        var tool = new DelegateTool("error_tool", "Throws", (string _) => throw new InvalidOperationException("boom"));
+        Func<string, string> throwingFunc = _ => throw new InvalidOperationException("boom");
+        var tool = new DelegateTool("error_tool", "Throws", throwingFunc);
 
         // Act
         var result = await tool.InvokeAsync("input");
@@ -97,8 +98,8 @@ public class DelegateTool2Tests
     public async Task InvokeAsync_AsyncFunction_Exception_ReturnsFailure()
     {
         // Arrange
-        var tool = new DelegateTool("error_tool", "Throws",
-            (string _) => throw new InvalidOperationException("async boom"));
+        Func<string, Task<string>> throwingFunc = _ => throw new InvalidOperationException("async boom");
+        var tool = new DelegateTool("error_tool", "Throws", throwingFunc);
 
         // Act
         var result = await tool.InvokeAsync("input");

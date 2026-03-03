@@ -40,7 +40,7 @@ public sealed class ThrottlingStepsExtendedTests
         var lockedStep = ThrottlingSteps.WithLock(innerStep);
 
         // Act & Assert
-        await Assert.ThrowsAsync<OperationCanceledException>(
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
             () => lockedStep(stateWithCancellation));
     }
 

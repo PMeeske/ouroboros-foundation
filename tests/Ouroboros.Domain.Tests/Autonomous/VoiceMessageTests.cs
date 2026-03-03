@@ -84,7 +84,7 @@ public class SpeechRequestTests
         // Assert
         request.Text.Should().Be("Speak this");
         request.Persona.Should().Be("Agent");
-        request.Completion.Should().Be(tcs);
+        request.Completion.Should().BeSameAs(tcs);
     }
 
     [Fact]
@@ -94,7 +94,7 @@ public class SpeechRequestTests
         var request = new SpeechRequest("Text", "Persona");
 
         // Assert
-        request.Completion.Should().BeNull();
+        (request.Completion is null).Should().BeTrue();
     }
 
     [Fact]

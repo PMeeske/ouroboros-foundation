@@ -5,7 +5,6 @@
 namespace Ouroboros.Tests.Genetic.Extensions;
 
 using FluentAssertions;
-using Moq;
 using Ouroboros.Core.Steps;
 using Ouroboros.Genetic.Abstractions;
 using Ouroboros.Genetic.Core;
@@ -15,6 +14,7 @@ using Xunit;
 
 /// <summary>
 /// Tests for the static GeneticEvolutionStep class in Genetic/Extensions.
+/// Uses manual test doubles instead of Moq because SimpleChromosome is internal.
 /// </summary>
 [Trait("Category", "Unit")]
 public class GeneticEvolutionStepStaticTests
@@ -30,13 +30,11 @@ public class GeneticEvolutionStepStaticTests
             new SimpleChromosome(10.0, fitness: 0.5),
         });
 
-        var mockEngine = new Mock<IEvolutionEngine<SimpleChromosome>>();
-        mockEngine.Setup(e => e.EvolveAsync(It.IsAny<EvolutionPopulation<SimpleChromosome>>(), 10))
-            .ReturnsAsync(Result<EvolutionPopulation<SimpleChromosome>>.Success(evolvedPopulation));
-        mockEngine.Setup(e => e.GetBest(It.IsAny<EvolutionPopulation<SimpleChromosome>>()))
-            .Returns(Option<SimpleChromosome>.Some(bestChromosome));
+        var engine = new FakeEvolutionEngine(
+            Result<EvolutionPopulation<SimpleChromosome>>.Success(evolvedPopulation),
+            Option<SimpleChromosome>.Some(bestChromosome));
 
-        var step = GeneticEvolutionStep.CreateEvolutionStep(mockEngine.Object, 10);
+        var step = GeneticEvolutionStep.CreateEvolutionStep(engine, 10);
         var initialPopulation = new EvolutionPopulation<SimpleChromosome>(new[]
         {
             new SimpleChromosome(1.0),
@@ -56,11 +54,11 @@ public class GeneticEvolutionStepStaticTests
     public async Task CreateEvolutionStep_WhenEvolutionFails_ReturnsFailure()
     {
         // Arrange
-        var mockEngine = new Mock<IEvolutionEngine<SimpleChromosome>>();
-        mockEngine.Setup(e => e.EvolveAsync(It.IsAny<EvolutionPopulation<SimpleChromosome>>(), It.IsAny<int>()))
-            .ReturnsAsync(Result<EvolutionPopulation<SimpleChromosome>>.Failure("Engine error"));
+        var engine = new FakeEvolutionEngine(
+            Result<EvolutionPopulation<SimpleChromosome>>.Failure("Engine error"),
+            Option<SimpleChromosome>.None());
 
-        var step = GeneticEvolutionStep.CreateEvolutionStep(mockEngine.Object, 5);
+        var step = GeneticEvolutionStep.CreateEvolutionStep(engine, 5);
         var population = new EvolutionPopulation<SimpleChromosome>(new[]
         {
             new SimpleChromosome(1.0),
@@ -78,8 +76,11 @@ public class GeneticEvolutionStepStaticTests
     public async Task CreateEvolutionStep_WhenNullPopulation_ReturnsFailure()
     {
         // Arrange
-        var mockEngine = new Mock<IEvolutionEngine<SimpleChromosome>>();
-        var step = GeneticEvolutionStep.CreateEvolutionStep(mockEngine.Object, 5);
+        var engine = new FakeEvolutionEngine(
+            Result<EvolutionPopulation<SimpleChromosome>>.Failure("unused"),
+            Option<SimpleChromosome>.None());
+
+        var step = GeneticEvolutionStep.CreateEvolutionStep(engine, 5);
 
         // Act
         var result = await step(null!);
@@ -98,13 +99,11 @@ public class GeneticEvolutionStepStaticTests
             new SimpleChromosome(1.0),
         });
 
-        var mockEngine = new Mock<IEvolutionEngine<SimpleChromosome>>();
-        mockEngine.Setup(e => e.EvolveAsync(It.IsAny<EvolutionPopulation<SimpleChromosome>>(), It.IsAny<int>()))
-            .ReturnsAsync(Result<EvolutionPopulation<SimpleChromosome>>.Success(evolvedPopulation));
-        mockEngine.Setup(e => e.GetBest(It.IsAny<EvolutionPopulation<SimpleChromosome>>()))
-            .Returns(Option<SimpleChromosome>.None());
+        var engine = new FakeEvolutionEngine(
+            Result<EvolutionPopulation<SimpleChromosome>>.Success(evolvedPopulation),
+            Option<SimpleChromosome>.None());
 
-        var step = GeneticEvolutionStep.CreateEvolutionStep(mockEngine.Object, 5);
+        var step = GeneticEvolutionStep.CreateEvolutionStep(engine, 5);
         var population = new EvolutionPopulation<SimpleChromosome>(new[]
         {
             new SimpleChromosome(1.0),
@@ -128,11 +127,11 @@ public class GeneticEvolutionStepStaticTests
             new SimpleChromosome(43.0, fitness: 0.8),
         });
 
-        var mockEngine = new Mock<IEvolutionEngine<SimpleChromosome>>();
-        mockEngine.Setup(e => e.EvolveAsync(It.IsAny<EvolutionPopulation<SimpleChromosome>>(), 15))
-            .ReturnsAsync(Result<EvolutionPopulation<SimpleChromosome>>.Success(evolvedPopulation));
+        var engine = new FakeEvolutionEngine(
+            Result<EvolutionPopulation<SimpleChromosome>>.Success(evolvedPopulation),
+            Option<SimpleChromosome>.None());
 
-        var step = GeneticEvolutionStep.CreatePopulationEvolutionStep(mockEngine.Object, 15);
+        var step = GeneticEvolutionStep.CreatePopulationEvolutionStep(engine, 15);
         var initialPopulation = new EvolutionPopulation<SimpleChromosome>(new[]
         {
             new SimpleChromosome(1.0),
@@ -151,8 +150,11 @@ public class GeneticEvolutionStepStaticTests
     public async Task CreatePopulationEvolutionStep_WhenNullPopulation_ReturnsFailure()
     {
         // Arrange
-        var mockEngine = new Mock<IEvolutionEngine<SimpleChromosome>>();
-        var step = GeneticEvolutionStep.CreatePopulationEvolutionStep(mockEngine.Object, 5);
+        var engine = new FakeEvolutionEngine(
+            Result<EvolutionPopulation<SimpleChromosome>>.Failure("unused"),
+            Option<SimpleChromosome>.None());
+
+        var step = GeneticEvolutionStep.CreatePopulationEvolutionStep(engine, 5);
 
         // Act
         var result = await step(null!);
@@ -166,11 +168,11 @@ public class GeneticEvolutionStepStaticTests
     public async Task CreatePopulationEvolutionStep_WhenFails_PropagatesError()
     {
         // Arrange
-        var mockEngine = new Mock<IEvolutionEngine<SimpleChromosome>>();
-        mockEngine.Setup(e => e.EvolveAsync(It.IsAny<EvolutionPopulation<SimpleChromosome>>(), It.IsAny<int>()))
-            .ReturnsAsync(Result<EvolutionPopulation<SimpleChromosome>>.Failure("Population too small"));
+        var engine = new FakeEvolutionEngine(
+            Result<EvolutionPopulation<SimpleChromosome>>.Failure("Population too small"),
+            Option<SimpleChromosome>.None());
 
-        var step = GeneticEvolutionStep.CreatePopulationEvolutionStep(mockEngine.Object, 5);
+        var step = GeneticEvolutionStep.CreatePopulationEvolutionStep(engine, 5);
         var population = new EvolutionPopulation<SimpleChromosome>(new[]
         {
             new SimpleChromosome(1.0),
@@ -194,11 +196,9 @@ public class GeneticEvolutionStepStaticTests
             bestChromosome,
         });
 
-        var mockEngine = new Mock<IEvolutionEngine<SimpleChromosome>>();
-        mockEngine.Setup(e => e.EvolveAsync(It.IsAny<EvolutionPopulation<SimpleChromosome>>(), 10))
-            .ReturnsAsync(Result<EvolutionPopulation<SimpleChromosome>>.Success(evolvedPopulation));
-        mockEngine.Setup(e => e.GetBest(It.IsAny<EvolutionPopulation<SimpleChromosome>>()))
-            .Returns(Option<SimpleChromosome>.Some(bestChromosome));
+        var engine = new FakeEvolutionEngine(
+            Result<EvolutionPopulation<SimpleChromosome>>.Success(evolvedPopulation),
+            Option<SimpleChromosome>.Some(bestChromosome));
 
         Func<string, Result<EvolutionPopulation<SimpleChromosome>>> factory = input =>
         {
@@ -209,7 +209,7 @@ public class GeneticEvolutionStepStaticTests
             return Result<EvolutionPopulation<SimpleChromosome>>.Success(pop);
         };
 
-        var step = GeneticEvolutionStep.CreateEvolveFromInputStep(factory, mockEngine.Object, 10);
+        var step = GeneticEvolutionStep.CreateEvolveFromInputStep(factory, engine, 10);
 
         // Act
         var result = await step("test input");
@@ -223,12 +223,14 @@ public class GeneticEvolutionStepStaticTests
     public async Task CreateEvolveFromInputStep_WhenFactoryFails_ReturnsFailure()
     {
         // Arrange
-        var mockEngine = new Mock<IEvolutionEngine<SimpleChromosome>>();
+        var engine = new FakeEvolutionEngine(
+            Result<EvolutionPopulation<SimpleChromosome>>.Failure("unused"),
+            Option<SimpleChromosome>.None());
 
         Func<string, Result<EvolutionPopulation<SimpleChromosome>>> factory = input =>
             Result<EvolutionPopulation<SimpleChromosome>>.Failure("Invalid input");
 
-        var step = GeneticEvolutionStep.CreateEvolveFromInputStep(factory, mockEngine.Object, 10);
+        var step = GeneticEvolutionStep.CreateEvolveFromInputStep(factory, engine, 10);
 
         // Act
         var result = await step("bad input");
@@ -242,15 +244,15 @@ public class GeneticEvolutionStepStaticTests
     public async Task CreateEvolveFromInputStep_WhenEvolutionFails_ReturnsFailure()
     {
         // Arrange
-        var mockEngine = new Mock<IEvolutionEngine<SimpleChromosome>>();
-        mockEngine.Setup(e => e.EvolveAsync(It.IsAny<EvolutionPopulation<SimpleChromosome>>(), It.IsAny<int>()))
-            .ReturnsAsync(Result<EvolutionPopulation<SimpleChromosome>>.Failure("Evolution error"));
+        var engine = new FakeEvolutionEngine(
+            Result<EvolutionPopulation<SimpleChromosome>>.Failure("Evolution error"),
+            Option<SimpleChromosome>.None());
 
         Func<string, Result<EvolutionPopulation<SimpleChromosome>>> factory = input =>
             Result<EvolutionPopulation<SimpleChromosome>>.Success(
                 new EvolutionPopulation<SimpleChromosome>(new[] { new SimpleChromosome(1.0) }));
 
-        var step = GeneticEvolutionStep.CreateEvolveFromInputStep(factory, mockEngine.Object, 10);
+        var step = GeneticEvolutionStep.CreateEvolveFromInputStep(factory, engine, 10);
 
         // Act
         var result = await step("input");
@@ -269,17 +271,15 @@ public class GeneticEvolutionStepStaticTests
             new SimpleChromosome(1.0),
         });
 
-        var mockEngine = new Mock<IEvolutionEngine<SimpleChromosome>>();
-        mockEngine.Setup(e => e.EvolveAsync(It.IsAny<EvolutionPopulation<SimpleChromosome>>(), It.IsAny<int>()))
-            .ReturnsAsync(Result<EvolutionPopulation<SimpleChromosome>>.Success(evolvedPopulation));
-        mockEngine.Setup(e => e.GetBest(It.IsAny<EvolutionPopulation<SimpleChromosome>>()))
-            .Returns(Option<SimpleChromosome>.None());
+        var engine = new FakeEvolutionEngine(
+            Result<EvolutionPopulation<SimpleChromosome>>.Success(evolvedPopulation),
+            Option<SimpleChromosome>.None());
 
         Func<string, Result<EvolutionPopulation<SimpleChromosome>>> factory = input =>
             Result<EvolutionPopulation<SimpleChromosome>>.Success(
                 new EvolutionPopulation<SimpleChromosome>(new[] { new SimpleChromosome(1.0) }));
 
-        var step = GeneticEvolutionStep.CreateEvolveFromInputStep(factory, mockEngine.Object, 10);
+        var step = GeneticEvolutionStep.CreateEvolveFromInputStep(factory, engine, 10);
 
         // Act
         var result = await step("input");
@@ -287,5 +287,33 @@ public class GeneticEvolutionStepStaticTests
         // Assert
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Contain("No best chromosome");
+    }
+
+    /// <summary>
+    /// Manual test double for IEvolutionEngine to avoid Moq proxy issues with internal types.
+    /// </summary>
+    private sealed class FakeEvolutionEngine : IEvolutionEngine<SimpleChromosome>
+    {
+        private readonly Result<EvolutionPopulation<SimpleChromosome>> evolveResult;
+        private readonly Option<SimpleChromosome> bestResult;
+
+        public FakeEvolutionEngine(
+            Result<EvolutionPopulation<SimpleChromosome>> evolveResult,
+            Option<SimpleChromosome> bestResult)
+        {
+            this.evolveResult = evolveResult;
+            this.bestResult = bestResult;
+        }
+
+        public Task<Result<EvolutionPopulation<SimpleChromosome>>> EvolveAsync(
+            EvolutionPopulation<SimpleChromosome> initialPopulation, int generations)
+        {
+            return Task.FromResult(this.evolveResult);
+        }
+
+        public Option<SimpleChromosome> GetBest(EvolutionPopulation<SimpleChromosome> population)
+        {
+            return this.bestResult;
+        }
     }
 }
