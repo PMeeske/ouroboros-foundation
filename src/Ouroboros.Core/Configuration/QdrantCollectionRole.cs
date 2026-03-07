@@ -96,6 +96,16 @@ public enum QdrantCollectionRole
     /// <summary>Stores episodic memory embeddings for experience recall.</summary>
     EpisodicMemory,
 
+    // ── Embodiment ────────────────────────────────────────
+    /// <summary>Stores embodied perception embeddings (vision, audio, sensor data).</summary>
+    EmbodimentPerceptions,
+
+    /// <summary>Stores embodiment state embeddings (pose, emotion, environment).</summary>
+    EmbodimentStates,
+
+    /// <summary>Stores affordance embeddings (available actions in current context).</summary>
+    EmbodimentAffordances,
+
     // ── Admin ───────────────────────────────────────────
     /// <summary>Stores collection-level metadata embeddings.</summary>
     CollectionMetadata,
