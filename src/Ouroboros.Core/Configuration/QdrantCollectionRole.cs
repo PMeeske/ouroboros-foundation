@@ -106,6 +106,10 @@ public enum QdrantCollectionRole
     /// <summary>Stores affordance embeddings (available actions in current context).</summary>
     EmbodimentAffordances,
 
+    // ── Avatar ────────────────────────────────────────────
+    /// <summary>Stores cached comic panel embeddings for avatar generation.</summary>
+    ComicPanels,
+
     // ── Admin ───────────────────────────────────────────
     /// <summary>Stores collection-level metadata embeddings.</summary>
     CollectionMetadata,
