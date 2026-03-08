@@ -11,7 +11,7 @@ namespace Ouroboros.Domain.Benchmarks;
 /// Implementation of the benchmark suite for evaluating Ouroboros capabilities
 /// across multiple dimensions and standard AI benchmarks.
 /// </summary>
-public sealed class BenchmarkSuite : IBenchmarkSuite
+public sealed partial class BenchmarkSuite : IBenchmarkSuite
 {
     /// <summary>
     /// Runs the ARC-AGI-2 benchmark for abstract reasoning and pattern recognition.
@@ -46,7 +46,7 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
                 Stopwatch taskStopwatch = Stopwatch.StartNew();
 
                 // Simulate ARC task execution (placeholder implementation)
-                (bool success, double score, string? error, string difficulty, string patternType) taskResult = await this.ExecuteARCTaskAsync($"arc-task-{i}", ct);
+                (bool success, double score, string? error, string difficulty, string patternType) taskResult = await ExecuteARCTaskAsync($"arc-task-{i}", ct);
                 taskStopwatch.Stop();
 
                 results.Add(new TaskResult(
@@ -91,7 +91,8 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
 
             return Result<BenchmarkReport, string>.Success(report);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<BenchmarkReport, string>.Failure($"ARC benchmark failed: {ex.Message}");
         }
@@ -129,7 +130,7 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
                 Stopwatch subjectStopwatch = Stopwatch.StartNew();
 
                 // Execute MMLU tasks for this subject
-                (bool success, double score, string? error, int questionCount) subjectResult = await this.ExecuteMMLUSubjectAsync(subject, ct);
+                (bool success, double score, string? error, int questionCount) subjectResult = await ExecuteMMLUSubjectAsync(subject, ct);
                 subjectStopwatch.Stop();
 
                 results.Add(new TaskResult(
@@ -166,7 +167,8 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
 
             return Result<BenchmarkReport, string>.Success(report);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<BenchmarkReport, string>.Failure($"MMLU benchmark failed: {ex.Message}");
         }
@@ -204,7 +206,7 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
                 Stopwatch sequenceStopwatch = Stopwatch.StartNew();
 
                 // Execute continual learning sequence
-                (bool success, double retentionScore, string? error, double initialAccuracy, double finalAccuracy) sequenceResult = await this.ExecuteContinualLearningSequenceAsync(sequence, ct);
+                (bool success, double retentionScore, string? error, double initialAccuracy, double finalAccuracy) sequenceResult = await ExecuteContinualLearningSequenceAsync(sequence, ct);
                 sequenceStopwatch.Stop();
 
                 results.Add(new TaskResult(
@@ -243,7 +245,8 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
 
             return Result<BenchmarkReport, string>.Success(report);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<BenchmarkReport, string>.Failure($"Continual learning benchmark failed: {ex.Message}");
         }
@@ -266,7 +269,7 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
             Dictionary<string, double> subScores = new Dictionary<string, double>();
 
             // Execute dimension-specific tasks
-            (List<TaskResult> tasks, string? error) dimensionResult = await this.ExecuteCognitiveDimensionAsync(dimension, ct);
+            (List<TaskResult> tasks, string? error) dimensionResult = await ExecuteCognitiveDimensionAsync(dimension, ct);
             stopwatch.Stop();
 
             foreach (TaskResult task in dimensionResult.tasks)
@@ -284,7 +287,7 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
                 }
             }
 
-            double overallScore = results.Where(r => r.Success).Any()
+            double overallScore = results.Any(r => r.Success)
                 ? results.Where(r => r.Success).Average(r => r.Score)
                 : 0.0;
 
@@ -298,7 +301,8 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
 
             return Result<BenchmarkReport, string>.Success(report);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<BenchmarkReport, string>.Failure($"Cognitive benchmark failed: {ex.Message}");
         }
@@ -352,9 +356,9 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
                 : 0.0;
 
             // Analyze strengths and weaknesses
-            List<string> strengths = this.IdentifyStrengths(benchmarkResults);
-            List<string> weaknesses = this.IdentifyWeaknesses(benchmarkResults);
-            List<string> recommendations = this.GenerateRecommendations(strengths, weaknesses);
+            List<string> strengths = IdentifyStrengths(benchmarkResults);
+            List<string> weaknesses = IdentifyWeaknesses(benchmarkResults);
+            List<string> recommendations = GenerateRecommendations(strengths, weaknesses);
 
             ComprehensiveReport report = new ComprehensiveReport(
                 BenchmarkResults: benchmarkResults,
@@ -366,208 +370,10 @@ public sealed class BenchmarkSuite : IBenchmarkSuite
 
             return Result<ComprehensiveReport, string>.Success(report);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<ComprehensiveReport, string>.Failure($"Full evaluation failed: {ex.Message}");
         }
-    }
-
-    // Private helper methods
-    private async Task<(bool success, double score, string? error, string difficulty, string patternType)> ExecuteARCTaskAsync(
-        string taskId,
-        CancellationToken ct)
-    {
-        // Simulate task execution with varying difficulty
-        await Task.Delay(10, ct);
-
-        SeededRandomProvider random = new SeededRandomProvider(taskId.GetHashCode());
-        string difficulty = random.Next(3) switch
-        {
-            0 => "easy",
-            1 => "medium",
-            _ => "hard",
-        };
-
-        string patternType = random.Next(4) switch
-        {
-            0 => "rotation",
-            1 => "scaling",
-            2 => "color_mapping",
-            _ => "shape_transformation",
-        };
-
-        // Simulate varying success based on difficulty
-        double baseScore = difficulty switch
-        {
-            "easy" => 0.7,
-            "medium" => 0.4,
-            _ => 0.15,
-        };
-
-        double score = Math.Max(0, Math.Min(1.0, baseScore + (random.NextDouble() * 0.2 - 0.1)));
-        bool success = score > 0.5;
-
-        return (success, score, success ? null : "Task failed", difficulty, patternType);
-    }
-
-    private async Task<(bool success, double score, string? error, int questionCount)> ExecuteMMLUSubjectAsync(
-        string subject,
-        CancellationToken ct)
-    {
-        // Simulate MMLU subject test execution
-        await Task.Delay(50, ct);
-
-        SeededRandomProvider random = new SeededRandomProvider(subject.GetHashCode());
-        int questionCount = random.Next(50, 100);
-        double score = 0.65 + (random.NextDouble() * 0.2); // Target 70%+
-
-        return (true, score, null, questionCount);
-    }
-
-    private async Task<(bool success, double retentionScore, string? error, double initialAccuracy, double finalAccuracy)> ExecuteContinualLearningSequenceAsync(
-        TaskSequence sequence,
-        CancellationToken ct)
-    {
-        // Simulate continual learning with retention measurement
-        await Task.Delay(100, ct);
-
-        SeededRandomProvider random = new SeededRandomProvider(sequence.Name.GetHashCode());
-        double initialAccuracy = 0.85 + (random.NextDouble() * 0.1);
-        double finalAccuracy = sequence.MeasureRetention ? 0.75 + (random.NextDouble() * 0.1) : initialAccuracy;
-        double retentionScore = finalAccuracy / initialAccuracy; // Target 80%+ retention
-
-        return (true, retentionScore, null, initialAccuracy, finalAccuracy);
-    }
-
-    private async Task<(List<TaskResult> tasks, string? error)> ExecuteCognitiveDimensionAsync(
-        CognitiveDimension dimension,
-        CancellationToken ct)
-    {
-        // Simulate cognitive dimension testing
-        await Task.Delay(50, ct);
-
-        List<TaskResult> tasks = new List<TaskResult>();
-        SeededRandomProvider random = new SeededRandomProvider((int)dimension);
-
-        // Generate tasks based on dimension
-        int taskCount = 10;
-        for (int i = 0; i < taskCount; i++)
-        {
-            double score = this.GetDimensionBaseScore(dimension) + (random.NextDouble() * 0.2 - 0.1);
-            score = Math.Max(0, Math.Min(1.0, score));
-
-            tasks.Add(new TaskResult(
-                TaskId: $"{dimension}-task-{i}",
-                TaskName: $"{dimension} Task {i}",
-                Success: score > 0.5,
-                Score: score,
-                Duration: TimeSpan.FromMilliseconds(random.Next(50, 200)),
-                ErrorMessage: null,
-                Metadata: new Dictionary<string, object>
-                {
-                    ["dimension"] = dimension.ToString(),
-                    ["category"] = this.GetDimensionCategory(dimension, i),
-                }));
-        }
-
-        return (tasks, null);
-    }
-
-    private double GetDimensionBaseScore(CognitiveDimension dimension)
-    {
-        return dimension switch
-        {
-            CognitiveDimension.Reasoning => 0.65,
-            CognitiveDimension.Planning => 0.70,
-            CognitiveDimension.Learning => 0.75,
-            CognitiveDimension.Memory => 0.80,
-            CognitiveDimension.Generalization => 0.60,
-            CognitiveDimension.Creativity => 0.55,
-            CognitiveDimension.SocialIntelligence => 0.50,
-            _ => 0.50,
-        };
-    }
-
-    private string GetDimensionCategory(CognitiveDimension dimension, int taskIndex)
-    {
-        return dimension switch
-        {
-            CognitiveDimension.Reasoning => taskIndex % 2 == 0 ? "deductive" : "inductive",
-            CognitiveDimension.Planning => taskIndex % 2 == 0 ? "short_term" : "long_term",
-            CognitiveDimension.Memory => taskIndex % 2 == 0 ? "episodic" : "semantic",
-            _ => "general",
-        };
-    }
-
-    private List<string> IdentifyStrengths(Dictionary<string, BenchmarkReport> results)
-    {
-        List<string> strengths = new List<string>();
-
-        foreach ((string? name, BenchmarkReport? report) in results)
-        {
-            if (report.OverallScore >= 0.7)
-            {
-                strengths.Add($"Strong performance in {name} ({report.OverallScore:P1})");
-            }
-        }
-
-        if (strengths.Count == 0)
-        {
-            strengths.Add("All benchmarks show room for improvement");
-        }
-
-        return strengths;
-    }
-
-    private List<string> IdentifyWeaknesses(Dictionary<string, BenchmarkReport> results)
-    {
-        List<string> weaknesses = new List<string>();
-
-        foreach ((string? name, BenchmarkReport? report) in results)
-        {
-            if (report.OverallScore < 0.5)
-            {
-                weaknesses.Add($"Below target performance in {name} ({report.OverallScore:P1})");
-            }
-        }
-
-        if (weaknesses.Count == 0)
-        {
-            weaknesses.Add("No significant weaknesses identified");
-        }
-
-        return weaknesses;
-    }
-
-    private List<string> GenerateRecommendations(List<string> strengths, List<string> weaknesses)
-    {
-        List<string> recommendations = new List<string>();
-
-        if (weaknesses.Any(w => w.Contains("ARC")))
-        {
-            recommendations.Add("Focus on improving abstract reasoning and pattern recognition capabilities");
-        }
-
-        if (weaknesses.Any(w => w.Contains("MMLU")))
-        {
-            recommendations.Add("Enhance knowledge base and multi-domain understanding");
-        }
-
-        if (weaknesses.Any(w => w.Contains("Continual")))
-        {
-            recommendations.Add("Implement better memory consolidation to reduce catastrophic forgetting");
-        }
-
-        if (weaknesses.Any(w => w.Contains("Cognitive")))
-        {
-            recommendations.Add("Develop targeted training for specific cognitive dimensions");
-        }
-
-        if (recommendations.Count == 0)
-        {
-            recommendations.Add("Continue current training regimen and monitor for regressions");
-        }
-
-        return recommendations;
     }
 }

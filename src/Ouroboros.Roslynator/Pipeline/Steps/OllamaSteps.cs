@@ -1,24 +1,35 @@
 using System.Net.Http;
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
+using OllamaSharp;
+using OllamaSharp.Models;
+using Ouroboros.Core.Configuration;
 
 namespace Ouroboros.Roslynator.Pipeline.Steps;
 
 /// <summary>
 /// Ollama AI pipeline step implemented as a self-contained Kleisli-like function.
 /// Reads configuration from environment variables:
-///  - OLLAMA_ENDPOINT (default http://localhost:11434/api/generate)
+///  - OLLAMA_ENDPOINT (default <see cref="DefaultEndpoints.Ollama"/>)
 ///  - OLLAMA_MODEL (default "codellama")
 /// </summary>
 public static class OllamaSteps
 {
-    private static readonly HttpClient _http = new() { Timeout = TimeSpan.FromMinutes(2) };
-
-    private static string Endpoint => Environment.GetEnvironmentVariable("OLLAMA_ENDPOINT")
-        ?? "http://localhost:11434/api/generate";
+    private static readonly OllamaApiClient _ollama = CreateClient();
 
     private static string Model => Environment.GetEnvironmentVariable("OLLAMA_MODEL") ?? "codellama";
+
+    private static OllamaApiClient CreateClient()
+    {
+        var http = new HttpClient
+        {
+            Timeout = TimeSpan.FromMinutes(2),
+            BaseAddress = new Uri(
+                Environment.GetEnvironmentVariable("OLLAMA_ENDPOINT")
+                ?? DefaultEndpoints.Ollama),
+        };
+        return new OllamaApiClient(http);
+    }
 
     /// <summary>
     /// Main Ollama step. Returns the same state if no change is made or on failure.
@@ -35,31 +46,24 @@ public static class OllamaSteps
 
             string prompt = BuildPrompt(state.Diagnostic.Id, state.Diagnostic.GetMessage(), code);
 
-            var requestObj = new
+            var request = new GenerateRequest
             {
-                model = Model,
-                prompt = prompt,
-                stream = false,
-                options = new { temperature = 0.05, top_p = 0.95 }
+                Model = Model,
+                Prompt = prompt,
+                Stream = false,
+                Options = new RequestOptions { Temperature = 0.05f, TopP = 0.95f },
             };
 
-            string json = JsonSerializer.Serialize(requestObj);
-            using StringContent content = new StringContent(json, Encoding.UTF8, "application/json");
+            StringBuilder responseBuilder = new StringBuilder();
+            await foreach (var chunk in _ollama.GenerateAsync(request, state.CancellationToken).ConfigureAwait(false))
+            {
+                if (chunk?.Response is not null)
+                {
+                    responseBuilder.Append(chunk.Response);
+                }
+            }
 
-            using HttpResponseMessage resp = await _http.PostAsync(Endpoint, content, state.CancellationToken).ConfigureAwait(false);
-            if (!resp.IsSuccessStatusCode) return state;
-
-            string payload = await resp.Content.ReadAsStringAsync(state.CancellationToken).ConfigureAwait(false);
-            using JsonDocument doc = JsonDocument.Parse(payload);
-
-            // Ollama JSON may vary — look for "response" string or first text segment
-            string? raw = null;
-            if (doc.RootElement.TryGetProperty("response", out JsonElement r))
-                raw = r.GetString();
-            else if (doc.RootElement.TryGetProperty("results", out JsonElement results) && results.GetArrayLength() > 0)
-                raw = results[0].GetProperty("output").GetString();
-
-            string fixedCode = CleanOutput(raw);
+            string fixedCode = CleanOutput(responseBuilder.ToString());
             if (string.IsNullOrWhiteSpace(fixedCode) || fixedCode == code) return state;
 
             // parse produced code back into a SyntaxNode (best-effort)
@@ -69,11 +73,15 @@ public static class OllamaSteps
             SyntaxNode newRoot = state.CurrentRoot.ReplaceNode(node, fixedNode);
             return state.WithNewRoot(newRoot, "Ollama AI Fix");
         }
-#pragma warning disable CA1031 // Fail gracefully on any LLM/parsing errors
-        catch (Exception ex)
-#pragma warning restore CA1031
+        catch (OperationCanceledException) { throw; }
+        catch (HttpRequestException ex)
         {
             // Fail gracefully: log and return unchanged state
+            System.Diagnostics.Debug.WriteLine($"[OllamaStep] Error: {ex.Message}");
+            return state;
+        }
+        catch (System.Text.Json.JsonException ex)
+        {
             System.Diagnostics.Debug.WriteLine($"[OllamaStep] Error: {ex.Message}");
             return state;
         }

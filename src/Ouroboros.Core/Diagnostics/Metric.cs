@@ -3,7 +3,7 @@ namespace Ouroboros.Diagnostics;
 /// <summary>
 /// Represents a collected metric with metadata.
 /// </summary>
-public class Metric
+public sealed class Metric
 {
     /// <summary>
     /// Gets or initializes the metric name.

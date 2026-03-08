@@ -15,17 +15,21 @@ namespace Ouroboros.Core.CognitivePhysics;
 /// </summary>
 public sealed class ZeroShiftOperator
 {
-    private readonly IEmbeddingProvider _embeddingProvider;
-    private readonly IEthicsGate _ethicsGate;
+    private readonly Ouroboros.Domain.IEmbeddingModel _embeddingProvider;
+    private readonly Func<string, string, ValueTask<EthicsGateResult>> _ethicsEvaluator;
     private readonly ZeroShiftConfig _config;
 
+    /// <summary>Initialises the operator with the required embedding provider, optional ethics evaluator, and configuration.</summary>
+    /// <param name="embeddingProvider">Provider used to compute semantic distance between contexts.</param>
+    /// <param name="ethicsEvaluator">Optional delegate that evaluates ethical permissibility of transitions. Defaults to always-allow.</param>
+    /// <param name="config">Optional shift configuration; uses <see cref="ZeroShiftConfig"/> defaults when null.</param>
     public ZeroShiftOperator(
-        IEmbeddingProvider embeddingProvider,
-        IEthicsGate ethicsGate,
+        Ouroboros.Domain.IEmbeddingModel embeddingProvider,
+        Func<string, string, ValueTask<EthicsGateResult>>? ethicsEvaluator = null,
         ZeroShiftConfig? config = null)
     {
         _embeddingProvider = embeddingProvider ?? throw new ArgumentNullException(nameof(embeddingProvider));
-        _ethicsGate = ethicsGate ?? throw new ArgumentNullException(nameof(ethicsGate));
+        _ethicsEvaluator = ethicsEvaluator ?? ((_, _) => new ValueTask<EthicsGateResult>(EthicsGateResult.Allow()));
         _config = config ?? new ZeroShiftConfig();
     }
 
@@ -44,7 +48,7 @@ public sealed class ZeroShiftOperator
             return ZeroShiftResult.Failed(state, $"Cooldown active: {state.Cooldown:F2} remaining.");
 
         // Ethics gate evaluation
-        EthicsGateResult ethicsResult = await _ethicsGate.EvaluateAsync(state.Focus, target);
+        EthicsGateResult ethicsResult = await _ethicsEvaluator(state.Focus, target);
 
         if (ethicsResult.IsDenied)
             return ZeroShiftResult.Failed(state, $"Ethics gate denied: {ethicsResult.Reason}");
@@ -58,7 +62,9 @@ public sealed class ZeroShiftOperator
         }
 
         // Compute semantic distance and cost
-        double distance = await SemanticDistance.ComputeAsync(_embeddingProvider, state.Focus, target);
+        float[] focusEmbedding = await _embeddingProvider.CreateEmbeddingsAsync(state.Focus);
+        float[] targetEmbedding = await _embeddingProvider.CreateEmbeddingsAsync(target);
+        double distance = SemanticDistance.Compute(focusEmbedding, targetEmbedding);
         double cost = distance * state.Compression;
 
         if (state.Resources < cost)

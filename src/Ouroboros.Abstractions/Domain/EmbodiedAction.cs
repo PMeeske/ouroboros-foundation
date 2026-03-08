@@ -8,7 +8,4 @@ namespace Ouroboros.Abstractions.Domain;
 /// <summary>
 /// Represents an action that can be taken by an embodied agent.
 /// </summary>
-public class EmbodiedAction
-{
-    // Placeholder class - to be implemented
-}
+public sealed record EmbodiedAction;

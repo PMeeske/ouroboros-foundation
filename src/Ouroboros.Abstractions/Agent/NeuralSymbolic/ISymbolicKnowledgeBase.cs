@@ -1,6 +1,5 @@
 using Ouroboros.Abstractions;
 
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 // ==========================================================
 // Symbolic Knowledge Base Interface
 // Manages symbolic rules and MeTTa reasoning

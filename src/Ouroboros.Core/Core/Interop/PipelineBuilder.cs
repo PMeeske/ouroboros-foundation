@@ -7,6 +7,8 @@ public class PipelineBuilder<TIn>
 {
     private readonly string _name;
 
+    /// <summary>Initialises the builder with the given pipeline name.</summary>
+    /// <param name="name">Display name for the pipeline being constructed.</param>
     public PipelineBuilder(string name)
     {
         _name = name;

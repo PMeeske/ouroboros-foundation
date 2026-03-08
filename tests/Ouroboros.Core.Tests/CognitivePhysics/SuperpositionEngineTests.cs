@@ -14,9 +14,14 @@ namespace Ouroboros.Tests.CognitivePhysics;
 public class SuperpositionEngineTests
 {
     private readonly FakeEmbeddingProvider _provider = new();
-    private readonly FakeEthicsGate _gate = new();
+    private readonly Dictionary<string, EthicsGateResult> _rules = new();
+    private EthicsGateResult _defaultResult = EthicsGateResult.Allow();
 
-    private SuperpositionEngine CreateEngine() => new(_provider, _gate);
+    private Func<string, string, ValueTask<EthicsGateResult>> EthicsEvaluator =>
+        (_, target) => ValueTask.FromResult(
+            _rules.TryGetValue(target, out var r) ? r : _defaultResult);
+
+    private SuperpositionEngine CreateEngine() => new(_provider, EthicsEvaluator);
 
     [Fact]
     public async Task Entangle_EmptyTargets_ShouldReturnEmpty()
@@ -104,7 +109,7 @@ public class SuperpositionEngineTests
         _provider.SetEmbedding("denied", [0.99f, 0.01f]); // Very close but denied
         _provider.SetEmbedding("allowed", [0.0f, 1.0f]);  // Far but allowed
 
-        _gate.SetRule("denied", EthicsGateResult.Deny("Forbidden context"));
+        _rules["denied"] = EthicsGateResult.Deny("Forbidden context");
 
         SuperpositionEngine engine = CreateEngine();
         CognitiveState state = CognitiveState.Create("origin");
@@ -123,7 +128,7 @@ public class SuperpositionEngineTests
         _provider.SetEmbedding("a", [0.9f, 0.1f]);
         _provider.SetEmbedding("b", [0.8f, 0.2f]);
 
-        _gate.SetDefault(EthicsGateResult.Deny("All denied"));
+        _defaultResult = EthicsGateResult.Deny("All denied");
 
         SuperpositionEngine engine = CreateEngine();
         CognitiveState state = CognitiveState.Create("origin");

@@ -47,7 +47,7 @@ public sealed class InMemoryAdapterStorage : IAdapterStorage
 
             return Task.FromResult(Result<Unit, string>.Success(Unit.Value));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             _logger?.LogError(ex, "Error storing metadata for adapter {AdapterId}", metadata?.Id);
             return Task.FromResult(Result<Unit, string>.Failure($"Failed to store metadata: {ex.Message}"));
@@ -70,7 +70,7 @@ public sealed class InMemoryAdapterStorage : IAdapterStorage
             _logger?.LogWarning("Adapter not found: {AdapterId}", adapterId);
             return Task.FromResult(Result<AdapterMetadata, string>.Failure($"Adapter not found: {adapterId}"));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             _logger?.LogError(ex, "Error retrieving metadata for adapter {AdapterId}", adapterId);
             return Task.FromResult(Result<AdapterMetadata, string>.Failure($"Failed to retrieve metadata: {ex.Message}"));
@@ -97,7 +97,7 @@ public sealed class InMemoryAdapterStorage : IAdapterStorage
 
             return Task.FromResult(Result<List<AdapterMetadata>, string>.Success(adapters));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             _logger?.LogError(ex, "Error retrieving adapters for task {TaskName}", taskName);
             return Task.FromResult(Result<List<AdapterMetadata>, string>.Failure($"Failed to retrieve adapters: {ex.Message}"));
@@ -126,7 +126,7 @@ public sealed class InMemoryAdapterStorage : IAdapterStorage
 
             return Task.FromResult(Result<Unit, string>.Success(Unit.Value));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             _logger?.LogError(ex, "Error updating metadata for adapter {AdapterId}", metadata?.Id);
             return Task.FromResult(Result<Unit, string>.Failure($"Failed to update metadata: {ex.Message}"));
@@ -152,7 +152,7 @@ public sealed class InMemoryAdapterStorage : IAdapterStorage
             // Treat as success even if not found (idempotent)
             return Task.FromResult(Result<Unit, string>.Success(Unit.Value));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             _logger?.LogError(ex, "Error deleting metadata for adapter {AdapterId}", adapterId);
             return Task.FromResult(Result<Unit, string>.Failure($"Failed to delete metadata: {ex.Message}"));

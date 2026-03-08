@@ -21,7 +21,15 @@ public sealed record EthicsGateResult(Form Decision, string Reason)
     /// <summary>Unknown: uncertain — soft fail with resource penalty.</summary>
     public bool IsUncertain => Decision.IsImaginary();
 
+    /// <summary>Creates a result indicating the transition is permitted.</summary>
+    /// <param name="reason">Optional explanation for the decision.</param>
     public static EthicsGateResult Allow(string reason = "") => new(Form.Mark, reason);
+
+    /// <summary>Creates a result indicating the transition is prohibited.</summary>
+    /// <param name="reason">Explanation for the denial.</param>
     public static EthicsGateResult Deny(string reason) => new(Form.Void, reason);
+
+    /// <summary>Creates a result indicating the transition outcome is uncertain.</summary>
+    /// <param name="reason">Explanation for the uncertainty.</param>
     public static EthicsGateResult Uncertain(string reason) => new(Form.Imaginary, reason);
 }

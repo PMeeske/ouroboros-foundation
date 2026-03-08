@@ -4,8 +4,6 @@
 
 using Ouroboros.Abstractions;
 
-#pragma warning disable SA1101 // Prefix local calls with this
-
 namespace Ouroboros.Tools.MeTTa;
 
 using System.Collections.Concurrent;
@@ -16,7 +14,7 @@ using Ouroboros.Core.Hyperon.Parsing;
 /// Native C# Hyperon-based MeTTa engine implementation.
 /// Uses the in-process AtomSpace and Interpreter for high-performance symbolic reasoning.
 /// </summary>
-public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
+public sealed partial class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
 {
     private readonly AtomSpace space;
     private readonly Interpreter interpreter;
@@ -110,7 +108,11 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
             string resultStr = string.Join(" ", results.Select(a => a.ToSExpr()));
             return Task.FromResult(Result<string, string>.Success(resultStr));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            return Task.FromResult(Result<string, string>.Failure($"Evaluation error: {ex.Message}"));
+        }
+        catch (FormatException ex)
         {
             return Task.FromResult(Result<string, string>.Failure($"Evaluation error: {ex.Message}"));
         }
@@ -135,7 +137,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
             AddAtom(parseResult.Value);
             return Task.FromResult(Result<Unit, string>.Success(Unit.Value));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Task.FromResult(Result<Unit, string>.Failure($"Add fact error: {ex.Message}"));
         }
@@ -168,7 +170,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
 
             return Task.FromResult(Result<string, string>.Success(resultStr));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Task.FromResult(Result<string, string>.Failure($"Apply rule error: {ex.Message}"));
         }
@@ -197,7 +199,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
 
             return Task.FromResult(Result<bool, string>.Success(isValid));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Task.FromResult(Result<bool, string>.Failure($"Verification error: {ex.Message}"));
         }
@@ -237,7 +239,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
 
             return Task.FromResult(Result<bool, string>.Success(true));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Task.FromResult(Result<bool, string>.Failure($"Verification error: {ex.Message}"));
         }
@@ -258,7 +260,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
             InitializeCoreAtoms();
             return Task.FromResult(Result<Unit, string>.Success(Unit.Value));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             return Task.FromResult(Result<Unit, string>.Failure($"Reset error: {ex.Message}"));
         }
@@ -322,7 +324,7 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
         foreach (string line in lines)
         {
             string trimmed = line.Trim();
-            if (string.IsNullOrEmpty(trimmed) || trimmed.StartsWith(";"))
+            if (string.IsNullOrEmpty(trimmed) || trimmed.StartsWith(';'))
             {
                 continue; // Skip empty lines and comments
             }
@@ -376,192 +378,5 @@ public sealed class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
 
         disposed = true;
         namedAtoms.Clear();
-    }
-
-    private static GroundedRegistry CreateDefaultGroundedOps()
-    {
-        GroundedRegistry registry = new();
-
-        // Basic arithmetic
-        registry.Register("+", (space, args) =>
-        {
-            if (args.Children.Count >= 2 &&
-                double.TryParse(args.Children[0].ToSExpr(), out double a) &&
-                double.TryParse(args.Children[1].ToSExpr(), out double b))
-            {
-                return new[] { Atom.Sym((a + b).ToString()) };
-            }
-
-            return Enumerable.Empty<Atom>();
-        });
-
-        registry.Register("-", (space, args) =>
-        {
-            if (args.Children.Count >= 2 &&
-                double.TryParse(args.Children[0].ToSExpr(), out double a) &&
-                double.TryParse(args.Children[1].ToSExpr(), out double b))
-            {
-                return new[] { Atom.Sym((a - b).ToString()) };
-            }
-
-            return Enumerable.Empty<Atom>();
-        });
-
-        registry.Register("*", (space, args) =>
-        {
-            if (args.Children.Count >= 2 &&
-                double.TryParse(args.Children[0].ToSExpr(), out double a) &&
-                double.TryParse(args.Children[1].ToSExpr(), out double b))
-            {
-                return new[] { Atom.Sym((a * b).ToString()) };
-            }
-
-            return Enumerable.Empty<Atom>();
-        });
-
-        registry.Register("/", (space, args) =>
-        {
-            if (args.Children.Count >= 2 &&
-                double.TryParse(args.Children[0].ToSExpr(), out double a) &&
-                double.TryParse(args.Children[1].ToSExpr(), out double b) &&
-                b != 0)
-            {
-                return new[] { Atom.Sym((a / b).ToString()) };
-            }
-
-            return Enumerable.Empty<Atom>();
-        });
-
-        // Comparisons
-        registry.Register("==", (space, args) =>
-        {
-            if (args.Children.Count >= 2)
-            {
-                bool equal = args.Children[0].ToSExpr() == args.Children[1].ToSExpr();
-                return new[] { Atom.Sym(equal ? "True" : "False") };
-            }
-
-            return Enumerable.Empty<Atom>();
-        });
-
-        registry.Register("!=", (space, args) =>
-        {
-            if (args.Children.Count >= 2)
-            {
-                bool notEqual = args.Children[0].ToSExpr() != args.Children[1].ToSExpr();
-                return new[] { Atom.Sym(notEqual ? "True" : "False") };
-            }
-
-            return Enumerable.Empty<Atom>();
-        });
-
-        // Logic
-        registry.Register("and-all", (space, args) =>
-        {
-            bool result = args.Children.All(a => a.ToSExpr() == "True");
-            return new[] { Atom.Sym(result ? "True" : "False") };
-        });
-
-        registry.Register("or-any", (space, args) =>
-        {
-            bool result = args.Children.Any(a => a.ToSExpr() == "True");
-            return new[] { Atom.Sym(result ? "True" : "False") };
-        });
-
-        registry.Register("negate", (space, args) =>
-        {
-            if (args.Children.Count >= 1)
-            {
-                bool result = args.Children[0].ToSExpr() != "True";
-                return new[] { Atom.Sym(result ? "True" : "False") };
-            }
-
-            return Enumerable.Empty<Atom>();
-        });
-
-        // String operations
-        registry.Register("concat-str", (space, args) =>
-        {
-            string result = string.Concat(args.Children.Select(a => a.ToSExpr().Trim('"')));
-            return new[] { Atom.Sym($"\"{result}\"") };
-        });
-
-        // List operations
-        registry.Register("cons", (space, args) =>
-        {
-            if (args.Children.Count >= 2)
-            {
-                return new[] { Atom.Expr(args.Children.ToArray()) };
-            }
-
-            return Enumerable.Empty<Atom>();
-        });
-
-        registry.Register("car", (space, args) =>
-        {
-            if (args.Children.Count >= 1 && args.Children[0] is Expression expr && expr.Children.Count > 0)
-            {
-                return new[] { expr.Children[0] };
-            }
-
-            return Enumerable.Empty<Atom>();
-        });
-
-        registry.Register("cdr", (space, args) =>
-        {
-            if (args.Children.Count >= 1 && args.Children[0] is Expression expr && expr.Children.Count > 1)
-            {
-                return new[] { Atom.Expr(expr.Children.Skip(1).ToArray()) };
-            }
-
-            return Enumerable.Empty<Atom>();
-        });
-
-        // Identity
-        registry.Register("identity", (space, args) =>
-        {
-            return args.Children.Count >= 1 ? new[] { args.Children[0] } : Enumerable.Empty<Atom>();
-        });
-
-        // Print (for debugging)
-        registry.Register("println", (space, args) =>
-        {
-            string output = string.Join(" ", args.Children.Select(a => a.ToSExpr()));
-            Console.WriteLine($"[MeTTa] {output}");
-            return new[] { Atom.Sym("()") };
-        });
-
-        return registry;
-    }
-
-    private void InitializeCoreAtoms()
-    {
-        // Core type atoms
-        AddAtom(Atom.Sym("Type"));
-        AddAtom(Atom.Sym("Atom"));
-        AddAtom(Atom.Sym("Symbol"));
-        AddAtom(Atom.Sym("Variable"));
-        AddAtom(Atom.Sym("Expression"));
-
-        // Boolean constants
-        AddAtom(Atom.Sym("True"));
-        AddAtom(Atom.Sym("False"));
-
-        // Type declarations
-        AddAtom(Atom.Expr(Atom.Sym(":"), Atom.Sym("True"), Atom.Sym("Bool")));
-        AddAtom(Atom.Expr(Atom.Sym(":"), Atom.Sym("False"), Atom.Sym("Bool")));
-
-        // Function type constructor
-        AddAtom(Atom.Expr(Atom.Sym(":"), Atom.Sym("->"), Atom.Expr(Atom.Sym("->"), Atom.Sym("Type"), Atom.Sym("Type"), Atom.Sym("Type"))));
-
-        // Basic inference rule
-        AddAtom(Atom.Expr(
-            Atom.Sym("="),
-            Atom.Expr(Atom.Sym("if"), Atom.Sym("True"), Atom.Var("then"), Atom.Var("else")),
-            Atom.Var("then")));
-        AddAtom(Atom.Expr(
-            Atom.Sym("="),
-            Atom.Expr(Atom.Sym("if"), Atom.Sym("False"), Atom.Var("then"), Atom.Var("else")),
-            Atom.Var("else")));
     }
 }

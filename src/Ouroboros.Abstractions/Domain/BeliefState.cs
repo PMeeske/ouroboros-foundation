@@ -8,7 +8,4 @@ namespace Ouroboros.Abstractions.Domain;
 /// <summary>
 /// Represents the belief state of an agent.
 /// </summary>
-public class BeliefState
-{
-    // Placeholder class - to be implemented
-}
+public sealed record BeliefState;

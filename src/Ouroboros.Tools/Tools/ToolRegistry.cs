@@ -99,7 +99,7 @@ public sealed class ToolRegistry : Ouroboros.Abstractions.Core.ToolRegistry
             string json = ToolJson.Serialize(schemas);
             return Result<string>.Success(json);
         }
-        catch (Exception ex)
+        catch (System.Text.Json.JsonException ex)
         {
             return Result<string>.Failure($"Schema export failed: {ex.Message}");
         }

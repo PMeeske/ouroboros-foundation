@@ -7,4 +7,4 @@ public sealed record Plan(
     string Goal,
     List<PlanStep> Steps,
     Dictionary<string, double> ConfidenceScores,
-    DateTime CreatedAt);
+    DateTime CreatedAt) : IPlan;

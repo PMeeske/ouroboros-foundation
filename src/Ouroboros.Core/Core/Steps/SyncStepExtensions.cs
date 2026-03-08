@@ -21,6 +21,7 @@ public static class SyncStepExtensions
     /// Uses Task.Run to avoid capturing the synchronization context.
     /// </summary>
     public static SyncStep<TIn, TOut> ToSync<TIn, TOut>(this Step<TIn, TOut> asyncStep)
+        // Intentional: sync wrapper for non-async callers
         => new(input => Task.Run(() => asyncStep(input)).GetAwaiter().GetResult());
 
     /// <summary>
@@ -59,7 +60,7 @@ public static class SyncStepExtensions
                 TOut? result = syncStep.Invoke(input);
                 return Result<TOut, Exception>.Success(result);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 return Result<TOut, Exception>.Failure(ex);
             }
@@ -78,7 +79,7 @@ public static class SyncStepExtensions
                 TOut? result = syncStep.Invoke(input);
                 return predicate(result) ? Option<TOut>.Some(result) : Option<TOut>.None();
             }
-            catch
+            catch (Exception)
             {
                 return Option<TOut>.None();
             }

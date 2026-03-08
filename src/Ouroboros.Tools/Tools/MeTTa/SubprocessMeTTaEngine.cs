@@ -62,8 +62,6 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
         // Escape double quotes for the command line argument
         string escapedScript = pythonScript.Replace("\"", "\\\"");
 
-        string currentDir = Directory.GetCurrentDirectory();
-        
         // Pass environment variables to Docker container
         StringBuilder envArgs = new StringBuilder();
         string[] envVarsToPass = { "OPENAI_API_KEY", "OPENAI_API_BASE", "OPENAI_API_MODEL" };
@@ -98,6 +96,10 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
                 StandardErrorEncoding = Encoding.UTF8,
             };
 
+            // SECURITY: validated — FileName is either a caller-provided executable path
+            // or "docker" (hardcoded). Arguments are built from hardcoded strings and
+            // environment variable names (not values injected into the command line).
+            // UseShellExecute = false prevents shell interpretation.
             this.process = Process.Start(startInfo);
 
             if (this.process != null)
@@ -107,7 +109,12 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
                 this.stderr = this.process.StandardError;
             }
         }
-        catch (Exception ex)
+        catch (System.ComponentModel.Win32Exception ex)
+        {
+            // Executable not found or not accessible
+            Console.WriteLine($"Warning: MeTTa executable not found: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
         {
             // If MeTTa executable is not found, we continue with null process
             // Methods will return appropriate errors when called
@@ -147,7 +154,11 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
         {
             return Result<string, string>.Failure("Query execution timed out");
         }
-        catch (Exception ex)
+        catch (IOException ex)
+        {
+            return Result<string, string>.Failure($"Query I/O error: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
         {
             return Result<string, string>.Failure($"Query execution failed: {ex.Message}");
         }
@@ -175,7 +186,15 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
 
             return Result<Unit, string>.Success(Unit.Value);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (IOException ex)
+        {
+            return Result<Unit, string>.Failure($"Add fact I/O error: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
         {
             return Result<Unit, string>.Failure($"Failed to add fact: {ex.Message}");
         }
@@ -213,7 +232,11 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
         {
             return Result<string, string>.Failure("Rule application timed out");
         }
-        catch (Exception ex)
+        catch (IOException ex)
+        {
+            return Result<string, string>.Failure($"Rule application I/O error: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
         {
             return Result<string, string>.Failure($"Rule application failed: {ex.Message}");
         }
@@ -255,7 +278,15 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
 
             return Result<Unit, string>.Success(Unit.Value);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (IOException ex)
+        {
+            return Result<Unit, string>.Failure($"Reset I/O error: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
         {
             return Result<Unit, string>.Failure($"Failed to reset: {ex.Message}");
         }

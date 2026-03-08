@@ -9,6 +9,7 @@ public record MemoryContext<T>(
     ConversationMemory Memory,
     Dictionary<string, object>? Properties = null)
 {
+    /// <summary>Gets the dictionary of named properties attached to this context.</summary>
     public Dictionary<string, object> Properties { get; } = Properties ?? new();
 
     /// <summary>

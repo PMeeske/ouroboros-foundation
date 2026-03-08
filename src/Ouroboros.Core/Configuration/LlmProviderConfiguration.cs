@@ -3,7 +3,7 @@ namespace Ouroboros.Core.Configuration;
 /// <summary>
 /// Configuration for LLM providers (Ollama, OpenAI, etc.).
 /// </summary>
-public class LlmProviderConfiguration
+public sealed class LlmProviderConfiguration
 {
     /// <summary>
     /// Gets or sets the default provider to use (e.g., "Ollama", "OpenAI").
@@ -13,12 +13,12 @@ public class LlmProviderConfiguration
     /// <summary>
     /// Gets or sets ollama endpoint URL.
     /// </summary>
-    public string OllamaEndpoint { get; set; } = "http://localhost:11434";
+    public string OllamaEndpoint { get; set; } = DefaultEndpoints.Ollama;
 
     /// <summary>
     /// Gets or sets default model name for chat operations.
     /// </summary>
-    public string DefaultChatModel { get; set; } = "deepseek-v3.1:671b-cloud";
+    public string DefaultChatModel { get; set; } = "devstral-2:123b-cloud";
 
     /// <summary>
     /// Gets or sets default model name for embeddings.

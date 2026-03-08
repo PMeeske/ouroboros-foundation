@@ -59,7 +59,11 @@ public sealed class DrawDistinctionTool : ITool
 
             return Task.FromResult(Result<string, string>.Success($"Distinction drawn in '{context}': {formState}"));
         }
-        catch (Exception ex)
+        catch (System.Text.Json.JsonException ex)
+        {
+            return Task.FromResult(Result<string, string>.Failure($"Error: {ex.Message}"));
+        }
+        catch (InvalidOperationException ex)
         {
             return Task.FromResult(Result<string, string>.Failure($"Error: {ex.Message}"));
         }

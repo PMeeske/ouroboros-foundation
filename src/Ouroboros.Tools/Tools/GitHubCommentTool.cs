@@ -63,7 +63,12 @@ public sealed class GitHubCommentTool : ITool
                 $"Comment ID: {comment.Id}\n" +
                 $"URL: {comment.HtmlUrl}");
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (ApiException ex)
+        {
+            return Result<string, string>.Failure($"Failed to add comment: {ex.Message}");
+        }
+        catch (System.Text.Json.JsonException ex)
         {
             return Result<string, string>.Failure($"Failed to add comment: {ex.Message}");
         }

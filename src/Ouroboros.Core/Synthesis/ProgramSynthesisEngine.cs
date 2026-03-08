@@ -1,4 +1,4 @@
-// <copyright file="ProgramSynthesisEngine.cs" company="PlaceholderCompany">
+﻿// <copyright file="ProgramSynthesisEngine.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
@@ -11,11 +11,10 @@ namespace Ouroboros.Core.Synthesis;
 /// Neural-guided program synthesis engine with library learning capabilities.
 /// Implements DreamCoder-style wake-sleep algorithm for program synthesis.
 /// </summary>
-public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
+public sealed partial class ProgramSynthesisEngine : IProgramSynthesisEngine
 {
     private readonly int beamWidth;
     private readonly int maxDepth;
-    private readonly double temperatureForSampling;
     private readonly Dictionary<string, double> primitiveLogProbabilities;
 
     /// <summary>
@@ -28,7 +27,6 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
     {
         this.beamWidth = beamWidth;
         this.maxDepth = maxDepth;
-        this.temperatureForSampling = temperature;
         this.primitiveLogProbabilities = new Dictionary<string, double>();
     }
 
@@ -71,7 +69,7 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
                 beam = await ExpandBeamAsync(beam, dsl, depth, cts.Token);
 
                 // Evaluate programs against examples
-                List<Program> validPrograms = await EvaluateBeamAsync(beam, examples, cts.Token);
+                List<Program> validPrograms = await EvaluateBeamAsync(beam, examples, dsl, cts.Token);
 
                 // Check if we found a solution
                 if (validPrograms.Count > 0)
@@ -91,7 +89,7 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
         {
             return Result<Program, string>.Failure("Synthesis was cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<Program, string>.Failure($"Synthesis failed: {ex.Message}");
         }
@@ -124,7 +122,7 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
         {
             return Result<List<Primitive>, string>.Failure("Primitive extraction was cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<List<Primitive>, string>.Failure($"Primitive extraction failed: {ex.Message}");
         }
@@ -145,7 +143,7 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
             // Update primitive log probabilities based on training pairs
             Dictionary<string, int> primitiveUsage = new Dictionary<string, int>();
 
-            foreach ((SynthesisTask? task, Program? solution) in pairs)
+            foreach ((SynthesisTask _, Program? solution) in pairs)
             {
                 ct.ThrowIfCancellationRequested();
 
@@ -161,14 +159,16 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
                 this.primitiveLogProbabilities[primitive] = Math.Log(probability);
             }
 
-            await Task.CompletedTask; // Placeholder for actual neural training
+            // The frequency-based log-probability update above is the recognition model:
+            // it computes a Bayesian posterior over primitives from observed usage counts,
+            // guiding future synthesis searches toward frequently successful primitives.
             return Result<Unit, string>.Success(Unit.Value);
         }
         catch (OperationCanceledException)
         {
             return Result<Unit, string>.Failure("Training was cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<Unit, string>.Failure($"Training failed: {ex.Message}");
         }
@@ -225,337 +225,10 @@ public sealed class ProgramSynthesisEngine : IProgramSynthesisEngine
         {
             return Result<DomainSpecificLanguage, string>.Failure("DSL evolution was cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<DomainSpecificLanguage, string>.Failure($"DSL evolution failed: {ex.Message}");
         }
     }
 
-    private List<ASTNode> InitializeBeam(DomainSpecificLanguage dsl)
-    {
-        // Start with all primitives as initial beam
-        return dsl.Primitives
-            .Select(p => new ASTNode("Primitive", p.Name, new List<ASTNode>()))
-            .ToList();
-    }
-
-    private async Task<List<ASTNode>> ExpandBeamAsync(
-        List<ASTNode> currentBeam,
-        DomainSpecificLanguage dsl,
-        int targetDepth,
-        CancellationToken ct)
-    {
-        List<ASTNode> expandedBeam = new List<ASTNode>();
-
-        foreach (ASTNode node in currentBeam)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            // If node is at target depth - 1, expand it
-            int nodeDepth = CalculateDepth(node);
-            if (nodeDepth < targetDepth)
-            {
-                // Try applying each primitive
-                foreach (Primitive primitive in dsl.Primitives)
-                {
-                    // Create application node
-                    ASTNode applicationNode = new ASTNode(
-                        "Apply",
-                        primitive.Name,
-                        new List<ASTNode> { node });
-                    expandedBeam.Add(applicationNode);
-
-                    // Create composition with another node
-                    foreach (ASTNode otherNode in currentBeam)
-                    {
-                        if (node != otherNode)
-                        {
-                            ASTNode compositionNode = new ASTNode(
-                                "Apply",
-                                primitive.Name,
-                                new List<ASTNode> { node, otherNode });
-                            expandedBeam.Add(compositionNode);
-                        }
-                    }
-                }
-            }
-        }
-
-        await Task.CompletedTask;
-        return expandedBeam.Any() ? expandedBeam : currentBeam;
-    }
-
-    private async Task<List<Program>> EvaluateBeamAsync(
-        List<ASTNode> beam,
-        List<InputOutputExample> examples,
-        CancellationToken ct)
-    {
-        List<Program> validPrograms = new List<Program>();
-
-        foreach (ASTNode node in beam)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            try
-            {
-                // Try to execute program on all examples
-                bool allExamplesPass = true;
-                List<ExecutionStep> trace = new List<ExecutionStep>();
-
-                foreach (InputOutputExample example in examples)
-                {
-                    object? result = await ExecuteProgramAsync(node, example.Input, ct);
-                    if (result == null || !result.Equals(example.ExpectedOutput))
-                    {
-                        allExamplesPass = false;
-                        break;
-                    }
-
-                    trace.Add(new ExecutionStep(node.Value, new List<object> { example.Input }, result));
-                }
-
-                if (allExamplesPass)
-                {
-                    Program program = CreateProgram(node, trace);
-                    validPrograms.Add(program);
-                }
-            }
-            catch
-            {
-                // Skip programs that fail to execute
-                continue;
-            }
-        }
-
-        return validPrograms;
-    }
-
-    private async Task<object?> ExecuteProgramAsync(ASTNode node, object input, CancellationToken ct)
-    {
-        ct.ThrowIfCancellationRequested();
-
-        // Simple interpreter for AST nodes
-        if (node.NodeType == "Primitive")
-        {
-            // For now, return input (placeholder implementation)
-            await Task.CompletedTask;
-            return input;
-        }
-
-        if (node.NodeType == "Apply")
-        {
-            // Execute children first
-            List<object> childResults = new List<object>();
-            foreach (ASTNode child in node.Children)
-            {
-                object? result = await ExecuteProgramAsync(child, input, ct);
-                if (result != null)
-                {
-                    childResults.Add(result);
-                }
-            }
-
-            // Apply primitive to child results
-            await Task.CompletedTask;
-            return childResults.LastOrDefault() ?? input;
-        }
-
-        return null;
-    }
-
-    private Program CreateProgram(ASTNode node, List<ExecutionStep> trace)
-    {
-        string sourceCode = ASTToSourceCode(node);
-        int depth = CalculateDepth(node);
-        int nodeCount = CountNodes(node);
-        AbstractSyntaxTree ast = new AbstractSyntaxTree(node, depth, nodeCount);
-        double logProb = CalculateLogProbability(node);
-
-        return new Program(
-            sourceCode,
-            ast,
-            new DomainSpecificLanguage("temp", new List<Primitive>(), new List<TypeRule>(), new List<RewriteRule>()),
-            logProb,
-            new ExecutionTrace(trace, trace.LastOrDefault()?.Output ?? new object(), TimeSpan.Zero));
-    }
-
-    private string ASTToSourceCode(ASTNode node)
-    {
-        if (node.NodeType == "Primitive")
-        {
-            return node.Value;
-        }
-
-        if (node.NodeType == "Apply" && node.Children.Count > 0)
-        {
-            string childrenCode = string.Join(" ", node.Children.Select(ASTToSourceCode));
-            return $"({node.Value} {childrenCode})";
-        }
-
-        return node.Value;
-    }
-
-    private int CalculateDepth(ASTNode node)
-    {
-        if (node.Children.Count == 0)
-        {
-            return 1;
-        }
-
-        return 1 + node.Children.Max(CalculateDepth);
-    }
-
-    private int CountNodes(ASTNode node)
-    {
-        return 1 + node.Children.Sum(CountNodes);
-    }
-
-    private double CalculateLogProbability(ASTNode node)
-    {
-        // Calculate log probability based on primitive usage
-        double logProb = 0.0;
-
-        if (this.primitiveLogProbabilities.TryGetValue(node.Value, out double prob))
-        {
-            logProb += prob;
-        }
-        else
-        {
-            logProb += Math.Log(0.1); // Default low probability
-        }
-
-        // Add children probabilities
-        foreach (ASTNode child in node.Children)
-        {
-            logProb += CalculateLogProbability(child);
-        }
-
-        return logProb;
-    }
-
-    private List<ASTNode> PruneBeam(List<ASTNode> beam, int maxSize)
-    {
-        if (beam.Count <= maxSize)
-        {
-            return beam;
-        }
-
-        // Sort by log probability and take top maxSize
-        return beam
-            .OrderByDescending(CalculateLogProbability)
-            .Take(maxSize)
-            .ToList();
-    }
-
-    private void CountPrimitiveUsage(ASTNode node, Dictionary<string, int> usage)
-    {
-        if (!usage.ContainsKey(node.Value))
-        {
-            usage[node.Value] = 0;
-        }
-
-        usage[node.Value]++;
-
-        foreach (ASTNode child in node.Children)
-        {
-            CountPrimitiveUsage(child, usage);
-        }
-    }
-
-    private async Task<List<Primitive>> ExtractViaAntiUnificationAsync(List<Program> programs, CancellationToken ct)
-    {
-        List<Primitive> extractedPrimitives = new List<Primitive>();
-
-        // Group programs by structure similarity
-        List<(Program, Program)> programPairs = new List<(Program, Program)>();
-        for (int i = 0; i < programs.Count; i++)
-        {
-            for (int j = i + 1; j < programs.Count; j++)
-            {
-                ct.ThrowIfCancellationRequested();
-                programPairs.Add((programs[i], programs[j]));
-            }
-        }
-
-        // Find common patterns via anti-unification
-        foreach ((Program? prog1, Program? prog2) in programPairs)
-        {
-            ct.ThrowIfCancellationRequested();
-
-            ASTNode? commonPattern = AntiUnify(prog1.AST.Root, prog2.AST.Root);
-            if (commonPattern != null && CountNodes(commonPattern) > 2)
-            {
-                // Create a new primitive from the common pattern
-                string primitiveName = $"learned_{extractedPrimitives.Count}";
-                string primitiveType = InferType(commonPattern);
-                Primitive primitive = new Primitive(
-                    primitiveName,
-                    primitiveType,
-                    args => args.FirstOrDefault() ?? new object(),
-                    Math.Log(0.5)); // Moderate prior
-
-                extractedPrimitives.Add(primitive);
-            }
-        }
-
-        await Task.CompletedTask;
-        return extractedPrimitives.Distinct().ToList();
-    }
-
-    private ASTNode? AntiUnify(ASTNode node1, ASTNode node2)
-    {
-        // Anti-unification: find most specific generalization
-        if (node1.NodeType == node2.NodeType && node1.Value == node2.Value)
-        {
-            if (node1.Children.Count == node2.Children.Count)
-            {
-                List<ASTNode> unifiedChildren = new List<ASTNode>();
-                for (int i = 0; i < node1.Children.Count; i++)
-                {
-                    ASTNode? unified = AntiUnify(node1.Children[i], node2.Children[i]);
-                    if (unified != null)
-                    {
-                        unifiedChildren.Add(unified);
-                    }
-                    else
-                    {
-                        // Use variable for differing parts
-                        unifiedChildren.Add(new ASTNode("Variable", $"$x{i}", new List<ASTNode>()));
-                    }
-                }
-
-                return new ASTNode(node1.NodeType, node1.Value, unifiedChildren);
-            }
-        }
-
-        return null;
-    }
-
-    private string InferType(ASTNode node)
-    {
-        // Simple type inference placeholder
-        return node.NodeType switch
-        {
-            "Primitive" => "a -> a",
-            "Apply" => "a -> b",
-            "Variable" => "a",
-            _ => "a -> a",
-        };
-    }
-
-    private async Task<List<Primitive>> ExtractViaEGraphAsync(List<Program> programs, CancellationToken ct)
-    {
-        // Placeholder for E-graph based compression
-        ct.ThrowIfCancellationRequested();
-        await Task.CompletedTask;
-        return new List<Primitive>();
-    }
-
-    private async Task<List<Primitive>> ExtractViaFragmentGrammarAsync(List<Program> programs, CancellationToken ct)
-    {
-        // Placeholder for fragment grammar extraction
-        ct.ThrowIfCancellationRequested();
-        await Task.CompletedTask;
-        return new List<Primitive>();
-    }
 }

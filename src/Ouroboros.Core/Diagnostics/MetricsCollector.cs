@@ -16,7 +16,6 @@ public class MetricsCollector
     private readonly ConcurrentDictionary<string, double> gauges = new();
     private readonly ConcurrentDictionary<string, ConcurrentBag<double>> histograms = new();
     private readonly ConcurrentDictionary<string, (double Sum, long Count)> summaries = new();
-    private readonly object @lock = new();
 
     /// <summary>
     /// Gets the singleton instance of the metrics collector.
@@ -31,7 +30,7 @@ public class MetricsCollector
     /// <param name="labels">Optional labels for the metric.</param>
     public void IncrementCounter(string name, double value = 1.0, Dictionary<string, string>? labels = null)
     {
-        string key = this.BuildKey(name, labels);
+        string key = BuildKey(name, labels);
         this.counters.AddOrUpdate(key, value, (_, current) => current + value);
     }
 
@@ -43,7 +42,7 @@ public class MetricsCollector
     /// <param name="labels">Optional labels for the metric.</param>
     public void SetGauge(string name, double value, Dictionary<string, string>? labels = null)
     {
-        string key = this.BuildKey(name, labels);
+        string key = BuildKey(name, labels);
         this.gauges[key] = value;
     }
 
@@ -55,7 +54,7 @@ public class MetricsCollector
     /// <param name="labels">Optional labels for the metric.</param>
     public void ObserveHistogram(string name, double value, Dictionary<string, string>? labels = null)
     {
-        string key = this.BuildKey(name, labels);
+        string key = BuildKey(name, labels);
         ConcurrentBag<double> bag = this.histograms.GetOrAdd(key, _ => new ConcurrentBag<double>());
         bag.Add(value);
     }
@@ -68,7 +67,7 @@ public class MetricsCollector
     /// <param name="labels">Optional labels for the metric.</param>
     public void ObserveSummary(string name, double value, Dictionary<string, string>? labels = null)
     {
-        string key = this.BuildKey(name, labels);
+        string key = BuildKey(name, labels);
         this.summaries.AddOrUpdate(
             key,
             (value, 1L),
@@ -97,7 +96,7 @@ public class MetricsCollector
         // Add counters
         foreach (KeyValuePair<string, double> kvp in this.counters)
         {
-            (string name, Dictionary<string, string> labels) = this.ParseKey(kvp.Key);
+            (string name, Dictionary<string, string> labels) = ParseKey(kvp.Key);
             metrics.Add(new Metric
             {
                 Name = name,
@@ -110,7 +109,7 @@ public class MetricsCollector
         // Add gauges
         foreach (KeyValuePair<string, double> kvp in this.gauges)
         {
-            (string name, Dictionary<string, string> labels) = this.ParseKey(kvp.Key);
+            (string name, Dictionary<string, string> labels) = ParseKey(kvp.Key);
             metrics.Add(new Metric
             {
                 Name = name,
@@ -123,7 +122,7 @@ public class MetricsCollector
         // Add histograms (as summary statistics)
         foreach (KeyValuePair<string, ConcurrentBag<double>> kvp in this.histograms)
         {
-            (string name, Dictionary<string, string> labels) = this.ParseKey(kvp.Key);
+            (string name, Dictionary<string, string> labels) = ParseKey(kvp.Key);
             double[] values = kvp.Value.ToArray();
             if (values.Length > 0)
             {
@@ -154,7 +153,7 @@ public class MetricsCollector
         // Add summaries
         foreach (KeyValuePair<string, (double Sum, long Count)> kvp in this.summaries)
         {
-            (string name, Dictionary<string, string> labels) = this.ParseKey(kvp.Key);
+            (string name, Dictionary<string, string> labels) = ParseKey(kvp.Key);
             (double sum, long count) = kvp.Value;
             metrics.Add(new Metric
             {
@@ -228,7 +227,7 @@ public class MetricsCollector
         this.summaries.Clear();
     }
 
-    private string BuildKey(string name, Dictionary<string, string>? labels)
+    private static string BuildKey(string name, Dictionary<string, string>? labels)
     {
         if (labels == null || !labels.Any())
         {
@@ -240,7 +239,7 @@ public class MetricsCollector
         return $"{name}|{sortedLabels}";
     }
 
-    private (string Name, Dictionary<string, string> Labels) ParseKey(string key)
+    private static (string Name, Dictionary<string, string> Labels) ParseKey(string key)
     {
         string[] parts = key.Split('|');
         if (parts.Length == 1)
@@ -261,7 +260,7 @@ public class MetricsCollector
         return (parts[0], labels);
     }
 
-    private class DurationMeasurement : IDisposable
+    private sealed class DurationMeasurement : IDisposable
     {
         private readonly MetricsCollector collector;
         private readonly string name;

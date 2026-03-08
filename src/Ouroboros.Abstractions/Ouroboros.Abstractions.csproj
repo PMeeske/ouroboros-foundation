@@ -10,6 +10,7 @@
 
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.AI.Abstractions" Version="10.3.0" />
         <PackageReference Include="System.Reactive" Version="6.1.0" />
     </ItemGroup>
 
@@ -44,6 +45,7 @@
         <Compile Include="Agent\MetaAI\RoutingDecision.cs" />
         <Compile Include="Agent\MetaAI\SafetyCheckResult.cs" />
         <Compile Include="Agent\MetaAI\SandboxResult.cs" />
+        <Compile Include="Agent\MetaAI\SelfImprovement\IPlan.cs" />
         <Compile Include="Agent\MetaAI\SelfImprovement\Plan.cs" />
         <Compile Include="Agent\MetaAI\SelfImprovement\PlanExecutionResult.cs" />
         <Compile Include="Agent\MetaAI\SelfImprovement\PlanVerificationResult.cs" />
@@ -88,8 +90,13 @@
         <Compile Include="GlobalUsings.cs" />
         <Compile Include="Monads\Result.cs" />
         <Compile Include="Monads\Option.cs" />
+        <Compile Include="Core\IChatClientBridge.cs" />
         <Compile Include="Core\IChatCompletionModel.cs" />
+        <Compile Include="Core\IEmbeddingGeneratorBridge.cs" />
+        <Compile Include="Core\IOuroborosChatClient.cs" />
         <Compile Include="Core\ToolRegistry.cs" />
+        <Compile Include="Domain\IEmbeddingModel.cs" />
+        <Compile Include="Domain\IOuroborosEmbeddingGenerator.cs" />
         <Compile Include="Domain\ActionPrediction.cs" />
         <Compile Include="Domain\AgentModel.cs" />
         <Compile Include="Domain\AgentObservation.cs" />
@@ -111,7 +118,6 @@
         <Compile Include="Agent\MetaAI\ExperienceFactory.cs" />
         <Compile Include="Agent\MetaAI\MemoryQueryExtensions.cs" />
         <Compile Include="Agent\MetaAI\IUncertaintyRouter.cs" />
-        <Compile Include="Agent\MetaAI\PerformanceMetrics.cs" />
         <Compile Include="Agent\MetaAI\MetaLearning\IMetaLearner.cs" />
         <Compile Include="Agent\MetaAI\MetaLearning\PerformanceSnapshot.cs" />
         <Compile Include="Agent\MetaAI\SelfImprovement\ITransferLearner.cs" />

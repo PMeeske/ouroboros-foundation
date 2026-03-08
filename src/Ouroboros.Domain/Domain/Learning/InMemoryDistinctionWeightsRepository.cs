@@ -42,7 +42,7 @@ public sealed class InMemoryDistinctionWeightsRepository : IDistinctionWeightsRe
             _logger?.LogDebug("Stored distinction weights for {Id}", id);
             return Task.FromResult(Result<Unit, string>.Success(Unit.Value));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             _logger?.LogError(ex, "Failed to store distinction weights for {Id}", id);
             return Task.FromResult(Result<Unit, string>.Failure($"Storage failed: {ex.Message}"));
@@ -80,7 +80,7 @@ public sealed class InMemoryDistinctionWeightsRepository : IDistinctionWeightsRe
 
             return Task.FromResult(Result<IReadOnlyList<DistinctionWeights>, string>.Success(results));
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             _logger?.LogError(ex, "Failed to find similar distinctions");
             return Task.FromResult(Result<IReadOnlyList<DistinctionWeights>, string>.Failure($"Search failed: {ex.Message}"));

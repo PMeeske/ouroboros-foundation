@@ -10,13 +10,18 @@ namespace Ouroboros.Core.CognitivePhysics;
 /// </summary>
 public sealed class SuperpositionEngine
 {
-    private readonly IEthicsGate _ethicsGate;
-    private readonly IEmbeddingProvider _embeddingProvider;
+    private readonly Func<string, string, ValueTask<EthicsGateResult>> _ethicsEvaluator;
+    private readonly Ouroboros.Domain.IEmbeddingModel _embeddingProvider;
 
-    public SuperpositionEngine(IEmbeddingProvider embeddingProvider, IEthicsGate ethicsGate)
+    /// <summary>Initialises the engine with the required embedding provider and optional ethics evaluator.</summary>
+    /// <param name="embeddingProvider">Provider used for semantic coherence scoring during collapse.</param>
+    /// <param name="ethicsEvaluator">Optional delegate that evaluates ethical permissibility of transitions. Defaults to always-allow.</param>
+    public SuperpositionEngine(
+        Ouroboros.Domain.IEmbeddingModel embeddingProvider,
+        Func<string, string, ValueTask<EthicsGateResult>>? ethicsEvaluator = null)
     {
         _embeddingProvider = embeddingProvider ?? throw new ArgumentNullException(nameof(embeddingProvider));
-        _ethicsGate = ethicsGate ?? throw new ArgumentNullException(nameof(ethicsGate));
+        _ethicsEvaluator = ethicsEvaluator ?? ((_, _) => new ValueTask<EthicsGateResult>(EthicsGateResult.Allow()));
     }
 
     /// <summary>
@@ -65,14 +70,15 @@ public sealed class SuperpositionEngine
 
         foreach (CognitiveBranch branch in branches)
         {
-            EthicsGateResult ethics = await _ethicsGate.EvaluateAsync(origin, branch.State.Focus);
+            EthicsGateResult ethics = await _ethicsEvaluator(origin, branch.State.Focus);
 
             // Denied branches are excluded entirely — they cannot win collapse
             if (ethics.IsDenied)
                 continue;
 
-            double coherence = 1.0 - await SemanticDistance.ComputeAsync(
-                _embeddingProvider, origin, branch.State.Focus);
+            float[] originEmbedding = await _embeddingProvider.CreateEmbeddingsAsync(origin);
+            float[] branchEmbedding = await _embeddingProvider.CreateEmbeddingsAsync(branch.State.Focus);
+            double coherence = 1.0 - SemanticDistance.Compute(originEmbedding, branchEmbedding);
 
             double ethicsScore = ethics.IsAllowed ? 1.0 : 0.5;
 

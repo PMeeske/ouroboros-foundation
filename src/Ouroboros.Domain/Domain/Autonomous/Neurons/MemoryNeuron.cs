@@ -126,7 +126,16 @@ public sealed class MemoryNeuron : Neuron
                 }
             }
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (JsonException ex)
+        {
+            SendResponse(message, new { Success = false, Error = ex.Message });
+        }
+        catch (HttpRequestException ex)
+        {
+            SendResponse(message, new { Success = false, Error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
         {
             SendResponse(message, new { Success = false, Error = ex.Message });
         }
@@ -154,7 +163,12 @@ public sealed class MemoryNeuron : Neuron
                 SendResponse(message, new { Query = query, Results = matches });
             }
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (HttpRequestException ex)
+        {
+            SendResponse(message, new { Success = false, Error = ex.Message });
+        }
+        catch (InvalidOperationException ex)
         {
             SendResponse(message, new { Success = false, Error = ex.Message });
         }

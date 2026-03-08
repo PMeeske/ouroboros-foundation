@@ -105,7 +105,6 @@ public sealed record BodySchema
     {
         if (!_sensors.ContainsKey(sensorId)) return this;
 
-        SensorDescriptor sensor = _sensors[sensorId];
         ImmutableDictionary<string, SensorDescriptor> newSensors = _sensors.Remove(sensorId);
 
         // Recompute capabilities from remaining sensors and actuators

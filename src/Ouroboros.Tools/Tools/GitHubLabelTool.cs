@@ -100,7 +100,12 @@ public sealed class GitHubLabelTool : ITool
             return Result<string, string>.Success(
                 $"✅ Labels updated for issue #{args.IssueNumber}\n{string.Join("\n", results)}");
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (ApiException ex)
+        {
+            return Result<string, string>.Failure($"Failed to manage labels: {ex.Message}");
+        }
+        catch (System.Text.Json.JsonException ex)
         {
             return Result<string, string>.Failure($"Failed to manage labels: {ex.Message}");
         }

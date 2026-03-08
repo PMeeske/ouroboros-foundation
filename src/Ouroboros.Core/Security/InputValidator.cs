@@ -49,14 +49,14 @@ public class InputValidator
         // Check for injection patterns if enabled
         if (this.options.CheckInjectionPatterns)
         {
-            List<string> injectionErrors = this.CheckForInjectionPatterns(input);
+            List<string> injectionErrors = CheckForInjectionPatterns(input);
             errors.AddRange(injectionErrors);
         }
 
         // Check for dangerous characters
         if (this.options.CheckDangerousCharacters)
         {
-            List<string> charErrors = this.CheckForDangerousCharacters(input, context);
+            List<string> charErrors = CheckForDangerousCharacters(input, context);
             errors.AddRange(charErrors);
         }
 
@@ -71,7 +71,7 @@ public class InputValidator
         return ValidationResult.Success(sanitized);
     }
 
-    private List<string> CheckForInjectionPatterns(string input)
+    private static List<string> CheckForInjectionPatterns(string input)
     {
         List<string> errors = new List<string>();
         string lowerInput = input.ToLowerInvariant();
@@ -117,7 +117,7 @@ public class InputValidator
         return errors;
     }
 
-    private List<string> CheckForDangerousCharacters(string input, ValidationContext context)
+    private static List<string> CheckForDangerousCharacters(string input, ValidationContext context)
     {
         List<string> errors = new List<string>();
 

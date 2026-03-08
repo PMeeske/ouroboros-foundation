@@ -1,4 +1,3 @@
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 // LangChain-integrated conversation context for monadic composition
 
 namespace Ouroboros.Core.LangChain;
@@ -12,7 +11,9 @@ public class LangChainConversationContext
     private readonly Dictionary<string, object> _properties = new();
     private readonly ConversationMemory _memory;
 
-    public LangChainConversationContext(int maxTurns = 10)
+    /// <summary>Initialises the context with an optional maximum number of retained conversation turns.</summary>
+    /// <param name="maxTurns">Maximum turns to retain in memory; 0 means unlimited.</param>
+    public LangChainConversationContext(int maxTurns = 0)
     {
         _memory = new ConversationMemory(maxTurns);
     }

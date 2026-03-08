@@ -203,7 +203,12 @@ public sealed class EmbodimentController : IDisposable
 
             return Result<Unit, string>.Success(Unit.Value);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (InvalidOperationException ex)
+        {
+            return Result<Unit, string>.Failure($"Failed to start: {ex.Message}");
+        }
+        catch (IOException ex)
         {
             return Result<Unit, string>.Failure($"Failed to start: {ex.Message}");
         }
@@ -229,7 +234,12 @@ public sealed class EmbodimentController : IDisposable
             _isRunning = false;
             return Result<Unit, string>.Success(Unit.Value);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (InvalidOperationException ex)
+        {
+            return Result<Unit, string>.Failure($"Failed to stop: {ex.Message}");
+        }
+        catch (IOException ex)
         {
             return Result<Unit, string>.Failure($"Failed to stop: {ex.Message}");
         }
@@ -264,7 +274,12 @@ public sealed class EmbodimentController : IDisposable
                     return new ActionResult(request, false, $"Unsupported modality: {request.Modality}");
             }
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (InvalidOperationException ex)
+        {
+            return new ActionResult(request, false, ex.Message, DateTime.UtcNow - start);
+        }
+        catch (IOException ex)
         {
             return new ActionResult(request, false, ex.Message, DateTime.UtcNow - start);
         }
@@ -316,7 +331,8 @@ public sealed class EmbodimentController : IDisposable
         {
             return Result<FusedPerception, string>.Failure("Timeout waiting for perceptions");
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (InvalidOperationException ex)
         {
             return Result<FusedPerception, string>.Failure($"Failed to fuse perceptions: {ex.Message}");
         }

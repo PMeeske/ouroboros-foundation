@@ -8,7 +8,4 @@ namespace Ouroboros.Abstractions.Domain;
 /// <summary>
 /// Represents a model of an agent.
 /// </summary>
-public class AgentModel
-{
-    // Placeholder class - to be implemented
-}
+public sealed record AgentModel;

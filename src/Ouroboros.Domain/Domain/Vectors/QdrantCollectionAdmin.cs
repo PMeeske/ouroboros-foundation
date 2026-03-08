@@ -13,17 +13,17 @@ namespace Ouroboros.Domain.Vectors;
 /// Ouroboros's self-administered Qdrant collection manager.
 /// Provides capabilities for managing, linking, and self-healing vector collections.
 /// </summary>
-public sealed class QdrantCollectionAdmin : IAsyncDisposable
+public sealed partial class QdrantCollectionAdmin : IAsyncDisposable
 {
     private const int DefaultVectorSize = 768; // nomic-embed-text
 
     private readonly QdrantClient _client;
-    private readonly IQdrantCollectionRegistry? _registry;
-    private readonly string _endpoint;
+    private readonly IQdrantCollectionRegistry _registry;
     private readonly bool _disposeClient;
     private readonly Dictionary<string, CollectionInfo> _collectionCache = new();
     private readonly List<CollectionLink> _collectionLinks = new();
     private bool _initialized;
+    private bool _disposed;
 
     /// <summary>
     /// Known Ouroboros collections and their purposes.
@@ -73,30 +73,6 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
         _registry = registry ?? throw new ArgumentNullException(nameof(registry));
-        _endpoint = "di-managed";
-        _disposeClient = false;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="QdrantCollectionAdmin"/> class.
-    /// </summary>
-    /// <param name="endpoint">Qdrant endpoint (e.g., "http://localhost:6333").</param>
-    [Obsolete("Use the constructor accepting QdrantClient + IQdrantCollectionRegistry from DI.")]
-    public QdrantCollectionAdmin(string endpoint = "http://localhost:6333")
-    {
-        _endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
-        Uri uri = new Uri(endpoint);
-        _client = new QdrantClient(uri.Host, uri.Port > 0 ? uri.Port : 6334, uri.Scheme == "https");
-        _disposeClient = true;
-    }
-
-    /// <summary>
-    /// Initializes a new instance with an existing client.
-    /// </summary>
-    public QdrantCollectionAdmin(QdrantClient client)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-        _endpoint = "external";
         _disposeClient = false;
     }
 
@@ -112,15 +88,8 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
     {
         if (_initialized) return;
 
-        // Load existing links — prefer registry-driven links when available
-        if (_registry != null)
-        {
-            _collectionLinks.AddRange(GetDefaultLinksFromRegistry());
-        }
-        else
-        {
-            _collectionLinks.AddRange(DefaultLinks);
-        }
+        // Load existing links from registry
+        _collectionLinks.AddRange(GetDefaultLinksFromRegistry());
 
         // Scan existing collections
         await RefreshCollectionCacheAsync(ct);
@@ -133,8 +102,6 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
     /// </summary>
     public IReadOnlyDictionary<string, string> GetKnownCollections()
     {
-        if (_registry == null) return KnownCollections;
-
         IReadOnlyDictionary<QdrantCollectionRole, string> mappings = _registry.GetAllMappings();
         return mappings.ToDictionary(
             kvp => kvp.Value,
@@ -144,8 +111,7 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
     private IReadOnlyList<CollectionLink> GetDefaultLinksFromRegistry()
     {
         string R(QdrantCollectionRole role) =>
-            _registry?.GetCollectionName(role)
-            ?? QdrantCollectionRegistry.Defaults.GetValueOrDefault(role, role.ToString());
+            _registry.GetCollectionName(role);
 
         return new List<CollectionLink>
         {
@@ -201,7 +167,7 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
                 Purpose: purpose,
                 LinkedCollections: links);
         }
-        catch
+        catch (Grpc.Core.RpcException)
         {
             return null;
         }
@@ -239,7 +205,7 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
 
             return true;
         }
-        catch
+        catch (Grpc.Core.RpcException)
         {
             return false;
         }
@@ -264,85 +230,10 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
 
             return true;
         }
-        catch
+        catch (Grpc.Core.RpcException)
         {
             return false;
         }
-    }
-
-    /// <summary>
-    /// Performs a health check on all collections, detecting dimension mismatches.
-    /// </summary>
-    public async Task<IReadOnlyList<CollectionHealthReport>> HealthCheckAsync(
-        int expectedDimension = DefaultVectorSize,
-        CancellationToken ct = default)
-    {
-        List<CollectionHealthReport> reports = new List<CollectionHealthReport>();
-        await RefreshCollectionCacheAsync(ct);
-
-        foreach ((string? name, CollectionInfo? info) in _collectionCache)
-        {
-            bool mismatch = info.VectorSize != (ulong)expectedDimension && info.VectorSize > 0;
-            string? issue = mismatch
-                ? $"Dimension mismatch: expected {expectedDimension}, got {info.VectorSize}"
-                : null;
-            string? recommendation = mismatch
-                ? $"Delete and recreate collection, or migrate vectors to {expectedDimension} dimensions"
-                : null;
-
-            reports.Add(new CollectionHealthReport(
-                name,
-                !mismatch && info.Status == CollectionStatus.Green,
-                (ulong)expectedDimension,
-                info.VectorSize,
-                mismatch,
-                issue,
-                recommendation));
-        }
-
-        return reports.AsReadOnly();
-    }
-
-    /// <summary>
-    /// Auto-heals collections with dimension mismatches by recreating them.
-    /// WARNING: This will delete all data in mismatched collections!
-    /// </summary>
-    public async Task<IReadOnlyList<string>> AutoHealDimensionMismatchesAsync(
-        int targetDimension = DefaultVectorSize,
-        CancellationToken ct = default)
-    {
-        List<string> healed = new List<string>();
-        IReadOnlyList<CollectionHealthReport> healthReports = await HealthCheckAsync(targetDimension, ct);
-
-        foreach (CollectionHealthReport? report in healthReports.Where(r => r.DimensionMismatch))
-        {
-            try
-            {
-                // Get existing info for recreation
-                CollectionInfo? info = _collectionCache.GetValueOrDefault(report.CollectionName);
-                Distance distance = info?.DistanceMetric ?? Distance.Cosine;
-
-                // Delete the mismatched collection
-                await _client.DeleteCollectionAsync(report.CollectionName, cancellationToken: ct);
-
-                // Recreate with correct dimensions
-                await _client.CreateCollectionAsync(
-                    report.CollectionName,
-                    new VectorParams { Size = (ulong)targetDimension, Distance = distance },
-                    cancellationToken: ct);
-
-                healed.Add(report.CollectionName);
-            }
-            catch
-            {
-                // Skip collections that can't be healed
-            }
-        }
-
-        // Refresh cache after healing
-        await RefreshCollectionCacheAsync(ct);
-
-        return healed.AsReadOnly();
     }
 
     /// <summary>
@@ -386,91 +277,6 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
             .AsReadOnly();
     }
 
-    /// <summary>
-    /// Generates a memory map showing collection relationships.
-    /// </summary>
-    public async Task<string> GenerateMemoryMapAsync(CancellationToken ct = default)
-    {
-        await RefreshCollectionCacheAsync(ct);
-
-        StringBuilder sb = new System.Text.StringBuilder();
-        sb.AppendLine("╔══════════════════════════════════════════════════════════════════╗");
-        sb.AppendLine("║              OUROBOROS MEMORY ARCHITECTURE                       ║");
-        sb.AppendLine("╠══════════════════════════════════════════════════════════════════╣");
-
-        // Group collections by purpose
-        List<string> thoughtCollections = _collectionCache.Keys.Where(k => k.Contains("thought")).ToList();
-        List<string> skillCollections = _collectionCache.Keys.Where(k => k.Contains("skill") || k.Contains("tool")).ToList();
-        List<string> knowledgeCollections = _collectionCache.Keys.Where(k => k.Contains("core") || k.Contains("code")).ToList();
-        List<string> personalityCollections = _collectionCache.Keys.Where(k => k.Contains("person") || k.Contains("self")).ToList();
-        List<string> otherCollections = _collectionCache.Keys
-            .Except(thoughtCollections)
-            .Except(skillCollections)
-            .Except(knowledgeCollections)
-            .Except(personalityCollections)
-            .ToList();
-
-        void AppendSection(string title, List<string> collections)
-        {
-            if (!collections.Any()) return;
-            sb.AppendLine($"║ {title,-64} ║");
-            foreach (string col in collections)
-            {
-                CollectionInfo? info = _collectionCache.GetValueOrDefault(col);
-                string status = info?.Status == CollectionStatus.Green ? "✓" : "⚠";
-                ulong points = info?.PointsCount ?? 0;
-                ulong dim = info?.VectorSize ?? 0;
-                sb.AppendLine($"║   {status} {col,-40} [{dim,4}d] {points,8} pts ║");
-            }
-        }
-
-        AppendSection("🧠 THOUGHT SYSTEM", thoughtCollections);
-        AppendSection("🛠️ SKILLS & TOOLS", skillCollections);
-        AppendSection("📚 KNOWLEDGE BASE", knowledgeCollections);
-        AppendSection("👤 PERSONALITY & SELF", personalityCollections);
-        AppendSection("📦 OTHER", otherCollections);
-
-        sb.AppendLine("╠══════════════════════════════════════════════════════════════════╣");
-        sb.AppendLine("║ COLLECTION LINKS                                                 ║");
-
-        foreach (CollectionLink? link in _collectionLinks.Take(10))
-        {
-            sb.AppendLine($"║   {link.SourceCollection,-25} ─{link.RelationType,12}→ {link.TargetCollection,-15} ║");
-        }
-
-        if (_collectionLinks.Count > 10)
-        {
-            sb.AppendLine($"║   ... and {_collectionLinks.Count - 10} more links                                    ║");
-        }
-
-        sb.AppendLine("╚══════════════════════════════════════════════════════════════════╝");
-
-        return sb.ToString();
-    }
-
-    /// <summary>
-    /// Gets statistics about Ouroboros's memory usage.
-    /// </summary>
-    public async Task<MemoryStatistics> GetMemoryStatisticsAsync(CancellationToken ct = default)
-    {
-        await RefreshCollectionCacheAsync(ct);
-
-        int totalCollections = _collectionCache.Count;
-        long totalPoints = _collectionCache.Values.Sum(c => (long)c.PointsCount);
-        int healthyCollections = _collectionCache.Values.Count(c => c.Status == CollectionStatus.Green);
-        Dictionary<ulong, int> dimensionGroups = _collectionCache.Values
-            .GroupBy(c => c.VectorSize)
-            .ToDictionary(g => g.Key, g => g.Count());
-
-        return new MemoryStatistics(
-            totalCollections,
-            totalPoints,
-            healthyCollections,
-            totalCollections - healthyCollections,
-            _collectionLinks.Count,
-            dimensionGroups);
-    }
-
     private async Task RefreshCollectionCacheAsync(CancellationToken ct)
     {
         try
@@ -487,20 +293,23 @@ public sealed class QdrantCollectionAdmin : IAsyncDisposable
                 }
             }
         }
-        catch
+        catch (Grpc.Core.RpcException)
         {
             // Keep existing cache on error
         }
     }
 
     /// <inheritdoc/>
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
+        if (_disposed) return ValueTask.CompletedTask;
+        _disposed = true;
+
         if (_disposeClient)
         {
             _client.Dispose();
         }
 
-        await Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 }

@@ -9,6 +9,7 @@ namespace Ouroboros.Abstractions.Core;
 /// Represents a chat completion model interface.
 /// Provides the minimal contract for text generation used across the pipeline.
 /// </summary>
+[Obsolete("Use IOuroborosChatClient (which extends IChatClient from Microsoft.Extensions.AI) instead. Will be removed in v3.")]
 public interface IChatCompletionModel
 {
     /// <summary>

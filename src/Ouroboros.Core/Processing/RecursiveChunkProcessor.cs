@@ -56,7 +56,7 @@ public sealed class RecursiveChunkProcessor : IRecursiveChunkProcessor
                 : maxChunkSize;
 
             // Split context into chunks
-            List<string> chunks = this.SplitIntoChunks(textContext, chunkSize);
+            List<string> chunks = SplitIntoChunks(textContext, chunkSize);
 
             if (chunks.Count == 0)
             {
@@ -108,7 +108,7 @@ public sealed class RecursiveChunkProcessor : IRecursiveChunkProcessor
         {
             return Result<TOutput>.Failure("Processing was cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<TOutput>.Failure($"Unexpected error during recursive processing: {ex.Message}");
         }
@@ -118,7 +118,7 @@ public sealed class RecursiveChunkProcessor : IRecursiveChunkProcessor
     /// Splits text into chunks of approximately the specified size.
     /// Uses token-aware splitting to avoid breaking semantic units.
     /// </summary>
-    private List<string> SplitIntoChunks(string text, int chunkSize)
+    private static List<string> SplitIntoChunks(string text, int chunkSize)
     {
         List<string> chunks = new List<string>();
 
@@ -212,7 +212,8 @@ public sealed class RecursiveChunkProcessor : IRecursiveChunkProcessor
 
                     results.Add(chunkResult);
                 }
-                catch
+                catch (OperationCanceledException) { throw; }
+                catch (InvalidOperationException)
                 {
                     stopwatch.Stop();
 
@@ -248,7 +249,8 @@ public sealed class RecursiveChunkProcessor : IRecursiveChunkProcessor
             Result<string> result = await this.combineResultsFunc(chunkOutputs);
             return result;
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (InvalidOperationException ex)
         {
             return Result<string>.Failure($"Error combining results: {ex.Message}");
         }

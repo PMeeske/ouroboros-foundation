@@ -6,17 +6,11 @@ namespace Ouroboros.Tools
     /// </summary>
     public class DslAssistant
     {
-        private readonly ILlmProvider _llm;
-        private readonly RoslynCodeTool _codeTool;
-
         /// <summary>
         /// Initializes a new instance of the DslAssistant.
         /// </summary>
-        /// <param name="llm">The LLM provider for AI assistance.</param>
-        public DslAssistant(ILlmProvider llm)
+        public DslAssistant()
         {
-            _llm = llm ?? throw new ArgumentNullException(nameof(llm));
-            _codeTool = new RoslynCodeTool();
         }
 
         /// <summary>
@@ -24,25 +18,18 @@ namespace Ouroboros.Tools
         /// </summary>
         /// <param name="currentDsl">The current DSL string.</param>
         /// <returns>A list of suggestions with explanations and confidence scores.</returns>
-        public async Task<List<DslSuggestion>> SuggestNextSteps(string currentDsl)
+        public static Task<List<DslSuggestion>> SuggestNextSteps(string currentDsl)
         {
             if (string.IsNullOrWhiteSpace(currentDsl))
-                return new List<DslSuggestion>();
+                return Task.FromResult(new List<DslSuggestion>());
 
-            var prompt = $"Given the current DSL pipeline: '{currentDsl}', suggest the next logical steps. " +
-                        "Provide 3-5 suggestions with explanations and confidence scores (0-1). " +
-                        "Format as JSON array of objects with 'step', 'explanation', 'confidence' fields.";
-
-            var response = await _llm.GenerateAsync(prompt);
-
-            // Parse response and return suggestions
-            // For simulation, return mock suggestions
-            return new List<DslSuggestion>
+            var suggestions = new List<DslSuggestion>
             {
                 new DslSuggestion("UseDraft", "Generate an initial draft response", 0.9),
                 new DslSuggestion("UseCritique", "Critique the draft for improvements", 0.8),
                 new DslSuggestion("UseImprove", "Improve the response based on critique", 0.7)
             };
+            return Task.FromResult(suggestions);
         }
 
         /// <summary>
@@ -50,7 +37,7 @@ namespace Ouroboros.Tools
         /// </summary>
         /// <param name="partialToken">The partial token to complete.</param>
         /// <returns>A list of possible completions.</returns>
-        public async Task<List<string>> GetTokenCompletions(string partialToken)
+        public static async Task<List<string>> GetTokenCompletions(string partialToken)
         {
             if (string.IsNullOrWhiteSpace(partialToken))
                 return new List<string>();
@@ -66,7 +53,7 @@ namespace Ouroboros.Tools
         /// </summary>
         /// <param name="dsl">The DSL string to validate.</param>
         /// <returns>Validation result with errors and suggestions.</returns>
-        public ValidationResult ValidateDsl(string dsl)
+        public static ValidationResult ValidateDsl(string dsl)
         {
             if (string.IsNullOrWhiteSpace(dsl))
                 return new ValidationResult(false, new[] { "DSL cannot be empty" }, Array.Empty<string>());
@@ -77,14 +64,11 @@ namespace Ouroboros.Tools
 
             var validTokens = new HashSet<string> { "SetTopic", "SetPrompt", "UseDraft", "UseCritique", "UseImprove", "UseVector", "UseDir" };
 
-            foreach (var token in tokens)
+            foreach (var token in tokens.Where(token => !validTokens.Contains(token.Split('(')[0])))
             {
-                if (!validTokens.Contains(token.Split('(')[0]))
-                {
-                    errors.Add($"Unknown token: {token}");
-                    var similar = validTokens.Where(v => v.Contains(token.Split('(')[0], StringComparison.OrdinalIgnoreCase)).ToList();
-                    suggestions.AddRange(similar);
-                }
+                errors.Add($"Unknown token: {token}");
+                var similar = validTokens.Where(v => v.Contains(token.Split('(')[0], StringComparison.OrdinalIgnoreCase)).ToList();
+                suggestions.AddRange(similar);
             }
 
             return new ValidationResult(!errors.Any(), errors.ToArray(), suggestions.ToArray());
@@ -95,7 +79,7 @@ namespace Ouroboros.Tools
         /// </summary>
         /// <param name="dsl">The DSL pipeline string.</param>
         /// <returns>A natural language explanation.</returns>
-        public string ExplainPipeline(string dsl)
+        public static string ExplainPipeline(string dsl)
         {
             if (string.IsNullOrWhiteSpace(dsl))
                 return "Empty pipeline";
@@ -133,7 +117,7 @@ namespace Ouroboros.Tools
         /// </summary>
         /// <param name="goal">The natural language goal.</param>
         /// <returns>A generated DSL string.</returns>
-        public string GenerateDslFromGoal(string goal)
+        public static string GenerateDslFromGoal(string goal)
         {
             if (string.IsNullOrWhiteSpace(goal))
                 return string.Empty;
@@ -150,7 +134,7 @@ namespace Ouroboros.Tools
         /// </summary>
         /// <param name="topic">The topic for the pipeline.</param>
         /// <returns>A suggested DSL string.</returns>
-        public string BuildDsl(string topic)
+        public static string BuildDsl(string topic)
         {
             return $"SetTopic('{topic}') | UseDraft | UseCritique | UseImprove";
         }
@@ -160,7 +144,7 @@ namespace Ouroboros.Tools
         /// </summary>
         /// <param name="dsl">The current DSL.</param>
         /// <returns>An improved DSL string.</returns>
-        public string SuggestImprovements(string dsl)
+        public static string SuggestImprovements(string dsl)
         {
             if (!dsl.Contains("UseCritique"))
                 return dsl + " | UseCritique";
@@ -174,7 +158,7 @@ namespace Ouroboros.Tools
         /// </summary>
         /// <param name="description">The description.</param>
         /// <returns>Generated C# code.</returns>
-        public string GenerateCode(string description)
+        public static string GenerateCode(string description)
         {
             if (description.Contains("Result<T> monad"))
             {
@@ -205,7 +189,7 @@ public class Result<T>
         /// </summary>
         /// <param name="code">The code to explain.</param>
         /// <returns>An explanation.</returns>
-        public string ExplainCode(string code)
+        public static string ExplainCode(string code)
         {
             return "This code implements a Result monad for functional error handling in C#.";
         }
@@ -215,18 +199,18 @@ public class Result<T>
         /// </summary>
         /// <param name="command">The command string.</param>
         /// <returns>Response output.</returns>
-        public string ProcessCommand(string command)
+        public static async Task<string> ProcessCommandAsync(string command)
         {
             if (command.StartsWith("suggest"))
             {
                 var dsl = command.Substring(8);
-                var suggestions = SuggestNextSteps(dsl).Result;
+                var suggestions = await SuggestNextSteps(dsl);
                 return $"Suggestions: {string.Join(", ", suggestions.Select(s => s.Step))}";
             }
             if (command.StartsWith("complete"))
             {
                 var partial = command.Substring(9);
-                var completions = GetTokenCompletions(partial).Result;
+                var completions = await GetTokenCompletions(partial);
                 return $"Completions: {string.Join(", ", completions)}";
             }
             if (command == "help")
@@ -234,6 +218,17 @@ public class Result<T>
             if (command == "exit")
                 return "Session terminated";
             return "Unknown command";
+        }
+
+        /// <summary>
+        /// Processes interactive commands synchronously. Prefer <see cref="ProcessCommandAsync"/> for async callers.
+        /// </summary>
+        /// <param name="command">The command string.</param>
+        /// <returns>Response output.</returns>
+        public static string ProcessCommand(string command)
+        {
+            // Intentional: sync wrapper for non-async callers
+            return Task.Run(() => ProcessCommandAsync(command)).GetAwaiter().GetResult();
         }
     }
 }

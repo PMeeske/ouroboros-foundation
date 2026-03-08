@@ -17,6 +17,8 @@ public sealed class EthicalHomeostasisEngine
     private readonly List<HomeostasisEvent> _eventHistory = new();
     private readonly object _lock = new();
 
+    /// <summary>Initialises the engine with the given ethics framework and equal weights across all traditions.</summary>
+    /// <param name="framework">The ethics framework used for evaluations.</param>
     public EthicalHomeostasisEngine(IEthicsFramework framework)
     {
         // Initialize tradition weights equally — no tradition is prior
@@ -25,16 +27,19 @@ public sealed class EthicalHomeostasisEngine
             _traditionWeights[t] = 1.0;
     }
 
+    /// <summary>Gets a snapshot of currently active ethical tensions.</summary>
     public IReadOnlyList<EthicalTension> ActiveTensions
     {
         get { lock (_lock) return _activeTensions.ToList().AsReadOnly(); }
     }
 
+    /// <summary>Gets the current weight assigned to each ethical tradition.</summary>
     public IReadOnlyDictionary<string, double> TraditionWeights
     {
         get { lock (_lock) return new Dictionary<string, double>(_traditionWeights); }
     }
 
+    /// <summary>Gets the full history of homeostasis events since engine creation.</summary>
     public IReadOnlyList<HomeostasisEvent> EventHistory
     {
         get { lock (_lock) return _eventHistory.ToList().AsReadOnly(); }

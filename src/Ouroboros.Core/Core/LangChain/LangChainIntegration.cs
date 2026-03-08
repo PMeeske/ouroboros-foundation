@@ -31,7 +31,12 @@ public static class LangChainIntegration
                 IChainValues result = await chain.CallAsync(chainValues);
                 return Result<Dictionary<string, object>, string>.Success(result.Value);
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (HttpRequestException ex)
+            {
+                return Result<Dictionary<string, object>, string>.Failure($"LangChain execution failed: {ex.Message}");
+            }
+            catch (InvalidOperationException ex)
             {
                 return Result<Dictionary<string, object>, string>.Failure($"LangChain execution failed: {ex.Message}");
             }
@@ -53,7 +58,12 @@ public static class LangChainIntegration
                 IChainValues result = await chain.CallAsync(chainValues);
                 return Result<Dictionary<string, object>, string>.Success(result.Value);
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (HttpRequestException ex)
+            {
+                return Result<Dictionary<string, object>, string>.Failure($"LangChain LLM execution failed: {ex.Message}");
+            }
+            catch (InvalidOperationException ex)
             {
                 return Result<Dictionary<string, object>, string>.Failure($"LangChain LLM execution failed: {ex.Message}");
             }
@@ -186,9 +196,15 @@ public static class LangChainConversationIntegration
 
                 return context;
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (HttpRequestException ex)
             {
                 // Handle errors gracefully in the monadic pipeline
+                context.SetProperty("error", $"LangChain LLM execution failed: {ex.Message}");
+                return context;
+            }
+            catch (InvalidOperationException ex)
+            {
                 context.SetProperty("error", $"LangChain LLM execution failed: {ex.Message}");
                 return context;
             }
@@ -225,7 +241,8 @@ public static class LangChainConversationIntegration
 
                 return context;
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (InvalidOperationException ex)
             {
                 context.SetProperty("error", $"LangChain Set operation failed: {ex.Message}");
                 return context;
@@ -259,7 +276,13 @@ public static class LangChainConversationIntegration
 
                 return context;
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (HttpRequestException ex)
+            {
+                context.SetProperty("error", $"LangChain chain execution failed: {ex.Message}");
+                return context;
+            }
+            catch (InvalidOperationException ex)
             {
                 context.SetProperty("error", $"LangChain chain execution failed: {ex.Message}");
                 return context;

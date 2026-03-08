@@ -57,7 +57,7 @@ public sealed class MeTTaRuleTool : ITool
                 rule = input;
             }
         }
-        catch
+        catch (System.Text.Json.JsonException)
         {
             rule = input;
         }

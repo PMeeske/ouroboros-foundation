@@ -86,7 +86,7 @@ public sealed class DCTVectorCompressor
     /// </summary>
     /// <param name="compressed">Compressed DCT data.</param>
     /// <returns>Reconstructed vector.</returns>
-    public float[] Decompress(DCTCompressedVector compressed)
+    public static float[] Decompress(DCTCompressedVector compressed)
     {
         int n = compressed.OriginalLength;
         int keep = compressed.Coefficients.Length;
@@ -121,7 +121,7 @@ public sealed class DCTVectorCompressor
     /// Computes approximate cosine similarity between two DCT-compressed vectors.
     /// Uses Parseval's theorem - energy in frequency domain equals energy in time domain.
     /// </summary>
-    public double CompressedSimilarity(DCTCompressedVector a, DCTCompressedVector b)
+    public static double CompressedSimilarity(DCTCompressedVector a, DCTCompressedVector b)
     {
         int minLen = Math.Min(a.Coefficients.Length, b.Coefficients.Length);
 
@@ -163,7 +163,7 @@ public sealed class DCTVectorCompressor
     /// <param name="compressed">DCT-compressed vector.</param>
     /// <param name="bits">Bits per coefficient (8 = byte, 16 = short).</param>
     /// <returns>Quantized compressed vector.</returns>
-    public QuantizedDCTVector Quantize(DCTCompressedVector compressed, int bits = 8)
+    public static QuantizedDCTVector Quantize(DCTCompressedVector compressed, int bits = 8)
     {
         float[] coeffs = compressed.Coefficients;
 
@@ -214,7 +214,7 @@ public sealed class DCTVectorCompressor
     /// <summary>
     /// Dequantizes and decompresses a quantized DCT vector.
     /// </summary>
-    public float[] DecompressQuantized(QuantizedDCTVector quantized)
+    public static float[] DecompressQuantized(QuantizedDCTVector quantized)
     {
         int coeffCount = quantized.BitsPerCoefficient <= 8
             ? quantized.QuantizedCoefficients.Length

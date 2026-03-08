@@ -3,7 +3,7 @@ namespace Ouroboros.Core.Security;
 /// <summary>
 /// Validation context specifying rules for input validation.
 /// </summary>
-public class ValidationContext
+public sealed class ValidationContext
 {
     /// <summary>
     /// Gets or sets maximum allowed length of input.

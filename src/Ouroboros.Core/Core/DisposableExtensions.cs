@@ -26,7 +26,7 @@ public static class DisposableExtensions
                 return Result<TResult, Exception>.Success(action(resource));
             }
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<TResult, Exception>.Failure(ex);
         }
@@ -53,7 +53,7 @@ public static class DisposableExtensions
                 return Result<TResult, Exception>.Success(await action(resource).ConfigureAwait(false));
             }
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return Result<TResult, Exception>.Failure(ex);
         }

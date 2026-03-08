@@ -6,6 +6,7 @@ namespace Ouroboros.Diagnostics;
 public static class TracingConfiguration
 {
     private static ActivityListener? listener;
+    private static readonly object _listenerLock = new();
 
     /// <summary>
     /// Enables tracing with the specified callback for handling activities.
@@ -16,20 +17,26 @@ public static class TracingConfiguration
         Action<Activity>? onActivityStarted = null,
         Action<Activity>? onActivityStopped = null)
     {
-        if (listener != null)
+        lock (_listenerLock)
         {
-            return; // Already enabled
+            if (listener != null)
+            {
+                return; // Already enabled
+            }
+
+            ActivityListener newListener = new ActivityListener
+            {
+                ShouldListenTo = source => source.Name == "Ouroboros",
+                Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
+                ActivityStarted = onActivityStarted,
+                ActivityStopped = onActivityStopped,
+            };
+
+            ActivitySource.AddActivityListener(newListener);
+
+            // Only assign after successful registration
+            listener = newListener;
         }
-
-        listener = new ActivityListener
-        {
-            ShouldListenTo = source => source.Name == "Ouroboros",
-            Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
-            ActivityStarted = onActivityStarted,
-            ActivityStopped = onActivityStopped,
-        };
-
-        ActivitySource.AddActivityListener(listener);
     }
 
     /// <summary>
@@ -37,8 +44,14 @@ public static class TracingConfiguration
     /// </summary>
     public static void DisableTracing()
     {
-        listener?.Dispose();
-        listener = null;
+        ActivityListener? toDispose;
+        lock (_listenerLock)
+        {
+            toDispose = listener;
+            listener = null;
+        }
+
+        toDispose?.Dispose();
     }
 
     /// <summary>

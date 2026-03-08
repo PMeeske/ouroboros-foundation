@@ -148,7 +148,8 @@ public readonly struct Pipeline<TIn, TOut>
                 TOut? result = await current(input).ConfigureAwait(false);
                 return Result<TOut, Exception>.Success(result);
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 return Result<TOut, Exception>.Failure(ex);
             }

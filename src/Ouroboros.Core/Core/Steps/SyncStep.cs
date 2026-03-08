@@ -10,6 +10,8 @@ public readonly struct SyncStep<TIn, TOut> : IEquatable<SyncStep<TIn, TOut>>
 {
     private readonly Func<TIn, TOut> _f;
 
+    /// <summary>Initialises the step wrapping the given synchronous function.</summary>
+    /// <param name="f">The pure function to execute.</param>
     public SyncStep(Func<TIn, TOut> f)
         => _f = f ?? throw new ArgumentNullException(nameof(f));
 

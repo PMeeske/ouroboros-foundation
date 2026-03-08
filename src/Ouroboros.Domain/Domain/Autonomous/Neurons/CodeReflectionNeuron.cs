@@ -94,7 +94,11 @@ public sealed class CodeReflectionNeuron : Neuron
                 IntentionCategory.CodeModification,
                 priority: IntentionPriority.Low);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Code health check failed: {ex.Message}");
+        }
+        catch (IOException ex)
         {
             System.Diagnostics.Debug.WriteLine($"Code health check failed: {ex.Message}");
         }

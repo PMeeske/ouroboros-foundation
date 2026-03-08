@@ -1,4 +1,3 @@
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 using Ouroboros.Core.Configuration;
 using Microsoft.Extensions.Logging;
 using Qdrant.Client;
@@ -73,9 +72,11 @@ public class VectorStoreFactory
         _logger?.LogInformation("Creating Qdrant vector store with connection: {Connection}",
             MaskConnectionString(_config.ConnectionString));
 
-#pragma warning disable CS0618 // Obsolete
-        return new QdrantVectorStore(_config.ConnectionString, _config.DefaultCollection, _logger);
-#pragma warning restore CS0618
+        // Create a QdrantClient from the connection string, then use the DI-based constructor
+        var uri = new Uri(_config.ConnectionString);
+        var client = new QdrantClient(uri.Host, uri.Port > 0 ? uri.Port : 6334, uri.Scheme == "https");
+        var registry = new QdrantCollectionRegistry(client);
+        return new QdrantVectorStore(client, registry, _logger);
     }
 
     private IVectorStore CreatePineconeStore()

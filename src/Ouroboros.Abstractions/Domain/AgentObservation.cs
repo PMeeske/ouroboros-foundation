@@ -8,7 +8,4 @@ namespace Ouroboros.Abstractions.Domain;
 /// <summary>
 /// Represents an observation made by an agent.
 /// </summary>
-public class AgentObservation
-{
-    // Placeholder class - to be implemented
-}
+public sealed record AgentObservation;

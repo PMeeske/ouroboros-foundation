@@ -105,15 +105,12 @@ public sealed class SymbolicNeuron : Neuron
                 IEnumerable<string>? dagFacts = message.Payload as IEnumerable<string>;
                 if (dagFacts != null)
                 {
-                    foreach (string dagFact in dagFacts)
+                    foreach (string dagFact in dagFacts.Where(f => !string.IsNullOrEmpty(f)))
                     {
-                        if (!string.IsNullOrEmpty(dagFact))
+                        _facts.Add(dagFact);
+                        if (MeTTaAddFactFunction != null)
                         {
-                            _facts.Add(dagFact);
-                            if (MeTTaAddFactFunction != null)
-                            {
-                                await MeTTaAddFactFunction(dagFact, ct);
-                            }
+                            await MeTTaAddFactFunction(dagFact, ct);
                         }
                     }
                 }
@@ -135,7 +132,12 @@ public sealed class SymbolicNeuron : Neuron
             {
                 return await MeTTaQueryFunction(query, ct);
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (InvalidOperationException ex)
+            {
+                return $"MeTTa query error: {ex.Message}";
+            }
+            catch (FormatException ex)
             {
                 return $"MeTTa query error: {ex.Message}";
             }
@@ -164,7 +166,12 @@ public sealed class SymbolicNeuron : Neuron
                 string relevantQuery = $"!(match &self ($rel \"{context}\" $obj) ($rel $obj))";
                 mettaResult = await MeTTaQueryFunction(relevantQuery, ct);
             }
-            catch
+            catch (OperationCanceledException) { throw; }
+            catch (InvalidOperationException)
+            {
+                // Ignore errors
+            }
+            catch (FormatException)
             {
                 // Ignore errors
             }
@@ -205,7 +212,12 @@ public sealed class SymbolicNeuron : Neuron
                    result.Trim() == "()" ||
                    result.Contains("True", StringComparison.OrdinalIgnoreCase);
         }
-        catch
+        catch (OperationCanceledException) { throw; }
+        catch (InvalidOperationException)
+        {
+            return true; // On error, allow
+        }
+        catch (FormatException)
         {
             return true; // On error, allow
         }

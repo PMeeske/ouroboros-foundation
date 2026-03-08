@@ -1,4 +1,3 @@
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 namespace Ouroboros.Domain;
 
 /// <summary>
@@ -17,7 +16,7 @@ public static class MachineCapabilities
             {
                 return GC.GetGCMemoryInfo().TotalAvailableMemoryBytes / (1024 * 1024);
             }
-            catch
+            catch (InvalidOperationException)
             {
                 return 4096; // fallback
             }

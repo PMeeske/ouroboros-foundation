@@ -70,7 +70,8 @@ public sealed class GeneticEvolutionStep<TIn, TOut, TGene>
                 TOut? output = await optimizedStep(input);
                 return Result<TOut, string>.Success(output);
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 return Result<TOut, string>.Failure($"Optimized step execution failed: {ex.Message}");
             }
@@ -93,7 +94,7 @@ public sealed class GeneticEvolutionStep<TIn, TOut, TGene>
         {
             // Evolve to find the best configuration
             Result<IChromosome<TGene>, string> evolutionResult = await this.algorithm.EvolveAsync(initialPopulation, generations, cancellationToken);
-            
+
             if (evolutionResult.IsFailure)
             {
                 return Result<(IChromosome<TGene>, TOut), string>.Failure(evolutionResult.Error);
@@ -102,7 +103,7 @@ public sealed class GeneticEvolutionStep<TIn, TOut, TGene>
             // Extract the best gene configuration
             IChromosome<TGene> bestChromosome = evolutionResult.Value;
             TGene? bestGene = bestChromosome.Genes.FirstOrDefault();
-            
+
             if (bestGene == null)
             {
                 return Result<(IChromosome<TGene>, TOut), string>.Failure("Best chromosome has no genes");
@@ -110,13 +111,14 @@ public sealed class GeneticEvolutionStep<TIn, TOut, TGene>
 
             // Create and execute the step with the best configuration
             Step<TIn, TOut> optimizedStep = this.stepFactory(bestGene);
-            
+
             try
             {
                 TOut? output = await optimizedStep(input);
                 return Result<(IChromosome<TGene>, TOut), string>.Success((bestChromosome, output));
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 return Result<(IChromosome<TGene>, TOut), string>.Failure($"Optimized step execution failed: {ex.Message}");
             }

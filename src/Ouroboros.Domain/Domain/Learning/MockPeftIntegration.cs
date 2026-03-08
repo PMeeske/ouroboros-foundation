@@ -55,7 +55,7 @@ public sealed class MockPeftIntegration : IPeftIntegration
         {
             return Result<byte[], string>.Failure("Operation cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger?.LogError(ex, "Error initializing mock adapter");
             return Result<byte[], string>.Failure($"Initialization failed: {ex.Message}");
@@ -97,7 +97,7 @@ public sealed class MockPeftIntegration : IPeftIntegration
         {
             return Result<byte[], string>.Failure("Operation cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger?.LogError(ex, "Error training mock adapter");
             return Result<byte[], string>.Failure($"Training failed: {ex.Message}");
@@ -131,7 +131,7 @@ public sealed class MockPeftIntegration : IPeftIntegration
         {
             return Result<string, string>.Failure("Operation cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger?.LogError(ex, "Error generating mock response");
             return Result<string, string>.Failure($"Generation failed: {ex.Message}");
@@ -187,7 +187,7 @@ public sealed class MockPeftIntegration : IPeftIntegration
         {
             return Result<byte[], string>.Failure("Operation cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger?.LogError(ex, "Error merging mock adapters");
             return Result<byte[], string>.Failure($"Merge failed: {ex.Message}");
@@ -210,7 +210,7 @@ public sealed class MockPeftIntegration : IPeftIntegration
 
             return Task.FromResult(Result<long, string>.Success((long)weights.Length));
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger?.LogError(ex, "Error validating mock adapter");
             return Task.FromResult(Result<long, string>.Failure($"Validation failed: {ex.Message}"));
@@ -260,7 +260,7 @@ public sealed class MockPeftIntegration : IPeftIntegration
         {
             return Result<byte[], string>.Failure("Operation cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger?.LogError(ex, "Error training mock adapter on distinction");
             return Result<byte[], string>.Failure($"Distinction training failed: {ex.Message}");
@@ -302,7 +302,7 @@ public sealed class MockPeftIntegration : IPeftIntegration
         {
             return Result<byte[], string>.Failure("Operation cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger?.LogError(ex, "Error applying mock dissolution");
             return Result<byte[], string>.Failure($"Dissolution failed: {ex.Message}");
@@ -358,7 +358,7 @@ public sealed class MockPeftIntegration : IPeftIntegration
         {
             return Result<byte[], string>.Failure("Operation cancelled");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _logger?.LogError(ex, "Error performing mock recognition merge");
             return Result<byte[], string>.Failure($"Recognition merge failed: {ex.Message}");

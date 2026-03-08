@@ -4,6 +4,7 @@
 
 using System.Collections.Concurrent;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Channels;
 
 namespace Ouroboros.Domain.Autonomous;
@@ -13,7 +14,7 @@ namespace Ouroboros.Domain.Autonomous;
 /// Components publish messages; the channel handles async TTS playback
 /// without blocking the main processing flow.
 /// </summary>
-public sealed class VoiceSideChannel : IAsyncDisposable
+public sealed partial class VoiceSideChannel : IAsyncDisposable
 {
     private static readonly ConcurrentDictionary<string, PersonaVoice> DefaultVoices = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -177,9 +178,6 @@ public sealed class VoiceSideChannel : IAsyncDisposable
         string sanitized = SanitizeForSpeech(text);
         if (string.IsNullOrWhiteSpace(sanitized)) return;
 
-        // Store original for reference - the full text remains the system truth
-        string originalForVoice = sanitized;
-
         // If LLM sanitizer is available and enabled, use it for natural condensation
         // Note: This only affects what is SPOKEN, not what is saved to memory/history
         if (_useLlmSanitization && _llmSanitizer != null && sanitized.Length > 100)
@@ -196,7 +194,13 @@ public sealed class VoiceSideChannel : IAsyncDisposable
                     sanitized = llmSanitized;
                 }
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (HttpRequestException ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[VoiceSideChannel] LLM sanitization failed: {ex.Message}");
+                // Fall back to regex-sanitized version
+            }
+            catch (InvalidOperationException ex)
             {
                 System.Diagnostics.Debug.WriteLine($"[VoiceSideChannel] LLM sanitization failed: {ex.Message}");
                 // Fall back to regex-sanitized version
@@ -247,21 +251,17 @@ Voice-friendly version:";
         if (string.IsNullOrWhiteSpace(text)) return text;
 
         // Remove persona tags like [AutoUser], [Ouroboros-A], [coordinator] etc.
-        string sanitized = System.Text.RegularExpressions.Regex.Replace(text, @"\[[^\]]+\]\s*", "");
+        string sanitized = PersonaTagRegex().Replace(text, "");
 
         // Condense URLs to just "link" - handles http, https, and www URLs
-        sanitized = System.Text.RegularExpressions.Regex.Replace(
-            sanitized,
-            @"https?://[^\s<>\""]+|www\.[^\s<>\""]+",
-            "link",
-            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        sanitized = UrlPatternRegex().Replace(sanitized, "link");
 
         // Remove markdown link syntax [text](url) -> just keep text
-        sanitized = System.Text.RegularExpressions.Regex.Replace(sanitized, @"\[([^\]]+)\]\([^)]+\)", "$1");
+        sanitized = MarkdownLinkRegex().Replace(sanitized, "$1");
 
         // Remove code blocks
-        sanitized = System.Text.RegularExpressions.Regex.Replace(sanitized, @"```[\s\S]*?```", " ");
-        sanitized = System.Text.RegularExpressions.Regex.Replace(sanitized, @"`[^`]+`", " ");
+        sanitized = FencedCodeBlockRegex().Replace(sanitized, " ");
+        sanitized = InlineCodeRegex().Replace(sanitized, " ");
 
         // Remove emojis - keep only ASCII printable characters and common extended Latin
         StringBuilder sb = new System.Text.StringBuilder();
@@ -279,7 +279,7 @@ Voice-friendly version:";
         }
 
         // Normalize whitespace
-        return System.Text.RegularExpressions.Regex.Replace(sb.ToString(), @"\s+", " ").Trim();
+        return WhitespaceNormalizerRegex().Replace(sb.ToString(), " ").Trim();
     }
 
     /// <summary>
@@ -341,7 +341,7 @@ Voice-friendly version:";
                 {
                     break;
                 }
-                catch (Exception)
+                catch (Exception ex) when (ex is not OperationCanceledException)
                 {
                     // Log but don't crash the channel
                     MessageSkipped?.Invoke(this, message);
@@ -378,4 +378,24 @@ Voice-friendly version:";
 
         _cts.Dispose();
     }
+
+    // GeneratedRegex patterns for speech sanitization
+
+    [GeneratedRegex(@"\[[^\]]+\]\s*")]
+    private static partial Regex PersonaTagRegex();
+
+    [GeneratedRegex(@"https?://[^\s<>\""]+|www\.[^\s<>\""]+", RegexOptions.IgnoreCase)]
+    private static partial Regex UrlPatternRegex();
+
+    [GeneratedRegex(@"\[([^\]]+)\]\([^)]+\)")]
+    private static partial Regex MarkdownLinkRegex();
+
+    [GeneratedRegex(@"```[\s\S]*?```")]
+    private static partial Regex FencedCodeBlockRegex();
+
+    [GeneratedRegex(@"`[^`]+`")]
+    private static partial Regex InlineCodeRegex();
+
+    [GeneratedRegex(@"\s+")]
+    private static partial Regex WhitespaceNormalizerRegex();
 }

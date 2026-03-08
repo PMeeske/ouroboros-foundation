@@ -14,16 +14,11 @@ namespace Ouroboros.Domain.Autonomous;
 public sealed class IntentionBus : IDisposable
 {
     private readonly ConcurrentDictionary<Guid, Intention> _intentions = new();
-    private readonly ConcurrentQueue<Intention> _pendingQueue = new();
     private readonly Subject<IntentionEvent> _intentionEvents = new();
     private readonly Subject<Intention> _newIntentions = new();
-    private readonly SemaphoreSlim _processLock = new(1, 1);
     private readonly CancellationTokenSource _cts = new();
 
-    private bool _isActive;
-#pragma warning disable CS0649 // Field is assigned dynamically or reserved for future use
-    private Task? _processingTask;
-#pragma warning restore CS0649
+    private volatile bool _isActive;
     private Task? _expirationTask;
 
     /// <summary>
@@ -41,8 +36,8 @@ public sealed class IntentionBus : IDisposable
 
         return englishMessage switch
         {
-            "🧠 IntentionBus activated. I will now propose actions before executing them."
-                => "🧠 IntentionBus aktiviert. Ich werde jetzt Aktionen vorschlagen, bevor ich sie ausführe.",
+            "[NET] IntentionBus activated. I will now propose actions before executing them."
+                => "[NET] IntentionBus aktiviert. Ich werde jetzt Aktionen vorschlagen, bevor ich sie ausführe.",
             _ => englishMessage
         };
     }
@@ -56,18 +51,18 @@ public sealed class IntentionBus : IDisposable
         {
             return templateKey switch
             {
-                "completed" => $"✅ Intention completed: {param}",
-                "failed" => $"❌ Intention failed: {param} - {param2}",
-                "proposed" => $"💭 **Intention Proposed:** {param}",
+                "completed" => $"[OK] Intention completed: {param}",
+                "failed" => $"[FAIL] Intention failed: {param} - {param2}",
+                "proposed" => $"[PROPOSED] **Intention Proposed:** {param}",
                 _ => param
             };
         }
 
         return templateKey switch
         {
-            "completed" => $"✅ Absicht abgeschlossen: {param}",
-            "failed" => $"❌ Absicht fehlgeschlagen: {param} - {param2}",
-            "proposed" => $"💭 **Absicht vorgeschlagen:** {param}",
+            "completed" => $"[OK] Absicht abgeschlossen: {param}",
+            "failed" => $"[FAIL] Absicht fehlgeschlagen: {param} - {param2}",
+            "proposed" => $"[PROPOSED] **Absicht vorgeschlagen:** {param}",
             _ => param
         };
     }
@@ -133,7 +128,7 @@ public sealed class IntentionBus : IDisposable
         _isActive = true;
 
         _expirationTask = Task.Run(ExpirationLoopAsync);
-        OnProactiveMessage?.Invoke(Localize("🧠 IntentionBus activated. I will now propose actions before executing them."), IntentionPriority.Normal);
+        OnProactiveMessage?.Invoke(Localize("[NET] IntentionBus activated. I will now propose actions before executing them."), IntentionPriority.Normal);
     }
 
     /// <summary>
@@ -145,8 +140,17 @@ public sealed class IntentionBus : IDisposable
         _isActive = false;
         _cts.Cancel();
 
-        if (_processingTask != null) await _processingTask;
-        if (_expirationTask != null) await _expirationTask;
+        if (_expirationTask != null)
+        {
+            try
+            {
+                await _expirationTask.WaitAsync(TimeSpan.FromSeconds(5));
+            }
+            catch (TimeoutException)
+            {
+                // Expiration loop did not stop in time — proceed with shutdown
+            }
+        }
     }
 
     /// <summary>
@@ -179,14 +183,13 @@ public sealed class IntentionBus : IDisposable
         };
 
         _intentions[intention.Id] = intention;
-        _pendingQueue.Enqueue(intention);
         _newIntentions.OnNext(intention);
 
         if (requiresApproval)
         {
             OnIntentionRequiresAttention?.Invoke(intention);
             OnProactiveMessage?.Invoke(
-                $"💭 **Intention Proposed:** {title}\n" +
+                $"[PROPOSED] **Intention Proposed:** {title}\n" +
                 $"   Category: {category}, Priority: {priority}\n" +
                 $"   Reason: {rationale}\n" +
                 $"   Use `/approve {intention.Id.ToString()[..8]}` or `/reject {intention.Id.ToString()[..8]}`",
@@ -370,11 +373,43 @@ public sealed class IntentionBus : IDisposable
                     _intentions[intention.Id] = updated;
                     _intentionEvents.OnNext(new IntentionEvent(updated, intention.Status, IntentionStatus.Expired, now));
                 }
+
+                // Evict terminal intentions older than 1 hour to prevent unbounded growth
+                EvictTerminalIntentions(now);
             }
             catch (OperationCanceledException)
             {
                 break;
             }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceWarning($"IntentionBus expiration loop error: {ex.Message}");
+                // Continue the loop -- don't let a transient error kill cleanup
+            }
+        }
+    }
+
+    /// <summary>
+    /// Removes completed, failed, expired, rejected, and cancelled intentions
+    /// that have been in a terminal state for longer than the retention period.
+    /// </summary>
+    private void EvictTerminalIntentions(DateTime now)
+    {
+        DateTime cutoff = now.AddHours(-1);
+
+        List<Guid> keysToRemove = _intentions
+            .Where(kvp => kvp.Value.Status is IntentionStatus.Completed
+                                           or IntentionStatus.Failed
+                                           or IntentionStatus.Expired
+                                           or IntentionStatus.Rejected
+                                           or IntentionStatus.Cancelled)
+            .Where(kvp => (kvp.Value.ActedAt ?? kvp.Value.CreatedAt) < cutoff)
+            .Select(kvp => kvp.Key)
+            .ToList();
+
+        foreach (Guid key in keysToRemove)
+        {
+            _intentions.TryRemove(key, out _);
         }
     }
 
@@ -389,7 +424,7 @@ public sealed class IntentionBus : IDisposable
         int rejected = _intentions.Values.Count(i => i.Status == IntentionStatus.Rejected);
         int failed = _intentions.Values.Count(i => i.Status == IntentionStatus.Failed);
 
-        return $"📊 **IntentionBus Status**\n" +
+        return $"[STATUS] **IntentionBus Status**\n" +
                $"  Pending: {pending}, Approved: {approved}, Completed: {completed}\n" +
                $"  Rejected: {rejected}, Failed: {failed}, Total: {_intentions.Count}";
     }
@@ -399,9 +434,10 @@ public sealed class IntentionBus : IDisposable
     {
         _isActive = false;
         _cts.Cancel();
+        try { _expirationTask?.Wait(TimeSpan.FromSeconds(2)); }
+        catch { /* timeout or cancellation — proceed with disposal */ }
         _cts.Dispose();
         _intentionEvents.Dispose();
         _newIntentions.Dispose();
-        _processLock.Dispose();
     }
 }

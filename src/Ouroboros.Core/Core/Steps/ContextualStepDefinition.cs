@@ -153,6 +153,7 @@ public readonly struct ContextualStepDefinition<TIn, TOut, TContext>
     {
         // Copy to a local so the lambda does not capture 'this' (not allowed in structs).
         ContextualStep<TIn, TOut, TContext> compiled = _compiled;
+        // Intentional: sync wrapper for non-async callers
         return Task.Run(() => compiled(input, context)).GetAwaiter().GetResult();
     }
 

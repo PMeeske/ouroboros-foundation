@@ -13,9 +13,14 @@ namespace Ouroboros.Domain.Persistence;
 /// </summary>
 public class FileThoughtStore : IThoughtStore
 {
+    private static readonly JsonSerializerOptions SharedJsonOptions = new()
+    {
+        WriteIndented = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    };
+
     private readonly string _baseDirectory;
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _sessionLocks = new();
-    private readonly JsonSerializerOptions _jsonOptions;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="FileThoughtStore"/> class.
@@ -25,12 +30,6 @@ public class FileThoughtStore : IThoughtStore
     {
         _baseDirectory = baseDirectory ?? Path.Combine(System.Environment.CurrentDirectory, "thoughts");
         Directory.CreateDirectory(_baseDirectory);
-
-        _jsonOptions = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        };
     }
 
     /// <inheritdoc/>
@@ -217,7 +216,7 @@ public class FileThoughtStore : IThoughtStore
         return _sessionLocks.GetOrAdd(sessionId, _ => new SemaphoreSlim(1, 1));
     }
 
-    private async Task<List<PersistedThought>> LoadThoughtsFromFileAsync(string filePath, CancellationToken ct)
+    private static async Task<List<PersistedThought>> LoadThoughtsFromFileAsync(string filePath, CancellationToken ct)
     {
         if (!File.Exists(filePath))
         {
@@ -227,7 +226,7 @@ public class FileThoughtStore : IThoughtStore
         try
         {
             string json = await File.ReadAllTextAsync(filePath, ct);
-            return JsonSerializer.Deserialize<List<PersistedThought>>(json, _jsonOptions) ?? new List<PersistedThought>();
+            return JsonSerializer.Deserialize<List<PersistedThought>>(json, SharedJsonOptions) ?? new List<PersistedThought>();
         }
         catch (JsonException)
         {
@@ -236,9 +235,9 @@ public class FileThoughtStore : IThoughtStore
         }
     }
 
-    private async Task SaveThoughtsToFileAsync(string filePath, List<PersistedThought> thoughts, CancellationToken ct)
+    private static async Task SaveThoughtsToFileAsync(string filePath, List<PersistedThought> thoughts, CancellationToken ct)
     {
-        string json = JsonSerializer.Serialize(thoughts, _jsonOptions);
+        string json = JsonSerializer.Serialize(thoughts, SharedJsonOptions);
         await File.WriteAllTextAsync(filePath, json, ct);
     }
 

@@ -57,7 +57,7 @@ public sealed class MeTTaPlanVerifierTool : ITool
                 plan = input;
             }
         }
-        catch
+        catch (System.Text.Json.JsonException)
         {
             plan = input;
         }

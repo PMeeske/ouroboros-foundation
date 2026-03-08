@@ -255,7 +255,7 @@ public sealed class VirtualSelf : IDisposable
 
         if (visual.Count > 0)
         {
-            string desc = visual.Last().Description;
+            string desc = visual[^1].Description;
             if (!string.IsNullOrWhiteSpace(desc))
             {
                 parts.Add($"[Saw] {desc}");

@@ -1,4 +1,3 @@
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 // ==========================================================
 // Kleisli <-> LangChain pipe interop
 // Enhanced integration with our unified monadic operations
@@ -30,6 +29,9 @@ public class PipelineBuilder<TIn, TCurrent>
     private readonly string _name;
     private readonly PipeNode<TIn, TCurrent> _currentPipeline;
 
+    /// <summary>Initialises the builder with a pipeline name and the initial pipe node.</summary>
+    /// <param name="name">Display name for the pipeline.</param>
+    /// <param name="pipeline">The initial pipe node to build from.</param>
     public PipelineBuilder(string name, PipeNode<TIn, TCurrent> pipeline)
     {
         _name = name;

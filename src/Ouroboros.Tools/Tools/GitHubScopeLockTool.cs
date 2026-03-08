@@ -79,7 +79,12 @@ public sealed class GitHubScopeLockTool : ITool
 
             return Result<string, string>.Success(resultMessage);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (ApiException ex)
+        {
+            return Result<string, string>.Failure($"Scope lock failed: {ex.Message}");
+        }
+        catch (System.Text.Json.JsonException ex)
         {
             return Result<string, string>.Failure($"Scope lock failed: {ex.Message}");
         }
@@ -105,12 +110,12 @@ public sealed class GitHubScopeLockTool : ITool
             }
 
             // Add the label to the issue
-            IssueUpdate issueUpdate = new IssueUpdate();
             await this.client.Issue.Labels.AddToIssue(this.owner, this.repo, issueNumber, new[] { "scope-locked" });
 
             return Result<bool, string>.Success(true);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (ApiException ex)
         {
             return Result<bool, string>.Failure($"Failed to add scope-locked label: {ex.Message}");
         }
@@ -135,7 +140,8 @@ public sealed class GitHubScopeLockTool : ITool
 
             return Result<bool, string>.Success(true);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (ApiException ex)
         {
             return Result<bool, string>.Failure($"Failed to add confirmation comment: {ex.Message}");
         }
@@ -164,7 +170,8 @@ public sealed class GitHubScopeLockTool : ITool
 
             return Result<bool, string>.Success(true);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (ApiException ex)
         {
             return Result<bool, string>.Failure($"Failed to update milestone: {ex.Message}");
         }

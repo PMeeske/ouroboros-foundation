@@ -2,8 +2,6 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
-#pragma warning disable SA1101 // Prefix local calls with this
-
 namespace Ouroboros.Tools.MeTTa;
 
 using System.Collections.Concurrent;
@@ -133,7 +131,7 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
                 {
                     break;
                 }
-                catch
+                catch (InvalidOperationException)
                 {
                     // Continue loop on errors
                 }
@@ -181,7 +179,7 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
                     subscription.Handler(match);
                     OnPatternMatch?.Invoke(match);
                 }
-                catch
+                catch (InvalidOperationException)
                 {
                     // Swallow handler exceptions
                 }
@@ -213,7 +211,11 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
                 return true;
             }
         }
-        catch
+        catch (InvalidOperationException)
+        {
+            // Pattern match failed
+        }
+        catch (FormatException)
         {
             // Pattern match failed
         }

@@ -1,5 +1,5 @@
-﻿using System.Collections.Concurrent;
-using System.Reactive.Subjects;
+﻿using System.Reactive.Subjects;
+using System.Threading.Channels;
 
 namespace Ouroboros.Domain.Autonomous;
 
@@ -8,12 +8,11 @@ namespace Ouroboros.Domain.Autonomous;
 /// </summary>
 public abstract class Neuron : IDisposable
 {
-    private readonly Subject<NeuronMessage> _incomingMessages = new();
     private readonly Subject<NeuronMessage> _outgoingMessages = new();
-    private readonly ConcurrentQueue<NeuronMessage> _messageQueue = new();
+    private readonly Channel<NeuronMessage> _messageChannel = Channel.CreateUnbounded<NeuronMessage>();
     private readonly CancellationTokenSource _cts = new();
 
-    private bool _isActive;
+    private volatile bool _isActive;
     private Task? _processingTask;
 
     /// <summary>
@@ -74,6 +73,7 @@ public abstract class Neuron : IDisposable
     {
         if (!_isActive) return;
         _isActive = false;
+        _messageChannel.Writer.TryComplete();
         _cts.Cancel();
         if (_processingTask != null) await _processingTask;
         OnStopped();
@@ -84,8 +84,7 @@ public abstract class Neuron : IDisposable
     /// </summary>
     public void ReceiveMessage(NeuronMessage message)
     {
-        _messageQueue.Enqueue(message);
-        _incomingMessages.OnNext(message);
+        _messageChannel.Writer.TryWrite(message);
     }
 
     /// <summary>
@@ -105,7 +104,12 @@ public abstract class Neuron : IDisposable
         };
 
         _outgoingMessages.OnNext(message);
-        Network?.RouteMessage(message);
+        _ = Network?.RouteMessageAsync(message).ContinueWith(t =>
+        {
+            if (t.IsFaulted && t.Exception != null)
+                foreach (var ex in t.Exception.InnerExceptions)
+                    System.Diagnostics.Trace.TraceWarning($"[{Id}] RouteMessage failed: {ex.Message}");
+        }, TaskContinuationOptions.OnlyOnFaulted);
     }
 
     /// <summary>
@@ -123,7 +127,12 @@ public abstract class Neuron : IDisposable
         };
 
         _outgoingMessages.OnNext(response);
-        Network?.RouteMessage(response);
+        _ = Network?.RouteMessageAsync(response).ContinueWith(t =>
+        {
+            if (t.IsFaulted && t.Exception != null)
+                foreach (var ex in t.Exception.InnerExceptions)
+                    System.Diagnostics.Trace.TraceWarning($"[{Id}] RouteMessage failed: {ex.Message}");
+        }, TaskContinuationOptions.OnlyOnFaulted);
     }
 
     /// <summary>
@@ -163,43 +172,61 @@ public abstract class Neuron : IDisposable
 
     private async Task ProcessMessagesAsync()
     {
-        while (_isActive && !_cts.Token.IsCancellationRequested)
+        // Start periodic tick loop as a companion task
+        Task tickTask = Task.Run(async () =>
         {
-            try
+            while (_isActive && !_cts.Token.IsCancellationRequested)
             {
-                // Process queued messages
-                while (_messageQueue.TryDequeue(out NeuronMessage? message))
+                try
                 {
-                    try
-                    {
-                        await ProcessMessageAsync(message, _cts.Token);
-                    }
-                    catch (Exception ex)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"[{Id}] Error processing message: {ex.Message}");
-                    }
+                    await Task.Delay(1000, _cts.Token);
+                    await OnTickAsync(_cts.Token);
                 }
-
-                // Periodic tick
-                await OnTickAsync(_cts.Token);
-
-                // Small delay to prevent busy-waiting
-                await Task.Delay(100, _cts.Token);
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.TraceWarning($"[{Id}] Error in tick loop: {ex.Message}");
+                }
             }
-            catch (OperationCanceledException)
+        }, _cts.Token);
+
+        // Event-driven message processing loop (no polling)
+        try
+        {
+            await foreach (NeuronMessage message in _messageChannel.Reader.ReadAllAsync(_cts.Token))
             {
-                break;
+                try
+                {
+                    await ProcessMessageAsync(message, _cts.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    System.Diagnostics.Trace.TraceWarning($"[{Id}] Error processing message: {ex.Message}");
+                }
             }
         }
+        catch (OperationCanceledException)
+        {
+            // Expected during shutdown
+        }
+
+        await tickTask;
     }
 
     /// <inheritdoc/>
     public virtual void Dispose()
     {
         _isActive = false;
+        _messageChannel.Writer.TryComplete();
         _cts.Cancel();
         _cts.Dispose();
-        _incomingMessages.Dispose();
         _outgoingMessages.Dispose();
     }
 }

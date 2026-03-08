@@ -80,7 +80,7 @@ public static class AdvancedToolBuilder
                     string aggregated = aggregator(results);
                     return Result<string, string>.Success(aggregated);
                 }
-                catch (Exception ex)
+                catch (InvalidOperationException ex)
                 {
                     return Result<string, string>.Failure(
                         $"Aggregation failed: {ex.Message}");

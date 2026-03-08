@@ -16,7 +16,7 @@ namespace Ouroboros.Domain.Autonomous;
 /// Stores neuron messages, intentions, and enables semantic search.
 /// Uses the shared IQdrantClient via gRPC for unified Qdrant access.
 /// </summary>
-public sealed class QdrantNeuralMemory : IDisposable
+public sealed partial class QdrantNeuralMemory : IDisposable
 {
     private readonly QdrantClient _client;
     private readonly string _neuronMessagesCollection;
@@ -45,22 +45,6 @@ public sealed class QdrantNeuralMemory : IDisposable
         _memoriesCollection = registry.GetCollectionName(QdrantCollectionRole.Memories);
         _defaultVectorSize = settings.DefaultVectorSize;
         _disposeClient = false;
-    }
-
-    /// <summary>
-    /// Creates a new Qdrant neural memory instance.
-    /// </summary>
-    /// <param name="qdrantEndpoint">Qdrant gRPC endpoint (e.g., http://localhost:6334).</param>
-    [Obsolete("Use the constructor accepting QdrantClient + IQdrantCollectionRegistry from DI.")]
-    public QdrantNeuralMemory(string qdrantEndpoint = "http://localhost:6334")
-    {
-        Uri uri = new Uri(qdrantEndpoint.TrimEnd('/'));
-        _client = new QdrantClient(uri.Host, uri.Port > 0 ? uri.Port : 6334, uri.Scheme == "https");
-        _neuronMessagesCollection = "ouroboros_neuron_messages";
-        _intentionsCollection = "ouroboros_intentions";
-        _memoriesCollection = "ouroboros_memories";
-        _defaultVectorSize = 768;
-        _disposeClient = true;
     }
 
     /// <summary>
@@ -144,7 +128,15 @@ public sealed class QdrantNeuralMemory : IDisposable
 
             _initializedCollections[collectionName] = true;
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Grpc.Core.RpcException ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Qdrant RPC error ensuring collection {collectionName}: {ex.Status.Detail}");
+        }
+        catch (HttpRequestException ex)
         {
             System.Diagnostics.Debug.WriteLine($"Failed to ensure collection {collectionName}: {ex.Message}");
         }
@@ -204,7 +196,7 @@ public sealed class QdrantNeuralMemory : IDisposable
                     await _client.UpsertAsync(collectionName, new[] { point }, cancellationToken: ct);
                     migrated++;
                 }
-                catch
+                catch (Grpc.Core.RpcException)
                 {
                     failed++;
                 }
@@ -212,7 +204,19 @@ public sealed class QdrantNeuralMemory : IDisposable
 
             Console.WriteLine($"    \u2713 Migrated {migrated} points ({failed} failed)");
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Grpc.Core.RpcException ex)
+        {
+            Console.WriteLine($"    \u26a0 Migration RPC error: {ex.Status.Detail}");
+            await _client.CreateCollectionAsync(
+                collectionName,
+                new VectorParams { Size = (ulong)newVectorSize, Distance = Distance.Cosine },
+                cancellationToken: ct);
+        }
+        catch (HttpRequestException ex)
         {
             Console.WriteLine($"    \u26a0 Migration failed: {ex.Message}");
             await _client.CreateCollectionAsync(
@@ -266,10 +270,10 @@ public sealed class QdrantNeuralMemory : IDisposable
                     results.Add((id, payloadDict));
                 }
 
-                offset = scrollResult.Result.Count > 0 ? scrollResult.Result.Last().Id : null;
+                offset = scrollResult.Result.Count > 0 ? scrollResult.Result[^1].Id : null;
                 if (offset == null) break;
             }
-            catch
+            catch (Grpc.Core.RpcException)
             {
                 break;
             }
@@ -359,163 +363,6 @@ public sealed class QdrantNeuralMemory : IDisposable
         };
 
         await _client.UpsertAsync(_memoriesCollection, new[] { point }, cancellationToken: ct);
-    }
-
-    /// <summary>
-    /// Searches for similar neuron messages.
-    /// </summary>
-    public async Task<IReadOnlyList<NeuronMessage>> SearchSimilarMessagesAsync(
-        float[] queryVector, int limit = 10, CancellationToken ct = default)
-    {
-        try
-        {
-            bool exists = await _client.CollectionExistsAsync(_neuronMessagesCollection, ct);
-            if (!exists) return Array.Empty<NeuronMessage>();
-
-            IReadOnlyList<ScoredPoint> results = await _client.SearchAsync(
-                _neuronMessagesCollection,
-                queryVector,
-                limit: (ulong)limit,
-                payloadSelector: new WithPayloadSelector { Enable = true },
-                cancellationToken: ct);
-
-            return results.Select(r =>
-            {
-                MapField<string, Value> p = r.Payload;
-                return new NeuronMessage
-                {
-                    Id = Guid.TryParse(r.Id.Uuid, out Guid id) ? id : Guid.NewGuid(),
-                    SourceNeuron = p.TryGetValue("source_neuron", out Value? sn) ? sn.StringValue : "",
-                    TargetNeuron = p.TryGetValue("target_neuron", out Value? tn) ? tn.StringValue : null,
-                    Topic = p.TryGetValue("topic", out Value? t) ? t.StringValue : "",
-                    Payload = p.TryGetValue("content", out Value? c) ? c.StringValue : "",
-                    Priority = p.TryGetValue("priority", out Value? pr) && Enum.TryParse<IntentionPriority>(pr.IntegerValue.ToString(), out IntentionPriority pv) ? pv : IntentionPriority.Normal,
-                };
-            }).ToList();
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Search failed: {ex.Message}");
-            return Array.Empty<NeuronMessage>();
-        }
-    }
-
-    /// <summary>
-    /// Searches for similar memories.
-    /// </summary>
-    public async Task<IReadOnlyList<string>> SearchMemoriesAsync(
-        float[] queryVector, int limit = 10, CancellationToken ct = default)
-    {
-        try
-        {
-            bool exists = await _client.CollectionExistsAsync(_memoriesCollection, ct);
-            if (!exists) return Array.Empty<string>();
-
-            IReadOnlyList<ScoredPoint> results = await _client.SearchAsync(
-                _memoriesCollection,
-                queryVector,
-                limit: (ulong)limit,
-                payloadSelector: new WithPayloadSelector { Enable = true },
-                cancellationToken: ct);
-
-            return results.Select(r =>
-                r.Payload.TryGetValue("content", out Value? c) ? c.StringValue : "").ToList();
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Search failed: {ex.Message}");
-            return Array.Empty<string>();
-        }
-    }
-
-    /// <summary>
-    /// Searches for similar intentions.
-    /// </summary>
-    public async Task<IReadOnlyList<Intention>> SearchIntentionsAsync(
-        float[] queryVector, int limit = 10, CancellationToken ct = default)
-    {
-        try
-        {
-            bool exists = await _client.CollectionExistsAsync(_intentionsCollection, ct);
-            if (!exists) return Array.Empty<Intention>();
-
-            IReadOnlyList<ScoredPoint> results = await _client.SearchAsync(
-                _intentionsCollection,
-                queryVector,
-                limit: (ulong)limit,
-                payloadSelector: new WithPayloadSelector { Enable = true },
-                cancellationToken: ct);
-
-            return results.Select(r =>
-            {
-                MapField<string, Value> p = r.Payload;
-                return new Intention
-                {
-                    Id = Guid.TryParse(r.Id.Uuid, out Guid id) ? id : Guid.NewGuid(),
-                    Title = p.TryGetValue("title", out Value? ti) ? ti.StringValue : "",
-                    Description = p.TryGetValue("description", out Value? d) ? d.StringValue : "",
-                    Rationale = p.TryGetValue("rationale", out Value? ra) ? ra.StringValue : "",
-                    Category = p.TryGetValue("category", out Value? ca) && Enum.TryParse<IntentionCategory>(ca.StringValue, out IntentionCategory cv) ? cv : IntentionCategory.SelfReflection,
-                    Source = p.TryGetValue("source", out Value? s) ? s.StringValue : "",
-                    Priority = p.TryGetValue("priority", out Value? pr) && Enum.TryParse<IntentionPriority>(pr.IntegerValue.ToString(), out IntentionPriority pv) ? pv : IntentionPriority.Normal,
-                };
-            }).ToList();
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Search failed: {ex.Message}");
-            return Array.Empty<Intention>();
-        }
-    }
-
-    /// <summary>
-    /// Gets collection statistics.
-    /// </summary>
-    public async Task<QdrantCollectionStats> GetCollectionStatsAsync(string collectionName, CancellationToken ct = default)
-    {
-        try
-        {
-            bool exists = await _client.CollectionExistsAsync(collectionName, ct);
-            if (!exists)
-            {
-                return new QdrantCollectionStats { Name = collectionName, Exists = false };
-            }
-
-            CollectionInfo info = await _client.GetCollectionInfoAsync(collectionName, ct);
-            ulong count = await _client.CountAsync(collectionName, exact: true, cancellationToken: ct);
-            int vectorSize = (int)(info.Config?.Params?.VectorsConfig?.Params?.Size ?? 0);
-
-            return new QdrantCollectionStats
-            {
-                Name = collectionName,
-                Exists = true,
-                PointCount = (long)count,
-                VectorSize = vectorSize,
-            };
-        }
-        catch
-        {
-            return new QdrantCollectionStats { Name = collectionName, Exists = false };
-        }
-    }
-
-    /// <summary>
-    /// Gets statistics for all neural memory collections.
-    /// </summary>
-    public async Task<QdrantNeuralMemoryStats> GetStatsAsync(CancellationToken ct = default)
-    {
-        QdrantCollectionStats messagesStats = await GetCollectionStatsAsync(_neuronMessagesCollection, ct);
-        QdrantCollectionStats intentionsStats = await GetCollectionStatsAsync(_intentionsCollection, ct);
-        QdrantCollectionStats memoriesStats = await GetCollectionStatsAsync(_memoriesCollection, ct);
-
-        return new QdrantNeuralMemoryStats
-        {
-            IsConnected = messagesStats.Exists || intentionsStats.Exists || memoriesStats.Exists,
-            NeuronMessagesCount = messagesStats.PointCount,
-            IntentionsCount = intentionsStats.PointCount,
-            MemoriesCount = memoriesStats.PointCount,
-            TotalPoints = messagesStats.PointCount + intentionsStats.PointCount + memoriesStats.PointCount,
-        };
     }
 
     private async Task<float[]?> GetEmbeddingAsync(string text, CancellationToken ct)

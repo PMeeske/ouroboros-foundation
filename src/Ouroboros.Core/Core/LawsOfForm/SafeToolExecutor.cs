@@ -98,7 +98,8 @@ public sealed class SafeToolExecutor
 
                 evidence.Add(new Evidence(criterion.Name, form, description));
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 // Treat exceptions as uncertain
                 criteriaForms.Add(Form.Imaginary);
@@ -115,7 +116,7 @@ public sealed class SafeToolExecutor
         // Handle each certainty state
         return await overallCertainty.Match(
             onMark: async () => await this.ExecuteTool(toolCall, context, evidence),
-            onVoid: () => Task.FromResult(this.RejectExecution(toolCall, evidence)),
+            onVoid: () => Task.FromResult(RejectExecution(toolCall, evidence)),
             onImaginary: async () => await this.HandleUncertain(toolCall, context, evidence));
     }
 
@@ -146,7 +147,7 @@ public sealed class SafeToolExecutor
             TimeSpan duration = DateTime.UtcNow - startTime;
 
             // Convert Result to ToolResult
-            ToolResult toolResult = result.Match(
+            ToolResult execResult = result.Match(
                 onSuccess: output => ToolResult.Success(output, toolCall, duration),
                 onFailure: error => ToolResult.Failure(error, toolCall, duration));
 
@@ -154,15 +155,13 @@ public sealed class SafeToolExecutor
             context.RateLimiter.Record(toolCall);
 
             return AuditableDecision<ToolResult>.Approve(
-                toolResult,
+                execResult,
                 "All safety criteria passed, tool executed successfully",
                 evidence.ToArray());
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            TimeSpan duration = DateTime.UtcNow - startTime;
-            ToolResult toolResult = ToolResult.Failure(ex.Message, toolCall, duration);
-
             return AuditableDecision<ToolResult>.Reject(
                 $"Tool execution failed: {ex.Message}",
                 "Exception during tool execution",
@@ -170,7 +169,7 @@ public sealed class SafeToolExecutor
         }
     }
 
-    private AuditableDecision<ToolResult> RejectExecution(
+    private static AuditableDecision<ToolResult> RejectExecution(
         ToolCall toolCall,
         List<Evidence> evidence)
     {
@@ -238,7 +237,8 @@ public sealed class SafeToolExecutor
                     evidence.ToArray());
             }
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return AuditableDecision<ToolResult>.Uncertain(
                 $"Uncertainty handler failed: {ex.Message}",

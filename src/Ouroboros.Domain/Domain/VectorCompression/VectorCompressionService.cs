@@ -64,7 +64,7 @@ public static class VectorCompressionService
 
                 case CompressionMethod.QuantizedDCT:
                     DCTCompressedVector dctQ = dctCompressor.Compress(vector);
-                    QuantizedDCTVector quantized = dctCompressor.Quantize(dctQ, 8);
+                    QuantizedDCTVector quantized = DCTVectorCompressor.Quantize(dctQ, 8);
                     result = WrapWithHeader(CompressionMethod.QuantizedDCT, quantized.ToBytes());
                     energyRetained = dctQ.EnergyRetained;
                     break;
@@ -87,7 +87,15 @@ public static class VectorCompressionService
 
             return Result<(byte[], VectorCompressionEvent)>.Success((result, compressionEvent));
         }
-        catch (Exception ex)
+        catch (ArgumentNullException ex)
+        {
+            return Result<(byte[], VectorCompressionEvent)>.Failure($"Compression input error: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Result<(byte[], VectorCompressionEvent)>.Failure($"Compression failed: {ex.Message}");
+        }
+        catch (OverflowException ex)
         {
             return Result<(byte[], VectorCompressionEvent)>.Failure($"Compression failed: {ex.Message}");
         }
@@ -109,26 +117,21 @@ public static class VectorCompressionService
 
             (CompressionMethod method, byte[]? payload) = UnwrapHeader(data);
 
-            // Create compressors
-            FourierVectorCompressor fftCompressor = new FourierVectorCompressor(
-                config.TargetDimension,
-                FourierVectorCompressor.CompressionStrategy.HighestMagnitude);
-
-            DCTVectorCompressor dctCompressor = new DCTVectorCompressor(
-                config.TargetDimension,
-                config.EnergyThreshold);
-
             float[] result = method switch
             {
-                CompressionMethod.DCT => dctCompressor.Decompress(DCTCompressedVector.FromBytes(payload)),
-                CompressionMethod.QuantizedDCT => dctCompressor.DecompressQuantized(QuantizedDCTVector.FromBytes(payload)),
-                CompressionMethod.FFT => fftCompressor.Decompress(CompressedVector.FromBytes(payload)),
+                CompressionMethod.DCT => DCTVectorCompressor.Decompress(DCTCompressedVector.FromBytes(payload)),
+                CompressionMethod.QuantizedDCT => DCTVectorCompressor.DecompressQuantized(QuantizedDCTVector.FromBytes(payload)),
+                CompressionMethod.FFT => FourierVectorCompressor.Decompress(CompressedVector.FromBytes(payload)),
                 _ => throw new InvalidOperationException($"Unknown compression method: {method}")
             };
 
             return Result<float[]>.Success(result);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            return Result<float[]>.Failure($"Decompression format error: {ex.Message}");
+        }
+        catch (ArgumentException ex)
         {
             return Result<float[]>.Failure($"Decompression failed: {ex.Message}");
         }
@@ -149,15 +152,6 @@ public static class VectorCompressionService
             (CompressionMethod methodA, byte[]? payloadA) = UnwrapHeader(a);
             (CompressionMethod methodB, byte[]? payloadB) = UnwrapHeader(b);
 
-            // Create compressors
-            FourierVectorCompressor fftCompressor = new FourierVectorCompressor(
-                config.TargetDimension,
-                FourierVectorCompressor.CompressionStrategy.HighestMagnitude);
-
-            DCTVectorCompressor dctCompressor = new DCTVectorCompressor(
-                config.TargetDimension,
-                config.EnergyThreshold);
-
             if (methodA != methodB)
             {
                 // Fall back to full decompression if methods differ
@@ -174,10 +168,10 @@ public static class VectorCompressionService
 
             double similarity = methodA switch
             {
-                CompressionMethod.DCT => dctCompressor.CompressedSimilarity(
+                CompressionMethod.DCT => DCTVectorCompressor.CompressedSimilarity(
                     DCTCompressedVector.FromBytes(payloadA),
                     DCTCompressedVector.FromBytes(payloadB)),
-                CompressionMethod.FFT => fftCompressor.CompressedSimilarity(
+                CompressionMethod.FFT => FourierVectorCompressor.CompressedSimilarity(
                     CompressedVector.FromBytes(payloadA),
                     CompressedVector.FromBytes(payloadB)),
                 _ => throw new InvalidOperationException($"Compressed similarity not supported for method: {methodA}")
@@ -185,7 +179,11 @@ public static class VectorCompressionService
 
             return Result<double>.Success(similarity);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
+        {
+            return Result<double>.Failure($"Compressed similarity format error: {ex.Message}");
+        }
+        catch (ArgumentException ex)
         {
             return Result<double>.Failure($"Compressed similarity failed: {ex.Message}");
         }
@@ -234,7 +232,11 @@ public static class VectorCompressionService
 
             return Result<VectorCompressionStats>.Success(stats);
         }
-        catch (Exception ex)
+        catch (ArgumentNullException ex)
+        {
+            return Result<VectorCompressionStats>.Failure($"Stats input error: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
         {
             return Result<VectorCompressionStats>.Failure($"Failed to compute stats: {ex.Message}");
         }
@@ -276,7 +278,15 @@ public static class VectorCompressionService
             return Result<(IReadOnlyList<byte[]>, IReadOnlyList<VectorCompressionEvent>)>.Success(
                 (compressedResults.AsReadOnly(), compressionEvents.AsReadOnly()));
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (AggregateException ex)
+        {
+            return Result<(IReadOnlyList<byte[]>, IReadOnlyList<VectorCompressionEvent>)>.Failure($"Batch compression failed (aggregate): {ex.InnerException?.Message ?? ex.Message}");
+        }
+        catch (ArgumentNullException ex)
         {
             return Result<(IReadOnlyList<byte[]>, IReadOnlyList<VectorCompressionEvent>)>.Failure($"Batch compression failed: {ex.Message}");
         }
@@ -311,11 +321,15 @@ public static class VectorCompressionService
                 DCTEnergyRetained: dct.EnergyRetained,
                 FFTCompressedSize: fft.ToBytes().Length,
                 FFTCompressionRatio: fft.CompressionRatio,
-                QuantizedDCTSize: dctCompressor.Quantize(dct, 8).ToBytes().Length);
+                QuantizedDCTSize: DCTVectorCompressor.Quantize(dct, 8).ToBytes().Length);
 
             return Result<CompressionPreview>.Success(preview);
         }
-        catch (Exception ex)
+        catch (ArgumentNullException ex)
+        {
+            return Result<CompressionPreview>.Failure($"Preview input error: {ex.Message}");
+        }
+        catch (InvalidOperationException ex)
         {
             return Result<CompressionPreview>.Failure($"Preview generation failed: {ex.Message}");
         }

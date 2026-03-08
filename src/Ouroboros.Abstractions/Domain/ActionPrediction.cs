@@ -8,7 +8,4 @@ namespace Ouroboros.Abstractions.Domain;
 /// <summary>
 /// Represents a prediction of an agent's action.
 /// </summary>
-public class ActionPrediction
-{
-    // Placeholder class - to be implemented
-}
+public sealed record ActionPrediction;

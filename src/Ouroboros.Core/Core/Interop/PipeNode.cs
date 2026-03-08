@@ -5,8 +5,11 @@ namespace Ouroboros.Core.Interop;
 /// </summary>
 public readonly struct PipeNode<TIn, TOut>
 {
+    /// <summary>The underlying compatible node that performs the actual computation.</summary>
     public readonly ICompatNode<TIn, TOut> Node;
 
+    /// <summary>Initialises the pipe node wrapping the given compatible node.</summary>
+    /// <param name="node">The node to wrap.</param>
     public PipeNode(ICompatNode<TIn, TOut> node)
     {
         Node = node;
@@ -62,7 +65,8 @@ public readonly struct PipeNode<TIn, TOut>
                 TOut? result = await currentNode.InvokeAsync(input).ConfigureAwait(false);
                 return Result<TOut, Exception>.Success(result);
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 return Result<TOut, Exception>.Failure(ex);
             }

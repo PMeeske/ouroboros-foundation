@@ -61,7 +61,12 @@ public sealed class GitHubSearchTool : ITool
                 _ => Result<string, string>.Failure($"Unknown search type: {searchType}. Valid types: issues, code")
             };
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (ApiException ex)
+        {
+            return Result<string, string>.Failure($"Search failed: {ex.Message}");
+        }
+        catch (System.Text.Json.JsonException ex)
         {
             return Result<string, string>.Failure($"Search failed: {ex.Message}");
         }
@@ -101,7 +106,7 @@ public sealed class GitHubSearchTool : ITool
                 $"Found {result.TotalCount} issues (showing top {Math.Min(maxResults, result.Items.Count)}):\n\n" +
                 string.Join("\n", issueResults));
         }
-        catch (Exception ex)
+        catch (ApiException ex)
         {
             return Result<string, string>.Failure($"Issue search failed: {ex.Message}");
         }
@@ -136,7 +141,7 @@ public sealed class GitHubSearchTool : ITool
                 $"Found {result.TotalCount} code matches (showing top {Math.Min(maxResults, result.Items.Count)}):\n\n" +
                 string.Join("\n", codeResults));
         }
-        catch (Exception ex)
+        catch (ApiException ex)
         {
             return Result<string, string>.Failure($"Code search failed: {ex.Message}");
         }

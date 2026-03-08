@@ -2,7 +2,9 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using Ouroboros.Core.Configuration;
 using Ouroboros.Domain.Vectors;
+using Qdrant.Client;
 
 namespace Ouroboros.Domain.Persistence;
 
@@ -40,10 +42,11 @@ public sealed class OuroborosMemoryManager : IAsyncDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="OuroborosMemoryManager"/> class.
     /// </summary>
-    /// <param name="qdrantEndpoint">Qdrant server endpoint.</param>
-    public OuroborosMemoryManager(string qdrantEndpoint = "http://localhost:6333")
+    /// <param name="client">Shared Qdrant client from DI.</param>
+    /// <param name="registry">Collection registry for role-based resolution.</param>
+    public OuroborosMemoryManager(QdrantClient client, IQdrantCollectionRegistry registry)
     {
-        _admin = new QdrantCollectionAdmin(qdrantEndpoint);
+        _admin = new QdrantCollectionAdmin(client, registry);
         _layerMappings = DefaultLayerMappings.ToDictionary(m => m.Layer);
     }
 

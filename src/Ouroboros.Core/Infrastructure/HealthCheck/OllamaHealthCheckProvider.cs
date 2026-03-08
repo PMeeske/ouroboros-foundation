@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using OllamaSharp;
 
 /// <summary>
 /// Health check provider for Ollama service.
@@ -17,6 +18,7 @@ using System.Threading.Tasks;
 public sealed class OllamaHealthCheckProvider : IHealthCheckProvider, IDisposable
 {
     private const double DegradedThresholdMultiplier = 0.5;
+    private readonly OllamaApiClient ollamaClient;
     private readonly HttpClient httpClient;
     private readonly string endpoint;
     private readonly int timeoutSeconds;
@@ -34,7 +36,9 @@ public sealed class OllamaHealthCheckProvider : IHealthCheckProvider, IDisposabl
         this.httpClient = new HttpClient
         {
             Timeout = TimeSpan.FromSeconds(timeoutSeconds),
+            BaseAddress = new Uri(endpoint),
         };
+        this.ollamaClient = new OllamaApiClient(this.httpClient);
     }
 
     /// <inheritdoc/>
@@ -47,47 +51,31 @@ public sealed class OllamaHealthCheckProvider : IHealthCheckProvider, IDisposabl
 
         try
         {
-            HttpResponseMessage response = await this.httpClient.GetAsync(
-                $"{this.endpoint}/api/tags",
-                cancellationToken);
+            _ = await this.ollamaClient.ListLocalModelsAsync(cancellationToken);
 
             sw.Stop();
 
-            if (response.IsSuccessStatusCode)
+            Dictionary<string, object> details = new Dictionary<string, object>
             {
-                Dictionary<string, object> details = new Dictionary<string, object>
-                {
-                    { "endpoint", this.endpoint },
-                    { "statusCode", (int)response.StatusCode },
-                };
+                { "endpoint", this.endpoint },
+            };
 
-                // Check if response time is slow (more than 50% of timeout threshold)
-                long degradedThreshold = (long)(this.timeoutSeconds * 1000 * DegradedThresholdMultiplier);
-                if (sw.ElapsedMilliseconds > degradedThreshold)
-                {
-                    details.Add("warning", "Slow response time");
-                    return HealthCheckResult.Degraded(
-                        this.ComponentName,
-                        sw.ElapsedMilliseconds,
-                        details,
-                        "Response time exceeds degraded threshold");
-                }
-
-                return HealthCheckResult.Healthy(
+            // Check if response time is slow (more than 50% of timeout threshold)
+            long degradedThreshold = (long)(this.timeoutSeconds * 1000 * DegradedThresholdMultiplier);
+            if (sw.ElapsedMilliseconds > degradedThreshold)
+            {
+                details.Add("warning", "Slow response time");
+                return HealthCheckResult.Degraded(
                     this.ComponentName,
                     sw.ElapsedMilliseconds,
-                    details);
+                    details,
+                    "Response time exceeds degraded threshold");
             }
 
-            return HealthCheckResult.Unhealthy(
+            return HealthCheckResult.Healthy(
                 this.ComponentName,
                 sw.ElapsedMilliseconds,
-                $"HTTP {(int)response.StatusCode}: {response.ReasonPhrase}",
-                new Dictionary<string, object>
-                {
-                    { "endpoint", this.endpoint },
-                    { "statusCode", (int)response.StatusCode },
-                });
+                details);
         }
         catch (TaskCanceledException)
         {
@@ -102,13 +90,13 @@ public sealed class OllamaHealthCheckProvider : IHealthCheckProvider, IDisposabl
                     { "timeout", this.timeoutSeconds },
                 });
         }
-        catch (Exception ex)
+        catch (HttpRequestException ex)
         {
             sw.Stop();
             return HealthCheckResult.Unhealthy(
                 this.ComponentName,
                 sw.ElapsedMilliseconds,
-                ex.Message,
+                $"HTTP request error: {ex.Message}",
                 new Dictionary<string, object>
                 {
                     { "endpoint", this.endpoint },
@@ -118,12 +106,13 @@ public sealed class OllamaHealthCheckProvider : IHealthCheckProvider, IDisposabl
     }
 
     /// <summary>
-    /// Disposes the HTTP client.
+    /// Disposes the Ollama client and underlying HTTP client.
     /// </summary>
     public void Dispose()
     {
         if (!this.disposed)
         {
+            this.ollamaClient?.Dispose();
             this.httpClient?.Dispose();
             this.disposed = true;
         }

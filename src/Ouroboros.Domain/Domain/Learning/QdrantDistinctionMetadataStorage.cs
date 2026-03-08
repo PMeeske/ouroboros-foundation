@@ -38,48 +38,6 @@ public sealed class QdrantDistinctionMetadataStorage
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="QdrantDistinctionMetadataStorage"/> class.
-    /// </summary>
-    /// <param name="connectionString">Qdrant connection string.</param>
-    /// <param name="logger">Logger instance.</param>
-    [Obsolete("Use the constructor accepting QdrantClient + IQdrantCollectionRegistry from DI.")]
-    public QdrantDistinctionMetadataStorage(
-        string connectionString,
-        ILogger<QdrantDistinctionMetadataStorage> logger)
-    {
-        if (string.IsNullOrWhiteSpace(connectionString))
-        {
-            throw new ArgumentException("Connection string cannot be null or empty", nameof(connectionString));
-        }
-
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _collectionName = "distinction_states";
-
-        // Parse connection string
-        Uri uri = new Uri(connectionString);
-        string host = uri.Host;
-        int port = uri.Port > 0 ? uri.Port : 6334; // Fixed: use gRPC port
-        bool useHttps = uri.Scheme == "https";
-
-        _client = new QdrantClient(host, port, useHttps);
-        _logger.LogInformation("Initialized Qdrant metadata storage: {Host}:{Port}", host, port);
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="QdrantDistinctionMetadataStorage"/> class with existing client.
-    /// </summary>
-    /// <param name="client">Existing Qdrant client.</param>
-    /// <param name="logger">Logger instance.</param>
-    public QdrantDistinctionMetadataStorage(
-        QdrantClient client,
-        ILogger<QdrantDistinctionMetadataStorage> logger)
-    {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _collectionName = "distinction_states";
-    }
-
-    /// <summary>
     /// Stores distinction metadata with semantic embedding for retrieval.
     /// </summary>
     /// <param name="weights">The distinction weights containing metadata.</param>
@@ -121,7 +79,16 @@ public sealed class QdrantDistinctionMetadataStorage
             _logger.LogInformation("Stored metadata for distinction {Id}", weights.Id);
             return Result<Unit, string>.Success(Unit.Value);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger.LogError(ex, "Qdrant RPC error storing metadata for distinction {Id}", weights.Id);
+            return Result<Unit, string>.Failure($"Metadata storage RPC failed: {ex.Status.Detail}");
+        }
+        catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Failed to store metadata for distinction {Id}", weights.Id);
             return Result<Unit, string>.Failure($"Metadata storage failed: {ex.Message}");
@@ -148,7 +115,16 @@ public sealed class QdrantDistinctionMetadataStorage
             return await Task.FromResult(Result<IReadOnlyList<DistinctionMetadata>, string>.Success(
                 (IReadOnlyList<DistinctionMetadata>)Array.Empty<DistinctionMetadata>()));
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger.LogError(ex, "Qdrant RPC error searching similar distinctions");
+            return Result<IReadOnlyList<DistinctionMetadata>, string>.Failure($"Search RPC failed: {ex.Status.Detail}");
+        }
+        catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Failed to search similar distinctions");
             return Result<IReadOnlyList<DistinctionMetadata>, string>.Failure($"Search failed: {ex.Message}");
@@ -179,7 +155,16 @@ public sealed class QdrantDistinctionMetadataStorage
             _logger.LogInformation("Marked distinction {Id} as dissolved (deleted from Qdrant)", id);
             return Result<Unit, string>.Success(Unit.Value);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger.LogError(ex, "Qdrant RPC error marking distinction {Id} as dissolved", id);
+            return Result<Unit, string>.Failure($"Update RPC failed: {ex.Status.Detail}");
+        }
+        catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Failed to mark distinction {Id} as dissolved", id);
             return Result<Unit, string>.Failure($"Update failed: {ex.Message}");
@@ -217,7 +202,16 @@ public sealed class QdrantDistinctionMetadataStorage
             _logger.LogInformation("Retrieved metadata for distinction {Id}", id);
             return Result<DistinctionMetadata, string>.Success(metadata);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger.LogError(ex, "Qdrant RPC error getting metadata for distinction {Id}", id);
+            return Result<DistinctionMetadata, string>.Failure($"Retrieval RPC failed: {ex.Status.Detail}");
+        }
+        catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Failed to get metadata for distinction {Id}", id);
             return Result<DistinctionMetadata, string>.Failure($"Retrieval failed: {ex.Message}");
@@ -241,13 +235,21 @@ public sealed class QdrantDistinctionMetadataStorage
                     _collectionName, vectorDimension);
             }
         }
-        catch (Exception ex)
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Grpc.Core.RpcException ex)
+        {
+            _logger.LogWarning(ex, "Qdrant RPC error ensuring collection exists (status: {Status})", ex.StatusCode);
+        }
+        catch (HttpRequestException ex)
         {
             _logger.LogWarning(ex, "Failed to ensure collection exists");
         }
     }
 
-    private DistinctionMetadata PayloadToMetadata(DistinctionId id, IDictionary<string, Value> payload)
+    private static DistinctionMetadata PayloadToMetadata(DistinctionId id, IDictionary<string, Value> payload)
     {
         string circumstance = payload.TryGetValue("circumstance", out Value? c) ? c.StringValue : string.Empty;
         string storagePath = payload.TryGetValue("storage_path", out Value? sp) ? sp.StringValue : string.Empty;

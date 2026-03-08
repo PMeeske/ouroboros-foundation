@@ -109,7 +109,12 @@ public sealed class AudioSensor : IDisposable
 
             return Result<Unit, string>.Success(Unit.Value);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (InvalidOperationException ex)
+        {
+            return Result<Unit, string>.Failure($"Failed to start listening: {ex.Message}");
+        }
+        catch (IOException ex)
         {
             return Result<Unit, string>.Failure($"Failed to start listening: {ex.Message}");
         }
@@ -136,7 +141,12 @@ public sealed class AudioSensor : IDisposable
 
             return Result<Unit, string>.Success(Unit.Value);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (InvalidOperationException ex)
+        {
+            return Result<Unit, string>.Failure($"Failed to stop listening: {ex.Message}");
+        }
+        catch (IOException ex)
         {
             return Result<Unit, string>.Failure($"Failed to stop listening: {ex.Message}");
         }
@@ -176,7 +186,12 @@ public sealed class AudioSensor : IDisposable
 
             return Result<Unit, string>.Success(Unit.Value);
         }
-        catch (Exception ex)
+        catch (OperationCanceledException) { throw; }
+        catch (InvalidOperationException ex)
+        {
+            return Result<Unit, string>.Failure($"Failed to process audio: {ex.Message}");
+        }
+        catch (IOException ex)
         {
             return Result<Unit, string>.Failure($"Failed to process audio: {ex.Message}");
         }
@@ -216,7 +231,23 @@ public sealed class AudioSensor : IDisposable
         _disposed = true;
 
         _isListening = false;
-        _streamingSession?.DisposeAsync().AsTask().Wait();
+        try
+        {
+            // Intentional: sync disposal in Dispose() — cannot use async
+            Task.Run(async () =>
+            {
+                if (_streamingSession != null)
+                    await _streamingSession.DisposeAsync();
+            }).GetAwaiter().GetResult();
+        }
+        catch (ObjectDisposedException)
+        {
+            // Best-effort disposal; do not throw from Dispose
+        }
+        catch (InvalidOperationException)
+        {
+            // Best-effort disposal; do not throw from Dispose
+        }
 
         _audioChunks.OnCompleted();
         _transcriptions.OnCompleted();
