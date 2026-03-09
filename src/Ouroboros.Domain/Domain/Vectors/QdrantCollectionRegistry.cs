@@ -70,6 +70,14 @@ public sealed class QdrantCollectionRegistry : IQdrantCollectionRegistry
             // Episodic Memory
             [QdrantCollectionRole.EpisodicMemory] = "episodic_memory",
 
+            // Embodiment
+            [QdrantCollectionRole.EmbodimentPerceptions] = "ouroboros_embodiment_perceptions",
+            [QdrantCollectionRole.EmbodimentStates] = "ouroboros_embodiment_states",
+            [QdrantCollectionRole.EmbodimentAffordances] = "ouroboros_embodiment_affordances",
+
+            // Avatar
+            [QdrantCollectionRole.ComicPanels] = "ouroboros_comic_panels",
+
             // Admin
             [QdrantCollectionRole.CollectionMetadata] = "ouroboros_collection_metadata",
         };
@@ -239,6 +247,10 @@ public sealed class QdrantCollectionRegistry : IQdrantCollectionRegistry
             _ when lower.Contains("pipeline") => QdrantCollectionRole.PipelineVectors,
             _ when lower.Contains("prefix") && lower.Contains("cache") => QdrantCollectionRole.PrefixCache,
             _ when lower.Contains("codebase") => QdrantCollectionRole.Codebase,
+            _ when lower.Contains("embodiment") && lower.Contains("perception") => QdrantCollectionRole.EmbodimentPerceptions,
+            _ when lower.Contains("embodiment") && lower.Contains("state") => QdrantCollectionRole.EmbodimentStates,
+            _ when lower.Contains("embodiment") && lower.Contains("affordance") => QdrantCollectionRole.EmbodimentAffordances,
+            _ when lower.Contains("comic") && lower.Contains("panel") => QdrantCollectionRole.ComicPanels,
             _ when lower.Contains("metadata") => QdrantCollectionRole.CollectionMetadata,
             _ => null,
         };
