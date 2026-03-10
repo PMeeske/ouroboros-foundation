@@ -110,6 +110,12 @@ public enum QdrantCollectionRole
     /// <summary>Stores cached comic panel embeddings for avatar generation.</summary>
     ComicPanels,
 
+    /// <summary>Stores cached video clip embeddings indexed by emotional state.</summary>
+    VideoPanels,
+
+    /// <summary>Stores inner thought embeddings indexed by emotional dimensional space.</summary>
+    InnerThoughts,
+
     // ── Admin ───────────────────────────────────────────
     /// <summary>Stores collection-level metadata embeddings.</summary>
     CollectionMetadata,
