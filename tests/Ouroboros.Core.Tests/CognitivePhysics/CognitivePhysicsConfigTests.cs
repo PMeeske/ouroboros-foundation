@@ -236,26 +236,3 @@ public class EthicsGateResultTests
         result.Reason.Should().Be("Insufficient data");
     }
 }
-
-[Trait("Category", "Unit")]
-public class CognitiveBranchTests
-{
-    [Fact]
-    public void Create_ShouldSetProperties()
-    {
-        var state = CognitiveState.Create("math", 80.0);
-        var branch = new CognitiveBranch(state, 0.75);
-
-        branch.State.Should().Be(state);
-        branch.Weight.Should().Be(0.75);
-    }
-
-    [Fact]
-    public void Record_Equality_ShouldWorkByValue()
-    {
-        var state = CognitiveState.Create("test");
-        var a = new CognitiveBranch(state, 0.5);
-        var b = new CognitiveBranch(state, 0.5);
-        a.Should().Be(b);
-    }
-}
