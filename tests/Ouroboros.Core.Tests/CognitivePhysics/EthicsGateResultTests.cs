@@ -1,5 +1,6 @@
 using Ouroboros.Core.CognitivePhysics;
 using Ouroboros.Core.LawsOfForm;
+using LoF = Ouroboros.Core.LawsOfForm.Form;
 
 namespace Ouroboros.Core.Tests.CognitivePhysics;
 
@@ -54,7 +55,7 @@ public class EthicsGateResultTests
     {
         var result = EthicsGateResult.Allow();
 
-        result.Decision.Should().Be(Form.Mark);
+        result.Decision.Should().Be(LoF.Mark);
     }
 
     [Fact]
@@ -62,7 +63,7 @@ public class EthicsGateResultTests
     {
         var result = EthicsGateResult.Deny("reason");
 
-        result.Decision.Should().Be(Form.Void);
+        result.Decision.Should().Be(LoF.Void);
     }
 
     [Fact]
@@ -70,6 +71,6 @@ public class EthicsGateResultTests
     {
         var result = EthicsGateResult.Uncertain("reason");
 
-        result.Decision.Should().Be(Form.Imaginary);
+        result.Decision.Should().Be(LoF.Imaginary);
     }
 }

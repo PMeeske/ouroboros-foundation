@@ -5,6 +5,7 @@
 using Ouroboros.Abstractions.Monads;
 using Ouroboros.Core.LawsOfForm;
 using ExecutionContext = Ouroboros.Core.LawsOfForm.ExecutionContext;
+using LoF = Ouroboros.Core.LawsOfForm.Form;
 
 namespace Ouroboros.Core.Tests.LawsOfForm;
 
@@ -62,7 +63,7 @@ public class SafeToolExecutorTests
     {
         var executor = new SafeToolExecutor(this.mockToolLookup.Object);
 
-        Action act = () => executor.AddCriterion(null!, (call, ctx) => Form.Mark);
+        Action act = () => executor.AddCriterion(null!, (call, ctx) => LoF.Mark);
 
         act.Should().Throw<ArgumentNullException>();
     }
@@ -82,7 +83,7 @@ public class SafeToolExecutorTests
     {
         var executor = new SafeToolExecutor(this.mockToolLookup.Object);
 
-        var result = executor.AddCriterion("test", (call, ctx) => Form.Mark);
+        var result = executor.AddCriterion("test", (call, ctx) => LoF.Mark);
 
         result.Should().BeSameAs(executor);
     }
@@ -143,13 +144,13 @@ public class SafeToolExecutorTests
             .Returns(Option<IToolExecutor>.Some(mockTool.Object));
 
         var executor = new SafeToolExecutor(this.mockToolLookup.Object)
-            .AddCriterion("safety", (call, ctx) => Form.Mark)
-            .AddCriterion("auth", (call, ctx) => Form.Mark);
+            .AddCriterion("safety", (call, ctx) => LoF.Mark)
+            .AddCriterion("auth", (call, ctx) => LoF.Mark);
 
         var toolCall = CreateToolCall();
         var result = await executor.ExecuteWithAudit(toolCall, this.testContext);
 
-        result.State.Should().Be(Form.Mark);
+        result.State.Should().Be(LoF.Mark);
         result.Value.Should().NotBeNull();
         result.Value!.Output.Should().Be("output");
     }
@@ -158,13 +159,13 @@ public class SafeToolExecutorTests
     public async Task ExecuteWithAudit_OneCriterionVoid_RejectsExecution()
     {
         var executor = new SafeToolExecutor(this.mockToolLookup.Object)
-            .AddCriterion("safety", (call, ctx) => Form.Mark)
-            .AddCriterion("auth", (call, ctx) => Form.Void);
+            .AddCriterion("safety", (call, ctx) => LoF.Mark)
+            .AddCriterion("auth", (call, ctx) => LoF.Void);
 
         var toolCall = CreateToolCall();
         var result = await executor.ExecuteWithAudit(toolCall, this.testContext);
 
-        result.State.Should().Be(Form.Void);
+        result.State.Should().Be(LoF.Void);
         result.Reasoning.Should().Contain("auth");
     }
 
@@ -178,19 +179,19 @@ public class SafeToolExecutorTests
         var result = await executor.ExecuteWithAudit(toolCall, this.testContext);
 
         // Exception is treated as Imaginary, and no uncertainty handler -> uncertain
-        result.State.Should().Be(Form.Imaginary);
+        result.State.Should().Be(LoF.Imaginary);
     }
 
     [Fact]
     public async Task ExecuteWithAudit_UncertainWithNoHandler_ReturnsUncertain()
     {
         var executor = new SafeToolExecutor(this.mockToolLookup.Object)
-            .AddCriterion("uncertain", (call, ctx) => Form.Imaginary);
+            .AddCriterion("uncertain", (call, ctx) => LoF.Imaginary);
 
         var toolCall = CreateToolCall();
         var result = await executor.ExecuteWithAudit(toolCall, this.testContext);
 
-        result.State.Should().Be(Form.Imaginary);
+        result.State.Should().Be(LoF.Imaginary);
         result.Reasoning.Should().Contain("uncertain");
     }
 
@@ -205,13 +206,13 @@ public class SafeToolExecutorTests
             .Returns(Option<IToolExecutor>.Some(mockTool.Object));
 
         var executor = new SafeToolExecutor(this.mockToolLookup.Object)
-            .AddCriterion("uncertain", (call, ctx) => Form.Imaginary)
+            .AddCriterion("uncertain", (call, ctx) => LoF.Imaginary)
             .OnUncertain(call => Task.FromResult(true));
 
         var toolCall = CreateToolCall();
         var result = await executor.ExecuteWithAudit(toolCall, this.testContext);
 
-        result.State.Should().Be(Form.Mark);
+        result.State.Should().Be(LoF.Mark);
         result.Value!.Output.Should().Be("approved-output");
     }
 
@@ -219,13 +220,13 @@ public class SafeToolExecutorTests
     public async Task ExecuteWithAudit_UncertainWithRejectionHandler_RejectsExecution()
     {
         var executor = new SafeToolExecutor(this.mockToolLookup.Object)
-            .AddCriterion("uncertain", (call, ctx) => Form.Imaginary)
+            .AddCriterion("uncertain", (call, ctx) => LoF.Imaginary)
             .OnUncertain(call => Task.FromResult(false));
 
         var toolCall = CreateToolCall();
         var result = await executor.ExecuteWithAudit(toolCall, this.testContext);
 
-        result.State.Should().Be(Form.Void);
+        result.State.Should().Be(LoF.Void);
         result.Reasoning.Should().Contain("Human review declined");
     }
 
@@ -233,13 +234,13 @@ public class SafeToolExecutorTests
     public async Task ExecuteWithAudit_UncertaintyHandlerThrows_ReturnsUncertain()
     {
         var executor = new SafeToolExecutor(this.mockToolLookup.Object)
-            .AddCriterion("uncertain", (call, ctx) => Form.Imaginary)
+            .AddCriterion("uncertain", (call, ctx) => LoF.Imaginary)
             .OnUncertain(call => throw new Exception("Handler failed"));
 
         var toolCall = CreateToolCall();
         var result = await executor.ExecuteWithAudit(toolCall, this.testContext);
 
-        result.State.Should().Be(Form.Imaginary);
+        result.State.Should().Be(LoF.Imaginary);
     }
 
     [Fact]
@@ -249,12 +250,12 @@ public class SafeToolExecutorTests
             .Returns(Option<IToolExecutor>.None());
 
         var executor = new SafeToolExecutor(this.mockToolLookup.Object)
-            .AddCriterion("safety", (call, ctx) => Form.Mark);
+            .AddCriterion("safety", (call, ctx) => LoF.Mark);
 
         var toolCall = CreateToolCall(name: "missing");
         var result = await executor.ExecuteWithAudit(toolCall, this.testContext);
 
-        result.State.Should().Be(Form.Void);
+        result.State.Should().Be(LoF.Void);
         result.Reasoning.Should().Contain("not found");
     }
 
@@ -269,12 +270,12 @@ public class SafeToolExecutorTests
             .Returns(Option<IToolExecutor>.Some(mockTool.Object));
 
         var executor = new SafeToolExecutor(this.mockToolLookup.Object)
-            .AddCriterion("safety", (call, ctx) => Form.Mark);
+            .AddCriterion("safety", (call, ctx) => LoF.Mark);
 
         var toolCall = CreateToolCall();
         var result = await executor.ExecuteWithAudit(toolCall, this.testContext);
 
-        result.State.Should().Be(Form.Void);
+        result.State.Should().Be(LoF.Void);
         result.Reasoning.Should().Contain("Tool execution failed");
     }
 
@@ -294,7 +295,7 @@ public class SafeToolExecutorTests
         var result = await executor.ExecuteWithAudit(toolCall, this.testContext);
 
         // FormExtensions.All with empty array returns Mark
-        result.State.Should().Be(Form.Mark);
+        result.State.Should().Be(LoF.Mark);
     }
 
     [Fact]
@@ -308,7 +309,7 @@ public class SafeToolExecutorTests
             .Returns(Option<IToolExecutor>.Some(mockTool.Object));
 
         var executor = new SafeToolExecutor(this.mockToolLookup.Object)
-            .AddCriterion("safety", (call, ctx) => Form.Mark);
+            .AddCriterion("safety", (call, ctx) => LoF.Mark);
 
         var toolCall = CreateToolCall();
         await executor.ExecuteWithAudit(toolCall, this.testContext);
@@ -327,13 +328,13 @@ public class SafeToolExecutorTests
             .Returns(Option<IToolExecutor>.Some(mockTool.Object));
 
         var executor = new SafeToolExecutor(this.mockToolLookup.Object)
-            .AddCriterion("crit1", (call, ctx) => Form.Mark)
-            .AddCriterion("crit2", (call, ctx) => Form.Mark);
+            .AddCriterion("crit1", (call, ctx) => LoF.Mark)
+            .AddCriterion("crit2", (call, ctx) => LoF.Mark);
 
         var toolCall = CreateToolCall();
         var result = await executor.ExecuteWithAudit(toolCall, this.testContext);
 
-        result.Evidence.Should().HaveCountGreaterOrEqualTo(2);
+        result.Evidence.Should().HaveCountGreaterThanOrEqualTo(2);
     }
 
     [Fact]
@@ -347,13 +348,13 @@ public class SafeToolExecutorTests
             .Returns(Option<IToolExecutor>.Some(mockTool.Object));
 
         var executor = new SafeToolExecutor(this.mockToolLookup.Object)
-            .AddCriterion("safety", (call, ctx) => Form.Mark);
+            .AddCriterion("safety", (call, ctx) => LoF.Mark);
 
         var toolCall = CreateToolCall();
         var result = await executor.ExecuteWithAudit(toolCall, this.testContext);
 
         // Safety criteria passed, tool executed (even if result was failure)
-        result.State.Should().Be(Form.Mark);
+        result.State.Should().Be(LoF.Mark);
         result.Value!.Status.Should().Be(ExecutionStatus.Failed);
     }
 
@@ -370,7 +371,7 @@ public class SafeToolExecutorTests
             .Returns(Option<IToolExecutor>.Some(mockTool.Object));
 
         var executor = new SafeToolExecutor(this.mockToolLookup.Object)
-            .AddCriterion("uncertain", (call, ctx) => Form.Imaginary)
+            .AddCriterion("uncertain", (call, ctx) => LoF.Imaginary)
             .OnUncertain((call, ctx) =>
             {
                 capturedContext = ctx;
