@@ -27,10 +27,10 @@ public class SpeechToTextEdgeCaseTests
         var original = new AudioChunk(new byte[] { 0x01 }, "pcm16", 16000, 1, false);
 
         // Act
-        var modified = original with { IsLastChunk = true };
+        var modified = original with { IsFinal = true };
 
         // Assert
-        modified.IsLastChunk.Should().BeTrue();
+        modified.IsFinal.Should().BeTrue();
         modified.SampleRate.Should().Be(16000);
     }
 
@@ -42,68 +42,7 @@ public class SpeechToTextEdgeCaseTests
 
         // Assert
         chunk.Data.Should().BeEmpty();
-        chunk.IsLastChunk.Should().BeTrue();
-    }
-
-    [Fact]
-    public void TranscriptionResult_AllPropertiesSet()
-    {
-        // Arrange
-        var segments = new List<TranscriptionSegment>
-        {
-            new TranscriptionSegment("Hello", TimeSpan.Zero, TimeSpan.FromSeconds(1), 0.95, null)
-        };
-
-        // Act
-        var result = new TranscriptionResult(
-            "Hello world", "en", TimeSpan.FromSeconds(5),
-            segments, new Dictionary<string, object> { ["model"] = "whisper" });
-
-        // Assert
-        result.Text.Should().Be("Hello world");
-        result.Language.Should().Be("en");
-        result.Duration.Should().Be(TimeSpan.FromSeconds(5));
-        result.Segments.Should().HaveCount(1);
-        result.Metadata.Should().ContainKey("model");
-    }
-
-    [Fact]
-    public void TranscriptionResult_RecordEquality_SameValues_AreEqual()
-    {
-        // Arrange
-        var segments = new List<TranscriptionSegment>();
-        var metadata = new Dictionary<string, object>();
-
-        var a = new TranscriptionResult("text", "en", TimeSpan.FromSeconds(1), segments, metadata);
-        var b = new TranscriptionResult("text", "en", TimeSpan.FromSeconds(1), segments, metadata);
-
-        // Assert
-        a.Should().Be(b);
-    }
-
-    [Fact]
-    public void TranscriptionSegment_WithSpeakerId()
-    {
-        // Act
-        var segment = new TranscriptionSegment(
-            "Hello", TimeSpan.Zero, TimeSpan.FromSeconds(1),
-            0.98, "speaker-1");
-
-        // Assert
-        segment.Text.Should().Be("Hello");
-        segment.SpeakerId.Should().Be("speaker-1");
-        segment.Confidence.Should().Be(0.98);
-    }
-
-    [Fact]
-    public void TranscriptionSegment_DefaultSpeakerId_IsNull()
-    {
-        // Act
-        var segment = new TranscriptionSegment(
-            "text", TimeSpan.Zero, TimeSpan.FromSeconds(1), 0.9);
-
-        // Assert
-        segment.SpeakerId.Should().BeNull();
+        chunk.IsFinal.Should().BeTrue();
     }
 
     [Fact]

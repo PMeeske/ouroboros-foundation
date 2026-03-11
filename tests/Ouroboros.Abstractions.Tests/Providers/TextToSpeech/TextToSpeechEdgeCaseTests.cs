@@ -1,4 +1,4 @@
-using Ouroboros.Providers.TextToSpeech;
+﻿using Ouroboros.Providers.TextToSpeech;
 
 namespace Ouroboros.Abstractions.Tests.Providers.TextToSpeech;
 
@@ -27,11 +27,11 @@ public class TextToSpeechEdgeCaseTests
         var original = new SpeechResult(new byte[] { 0x01 }, "mp3", 1.0);
 
         // Act
-        var modified = original with { Format = "wav", DurationSeconds = 3.5 };
+        var modified = original with { Format = "wav", Duration = 3.5 };
 
         // Assert
         modified.Format.Should().Be("wav");
-        modified.DurationSeconds.Should().Be(3.5);
+        modified.Duration.Should().Be(3.5);
         modified.AudioData.Should().Equal(original.AudioData);
     }
 
@@ -42,12 +42,15 @@ public class TextToSpeechEdgeCaseTests
         var data = new byte[] { 0x01, 0x02, 0x03 };
 
         // Act
-        var chunk = new SpeechChunk(data, 0, true);
+        var chunk = new SpeechChunk(data, "mp3", 1.5, "Hello", true, true);
 
         // Assert
         chunk.AudioData.Should().HaveCount(3);
-        chunk.SequenceNumber.Should().Be(0);
-        chunk.IsLastChunk.Should().BeTrue();
+        chunk.Format.Should().Be("mp3");
+        chunk.DurationSeconds.Should().Be(1.5);
+        chunk.Text.Should().Be("Hello");
+        chunk.IsSentenceEnd.Should().BeTrue();
+        chunk.IsComplete.Should().BeTrue();
     }
 
     [Fact]
@@ -55,8 +58,8 @@ public class TextToSpeechEdgeCaseTests
     {
         // Arrange
         var data = new byte[] { 0x01 };
-        var a = new SpeechChunk(data, 5, false);
-        var b = new SpeechChunk(data, 5, false);
+        var a = new SpeechChunk(data, "mp3", 0.5);
+        var b = new SpeechChunk(data, "mp3", 0.5);
 
         // Assert
         a.Should().Be(b);
@@ -69,11 +72,11 @@ public class TextToSpeechEdgeCaseTests
         var options = new TextToSpeechOptions();
 
         // Assert
-        options.Voice.Should().BeNull();
+        options.Voice.Should().Be(TtsVoice.Alloy);
         options.Speed.Should().Be(1.0);
-        options.Pitch.Should().Be(1.0);
         options.Format.Should().Be("mp3");
-        options.SampleRate.Should().BeNull();
+        options.Model.Should().BeNull();
+        options.IsWhisper.Should().BeFalse();
     }
 
     [Fact]
@@ -81,26 +84,26 @@ public class TextToSpeechEdgeCaseTests
     {
         // Act
         var options = new TextToSpeechOptions(
-            Voice: "en-US-Neural",
+            Voice: TtsVoice.Nova,
             Speed: 1.5,
-            Pitch: 0.8,
             Format: "wav",
-            SampleRate: 44100);
+            Model: "tts-1-hd",
+            IsWhisper: true);
 
         // Assert
-        options.Voice.Should().Be("en-US-Neural");
+        options.Voice.Should().Be(TtsVoice.Nova);
         options.Speed.Should().Be(1.5);
-        options.Pitch.Should().Be(0.8);
         options.Format.Should().Be("wav");
-        options.SampleRate.Should().Be(44100);
+        options.Model.Should().Be("tts-1-hd");
+        options.IsWhisper.Should().BeTrue();
     }
 
     [Fact]
     public void TextToSpeechOptions_RecordEquality_SameValues_AreEqual()
     {
         // Arrange
-        var a = new TextToSpeechOptions(Voice: "voice1", Speed: 1.0);
-        var b = new TextToSpeechOptions(Voice: "voice1", Speed: 1.0);
+        var a = new TextToSpeechOptions(Voice: TtsVoice.Echo, Speed: 1.0);
+        var b = new TextToSpeechOptions(Voice: TtsVoice.Echo, Speed: 1.0);
 
         // Assert
         a.Should().Be(b);
@@ -110,51 +113,46 @@ public class TextToSpeechEdgeCaseTests
     public void TextToSpeechOptions_WithExpression_CreatesModifiedCopy()
     {
         // Arrange
-        var original = new TextToSpeechOptions(Voice: "default");
+        var original = new TextToSpeechOptions(Voice: TtsVoice.Alloy);
 
         // Act
         var modified = original with { Speed = 2.0 };
 
         // Assert
         modified.Speed.Should().Be(2.0);
-        modified.Voice.Should().Be("default");
+        modified.Voice.Should().Be(TtsVoice.Alloy);
     }
 
     [Fact]
-    public void TtsVoice_AllPropertiesSet()
+    public void TtsVoice_AllValues_AreDefined()
     {
-        // Act
-        var voice = new TtsVoice(
-            "voice-1", "Neural Voice", "en-US", "Female",
-            new List<string> { "conversational", "narration" });
-
         // Assert
-        voice.Id.Should().Be("voice-1");
-        voice.Name.Should().Be("Neural Voice");
-        voice.Language.Should().Be("en-US");
-        voice.Gender.Should().Be("Female");
-        voice.SupportedStyles.Should().HaveCount(2);
+        Enum.IsDefined(typeof(TtsVoice), TtsVoice.Alloy).Should().BeTrue();
+        Enum.IsDefined(typeof(TtsVoice), TtsVoice.Echo).Should().BeTrue();
+        Enum.IsDefined(typeof(TtsVoice), TtsVoice.Fable).Should().BeTrue();
+        Enum.IsDefined(typeof(TtsVoice), TtsVoice.Onyx).Should().BeTrue();
+        Enum.IsDefined(typeof(TtsVoice), TtsVoice.Nova).Should().BeTrue();
+        Enum.IsDefined(typeof(TtsVoice), TtsVoice.Shimmer).Should().BeTrue();
     }
 
     [Fact]
-    public void TtsVoice_RecordEquality_SameValues_AreEqual()
+    public void TtsVoice_Equality_SameValue_AreEqual()
     {
         // Arrange
-        var styles = new List<string> { "style1" };
-        var a = new TtsVoice("id", "name", "en", "Male", styles);
-        var b = new TtsVoice("id", "name", "en", "Male", styles);
+        var a = TtsVoice.Nova;
+        var b = TtsVoice.Nova;
 
         // Assert
         a.Should().Be(b);
     }
 
     [Fact]
-    public void TtsVoice_DefaultStyles_IsNull()
+    public void TtsVoice_DefaultVoiceInOptions_IsAlloy()
     {
         // Act
-        var voice = new TtsVoice("id", "name", "en", "Female");
+        var options = new TextToSpeechOptions();
 
         // Assert
-        voice.SupportedStyles.Should().BeNull();
+        options.Voice.Should().Be(TtsVoice.Alloy);
     }
 }
