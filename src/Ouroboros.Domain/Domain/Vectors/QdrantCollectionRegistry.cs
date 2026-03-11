@@ -77,6 +77,8 @@ public sealed class QdrantCollectionRegistry : IQdrantCollectionRegistry
 
             // Avatar
             [QdrantCollectionRole.ComicPanels] = "ouroboros_comic_panels",
+            [QdrantCollectionRole.VideoPanels] = "ouroboros_video_panels",
+            [QdrantCollectionRole.InnerThoughts] = "ouroboros_inner_thoughts",
 
             // Admin
             [QdrantCollectionRole.CollectionMetadata] = "ouroboros_collection_metadata",
