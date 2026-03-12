@@ -106,6 +106,9 @@ public enum QdrantCollectionRole
     /// <summary>Stores affordance embeddings (available actions in current context).</summary>
     EmbodimentAffordances,
 
+    /// <summary>Stores fused embodiment-memory embeddings for cross-modal retrieval.</summary>
+    EmbodimentMemory,
+
     // ── Avatar ────────────────────────────────────────────
     /// <summary>Stores cached comic panel embeddings for avatar generation.</summary>
     ComicPanels,
