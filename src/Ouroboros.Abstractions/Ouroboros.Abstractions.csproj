@@ -125,6 +125,7 @@
         <Compile Include="Agent\MetaAI\SelfImprovement\PlanStep.cs" />
         <Compile Include="Agent\MetaAI\WorldModel\IWorldModelEngine.cs" />
         <Compile Include="Agent\MetaAI\WorldModel\LearnedWorldModel.cs" />
+        <Compile Include="Agent\MetaAI\Affect\IEmbodimentMemoryFusion.cs" />
         <Compile Include="Agent\MetaAI\Affect\IHomeostasisPolicy.cs" />
         <Compile Include="Agent\MetaAI\Affect\AffectiveState.cs" />
         <Compile Include="Agent\MetaAI\SelfModel\IPredictiveMonitor.cs" />
