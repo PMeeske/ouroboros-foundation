@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
@@ -7,6 +9,7 @@ namespace Ouroboros.Core.EmbodiedInteraction;
 /// <param name="StartTime">Start time.</param>
 /// <param name="EndTime">End time.</param>
 /// <param name="Confidence">Confidence.</param>
+[ExcludeFromCodeCoverage]
 public sealed record WordTiming(
     string Word,
     TimeSpan StartTime,

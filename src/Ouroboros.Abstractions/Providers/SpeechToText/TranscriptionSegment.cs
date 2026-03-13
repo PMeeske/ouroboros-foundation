@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Providers.SpeechToText;
 
 /// <summary>
@@ -7,6 +9,7 @@ namespace Ouroboros.Providers.SpeechToText;
 /// <param name="Start">Start time in seconds.</param>
 /// <param name="End">End time in seconds.</param>
 /// <param name="Confidence">Optional confidence score (0-1).</param>
+[ExcludeFromCodeCoverage]
 public sealed record TranscriptionSegment(
     string Text,
     double Start,

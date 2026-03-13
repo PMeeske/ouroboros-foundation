@@ -2,12 +2,15 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Ethics;
 
 /// <summary>
 /// Interface for ethical reasoning logic.
 /// Separates reasoning algorithms from the framework interface.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IEthicalReasoner
 {
     /// <summary>

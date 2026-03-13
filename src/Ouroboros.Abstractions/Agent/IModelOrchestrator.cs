@@ -4,12 +4,15 @@
 // based on prompt analysis and performance metrics
 // ==========================================================
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent;
 
 /// <summary>
 /// Orchestrates model and tool selection based on prompt analysis and performance metrics.
 /// Implements intelligent routing to optimize for quality, cost, and performance.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IModelOrchestrator
 {
     /// <summary>

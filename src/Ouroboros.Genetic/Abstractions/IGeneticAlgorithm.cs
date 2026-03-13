@@ -2,12 +2,15 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Genetic.Abstractions;
 
 /// <summary>
 /// Represents a genetic algorithm for evolutionary optimization.
 /// </summary>
 /// <typeparam name="TGene">The type of gene in the chromosomes.</typeparam>
+[ExcludeFromCodeCoverage]
 public interface IGeneticAlgorithm<TGene>
 {
     /// <summary>

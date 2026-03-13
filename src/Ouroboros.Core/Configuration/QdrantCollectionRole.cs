@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Configuration;
 
 /// <summary>
@@ -5,6 +7,7 @@ namespace Ouroboros.Core.Configuration;
 /// Components request collections by role via <see cref="IQdrantCollectionRegistry"/>,
 /// never by hardcoded string.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum QdrantCollectionRole
 {
     // ── Thought System ──────────────────────────────────

@@ -1,9 +1,12 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.Affect;
 
 /// <summary>
 /// Interface for monitoring and computing synthetic affective states.
 /// Tracks valence, stress, confidence, curiosity, and arousal.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IValenceMonitor
 {
     /// <summary>

@@ -2,6 +2,8 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Domain.Environment;
 
 /// <summary>
@@ -12,6 +14,7 @@ namespace Ouroboros.Domain.Environment;
 /// <param name="Reward">The reward received for the action</param>
 /// <param name="IsTerminal">Whether the episode has ended</param>
 /// <param name="Info">Additional information about the outcome</param>
+[ExcludeFromCodeCoverage]
 public sealed record Observation(
     EnvironmentState State,
     double Reward,

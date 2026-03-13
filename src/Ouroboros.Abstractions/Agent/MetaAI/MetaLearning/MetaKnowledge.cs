@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.MetaLearning;
 
 /// <summary>
 /// Represents transferable meta-knowledge extracted from learning history.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record MetaKnowledge(
     string Domain,
     string Insight,

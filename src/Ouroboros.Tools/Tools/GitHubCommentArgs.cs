@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Tools;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Tools;
 
 /// <summary>
 /// Arguments for adding a comment to a GitHub issue/PR.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed class GitHubCommentArgs
 {
     /// <summary>

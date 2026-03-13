@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Processing;
 
 /// <summary>
 /// Defines the chunking strategy for processing large contexts.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum ChunkingStrategy
 {
     /// <summary>

@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Security.Authentication;
 
 /// <summary>
 /// Interface for authentication providers.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IAuthenticationProvider
 {
     /// <summary>

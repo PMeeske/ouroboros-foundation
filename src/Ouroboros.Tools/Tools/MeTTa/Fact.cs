@@ -1,4 +1,6 @@
-﻿namespace Ouroboros.Tools.MeTTa;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Tools.MeTTa;
 
 /// <summary>
 /// Represents a symbolic fact.
@@ -6,6 +8,7 @@
 /// <param name="Predicate">Predicate name.</param>
 /// <param name="Arguments">List of arguments.</param>
 /// <param name="Confidence">Confidence level (0.0 to 1.0).</param>
+[ExcludeFromCodeCoverage]
 public sealed record Fact(
     string Predicate,
     List<string> Arguments,

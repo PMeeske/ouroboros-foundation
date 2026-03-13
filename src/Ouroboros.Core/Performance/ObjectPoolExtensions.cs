@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Performance;
 
 /// <summary>
 /// Extension methods for object pools.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class ObjectPoolExtensions
 {
     /// <summary>

@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.SelfImprovement;
 
 /// <summary>
@@ -5,6 +7,7 @@ namespace Ouroboros.Agent.MetaAI.SelfImprovement;
 /// Implements divergent thinking, conceptual blending, bisociation,
 /// and creative evaluation.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface ICreativityEngine
 {
     /// <summary>

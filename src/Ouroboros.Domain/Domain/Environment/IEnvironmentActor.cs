@@ -2,12 +2,15 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Domain.Environment;
 
 /// <summary>
 /// Interface for actors that can interact with environments.
 /// Enables embodiment for closed-loop learning.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IEnvironmentActor
 {
     /// <summary>

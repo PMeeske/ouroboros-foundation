@@ -2,11 +2,14 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Domain.Embodied;
 
 /// <summary>
 /// Defines the types of environments supported for embodied simulation.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum EnvironmentType
 {
     /// <summary>

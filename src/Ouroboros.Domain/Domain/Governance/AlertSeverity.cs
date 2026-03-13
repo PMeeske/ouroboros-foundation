@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Governance;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Governance;
 
 /// <summary>
 /// Alert severity levels.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum AlertSeverity
 {
     /// <summary>

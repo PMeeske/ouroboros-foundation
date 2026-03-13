@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Synthesis;
 
 /// <summary>
@@ -6,6 +8,7 @@ namespace Ouroboros.Core.Synthesis;
 /// <param name="PrimitiveName">The name of the primitive executed.</param>
 /// <param name="Inputs">The input values to the primitive.</param>
 /// <param name="Output">The output value produced by the primitive.</param>
+[ExcludeFromCodeCoverage]
 public sealed record ExecutionStep(
     string PrimitiveName,
     List<object> Inputs,

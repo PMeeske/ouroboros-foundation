@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
@@ -9,6 +11,7 @@ namespace Ouroboros.Core.EmbodiedInteraction;
 /// <param name="Format">Data format (rgb24, jpeg, png).</param>
 /// <param name="FrameNumber">Sequential frame number.</param>
 /// <param name="Timestamp">Capture timestamp.</param>
+[ExcludeFromCodeCoverage]
 public sealed record VideoFrame(
     byte[] Data,
     int Width,

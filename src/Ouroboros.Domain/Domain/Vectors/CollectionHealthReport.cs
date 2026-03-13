@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Vectors;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Vectors;
 
 /// <summary>
 /// Result of a collection health check.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record CollectionHealthReport(
     string CollectionName,
     bool IsHealthy,

@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Providers.TextToSpeech;
 
 /// <summary>
@@ -8,6 +10,7 @@ namespace Ouroboros.Providers.TextToSpeech;
 /// <param name="Format">Output format: "mp3", "opus", "aac", "flac", "wav", "pcm".</param>
 /// <param name="Model">TTS model to use (e.g., "tts-1", "tts-1-hd").</param>
 /// <param name="IsWhisper">If true, uses a soft whispering style for inner thoughts.</param>
+[ExcludeFromCodeCoverage]
 public sealed record TextToSpeechOptions(
     TtsVoice Voice = TtsVoice.Alloy,
     double Speed = 1.0,

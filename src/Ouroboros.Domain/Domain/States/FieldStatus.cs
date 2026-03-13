@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.States;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.States;
 
 /// <summary>
 /// Evaluation status for a data field in the operating cost audit.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum FieldStatus
 {
     /// <summary>Directly visible on the main statement.</summary>

@@ -1,9 +1,12 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.SelfImprovement;
 
 /// <summary>
 /// Interface for habit formation and procedural memory.
 /// Tracks cue-routine-reward loops, automaticity, and routine building.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IHabitFormationEngine
 {
     /// <summary>

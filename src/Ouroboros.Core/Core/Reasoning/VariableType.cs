@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Reasoning;
 
 /// <summary>
 /// Defines the type of a variable in the causal graph.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum VariableType
 {
     /// <summary>

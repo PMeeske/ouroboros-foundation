@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Providers.Docker;
 
 /// <summary>
 /// Represents a Docker volume.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record DockerVolumeInfo
 {
     /// <summary>Gets the volume name.</summary>

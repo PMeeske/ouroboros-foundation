@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.CognitivePhysics;
 
 /// <summary>
 /// Configuration for the Cognitive Physics Engine.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record CognitivePhysicsConfig(
     ZeroShiftConfig ZeroShift,
     ChaosConfig Chaos,

@@ -1,9 +1,12 @@
-﻿namespace Ouroboros.Domain.Voice;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Voice;
 
 /// <summary>
 /// Agent internal thinking/reasoning displayed in real-time.
 /// Shown dimmed to distinguish from actual response.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record AgentThinkingEvent : InteractionEvent
 {
     /// <summary>Gets the thought chunk text.</summary>

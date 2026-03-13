@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
@@ -9,6 +11,7 @@ namespace Ouroboros.Core.EmbodiedInteraction;
 /// <param name="IsActive">Whether the sensor is currently active.</param>
 /// <param name="Capabilities">Capabilities this sensor provides.</param>
 /// <param name="Properties">Additional sensor properties.</param>
+[ExcludeFromCodeCoverage]
 public sealed record SensorInfo(
     string SensorId,
     string Name,

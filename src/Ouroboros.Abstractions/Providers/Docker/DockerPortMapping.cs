@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Providers.Docker;
 
 /// <summary>
 /// Represents a Docker port mapping.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record DockerPortMapping
 {
     /// <summary>Gets the host IP.</summary>

@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Actuator modality types.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum ActuatorModality
 {
     /// <summary>Speech/audio output.</summary>

@@ -2,6 +2,8 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Domain.States;
 
 /// <summary>
@@ -9,4 +11,5 @@ namespace Ouroboros.Domain.States;
 /// The culmination of the draft-critique-improve cycle.
 /// </summary>
 /// <param name="FinalText">The final refined text content</param>
+[ExcludeFromCodeCoverage]
 public sealed record FinalSpec(string FinalText) : ReasoningState("Final", FinalText);

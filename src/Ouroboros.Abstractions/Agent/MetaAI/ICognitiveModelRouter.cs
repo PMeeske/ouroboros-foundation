@@ -1,11 +1,14 @@
 // Copyright (c) Ouroboros. All rights reserved.
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI;
 
 /// <summary>
 /// Routes cognitive tasks to the appropriate model, providing task execution,
 /// embedding generation, and multi-label classification capabilities.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface ICognitiveModelRouter
 {
     /// <summary>

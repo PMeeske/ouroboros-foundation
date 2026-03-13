@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI;
 
 /// <summary>
 /// Strategies for handling uncertain situations when primary approach fails.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum FallbackStrategy
 {
     /// <summary>Retry the same approach.</summary>

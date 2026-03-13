@@ -2,6 +2,8 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Domain.Benchmarks;
 
 /// <summary>
@@ -10,6 +12,7 @@ namespace Ouroboros.Domain.Benchmarks;
 /// <param name="Name">The name of the task sequence.</param>
 /// <param name="Tasks">The ordered list of learning tasks.</param>
 /// <param name="MeasureRetention">Whether to measure retention across tasks.</param>
+[ExcludeFromCodeCoverage]
 public sealed record TaskSequence(
     string Name,
     List<LearningTask> Tasks,

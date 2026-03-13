@@ -2,6 +2,8 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Genetic.Abstractions;
 
 /// <summary>
@@ -9,6 +11,7 @@ namespace Ouroboros.Genetic.Abstractions;
 /// Chromosomes can represent pipeline configurations, parameters, or prompt variations.
 /// </summary>
 /// <typeparam name="TGene">The type of gene in this chromosome.</typeparam>
+[ExcludeFromCodeCoverage]
 public interface IChromosome<TGene>
 {
     /// <summary>

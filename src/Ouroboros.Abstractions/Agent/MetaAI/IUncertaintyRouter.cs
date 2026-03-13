@@ -2,12 +2,15 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI;
 
 /// <summary>
 /// Interface for routing decisions under uncertainty.
 /// Determines how to handle situations where the agent lacks sufficient confidence.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IUncertaintyRouter
 {
     /// <summary>

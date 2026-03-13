@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.VectorCompression;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.VectorCompression;
 
 /// <summary>
 /// Available compression methods.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum CompressionMethod
 {
     /// <summary>Discrete Cosine Transform - best for real-valued embeddings.</summary>

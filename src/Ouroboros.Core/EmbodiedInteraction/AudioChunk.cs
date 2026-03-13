@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
@@ -8,6 +10,7 @@ namespace Ouroboros.Core.EmbodiedInteraction;
 /// <param name="Channels">Number of channels.</param>
 /// <param name="Timestamp">Capture timestamp.</param>
 /// <param name="IsFinal">Is this the final chunk.</param>
+[ExcludeFromCodeCoverage]
 public sealed record AudioChunk(
     byte[] Data,
     int SampleRate,

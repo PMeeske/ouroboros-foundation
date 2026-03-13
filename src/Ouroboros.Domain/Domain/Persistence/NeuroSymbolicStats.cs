@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Persistence;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Persistence;
 
 /// <summary>
 /// Statistics for the neuro-symbolic thought map.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record NeuroSymbolicStats(
     int TotalThoughts,
     int TotalRelations,

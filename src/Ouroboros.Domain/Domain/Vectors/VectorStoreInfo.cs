@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Vectors;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Vectors;
 
 /// <summary>
 /// Information about a vector store.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record VectorStoreInfo(
     string Name,
     ulong VectorCount,
