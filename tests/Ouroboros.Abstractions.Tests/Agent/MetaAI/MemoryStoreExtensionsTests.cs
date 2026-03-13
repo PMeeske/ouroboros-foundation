@@ -12,10 +12,10 @@ public class MemoryStoreExtensionsTests
     public async Task RetrieveRelevantExperiencesAsync_NullStore_ThrowsArgumentNullException()
     {
         IMemoryStore store = null!;
-        var query = new MemoryQuery("test");
+        var query = new MemoryQuery(Context: "test");
 
         await Assert.ThrowsAsync<ArgumentNullException>(
-            () => store.RetrieveRelevantExperiencesAsync(query));
+            () => global::Ouroboros.Agent.MetaAI.MemoryStoreExtensions.RetrieveRelevantExperiencesAsync(store, query));
     }
 
     [Fact]
@@ -30,13 +30,13 @@ public class MemoryStoreExtensionsTests
     {
         var experiences = new List<Experience>
         {
-            new("ctx", "action", "outcome", true, DateTime.UtcNow)
+            ExperienceFactory.Simple("goal", "action", "outcome", true)
         };
 
         _mockStore.Setup(s => s.QueryExperiencesAsync(It.IsAny<MemoryQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<IReadOnlyList<Experience>, string>.Success(experiences));
 
-        var result = await _mockStore.Object.RetrieveRelevantExperiencesAsync(new MemoryQuery("test"));
+        var result = await global::Ouroboros.Agent.MetaAI.MemoryStoreExtensions.RetrieveRelevantExperiencesAsync(_mockStore.Object, new MemoryQuery(Context: "test"));
         result.Should().HaveCount(1);
     }
 
@@ -46,7 +46,7 @@ public class MemoryStoreExtensionsTests
         _mockStore.Setup(s => s.QueryExperiencesAsync(It.IsAny<MemoryQuery>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<IReadOnlyList<Experience>, string>.Failure("error"));
 
-        var result = await _mockStore.Object.RetrieveRelevantExperiencesAsync(new MemoryQuery("test"));
+        var result = await global::Ouroboros.Agent.MetaAI.MemoryStoreExtensions.RetrieveRelevantExperiencesAsync(_mockStore.Object, new MemoryQuery(Context: "test"));
         result.Should().BeEmpty();
     }
 

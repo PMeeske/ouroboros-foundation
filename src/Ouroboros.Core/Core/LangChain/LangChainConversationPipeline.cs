@@ -73,7 +73,7 @@ public class LangChainConversationPipeline
 
         foreach (Func<LangChainConversationContext, Task<LangChainConversationContext>> step in this.steps)
         {
-            currentContext = await step(currentContext);
+            currentContext = await step(currentContext).ConfigureAwait(false);
         }
 
         return currentContext;
@@ -124,7 +124,7 @@ public static class LangChainConversationBuilder
         return pipeline.AddStep(async context =>
         {
             string input = context.GetProperty<string>("input") ?? string.Empty;
-            string aiResponse = await responseGenerator(input);
+            string aiResponse = await responseGenerator(input).ConfigureAwait(false);
             context.SetProperty("text", aiResponse);
             return context;
         });

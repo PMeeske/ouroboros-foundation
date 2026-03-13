@@ -28,7 +28,7 @@ public static class LangChainIntegration
             try
             {
                 ChainValues chainValues = new ChainValues(input);
-                IChainValues result = await chain.CallAsync(chainValues);
+                IChainValues result = await chain.CallAsync(chainValues).ConfigureAwait(false);
                 return Result<Dictionary<string, object>, string>.Success(result.Value);
             }
             catch (OperationCanceledException) { throw; }
@@ -55,7 +55,7 @@ public static class LangChainIntegration
             try
             {
                 ChainValues chainValues = new ChainValues(input);
-                IChainValues result = await chain.CallAsync(chainValues);
+                IChainValues result = await chain.CallAsync(chainValues).ConfigureAwait(false);
                 return Result<Dictionary<string, object>, string>.Success(result.Value);
             }
             catch (OperationCanceledException) { throw; }
@@ -80,7 +80,7 @@ public static class LangChainIntegration
         return async input =>
         {
             ChainValues chainValues = new ChainValues(input);
-            IChainValues result = await chain.CallAsync(chainValues);
+            IChainValues result = await chain.CallAsync(chainValues).ConfigureAwait(false);
             return result.Value;
         };
     }
@@ -95,7 +95,7 @@ public static class LangChainIntegration
         return async input =>
         {
             ChainValues chainValues = new ChainValues(input);
-            IChainValues result = await chain.CallAsync(chainValues);
+            IChainValues result = await chain.CallAsync(chainValues).ConfigureAwait(false);
             return result.Value;
         };
     }
@@ -186,7 +186,7 @@ public static class LangChainConversationIntegration
                 ChainValues chainInput = new ChainValues(context.GetProperties());
 
                 // Execute LangChain
-                IChainValues result = await llmChain.CallAsync(chainInput);
+                IChainValues result = await llmChain.CallAsync(chainInput).ConfigureAwait(false);
 
                 // Update context with results
                 foreach (KeyValuePair<string, object> kvp in result.Value)
@@ -231,7 +231,7 @@ public static class LangChainConversationIntegration
                 ChainValues chainInput = new ChainValues(context.GetProperties());
 
                 // Execute chain
-                IChainValues result = await setChain.CallAsync(chainInput);
+                IChainValues result = await setChain.CallAsync(chainInput).ConfigureAwait(false);
 
                 // Update context
                 foreach (KeyValuePair<string, object> kvp in result.Value)
@@ -266,7 +266,7 @@ public static class LangChainConversationIntegration
                 ChainValues chainInput = new ChainValues(context.GetProperties());
 
                 // Execute chain
-                IChainValues result = await chain.CallAsync(chainInput);
+                IChainValues result = await chain.CallAsync(chainInput).ConfigureAwait(false);
 
                 // Update context
                 foreach (KeyValuePair<string, object> kvp in result.Value)

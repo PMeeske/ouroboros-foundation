@@ -24,7 +24,7 @@ public static class MemoryPipeExtensions
     {
         return async context =>
         {
-            TOut? result = await step(context.Data);
+            TOut? result = await step(context.Data).ConfigureAwait(false);
             return context.WithData(result);
         };
     }

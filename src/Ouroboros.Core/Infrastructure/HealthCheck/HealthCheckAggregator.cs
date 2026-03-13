@@ -41,7 +41,7 @@ public sealed class HealthCheckAggregator
         {
             try
             {
-                HealthCheckResult result = await provider.CheckHealthAsync(cancellationToken);
+                HealthCheckResult result = await provider.CheckHealthAsync(cancellationToken).ConfigureAwait(false);
                 results.Add(result);
             }
             catch (OperationCanceledException)

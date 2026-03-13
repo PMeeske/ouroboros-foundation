@@ -158,7 +158,7 @@ public sealed partial class EmbodimentAggregate : IDisposable
         }
 
         // Disconnect and dispose the provider
-        await provider.DisconnectAsync(ct);
+        await provider.DisconnectAsync(ct).ConfigureAwait(false);
         provider.Dispose();
 
         // Remove associated sensors and actuators - collect keys first to avoid
@@ -211,13 +211,13 @@ public sealed partial class EmbodimentAggregate : IDisposable
         {
             try
             {
-                Result<EmbodimentCapabilities> connectResult = await provider.ConnectAsync(ct);
+                Result<EmbodimentCapabilities> connectResult = await provider.ConnectAsync(ct).ConfigureAwait(false);
                 if (connectResult.IsSuccess)
                 {
                     aggregateCapabilities |= connectResult.Value;
 
                     // Load sensors and actuators
-                    await LoadProviderResourcesAsync(providerId, provider, ct);
+                    await LoadProviderResourcesAsync(providerId, provider, ct).ConfigureAwait(false);
                 }
                 else
                 {
@@ -276,7 +276,7 @@ public sealed partial class EmbodimentAggregate : IDisposable
 
         foreach ((string _, IEmbodimentProvider? provider) in _providers)
         {
-            await provider.DisconnectAsync(ct);
+            await provider.DisconnectAsync(ct).ConfigureAwait(false);
         }
 
         _activeSensors.Clear();
@@ -302,7 +302,7 @@ public sealed partial class EmbodimentAggregate : IDisposable
         IEmbodimentProvider provider,
         CancellationToken ct)
     {
-        Result<IReadOnlyList<SensorInfo>> sensorsResult = await provider.GetSensorsAsync(ct);
+        Result<IReadOnlyList<SensorInfo>> sensorsResult = await provider.GetSensorsAsync(ct).ConfigureAwait(false);
         if (sensorsResult.IsSuccess)
         {
             foreach (SensorInfo sensor in sensorsResult.Value)
@@ -315,7 +315,7 @@ public sealed partial class EmbodimentAggregate : IDisposable
             }
         }
 
-        Result<IReadOnlyList<ActuatorInfo>> actuatorsResult = await provider.GetActuatorsAsync(ct);
+        Result<IReadOnlyList<ActuatorInfo>> actuatorsResult = await provider.GetActuatorsAsync(ct).ConfigureAwait(false);
         if (actuatorsResult.IsSuccess)
         {
             foreach (ActuatorInfo actuator in actuatorsResult.Value)

@@ -116,9 +116,9 @@ public sealed class SafeToolExecutor
 
         // Handle each certainty state
         return await overallCertainty.Match(
-            onMark: async () => await this.ExecuteTool(toolCall, context, evidence),
+            onMark: async () => await this.ExecuteTool(toolCall, context, evidence).ConfigureAwait(false),
             onVoid: () => Task.FromResult(RejectExecution(toolCall, evidence)),
-            onImaginary: async () => await this.HandleUncertain(toolCall, context, evidence));
+            onImaginary: async () => await this.HandleUncertain(toolCall, context, evidence).ConfigureAwait(false)).ConfigureAwait(false);
     }
 
     private async Task<AuditableDecision<ToolResult>> ExecuteTool(
@@ -143,7 +143,7 @@ public sealed class SafeToolExecutor
 
             // Execute the tool
             IToolExecutor tool = toolOption.Value!;
-            Result<string, string> result = await tool.InvokeAsync(toolCall.Arguments);
+            Result<string, string> result = await tool.InvokeAsync(toolCall.Arguments).ConfigureAwait(false);
 
             TimeSpan duration = DateTime.UtcNow - startTime;
 
@@ -211,7 +211,7 @@ public sealed class SafeToolExecutor
         try
         {
             // Invoke the uncertainty handler
-            bool approved = await this.uncertaintyHandler(toolCall, context);
+            bool approved = await this.uncertaintyHandler(toolCall, context).ConfigureAwait(false);
 
             if (approved)
             {
@@ -222,7 +222,7 @@ public sealed class SafeToolExecutor
                     "Human reviewer approved execution"));
 
                 // Execute the tool
-                return await this.ExecuteTool(toolCall, context, evidence);
+                return await this.ExecuteTool(toolCall, context, evidence).ConfigureAwait(false);
             }
             else
             {

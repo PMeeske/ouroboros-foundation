@@ -120,6 +120,7 @@
         <Compile Include="Agent\MetaAI\SkillExtensions.cs" />
         <Compile Include="Agent\MetaAI\ExperienceFactory.cs" />
         <Compile Include="Agent\MetaAI\MemoryQueryExtensions.cs" />
+        <Compile Include="Agent\MetaAI\MemoryStoreExtensions.cs" />
         <Compile Include="Agent\MetaAI\IUncertaintyRouter.cs" />
         <Compile Include="Agent\MetaAI\MetaLearning\IMetaLearner.cs" />
         <Compile Include="Agent\MetaAI\MetaLearning\PerformanceSnapshot.cs" />

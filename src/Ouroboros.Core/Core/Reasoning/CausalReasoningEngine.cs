@@ -37,7 +37,7 @@ public sealed partial class CausalReasoningEngine : ICausalReasoningEngine
         {
             return algorithm switch
             {
-                DiscoveryAlgorithm.PC => await Task.Run(() => this.DiscoverUsingPC(data, ct), ct),
+                DiscoveryAlgorithm.PC => await Task.Run(() => this.DiscoverUsingPC(data, ct), ct).ConfigureAwait(false),
                 DiscoveryAlgorithm.FCI => Result<CausalGraph, string>.Failure("FCI algorithm not yet implemented"),
                 DiscoveryAlgorithm.GES => Result<CausalGraph, string>.Failure("GES algorithm not yet implemented"),
                 DiscoveryAlgorithm.NOTEARS => Result<CausalGraph, string>.Failure("NOTEARS algorithm not yet implemented"),
@@ -85,7 +85,7 @@ public sealed partial class CausalReasoningEngine : ICausalReasoningEngine
 
         try
         {
-            return await Task.Run(() => this.ComputeInterventionEffect(intervention, outcome, model, ct), ct);
+            return await Task.Run(() => this.ComputeInterventionEffect(intervention, outcome, model, ct), ct).ConfigureAwait(false);
         }
         catch (InvalidOperationException ex)
         {
@@ -133,7 +133,7 @@ public sealed partial class CausalReasoningEngine : ICausalReasoningEngine
 
         try
         {
-            return await Task.Run(() => ComputeCounterfactual(intervention, outcome, factual, model, ct), ct);
+            return await Task.Run(() => ComputeCounterfactual(intervention, outcome, factual, model, ct), ct).ConfigureAwait(false);
         }
         catch (InvalidOperationException ex)
         {
@@ -175,7 +175,7 @@ public sealed partial class CausalReasoningEngine : ICausalReasoningEngine
 
         try
         {
-            return await Task.Run(() => this.GenerateCausalExplanation(effect, possibleCauses, model, ct), ct);
+            return await Task.Run(() => this.GenerateCausalExplanation(effect, possibleCauses, model, ct), ct).ConfigureAwait(false);
         }
         catch (InvalidOperationException ex)
         {
@@ -217,7 +217,7 @@ public sealed partial class CausalReasoningEngine : ICausalReasoningEngine
 
         try
         {
-            return await Task.Run(() => this.PlanOptimalIntervention(desiredOutcome, model, controllableVariables, ct), ct);
+            return await Task.Run(() => this.PlanOptimalIntervention(desiredOutcome, model, controllableVariables, ct), ct).ConfigureAwait(false);
         }
         catch (InvalidOperationException ex)
         {

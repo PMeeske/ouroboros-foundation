@@ -92,7 +92,7 @@ public sealed partial class ImmutableEthicsFramework
                     _corePrinciples);
             }
 
-            await LogEvaluationAsync("Plan", planContext.Plan.Goal, planContext.ActionContext, clearance, ct);
+            await LogEvaluationAsync("Plan", planContext.Plan.Goal, planContext.ActionContext, clearance, ct).ConfigureAwait(false);
 
             return Result<EthicalClearance, string>.Success(clearance);
         }
@@ -178,7 +178,7 @@ public sealed partial class ImmutableEthicsFramework
                     confidenceScore: violations.Count == 0 && concerns.Count == 0 ? 1.0 : 0.8);
             }
 
-            await LogEvaluationAsync("Goal", goal.Description, context, clearance, ct);
+            await LogEvaluationAsync("Goal", goal.Description, context, clearance, ct).ConfigureAwait(false);
 
             return Result<EthicalClearance, string>.Success(clearance);
         }
@@ -255,7 +255,7 @@ public sealed partial class ImmutableEthicsFramework
                     _corePrinciples);
             }
 
-            await LogEvaluationAsync("Skill", skillContext.Skill.Name, skillContext.ActionContext, clearance, ct);
+            await LogEvaluationAsync("Skill", skillContext.Skill.Name, skillContext.ActionContext, clearance, ct).ConfigureAwait(false);
 
             return Result<EthicalClearance, string>.Success(clearance);
         }
@@ -330,7 +330,7 @@ public sealed partial class ImmutableEthicsFramework
                     _corePrinciples);
             }
 
-            await LogEvaluationAsync("Research", researchDescription, context, clearance, ct);
+            await LogEvaluationAsync("Research", researchDescription, context, clearance, ct).ConfigureAwait(false);
 
             return Result<EthicalClearance, string>.Success(clearance);
         }
@@ -414,7 +414,7 @@ public sealed partial class ImmutableEthicsFramework
                 $"{request.Type}: {request.Description}",
                 request.ActionContext,
                 clearance,
-                ct);
+                ct).ConfigureAwait(false);
 
             return Result<EthicalClearance, string>.Success(clearance);
         }
@@ -447,6 +447,6 @@ public sealed partial class ImmutableEthicsFramework
             Reasoning = "Ethical concern reported"
         };
 
-        await LogEvaluationAsync("ConcernReport", concern.Description, context, clearance, ct);
+        await LogEvaluationAsync("ConcernReport", concern.Description, context, clearance, ct).ConfigureAwait(false);
     }
 }

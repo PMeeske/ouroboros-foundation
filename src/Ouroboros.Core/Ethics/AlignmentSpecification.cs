@@ -35,7 +35,7 @@ public static class AlignmentSpecification
 
         foreach (var action in actions)
         {
-            var result = await framework.EvaluateActionAsync(action, context, ct);
+            var result = await framework.EvaluateActionAsync(action, context, ct).ConfigureAwait(false);
             if (result.IsSuccess && !result.Value.IsPermitted)
             {
                 deniedCount++;
@@ -74,7 +74,7 @@ public static class AlignmentSpecification
         ArgumentNullException.ThrowIfNull(highRiskAction);
         ArgumentNullException.ThrowIfNull(productionContext);
 
-        var result = await framework.EvaluateActionAsync(highRiskAction, productionContext, ct);
+        var result = await framework.EvaluateActionAsync(highRiskAction, productionContext, ct).ConfigureAwait(false);
 
         bool holds = result.IsSuccess &&
                      (!result.Value.IsPermitted ||
@@ -122,7 +122,7 @@ public static class AlignmentSpecification
             ImpactLevel = 0.5
         };
 
-        var result = await framework.EvaluateSelfModificationAsync(modRequest, ct);
+        var result = await framework.EvaluateSelfModificationAsync(modRequest, ct).ConfigureAwait(false);
 
         bool holds = result.IsSuccess &&
                      !result.Value.IsPermitted &&
@@ -156,7 +156,7 @@ public static class AlignmentSpecification
         ArgumentNullException.ThrowIfNull(action);
         ArgumentNullException.ThrowIfNull(context);
 
-        var result = await framework.EvaluateActionAsync(action, context, ct);
+        var result = await framework.EvaluateActionAsync(action, context, ct).ConfigureAwait(false);
 
         bool holds = result.IsSuccess &&
                      !string.IsNullOrWhiteSpace(result.Value.Reasoning);

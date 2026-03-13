@@ -66,11 +66,10 @@ public static class Arrow
         {
             try
             {
-                TOutput? result = await func(input);
+                TOutput? result = await func(input).ConfigureAwait(false);
                 return Result<TOutput, Exception>.Success(result);
             }
-            catch (OperationCanceledException) { throw; }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 return Result<TOutput, Exception>.Failure(ex);
             }
@@ -126,7 +125,7 @@ public static class Arrow
     /// <typeparam name="TOut">The output type of the second arrow.</typeparam>
     /// <returns>A KleisliCompose function for the specified types.</returns>
     public static KleisliCompose<TIn, TMid, TOut> Compose<TIn, TMid, TOut>()
-        => (f, g) => async input => await g(await f(input));
+        => (f, g) => async input => await g(await f(input).ConfigureAwait(false)).ConfigureAwait(false);
 
     /// <summary>
     /// Creates a curried composition function that takes the first arrow and returns
@@ -139,5 +138,5 @@ public static class Arrow
     /// <returns>A function waiting for the second arrow to complete the composition.</returns>
     public static Func<Kleisli<TMid, TOut>, Kleisli<TIn, TOut>> ComposeWith<TIn, TMid, TOut>(
         Kleisli<TIn, TMid> f)
-        => g => async input => await g(await f(input));
+        => g => async input => await g(await f(input).ConfigureAwait(false)).ConfigureAwait(false);
 }

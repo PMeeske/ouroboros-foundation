@@ -49,7 +49,7 @@ public class ConversationBuilder<TInput, TContext>
         ContextualStep<MemoryContext<TInput>, MemoryContext<TInput>, TContext> step = new ContextualStep<MemoryContext<TInput>, MemoryContext<TInput>, TContext>(
             async (input, context) =>
             {
-                MemoryContext<TInput> result = await processor(input, context);
+                MemoryContext<TInput> result = await processor(input, context).ConfigureAwait(false);
                 List<string> logs = logMessage != null ? [logMessage] : new List<string>();
                 return (result, logs);
             });
@@ -86,7 +86,7 @@ public class ConversationBuilder<TInput, TContext>
 
             foreach (ContextualStep<MemoryContext<TInput>, MemoryContext<TInput>, TContext> step in this.steps)
             {
-                (MemoryContext<TInput> result, List<string> logs) = await step(currentInput, this.context);
+                (MemoryContext<TInput> result, List<string> logs) = await step(currentInput, this.context).ConfigureAwait(false);
                 currentInput = result;
                 allLogs.AddRange(logs);
             }
@@ -104,7 +104,7 @@ public class ConversationBuilder<TInput, TContext>
         Step<MemoryContext<TInput>, (MemoryContext<TInput> result, List<string> logs)> pipeline = this.Build();
         return async input =>
         {
-            (MemoryContext<TInput> result, List<string> _) = await pipeline(input);
+            (MemoryContext<TInput> result, List<string> _) = await pipeline(input).ConfigureAwait(false);
             return result;
         };
     }
@@ -117,6 +117,6 @@ public class ConversationBuilder<TInput, TContext>
     public async Task<MemoryContext<TInput>> RunAsync(MemoryContext<TInput> input)
     {
         Step<MemoryContext<TInput>, MemoryContext<TInput>> pipeline = this.BuildAndRun();
-        return await pipeline(input);
+        return await pipeline(input).ConfigureAwait(false);
     }
 }

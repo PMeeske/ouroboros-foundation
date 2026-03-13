@@ -106,7 +106,7 @@ namespace Ouroboros.Core.Tracing
         /// <inheritdoc/>
         public async Task<Result<Activity, string>> TraceToolExecution(string toolName, string input)
         {
-            Result<Activity, string> result = await StartActivity($"ToolExecution-{toolName}");
+            Result<Activity, string> result = await StartActivity($"ToolExecution-{toolName}").ConfigureAwait(false);
             if (result.IsFailure) return result;
             Activity activity = result.Value;
             activity.SetTag("tool.name", toolName);
@@ -117,7 +117,7 @@ namespace Ouroboros.Core.Tracing
         /// <inheritdoc/>
         public async Task<Result<Activity, string>> TracePipelineExecution(string pipelineName)
         {
-            Result<Activity, string> result = await StartActivity($"PipelineExecution-{pipelineName}");
+            Result<Activity, string> result = await StartActivity($"PipelineExecution-{pipelineName}").ConfigureAwait(false);
             if (result.IsFailure) return result;
             Activity activity = result.Value;
             activity.SetTag("pipeline.name", pipelineName);
@@ -127,7 +127,7 @@ namespace Ouroboros.Core.Tracing
         /// <inheritdoc/>
         public async Task<Result<Activity, string>> TraceLlmRequest(string model, int maxTokens)
         {
-            Result<Activity, string> result = await StartActivity("llm.request");
+            Result<Activity, string> result = await StartActivity("llm.request").ConfigureAwait(false);
             if (result.IsFailure) return result;
             Activity activity = result.Value;
             activity.SetTag("llm.model", model);
@@ -138,7 +138,7 @@ namespace Ouroboros.Core.Tracing
         /// <inheritdoc/>
         public async Task<Result<Activity, string>> TraceVectorOperation(string operation, int dimension)
         {
-            Result<Activity, string> result = await StartActivity($"VectorOperation-{operation}");
+            Result<Activity, string> result = await StartActivity($"VectorOperation-{operation}").ConfigureAwait(false);
             if (result.IsFailure) return result;
             Activity activity = result.Value;
             activity.SetTag("vector.operation", operation);

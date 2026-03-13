@@ -29,14 +29,14 @@ public sealed partial class EmbodimentAggregate
             return Result<SensorInfo>.Failure($"Provider '{providerId}' not found");
         }
 
-        Result<Unit> result = await provider.ActivateSensorAsync(localSensorId, ct);
+        Result<Unit> result = await provider.ActivateSensorAsync(localSensorId, ct).ConfigureAwait(false);
         if (result.IsFailure)
         {
             return Result<SensorInfo>.Failure(result.Error);
         }
 
         // Update local state
-        Result<IReadOnlyList<SensorInfo>> sensorsResult = await provider.GetSensorsAsync(ct);
+        Result<IReadOnlyList<SensorInfo>> sensorsResult = await provider.GetSensorsAsync(ct).ConfigureAwait(false);
         if (sensorsResult.IsSuccess)
         {
             SensorInfo? sensor = sensorsResult.Value.FirstOrDefault(s => s.SensorId == localSensorId);
@@ -79,7 +79,7 @@ public sealed partial class EmbodimentAggregate
             return Result<Unit>.Failure($"Provider '{providerId}' not found");
         }
 
-        Result<Unit> result = await provider.DeactivateSensorAsync(localSensorId, ct);
+        Result<Unit> result = await provider.DeactivateSensorAsync(localSensorId, ct).ConfigureAwait(false);
         if (result.IsSuccess)
         {
             _activeSensors.TryRemove(sensorId, out _);
@@ -111,7 +111,7 @@ public sealed partial class EmbodimentAggregate
             return Result<PerceptionData>.Failure($"Provider '{providerId}' not found");
         }
 
-        return await provider.ReadSensorAsync(localSensorId, ct);
+        return await provider.ReadSensorAsync(localSensorId, ct).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -134,7 +134,7 @@ public sealed partial class EmbodimentAggregate
             return Result<ActionOutcome>.Failure($"Provider '{providerId}' not found");
         }
 
-        Result<ActionOutcome> result = await provider.ExecuteActionAsync(localActuatorId, action, ct);
+        Result<ActionOutcome> result = await provider.ExecuteActionAsync(localActuatorId, action, ct).ConfigureAwait(false);
 
         if (result.IsSuccess)
         {

@@ -33,7 +33,7 @@ public static class SyncStepExtensions
         => async input =>
         {
             TMid? intermediate = syncStep.Invoke(input);
-            return await asyncStep(intermediate);
+            return await asyncStep(intermediate).ConfigureAwait(false);
         };
 
     /// <summary>
@@ -44,7 +44,7 @@ public static class SyncStepExtensions
         SyncStep<TMid, TNext> syncStep)
         => async input =>
         {
-            TMid? intermediate = await asyncStep(input);
+            TMid? intermediate = await asyncStep(input).ConfigureAwait(false);
             return syncStep.Invoke(intermediate);
         };
 
@@ -79,9 +79,9 @@ public static class SyncStepExtensions
                 TOut? result = syncStep.Invoke(input);
                 return predicate(result) ? Option<TOut>.Some(result) : Option<TOut>.None();
             }
-            catch (OperationCanceledException) { throw; }
-            catch (Exception)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
+                _ = ex; // Intentional: monadic try/option boundary
                 return Option<TOut>.None();
             }
         });

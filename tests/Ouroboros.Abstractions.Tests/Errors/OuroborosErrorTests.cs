@@ -225,7 +225,7 @@ public class OuroborosErrorTests
         {
             throw new ArgumentException("bad arg");
         }
-        catch (Exception ex)
+        catch (ArgumentException ex)
         {
             caught = ex;
         }

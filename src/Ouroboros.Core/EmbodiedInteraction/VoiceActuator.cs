@@ -105,7 +105,7 @@ public sealed class VoiceActuator : IDisposable
                 ? _config with { Style = emotion }
                 : _config;
 
-            Result<SynthesizedSpeech, string> result = await _ttsModel.SynthesizeAsync(text, config, _speakingCts.Token);
+            Result<SynthesizedSpeech, string> result = await _ttsModel.SynthesizeAsync(text, config, _speakingCts.Token).ConfigureAwait(false);
 
             if (result.IsSuccess)
             {

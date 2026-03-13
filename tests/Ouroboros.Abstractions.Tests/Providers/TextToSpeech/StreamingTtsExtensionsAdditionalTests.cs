@@ -92,7 +92,7 @@ public class StreamingTtsExtensionsAdditionalTests
     public void BufferIntoSentences_PropagatesError()
     {
         // Arrange
-        var subject = new Subject<string>();
+        using var subject = new Subject<string>();
         var results = new List<string>();
         Exception? capturedError = null;
 
@@ -191,7 +191,7 @@ public class StreamingTtsExtensionsAdditionalTests
     public void BufferIntoSentences_IncrementalTokens_BuffersCorrectly()
     {
         // Arrange - tokens arrive one character at a time
-        var subject = new Subject<string>();
+        using var subject = new Subject<string>();
         var results = new List<string>();
         bool completed = false;
 

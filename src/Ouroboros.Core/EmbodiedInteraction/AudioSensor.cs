@@ -131,8 +131,8 @@ public sealed class AudioSensor : IDisposable
         {
             if (_streamingSession != null)
             {
-                await _streamingSession.EndAudioAsync(ct);
-                await _streamingSession.DisposeAsync();
+                await _streamingSession.EndAudioAsync(ct).ConfigureAwait(false);
+                await _streamingSession.DisposeAsync().ConfigureAwait(false);
                 _streamingSession = null;
             }
 
@@ -176,11 +176,11 @@ public sealed class AudioSensor : IDisposable
 
             if (_streamingSession != null)
             {
-                await _streamingSession.PushAudioAsync(audioData, ct);
+                await _streamingSession.PushAudioAsync(audioData, ct).ConfigureAwait(false);
 
                 if (isFinal)
                 {
-                    await _streamingSession.EndAudioAsync(ct);
+                    await _streamingSession.EndAudioAsync(ct).ConfigureAwait(false);
                 }
             }
 
@@ -206,7 +206,7 @@ public sealed class AudioSensor : IDisposable
     {
         if (_disposed) return Result<TranscriptionResult, string>.Failure("Sensor is disposed");
 
-        Result<TranscriptionResult, string> result = await _sttModel.TranscribeAsync(filePath, _config.Language, ct);
+        Result<TranscriptionResult, string> result = await _sttModel.TranscribeAsync(filePath, _config.Language, ct).ConfigureAwait(false);
 
         if (result.IsSuccess)
         {
@@ -237,7 +237,7 @@ public sealed class AudioSensor : IDisposable
             Task.Run(async () =>
             {
                 if (_streamingSession != null)
-                    await _streamingSession.DisposeAsync();
+                    await _streamingSession.DisposeAsync().ConfigureAwait(false);
             }).GetAwaiter().GetResult();
         }
         catch (ObjectDisposedException)

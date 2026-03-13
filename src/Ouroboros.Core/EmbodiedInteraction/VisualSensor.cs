@@ -132,7 +132,7 @@ public sealed class VisualSensor : IDisposable
             ClassifyScene: _config.EnableSceneClassification,
             MaxObjects: _config.MaxObjectsToDetect);
 
-        Result<VisionAnalysisResult, string> analysisResult = await _visionModel.AnalyzeImageAsync(frameData, format, options, ct);
+        Result<VisionAnalysisResult, string> analysisResult = await _visionModel.AnalyzeImageAsync(frameData, format, options, ct).ConfigureAwait(false);
 
         if (analysisResult.IsSuccess)
         {
@@ -165,7 +165,7 @@ public sealed class VisualSensor : IDisposable
     {
         if (_disposed) return Result<VisionAnalysisResult, string>.Failure("Sensor is disposed");
 
-        Result<VisionAnalysisResult, string> result = await _visionModel.AnalyzeImageFileAsync(filePath, null, ct);
+        Result<VisionAnalysisResult, string> result = await _visionModel.AnalyzeImageFileAsync(filePath, null, ct).ConfigureAwait(false);
 
         if (result.IsSuccess)
         {
@@ -193,7 +193,7 @@ public sealed class VisualSensor : IDisposable
     {
         if (_disposed) return Result<string, string>.Failure("Sensor is disposed");
 
-        return await _visionModel.AnswerQuestionAsync(imageData, format, question, ct);
+        return await _visionModel.AnswerQuestionAsync(imageData, format, question, ct).ConfigureAwait(false);
     }
 
     /// <summary>

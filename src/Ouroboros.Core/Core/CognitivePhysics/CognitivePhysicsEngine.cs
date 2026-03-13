@@ -63,7 +63,7 @@ public sealed class CognitivePhysicsEngine
     public Step<CognitiveState, Result<CognitiveState>> ShiftStep(string target) =>
         async state =>
         {
-            ZeroShiftResult result = await _zeroShift.ShiftAsync(state, target);
+            ZeroShiftResult result = await _zeroShift.ShiftAsync(state, target).ConfigureAwait(false);
             return result.Success
                 ? Result<CognitiveState>.Success(result.State)
                 : Result<CognitiveState>.Failure(result.FailureReason ?? "Shift failed.");
@@ -98,7 +98,7 @@ public sealed class CognitivePhysicsEngine
     /// <returns>A Step producing a list of weighted branches.</returns>
     public Step<CognitiveState, ImmutableList<CognitiveBranch>> EntangleStep(
         IReadOnlyList<string> targets) =>
-        async state => await _superposition.EntangleAsync(state, targets);
+        async state => await _superposition.EntangleAsync(state, targets).ConfigureAwait(false);
 
     /// <summary>
     /// Creates a Step that collapses superposition branches back to a single state.
@@ -107,7 +107,7 @@ public sealed class CognitivePhysicsEngine
     /// <returns>A Step selecting the best branch.</returns>
     public Step<ImmutableList<CognitiveBranch>, Option<CognitiveState>> CollapseStep(
         string origin) =>
-        async branches => await _superposition.CollapseAsync(origin, branches);
+        async branches => await _superposition.CollapseAsync(origin, branches).ConfigureAwait(false);
 
     /// <summary>
     /// Creates a Step that ticks the cooldown by the specified elapsed time.
@@ -134,7 +134,7 @@ public sealed class CognitivePhysicsEngine
         {
             current = current.Tick();
 
-            ZeroShiftResult result = await _zeroShift.ShiftAsync(current, target);
+            ZeroShiftResult result = await _zeroShift.ShiftAsync(current, target).ConfigureAwait(false);
 
             if (!result.Success)
             {

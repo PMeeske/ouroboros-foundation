@@ -56,7 +56,7 @@ public sealed class ToolApprovalQueue
     {
         string queueId = this.Enqueue(call, decision);
         TaskCompletionSource<AuditableDecision<ToolResult>> tcs = this.completionSources[queueId];
-        return await tcs.Task;
+        return await tcs.Task.ConfigureAwait(false);
     }
 
     /// <summary>
@@ -74,11 +74,11 @@ public sealed class ToolApprovalQueue
         string queueId = this.Enqueue(call, decision);
         TaskCompletionSource<AuditableDecision<ToolResult>> tcs = this.completionSources[queueId];
 
-        Task completedTask = await Task.WhenAny(tcs.Task, Task.Delay(timeout));
+        Task completedTask = await Task.WhenAny(tcs.Task, Task.Delay(timeout)).ConfigureAwait(false);
 
         if (completedTask == tcs.Task)
         {
-            return await tcs.Task;
+            return await tcs.Task.ConfigureAwait(false);
         }
         else
         {

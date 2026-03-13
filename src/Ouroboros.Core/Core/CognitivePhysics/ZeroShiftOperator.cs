@@ -48,7 +48,7 @@ public sealed class ZeroShiftOperator
             return ZeroShiftResult.Failed(state, $"Cooldown active: {state.Cooldown:F2} remaining.");
 
         // Ethics gate evaluation
-        EthicsGateResult ethicsResult = await _ethicsEvaluator(state.Focus, target);
+        EthicsGateResult ethicsResult = await _ethicsEvaluator(state.Focus, target).ConfigureAwait(false);
 
         if (ethicsResult.IsDenied)
             return ZeroShiftResult.Failed(state, $"Ethics gate denied: {ethicsResult.Reason}");
@@ -62,8 +62,8 @@ public sealed class ZeroShiftOperator
         }
 
         // Compute semantic distance and cost
-        float[] focusEmbedding = await _embeddingProvider.CreateEmbeddingsAsync(state.Focus);
-        float[] targetEmbedding = await _embeddingProvider.CreateEmbeddingsAsync(target);
+        float[] focusEmbedding = await _embeddingProvider.CreateEmbeddingsAsync(state.Focus).ConfigureAwait(false);
+        float[] targetEmbedding = await _embeddingProvider.CreateEmbeddingsAsync(target).ConfigureAwait(false);
         double distance = SemanticDistance.Compute(focusEmbedding, targetEmbedding);
         double cost = distance * state.Compression;
 

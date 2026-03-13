@@ -51,7 +51,7 @@ public sealed class OllamaHealthCheckProvider : IHealthCheckProvider, IDisposabl
 
         try
         {
-            _ = await this.ollamaClient.ListLocalModelsAsync(cancellationToken);
+            _ = await this.ollamaClient.ListLocalModelsAsync(cancellationToken).ConfigureAwait(false);
 
             sw.Stop();
 

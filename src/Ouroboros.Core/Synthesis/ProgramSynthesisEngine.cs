@@ -66,10 +66,10 @@ public sealed partial class ProgramSynthesisEngine : IProgramSynthesisEngine
                 }
 
                 // Expand beam to next depth
-                beam = await ExpandBeamAsync(beam, dsl, depth, cts.Token);
+                beam = await ExpandBeamAsync(beam, dsl, depth, cts.Token).ConfigureAwait(false);
 
                 // Evaluate programs against examples
-                List<Program> validPrograms = await EvaluateBeamAsync(beam, examples, dsl, cts.Token);
+                List<Program> validPrograms = await EvaluateBeamAsync(beam, examples, dsl, cts.Token).ConfigureAwait(false);
 
                 // Check if we found a solution
                 if (validPrograms.Count > 0)
@@ -110,9 +110,9 @@ public sealed partial class ProgramSynthesisEngine : IProgramSynthesisEngine
         {
             List<Primitive> extractedPrimitives = strategy switch
             {
-                CompressionStrategy.AntiUnification => await ExtractViaAntiUnificationAsync(successfulPrograms, ct),
-                CompressionStrategy.EGraph => await ExtractViaEGraphAsync(successfulPrograms, ct),
-                CompressionStrategy.FragmentGrammar => await ExtractViaFragmentGrammarAsync(successfulPrograms, ct),
+                CompressionStrategy.AntiUnification => await ExtractViaAntiUnificationAsync(successfulPrograms, ct).ConfigureAwait(false),
+                CompressionStrategy.EGraph => await ExtractViaEGraphAsync(successfulPrograms, ct).ConfigureAwait(false),
+                CompressionStrategy.FragmentGrammar => await ExtractViaFragmentGrammarAsync(successfulPrograms, ct).ConfigureAwait(false),
                 _ => throw new ArgumentException($"Unknown compression strategy: {strategy}"),
             };
 
@@ -218,7 +218,7 @@ public sealed partial class ProgramSynthesisEngine : IProgramSynthesisEngine
 
             DomainSpecificLanguage evolvedDSL = currentDSL with { Primitives = updatedPrimitives };
 
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
             return Result<DomainSpecificLanguage, string>.Success(evolvedDSL);
         }
         catch (OperationCanceledException)

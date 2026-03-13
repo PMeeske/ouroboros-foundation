@@ -148,7 +148,7 @@ public sealed class EmbodimentController : IDisposable
             // Start all audio sensors
             foreach ((string? id, AudioSensor? sensor) in _audioSensors)
             {
-                Result<Unit, string> result = await sensor.StartListeningAsync(ct);
+                Result<Unit, string> result = await sensor.StartListeningAsync(ct).ConfigureAwait(false);
                 if (!result.IsSuccess)
                     return Result<Unit, string>.Failure($"Failed to start audio sensor {id}: {result.Error}");
             }
@@ -226,7 +226,7 @@ public sealed class EmbodimentController : IDisposable
             _virtualSelf.SetState(EmbodimentState.Dormant);
 
             foreach (AudioSensor sensor in _audioSensors.Values)
-                await sensor.StopListeningAsync(ct);
+                await sensor.StopListeningAsync(ct).ConfigureAwait(false);
 
             foreach (VisualSensor sensor in _visualSensors.Values)
                 sensor.StopObserving();
@@ -264,7 +264,7 @@ public sealed class EmbodimentController : IDisposable
             switch (request.Modality)
             {
                 case ActuatorModality.Voice:
-                    return await ExecuteVoiceActionAsync(request, ct);
+                    return await ExecuteVoiceActionAsync(request, ct).ConfigureAwait(false);
 
                 case ActuatorModality.Text:
                     // Text output is handled externally
@@ -301,7 +301,7 @@ public sealed class EmbodimentController : IDisposable
         if (actuator == null)
             return Result<SynthesizedSpeech, string>.Failure("No voice actuator available");
 
-        return await actuator.SpeakAsync(text, emotion, ct);
+        return await actuator.SpeakAsync(text, emotion, ct).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -320,7 +320,7 @@ public sealed class EmbodimentController : IDisposable
             FusedPerception? fused = await _virtualSelf.FusedPerceptions
                 .Timeout(timeout)
                 .FirstOrDefaultAsync()
-                .ToTask(ct);
+                .ToTask(ct).ConfigureAwait(false);
 
             if (fused == null)
                 return Result<FusedPerception, string>.Failure("No perceptions available in timeout period");
@@ -373,7 +373,7 @@ public sealed class EmbodimentController : IDisposable
         string text = request.Content?.ToString() ?? string.Empty;
         string? emotion = request.Parameters?.GetValueOrDefault("emotion")?.ToString();
 
-        Result<SynthesizedSpeech, string> result = await actuator.SpeakAsync(text, emotion, ct);
+        Result<SynthesizedSpeech, string> result = await actuator.SpeakAsync(text, emotion, ct).ConfigureAwait(false);
 
         return new ActionResult(
             request,

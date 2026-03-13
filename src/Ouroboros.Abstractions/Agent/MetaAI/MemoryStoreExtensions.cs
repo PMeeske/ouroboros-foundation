@@ -23,7 +23,7 @@ public static class MemoryStoreExtensions
         ArgumentNullException.ThrowIfNull(store);
         ArgumentNullException.ThrowIfNull(query);
 
-        var result = await store.QueryExperiencesAsync(query, ct);
+        var result = await store.QueryExperiencesAsync(query, ct).ConfigureAwait(false);
         return result.IsSuccess
             ? result.Value.ToList()
             : new List<Experience>();
@@ -38,7 +38,7 @@ public static class MemoryStoreExtensions
     {
         ArgumentNullException.ThrowIfNull(store);
 
-        var result = await store.GetStatisticsAsync(ct);
+        var result = await store.GetStatisticsAsync(ct).ConfigureAwait(false);
         return result.IsSuccess
             ? result.Value
             : new MemoryStatistics(0, 0, 0, 0, 0);

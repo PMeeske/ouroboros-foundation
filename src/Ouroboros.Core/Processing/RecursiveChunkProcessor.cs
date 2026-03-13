@@ -64,7 +64,7 @@ public sealed class RecursiveChunkProcessor : IRecursiveChunkProcessor
             }
 
             // Process chunks in parallel (map phase)
-            List<ChunkResult<string>> chunkResults = await this.ProcessChunksInParallelAsync(chunks, strategy, cancellationToken);
+            List<ChunkResult<string>> chunkResults = await this.ProcessChunksInParallelAsync(chunks, strategy, cancellationToken).ConfigureAwait(false);
 
             // Check for failures
             List<ChunkResult<string>> failures = chunkResults.Where(r => !r.Success).ToList();
@@ -88,7 +88,7 @@ public sealed class RecursiveChunkProcessor : IRecursiveChunkProcessor
 
             // Combine results (reduce phase)
             Result<string> combinedResult = await this.CombineChunkResultsAsync(
-                chunkResults.Select(r => r.Output).ToList());
+                chunkResults.Select(r => r.Output).ToList()).ConfigureAwait(false);
 
             if (combinedResult.IsFailure)
             {
@@ -195,7 +195,7 @@ public sealed class RecursiveChunkProcessor : IRecursiveChunkProcessor
 
                 try
                 {
-                    Result<string> result = await this.processChunkFunc(chunk);
+                    Result<string> result = await this.processChunkFunc(chunk).ConfigureAwait(false);
                     stopwatch.Stop();
 
                     ChunkMetadata metadata = new ChunkMetadata(
@@ -231,7 +231,7 @@ public sealed class RecursiveChunkProcessor : IRecursiveChunkProcessor
 
                     results.Add(failedResult);
                 }
-            });
+            }).ConfigureAwait(false);
 
         return results.OrderBy(r => r.Metadata.Index).ToList();
     }
@@ -246,7 +246,7 @@ public sealed class RecursiveChunkProcessor : IRecursiveChunkProcessor
         try
         {
             // Use the provided combine function
-            Result<string> result = await this.combineResultsFunc(chunkOutputs);
+            Result<string> result = await this.combineResultsFunc(chunkOutputs).ConfigureAwait(false);
             return result;
         }
         catch (OperationCanceledException) { throw; }

@@ -52,7 +52,7 @@ public sealed class EthicsEnforcementWrapper<TAction, TResult> : IActionExecutor
             ProposedAction proposedAction = _actionConverter(action);
 
             // Evaluate action ethically
-            Result<EthicalClearance, string> evaluationResult = await _ethicsFramework.EvaluateActionAsync(proposedAction, _context, ct);
+            Result<EthicalClearance, string> evaluationResult = await _ethicsFramework.EvaluateActionAsync(proposedAction, _context, ct).ConfigureAwait(false);
 
             if (evaluationResult.IsFailure)
             {
@@ -80,7 +80,7 @@ public sealed class EthicsEnforcementWrapper<TAction, TResult> : IActionExecutor
             }
 
             // Execute the action
-            return await _innerExecutor.ExecuteAsync(action, ct);
+            return await _innerExecutor.ExecuteAsync(action, ct).ConfigureAwait(false);
         }
         catch (OperationCanceledException) { throw; }
         catch (Exception ex) when (ex is not OperationCanceledException)

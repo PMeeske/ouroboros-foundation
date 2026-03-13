@@ -47,7 +47,7 @@ public readonly struct SyncStep<TIn, TOut> : IEquatable<SyncStep<TIn, TOut>>
     public Step<TIn, TNext> Pipe<TNext>(Step<TOut, TNext> asyncNext)
     {
         Func<TIn, TOut> func = _f; // Capture to avoid struct 'this' issues
-        return async input => await asyncNext(func(input));
+        return async input => await asyncNext(func(input)).ConfigureAwait(false);
     }
 
     /// <summary>

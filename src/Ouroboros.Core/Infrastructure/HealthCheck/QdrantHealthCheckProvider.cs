@@ -49,7 +49,7 @@ public sealed class QdrantHealthCheckProvider : IHealthCheckProvider, IDisposabl
         {
             HttpResponseMessage response = await this.httpClient.GetAsync(
                 $"{this.endpoint}/healthz",
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
 
             sw.Stop();
 

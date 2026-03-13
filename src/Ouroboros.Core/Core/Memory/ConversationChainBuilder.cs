@@ -76,7 +76,7 @@ public class ConversationChainBuilder<T>
 
         foreach (Step<MemoryContext<object>, MemoryContext<object>> step in _steps)
         {
-            context = await step(context);
+            context = await step(context).ConfigureAwait(false);
         }
 
         return context;
@@ -87,7 +87,7 @@ public class ConversationChainBuilder<T>
     /// </summary>
     public async Task<TResult?> RunAsync<TResult>(string propertyKey)
     {
-        MemoryContext<object> result = await RunAsync();
+        MemoryContext<object> result = await RunAsync().ConfigureAwait(false);
         return result.GetProperty<TResult>(propertyKey);
     }
 }

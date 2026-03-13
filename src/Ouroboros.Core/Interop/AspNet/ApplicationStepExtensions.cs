@@ -28,7 +28,7 @@ public static class ApplicationStepExtensions
         => new(async app =>
         {
             app.Use(middleware);
-            return await Task.FromResult(app);
+            return await Task.FromResult(app).ConfigureAwait(false);
         });
 
     /// <summary>
@@ -36,7 +36,7 @@ public static class ApplicationStepExtensions
     /// </summary>
     public static Step<IApplicationBuilder, IApplicationBuilder> Use(
         Func<IApplicationBuilder, IApplicationBuilder> configure)
-        => new(async app => await Task.FromResult(configure(app)));
+        => new(async app => await Task.FromResult(configure(app)).ConfigureAwait(false));
 #else
     // Placeholders so the file compiles in non-ASP.NET projects. They throw if invoked without ASP.NET types.
     /// <summary>Placeholder that throws <see cref="NotSupportedException"/> when ASP.NET Core is not referenced.</summary>

@@ -1,5 +1,6 @@
 namespace Ouroboros.Abstractions.Tests.Agent.MetaAI.SelfImprovement;
 
+using Ouroboros.Agent;
 using Ouroboros.Agent.MetaAI;
 
 [Trait("Category", "Unit")]

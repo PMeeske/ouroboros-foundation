@@ -59,7 +59,7 @@ public class PipelineBuilder<TIn, TCurrent>
     /// Build and execute the pipeline
     /// </summary>
     public async Task<TCurrent> ExecuteAsync(TIn input)
-        => await (input | _currentPipeline);
+        => await (input | _currentPipeline).ConfigureAwait(false);
 }
 
 #endregion

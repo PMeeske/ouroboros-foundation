@@ -68,17 +68,17 @@ public sealed class SuperpositionEngine
         CognitiveBranch? best = null;
         double bestScore = double.MinValue;
 
-        float[] originEmbedding = await _embeddingProvider.CreateEmbeddingsAsync(origin);
+        float[] originEmbedding = await _embeddingProvider.CreateEmbeddingsAsync(origin).ConfigureAwait(false);
 
         foreach (CognitiveBranch branch in branches)
         {
-            EthicsGateResult ethics = await _ethicsEvaluator(origin, branch.State.Focus);
+            EthicsGateResult ethics = await _ethicsEvaluator(origin, branch.State.Focus).ConfigureAwait(false);
 
             // Denied branches are excluded entirely — they cannot win collapse
             if (ethics.IsDenied)
                 continue;
 
-            float[] branchEmbedding = await _embeddingProvider.CreateEmbeddingsAsync(branch.State.Focus);
+            float[] branchEmbedding = await _embeddingProvider.CreateEmbeddingsAsync(branch.State.Focus).ConfigureAwait(false);
             double coherence = 1.0 - SemanticDistance.Compute(originEmbedding, branchEmbedding);
 
             double ethicsScore = ethics.IsAllowed ? 1.0 : 0.5;

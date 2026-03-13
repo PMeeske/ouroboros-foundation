@@ -16,7 +16,7 @@ public static class EnhancedDemo
             .Then(EnhancedSteps.Length)
             .Then(EnhancedSteps.Show);
 
-        string result = await pipeline("hello enhanced kleisli");
+        string result = await pipeline("hello enhanced kleisli").ConfigureAwait(false);
         Console.WriteLine($"Result: {result}"); // length=22
 
         // With error handling
@@ -24,9 +24,9 @@ public static class EnhancedDemo
             .Then(EnhancedSteps.OnlyPositive.ToResult("Number must be positive"))
             .Map(n => $"Valid positive number: {n}");
 
-        Result<string, string> safeResult1 = await safePipeline("42");
-        Result<string, string> safeResult2 = await safePipeline("-5");
-        Result<string, string> safeResult3 = await safePipeline("not-a-number");
+        Result<string, string> safeResult1 = await safePipeline("42").ConfigureAwait(false);
+        Result<string, string> safeResult2 = await safePipeline("-5").ConfigureAwait(false);
+        Result<string, string> safeResult3 = await safePipeline("not-a-number").ConfigureAwait(false);
 
         Console.WriteLine($"Safe parse '42': {safeResult1}");
         Console.WriteLine($"Safe parse '-5': {safeResult2}");
@@ -46,7 +46,7 @@ public static class EnhancedDemo
 
         // Method-based composition since operator overloading had issues
         PipeNode<string, string> pipeline = n1.Pipe(n2).Pipe(n3);
-        string result = await ("enhanced compat pipe" | pipeline);
+        string result = await ("enhanced compat pipe" | pipeline).ConfigureAwait(false);
         Console.WriteLine($"Compat pipe result: {result}");
 
         // Using fluent pipeline builder
@@ -55,13 +55,13 @@ public static class EnhancedDemo
             .AddStep(EnhancedSteps.Upper, "Uppercase")
             .Then(EnhancedSteps.Length, "GetLength")
             .Then(EnhancedSteps.Show, "Format")
-            .ExecuteAsync("fluent pipeline demo");
+            .ExecuteAsync("fluent pipeline demo").ConfigureAwait(false);
 
         Console.WriteLine($"Fluent pipeline result: {fluentResult}");
 
         // With monadic error handling
         PipeNode<string, Result<int, string>> Ouroboros = EnhancedSteps.SafeParse.ToCompatNode("SafeParse");
-        Result<int, string> monadicResult = await ("456" | Ouroboros);
+        Result<int, string> monadicResult = await ("456" | Ouroboros).ConfigureAwait(false);
 
         monadicResult.Match(
             success => Console.WriteLine($"Monadic compat success: {success}"),
@@ -74,8 +74,8 @@ public static class EnhancedDemo
     /// </summary>
     public static async Task RunAllEnhanced()
     {
-        await RunEnhancedKleisli();
-        await RunEnhancedCompatPipe();
+        await RunEnhancedKleisli().ConfigureAwait(false);
+        await RunEnhancedCompatPipe().ConfigureAwait(false);
 
         Console.WriteLine("=== All Enhanced Interop Demonstrations Complete ===");
     }

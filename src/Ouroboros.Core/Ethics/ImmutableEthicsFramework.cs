@@ -99,7 +99,7 @@ public sealed partial class ImmutableEthicsFramework : IEthicsFramework
             }
 
             // Log the evaluation
-            await LogEvaluationAsync("Action", action.Description, context, clearance, ct);
+            await LogEvaluationAsync("Action", action.Description, context, clearance, ct).ConfigureAwait(false);
 
             return Result<EthicalClearance, string>.Success(clearance);
         }
@@ -136,6 +136,6 @@ public sealed partial class ImmutableEthicsFramework : IEthicsFramework
             }
         };
 
-        await _auditLog.LogEvaluationAsync(entry, ct);
+        await _auditLog.LogEvaluationAsync(entry, ct).ConfigureAwait(false);
     }
 }

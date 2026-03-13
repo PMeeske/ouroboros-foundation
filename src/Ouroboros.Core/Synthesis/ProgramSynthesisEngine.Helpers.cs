@@ -82,7 +82,7 @@ public sealed partial class ProgramSynthesisEngine
 
                 foreach (InputOutputExample example in examples)
                 {
-                    object? result = await ExecuteProgramAsync(node, example.Input, dsl, ct);
+                    object? result = await ExecuteProgramAsync(node, example.Input, dsl, ct).ConfigureAwait(false);
                     if (result == null || !result.Equals(example.ExpectedOutput))
                     {
                         allExamplesPass = false;
@@ -128,7 +128,7 @@ public sealed partial class ProgramSynthesisEngine
             List<object> childResults = new List<object>();
             foreach (ASTNode child in node.Children)
             {
-                object? result = await ExecuteProgramAsync(child, input, dsl, ct);
+                object? result = await ExecuteProgramAsync(child, input, dsl, ct).ConfigureAwait(false);
                 if (result != null)
                 {
                     childResults.Add(result);
