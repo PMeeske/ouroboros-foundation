@@ -5,13 +5,11 @@
 namespace Ouroboros.Core.Resilience;
 
 using Ouroboros.Core.Monads;
-using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
 /// Unified reasoning interface that abstracts over LLM and symbolic reasoning
 /// with automatic fallback and circuit breaking.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IReasoner
 {
     /// <summary>

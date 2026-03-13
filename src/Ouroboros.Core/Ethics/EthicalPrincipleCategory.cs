@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.Ethics;
 
 /// <summary>
 /// Categories of ethical principles for classification.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum EthicalPrincipleCategory
 {
     /// <summary>Safety and harm prevention</summary>

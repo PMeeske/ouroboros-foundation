@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.Ethics;
 
 /// <summary>
@@ -77,7 +75,6 @@ public sealed record HumanApprovalResponse
 /// <summary>
 /// The possible decisions for a human approval request.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum HumanApprovalDecision
 {
     /// <summary>The action/plan was approved by the reviewer.</summary>

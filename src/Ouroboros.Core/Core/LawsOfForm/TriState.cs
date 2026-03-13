@@ -2,15 +2,12 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.LawsOfForm;
 
 /// <summary>
 /// Three-valued logic state based on Laws of Form.
 /// Used for reasoning about certainty in AI systems.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum TriState
 {
     /// <summary>

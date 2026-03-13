@@ -7,12 +7,10 @@ using Ouroboros.Abstractions;
 namespace Ouroboros.Core.Learning;
 
 using Ouroboros.Core.Monads;
-using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
 /// Interface for adapter weights blob storage.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IAdapterBlobStorage
 {
     /// <summary>

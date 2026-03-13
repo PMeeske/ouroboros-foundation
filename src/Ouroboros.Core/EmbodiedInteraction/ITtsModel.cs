@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Interface for Text-to-Speech models.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface ITtsModel
 {
     /// <summary>

@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.LawsOfForm;
 
 /// <summary>
 /// Represents the safety level of content.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum SafetyLevel
 {
     /// <summary>

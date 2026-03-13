@@ -6,12 +6,10 @@ namespace Ouroboros.Core.Infrastructure.HealthCheck;
 
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
 /// Represents a health check provider that can verify the status of a specific component.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IHealthCheckProvider
 {
     /// <summary>

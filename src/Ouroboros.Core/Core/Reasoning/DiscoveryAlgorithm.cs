@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.Reasoning;
 
 /// <summary>
 /// Defines the algorithm used for causal structure discovery.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum DiscoveryAlgorithm
 {
     /// <summary>

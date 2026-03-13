@@ -1,12 +1,10 @@
 using Ouroboros.Core.Security.Authentication;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Core.Security.Authorization;
 
 /// <summary>
 /// Interface for authorization providers.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IAuthorizationProvider
 {
     /// <summary>

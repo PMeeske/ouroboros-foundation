@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.LawsOfForm;
 
 /// <summary>
@@ -7,7 +5,6 @@ namespace Ouroboros.Core.LawsOfForm;
 /// Based on Spencer-Brown's Laws of Form.
 /// The subject IS the distinction, arising as imaginary (i) from void (∅).
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum DreamStage
 {
     /// <summary>∅ - Before distinction. Pure potential. No subject, no object.</summary>

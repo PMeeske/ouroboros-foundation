@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Affordance type classification based on ecological psychology.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum AffordanceType
 {
     /// <summary>Surface can be traversed (walked on, driven on).</summary>

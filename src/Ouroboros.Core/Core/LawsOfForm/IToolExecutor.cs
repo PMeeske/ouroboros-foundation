@@ -1,12 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.LawsOfForm;
 
 /// <summary>
 /// Interface for tool execution.
 /// Abstracts the tool interface to avoid circular dependencies.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IToolExecutor
 {
     /// <summary>

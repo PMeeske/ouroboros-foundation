@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.Reasoning;
 
 /// <summary>
 /// Defines the type of causal edge.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum EdgeType
 {
     /// <summary>

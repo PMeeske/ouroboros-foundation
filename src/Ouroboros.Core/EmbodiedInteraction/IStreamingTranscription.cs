@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Interface for streaming transcription.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IStreamingTranscription : IAsyncDisposable
 {
     /// <summary>
