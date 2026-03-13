@@ -17,7 +17,7 @@ namespace Ouroboros.Genetic.Abstractions;
 /// it will be removed in a future major version once all consumers are migrated.
 /// </remarks>
 /// <typeparam name="TGene">The type of gene in this chromosome.</typeparam>
-[Obsolete("Use the non-generic IChromosome interface with EvolutionEngine<TChromosome> instead. See Ouroboros.Genetic.Genetic.Abstractions.IChromosome.")]
+[Obsolete("Use the non-generic IChromosome interface with EvolutionEngine<TChromosome> instead. See Ouroboros.Genetic.Abstractions.IChromosome.")]
 public interface IChromosome<TGene>
 {
     /// <summary>

@@ -168,24 +168,22 @@ public sealed class Interpreter
 
     /// <summary>
     /// Creates a monadic query that can be composed with other operations.
-    /// When an <paramref name="interpreter"/> is provided, its grounded operation
-    /// registry is reused across queries, ensuring consistent behavior when
-    /// custom operations have been registered.
+    /// The returned function always creates an <see cref="Interpreter"/> bound to
+    /// the <c>space</c> it receives, so the correct atom space is always used.
+    /// When <paramref name="groundedOps"/> is provided, its operations are reused
+    /// across queries, ensuring consistent behavior when custom operations have
+    /// been registered.
     /// </summary>
     /// <param name="query">The query atom.</param>
-    /// <param name="interpreter">
-    /// Optional interpreter instance whose grounded operations registry will be
-    /// shared. When <c>null</c>, a fresh interpreter is created per invocation.
+    /// <param name="groundedOps">
+    /// Optional grounded operations registry to reuse across invocations.
+    /// When <c>null</c>, a standard registry is created per invocation.
     /// </param>
     /// <returns>A function that evaluates the query against a space.</returns>
     public static Func<IAtomSpace, IEnumerable<Atom>> Query(
         Atom query,
-        Interpreter? interpreter = null) =>
-        space =>
-        {
-            var interp = interpreter ?? new Interpreter(space);
-            return interp.Evaluate(query);
-        };
+        GroundedRegistry? groundedOps = null) =>
+        space => new Interpreter(space, groundedOps).Evaluate(query);
 
     /// <summary>
     /// Composes two queries using monadic bind (SelectMany).
