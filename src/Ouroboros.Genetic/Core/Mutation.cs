@@ -12,7 +12,14 @@ using Ouroboros.Providers.Random;
 /// Implements mutation for genetic algorithms.
 /// Randomly modifies genes to introduce variation in the population.
 /// </summary>
+/// <remarks>
+/// Deprecated: This class is part of the original Genetic API.
+/// New code should use <see cref="EvolutionMutation"/> instead, which accepts
+/// a mutation function delegate and returns <c>Result&lt;TChromosome&gt;</c>
+/// for monadic error handling.
+/// </remarks>
 /// <typeparam name="TGene">The type of gene in the chromosomes.</typeparam>
+[Obsolete("Use EvolutionMutation instead. See Ouroboros.Genetic.Core.EvolutionMutation.")]
 public sealed class Mutation<TGene>
 {
     private readonly IRandomProvider random;

@@ -10,9 +10,16 @@ using Ouroboros.Genetic.Abstractions;
 /// A pipeline step that uses genetic algorithms to evolve and optimize parameters or configurations.
 /// This enables evolutionary optimization of monadic pipeline operations.
 /// </summary>
+/// <remarks>
+/// Deprecated: This step class wraps the original <see cref="Ouroboros.Genetic.Abstractions.IGeneticAlgorithm{TGene}"/>.
+/// New code should use <see cref="Ouroboros.Genetic.Extensions.GeneticEvolutionStep"/> (the static class)
+/// with <see cref="Ouroboros.Genetic.Core.EvolutionEngine{TChromosome}"/> which provides
+/// monadic composition via <c>Step&lt;EvolutionPopulation, Result&lt;TChromosome&gt;&gt;</c>.
+/// </remarks>
 /// <typeparam name="TIn">The input type for the pipeline step.</typeparam>
 /// <typeparam name="TOut">The output type for the pipeline step.</typeparam>
 /// <typeparam name="TGene">The type of gene encoding the parameters to optimize.</typeparam>
+[Obsolete("Use GeneticEvolutionStep static methods with EvolutionEngine<TChromosome> instead. See Ouroboros.Genetic.Extensions.GeneticEvolutionStep.")]
 public sealed class GeneticEvolutionStep<TIn, TOut, TGene>
 {
     private readonly IGeneticAlgorithm<TGene> algorithm;

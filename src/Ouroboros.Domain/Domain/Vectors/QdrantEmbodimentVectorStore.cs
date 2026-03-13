@@ -35,7 +35,8 @@ public sealed class QdrantEmbodimentVectorStore : IEmbodimentVectorStore
         IQdrantCollectionRegistry registry,
         uint vectorSize = 768)
     {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
+        ArgumentNullException.ThrowIfNull(client);
+        _client = client;
         ArgumentNullException.ThrowIfNull(registry);
         _perceptionsCollection = registry.GetCollectionName(QdrantCollectionRole.EmbodimentPerceptions);
         _statesCollection = registry.GetCollectionName(QdrantCollectionRole.EmbodimentStates);

@@ -23,6 +23,12 @@ public sealed record CodeFixGene(
 /// Chromosome that encodes a set of Roslyn code transformations as genes.
 /// Enables evolutionary optimization of code fix strategies.
 /// </summary>
+/// <remarks>
+/// Deprecated: This chromosome implements the original <c>IChromosome&lt;TGene&gt;</c> API.
+/// When migrating to the new Evolution API, implement the non-generic
+/// <see cref="Ouroboros.Genetic.Abstractions.IChromosome"/> interface instead.
+/// </remarks>
+[Obsolete("Implements deprecated IChromosome<TGene>. Migrate to non-generic IChromosome with EvolutionEngine.")]
 public sealed record CodeFixChromosome : IChromosome<CodeFixGene>
 {
     /// <summary>
@@ -30,7 +36,8 @@ public sealed record CodeFixChromosome : IChromosome<CodeFixGene>
     /// </summary>
     public CodeFixChromosome(IReadOnlyList<CodeFixGene> genes, double fitness = 0)
     {
-        Genes = genes?.ToList().AsReadOnly() ?? throw new ArgumentNullException(nameof(genes));
+        ArgumentNullException.ThrowIfNull(genes);
+        Genes = genes.ToList().AsReadOnly();
         Fitness = fitness;
     }
 
@@ -60,6 +67,12 @@ public sealed record CodeFixChromosome : IChromosome<CodeFixGene>
 /// Scores based on: compilation success, number of diagnostics fixed,
 /// and code quality metrics.
 /// </summary>
+/// <remarks>
+/// Deprecated: This fitness function implements the original <c>IFitnessFunction&lt;TGene&gt;</c> API.
+/// When migrating to the new Evolution API, implement
+/// <see cref="Ouroboros.Genetic.Abstractions.IEvolutionFitnessFunction{TChromosome}"/> instead.
+/// </remarks>
+[Obsolete("Implements deprecated IFitnessFunction<TGene>. Migrate to IEvolutionFitnessFunction<TChromosome>.")]
 public sealed class CodeFixFitnessFunction : IFitnessFunction<CodeFixGene>
 {
     private readonly Func<IReadOnlyList<CodeFixGene>, Task<CodeFixEvaluationResult>> _evaluator;
@@ -74,7 +87,8 @@ public sealed class CodeFixFitnessFunction : IFitnessFunction<CodeFixGene>
     public CodeFixFitnessFunction(
         Func<IReadOnlyList<CodeFixGene>, Task<CodeFixEvaluationResult>> evaluator)
     {
-        _evaluator = evaluator ?? throw new ArgumentNullException(nameof(evaluator));
+        ArgumentNullException.ThrowIfNull(evaluator);
+        _evaluator = evaluator;
     }
 
     /// <inheritdoc/>
@@ -126,6 +140,12 @@ public sealed record CodeFixEvaluationResult(
 /// Enables evolutionary self-modification of code through genetic optimization
 /// of Roslyn-based code transformations.
 /// </summary>
+/// <remarks>
+/// Deprecated: This bridge uses the deprecated <see cref="CodeFixChromosome"/> which
+/// implements the original <c>IChromosome&lt;TGene&gt;</c> API. A new bridge targeting
+/// the Evolution API should be created when migrating consumers.
+/// </remarks>
+[Obsolete("Uses deprecated CodeFixChromosome. A new bridge targeting the Evolution API should be created.")]
 public static class GeneticRoslynBridge
 {
     private static readonly string[] DefaultFixStrategies = new[]

@@ -12,6 +12,13 @@ using Ouroboros.Genetic.Steps;
 /// Extension methods for integrating genetic algorithms into monadic pipelines.
 /// Provides fluent API for evolutionary optimization of pipeline steps.
 /// </summary>
+/// <remarks>
+/// Deprecated: This class uses the original Genetic API (<see cref="Ouroboros.Genetic.Core.GeneticAlgorithm{TGene}"/>).
+/// New code should use <see cref="EvolutionPipelineExtensions"/> which provides
+/// the same fluent API backed by <see cref="Ouroboros.Genetic.Core.EvolutionEngine{TChromosome}"/>
+/// with monadic Result-based error handling.
+/// </remarks>
+[Obsolete("Use EvolutionPipelineExtensions instead. See Ouroboros.Genetic.Extensions.EvolutionPipelineExtensions.")]
 public static class GeneticPipelineExtensions
 {
     /// <summary>

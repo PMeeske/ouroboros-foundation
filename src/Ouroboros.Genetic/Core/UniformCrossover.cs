@@ -12,7 +12,14 @@ using Ouroboros.Providers.Random;
 /// Implements uniform crossover for genetic algorithms.
 /// Each gene is randomly selected from one of the two parents.
 /// </summary>
+/// <remarks>
+/// Deprecated: This class is part of the original Genetic API.
+/// New code should use <see cref="EvolutionCrossover"/> instead, which accepts
+/// a crossover function delegate and returns <c>Result&lt;TChromosome&gt;</c>
+/// for monadic error handling.
+/// </remarks>
 /// <typeparam name="TGene">The type of gene in the chromosomes.</typeparam>
+[Obsolete("Use EvolutionCrossover instead. See Ouroboros.Genetic.Core.EvolutionCrossover.")]
 public sealed class UniformCrossover<TGene>
 {
     private readonly IRandomProvider random;

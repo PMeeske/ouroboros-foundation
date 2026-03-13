@@ -37,7 +37,8 @@ public sealed partial class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisp
         ILogger? logger = null,
         QdrantCollectionRole role = QdrantCollectionRole.PipelineVectors)
     {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
+        ArgumentNullException.ThrowIfNull(client);
+        _client = client;
         ArgumentNullException.ThrowIfNull(registry);
         _collectionName = registry.GetCollectionName(role);
         _logger = logger;

@@ -10,7 +10,14 @@ using Ouroboros.Genetic.Abstractions;
 /// Represents a population of chromosomes in a genetic algorithm.
 /// Provides methods for population management and evolution.
 /// </summary>
+/// <remarks>
+/// Deprecated: This class is part of the original Genetic API.
+/// New code should use <see cref="EvolutionPopulation{TChromosome}"/> instead, which provides
+/// immutable collection operations (<c>Add</c>, <c>SortByFitness</c>, <c>Take</c>),
+/// <c>Option</c>-based best-chromosome retrieval, and generation tracking.
+/// </remarks>
 /// <typeparam name="TGene">The type of gene in the chromosomes.</typeparam>
+[Obsolete("Use EvolutionPopulation<TChromosome> instead. See Ouroboros.Genetic.Core.EvolutionPopulation<TChromosome>.")]
 public sealed class Population<TGene>
 {
     private readonly List<IChromosome<TGene>> chromosomes;

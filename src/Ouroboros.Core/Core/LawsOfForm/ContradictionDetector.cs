@@ -22,7 +22,8 @@ public sealed class ContradictionDetector
         IClaimExtractor claimExtractor,
         double similarityThreshold = 0.8)
     {
-        this.claimExtractor = claimExtractor ?? throw new ArgumentNullException(nameof(claimExtractor));
+        ArgumentNullException.ThrowIfNull(claimExtractor);
+        this.claimExtractor = claimExtractor;
         this.similarityThreshold = similarityThreshold;
     }
 

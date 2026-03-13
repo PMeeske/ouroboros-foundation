@@ -31,10 +31,12 @@ public sealed class QdrantDistinctionMetadataStorage
         IQdrantCollectionRegistry registry,
         ILogger<QdrantDistinctionMetadataStorage> logger)
     {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
+        ArgumentNullException.ThrowIfNull(client);
+        _client = client;
         ArgumentNullException.ThrowIfNull(registry);
         _collectionName = registry.GetCollectionName(QdrantCollectionRole.DistinctionStates);
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        ArgumentNullException.ThrowIfNull(logger);
+        _logger = logger;
     }
 
     /// <summary>
