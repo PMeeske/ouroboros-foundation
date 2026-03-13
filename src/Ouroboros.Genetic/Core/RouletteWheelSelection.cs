@@ -1,5 +1,5 @@
-// <copyright file="RouletteWheelSelection.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="RouletteWheelSelection.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 namespace Ouroboros.Genetic.Core;
@@ -12,7 +12,14 @@ using Ouroboros.Providers.Random;
 /// Implements roulette wheel selection (fitness-proportionate selection).
 /// Chromosomes with higher fitness have a higher probability of being selected.
 /// </summary>
+/// <remarks>
+/// Deprecated: This class is part of the original Genetic API.
+/// New code should use <see cref="EvolutionRouletteWheelSelection{TChromosome}"/> instead,
+/// which returns <c>Result&lt;TChromosome&gt;</c> for monadic error handling
+/// and works with <see cref="EvolutionPopulation{TChromosome}"/>.
+/// </remarks>
 /// <typeparam name="TGene">The type of gene in the chromosomes.</typeparam>
+[Obsolete("Use EvolutionRouletteWheelSelection<TChromosome> instead. See Ouroboros.Genetic.Core.EvolutionRouletteWheelSelection<TChromosome>.")]
 public sealed class RouletteWheelSelection<TGene>
 {
     private readonly IRandomProvider random;

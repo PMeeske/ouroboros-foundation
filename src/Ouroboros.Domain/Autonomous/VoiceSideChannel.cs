@@ -3,6 +3,8 @@
 // </copyright>
 
 using System.Collections.Concurrent;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Channels;
@@ -44,6 +46,7 @@ public sealed partial class VoiceSideChannel : IAsyncDisposable
     private string _defaultPersona = "Ouroboros";
     private bool _enabled = true;
     private bool _useLlmSanitization = true;
+    private readonly ILogger _logger;
     private bool _disposed;
 
     /// <summary>
@@ -69,8 +72,9 @@ public sealed partial class VoiceSideChannel : IAsyncDisposable
     /// <summary>
     /// Initializes a new instance of the <see cref="VoiceSideChannel"/> class.
     /// </summary>
-    public VoiceSideChannel(int maxQueueSize = 10)
+    public VoiceSideChannel(int maxQueueSize = 10, ILogger<VoiceSideChannel>? logger = null)
     {
+        _logger = logger ?? NullLogger<VoiceSideChannel>.Instance;
         _channel = Channel.CreateBounded<VoiceMessage>(new BoundedChannelOptions(maxQueueSize)
         {
             FullMode = BoundedChannelFullMode.DropOldest,
@@ -188,9 +192,7 @@ public sealed partial class VoiceSideChannel : IAsyncDisposable
                 if (!string.IsNullOrWhiteSpace(llmSanitized))
                 {
                     // Show the condensed voice version (original is preserved in system)
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.WriteLine($"  🔊 [Speaking]: {llmSanitized}");
-                    Console.ResetColor();
+                    _logger.LogInformation("Speaking: {SanitizedText}", llmSanitized);
                     sanitized = llmSanitized;
                 }
             }

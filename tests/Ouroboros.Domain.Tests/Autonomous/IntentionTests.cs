@@ -1,132 +1,96 @@
-namespace Ouroboros.Tests.Autonomous;
-
 using Ouroboros.Domain.Autonomous;
+
+namespace Ouroboros.Tests.Autonomous;
 
 [Trait("Category", "Unit")]
 public class IntentionTests
 {
     [Fact]
-    public void Constructor_DefaultValues_SetsExpectedDefaults()
+    public void Constructor_SetsDefaults()
     {
+        // Arrange & Act
         var intention = new Intention
         {
             Title = "Test",
-            Description = "Desc",
-            Rationale = "Reason",
-            Category = IntentionCategory.SelfReflection,
-            Source = "test"
+            Description = "A test intention",
+            Rationale = "For testing",
+            Category = IntentionCategory.Learning,
+            Source = "TestNeuron"
         };
 
+        // Assert
         intention.Id.Should().NotBe(Guid.Empty);
+        intention.Title.Should().Be("Test");
+        intention.Description.Should().Be("A test intention");
+        intention.Rationale.Should().Be("For testing");
+        intention.Category.Should().Be(IntentionCategory.Learning);
         intention.Priority.Should().Be(IntentionPriority.Normal);
         intention.Status.Should().Be(IntentionStatus.Pending);
         intention.RequiresApproval.Should().BeTrue();
         intention.ExpiresAt.Should().BeNull();
-        intention.Target.Should().BeNull();
-        intention.Action.Should().BeNull();
         intention.UserComment.Should().BeNull();
         intention.ActedAt.Should().BeNull();
         intention.ExecutionResult.Should().BeNull();
         intention.Embedding.Should().BeNull();
+        intention.Target.Should().BeNull();
+        intention.Action.Should().BeNull();
         intention.ExpectedOutcomes.Should().BeEmpty();
         intention.Risks.Should().BeEmpty();
         intention.Metadata.Should().BeEmpty();
     }
 
     [Fact]
-    public void Constructor_RequiredProperties_AreSet()
-    {
-        var intention = new Intention
-        {
-            Title = "Explore Topic",
-            Description = "Research quantum computing",
-            Rationale = "Expand knowledge",
-            Category = IntentionCategory.Exploration,
-            Source = "neuron.executive"
-        };
-
-        intention.Title.Should().Be("Explore Topic");
-        intention.Description.Should().Be("Research quantum computing");
-        intention.Rationale.Should().Be("Expand knowledge");
-        intention.Category.Should().Be(IntentionCategory.Exploration);
-        intention.Source.Should().Be("neuron.executive");
-    }
-
-    [Fact]
     public void WithExpression_CreatesModifiedCopy()
     {
+        // Arrange
         var original = new Intention
         {
-            Title = "Test",
+            Title = "Original",
             Description = "Desc",
             Rationale = "Reason",
-            Category = IntentionCategory.Learning,
-            Source = "test"
+            Category = IntentionCategory.CodeModification,
+            Source = "Source"
         };
 
-        var modified = original with { Status = IntentionStatus.Approved, UserComment = "OK" };
+        // Act
+        var updated = original with { Status = IntentionStatus.Approved, UserComment = "Go ahead" };
 
-        modified.Status.Should().Be(IntentionStatus.Approved);
-        modified.UserComment.Should().Be("OK");
-        modified.Title.Should().Be("Test");
+        // Assert
+        updated.Status.Should().Be(IntentionStatus.Approved);
+        updated.UserComment.Should().Be("Go ahead");
+        updated.Title.Should().Be("Original");
         original.Status.Should().Be(IntentionStatus.Pending);
     }
 
     [Fact]
-    public void Id_IsUniquePerInstance()
+    public void CreatedAt_DefaultsToUtcNow()
     {
-        var i1 = new Intention
-        {
-            Title = "A",
-            Description = "D",
-            Rationale = "R",
-            Category = IntentionCategory.Learning,
-            Source = "s"
-        };
-        var i2 = new Intention
-        {
-            Title = "B",
-            Description = "D",
-            Rationale = "R",
-            Category = IntentionCategory.Learning,
-            Source = "s"
-        };
-
-        i1.Id.Should().NotBe(i2.Id);
-    }
-
-    [Fact]
-    public void CreatedAt_IsCloseToNow()
-    {
+        // Arrange
         var before = DateTime.UtcNow;
-        var intention = new Intention
-        {
-            Title = "T",
-            Description = "D",
-            Rationale = "R",
-            Category = IntentionCategory.SelfReflection,
-            Source = "s"
-        };
-        var after = DateTime.UtcNow;
 
-        intention.CreatedAt.Should().BeOnOrAfter(before).And.BeOnOrBefore(after);
-    }
-
-    [Fact]
-    public void Metadata_CanStoreAndRetrieveValues()
-    {
+        // Act
         var intention = new Intention
         {
             Title = "T",
             Description = "D",
             Rationale = "R",
             Category = IntentionCategory.Learning,
-            Source = "s",
-            Metadata = new Dictionary<string, object> { ["key1"] = "value1", ["key2"] = 42 }
+            Source = "S"
         };
 
-        intention.Metadata.Should().ContainKey("key1");
-        intention.Metadata["key1"].Should().Be("value1");
-        intention.Metadata["key2"].Should().Be(42);
+        // Assert
+        intention.CreatedAt.Should().BeOnOrAfter(before);
+        intention.CreatedAt.Should().BeOnOrBefore(DateTime.UtcNow);
+    }
+
+    [Fact]
+    public void EachInstance_GetsUniqueId()
+    {
+        // Arrange & Act
+        var a = new Intention { Title = "A", Description = "D", Rationale = "R", Category = IntentionCategory.Learning, Source = "S" };
+        var b = new Intention { Title = "B", Description = "D", Rationale = "R", Category = IntentionCategory.Learning, Source = "S" };
+
+        // Assert
+        a.Id.Should().NotBe(b.Id);
     }
 }

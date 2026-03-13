@@ -1,16 +1,13 @@
-// <copyright file="ISafetyGuard.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="ISafetyGuard.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
-using System.Diagnostics.CodeAnalysis;
-
-namespace Ouroboros.Agent.MetaAI;
+namespace Ouroboros.Agent;
 
 /// <summary>
 /// Interface for safety guard that validates agent actions before execution.
 /// Ensures actions comply with safety policies and ethical constraints.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface ISafetyGuard
 {
     /// <summary>

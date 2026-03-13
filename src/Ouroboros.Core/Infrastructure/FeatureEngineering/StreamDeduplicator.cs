@@ -1,5 +1,5 @@
-// <copyright file="StreamDeduplicator.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="StreamDeduplicator.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 namespace Ouroboros.Infrastructure.FeatureEngineering;

@@ -1,5 +1,5 @@
-// <copyright file="HealthCheckReport.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="HealthCheckReport.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 namespace Ouroboros.Core.Infrastructure.HealthCheck;

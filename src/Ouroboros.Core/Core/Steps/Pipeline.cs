@@ -22,7 +22,8 @@ public readonly struct Pipeline<TIn, TOut>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Pipeline(Step<TIn, TOut> step)
     {
-        _step = step ?? throw new ArgumentNullException(nameof(step));
+        ArgumentNullException.ThrowIfNull(step);
+        _step = step;
     }
 
     /// <summary>

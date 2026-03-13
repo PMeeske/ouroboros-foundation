@@ -160,7 +160,7 @@ public sealed partial class HyperonMeTTaEngine
         registry.Register("println", (space, args) =>
         {
             string output = string.Join(" ", args.Children.Select(a => a.ToSExpr()));
-            Console.WriteLine($"[MeTTa] {output}");
+            System.Diagnostics.Debug.WriteLine($"[MeTTa] {output}");
             return new[] { Atom.Sym("()") };
         });
 

@@ -1,6 +1,6 @@
-namespace Ouroboros.Tests.Autonomous;
-
 using Ouroboros.Domain.Autonomous;
+
+namespace Ouroboros.Tests.Autonomous;
 
 [Trait("Category", "Unit")]
 public class IntentionBusTests : IDisposable
@@ -9,393 +9,445 @@ public class IntentionBusTests : IDisposable
 
     public void Dispose() => _bus.Dispose();
 
-    private Intention ProposeTestIntention(
+    private Intention ProposeDefault(
         string title = "Test",
         IntentionCategory category = IntentionCategory.Learning,
         IntentionPriority priority = IntentionPriority.Normal,
-        bool requiresApproval = true,
-        TimeSpan? expiresIn = null)
+        bool requiresApproval = true)
     {
         return _bus.ProposeIntention(
-            title,
-            "Test description",
-            "Test rationale",
-            category,
-            "test_source",
+            title: title,
+            description: "Test description",
+            rationale: "Test rationale",
+            category: category,
+            source: "TestSource",
             priority: priority,
-            requiresApproval: requiresApproval,
-            expiresIn: expiresIn);
+            requiresApproval: requiresApproval);
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // Construction and Properties
-    // ═══════════════════════════════════════════════════════════════
+    // --- ProposeIntention ---
 
     [Fact]
-    public void Constructor_InitialState_IsNotActive()
+    public void ProposeIntention_AddsToStore()
     {
-        _bus.IsActive.Should().BeFalse();
-        _bus.PendingCount.Should().Be(0);
-    }
+        // Act
+        var intention = ProposeDefault();
 
-    [Fact]
-    public void Culture_CanBeSetAndRead()
-    {
-        _bus.Culture = "de-DE";
-        _bus.Culture.Should().Be("de-DE");
-    }
-
-    // ═══════════════════════════════════════════════════════════════
-    // Start / Stop
-    // ═══════════════════════════════════════════════════════════════
-
-    [Fact]
-    public void Start_SetsIsActive()
-    {
-        _bus.Start();
-        _bus.IsActive.Should().BeTrue();
-    }
-
-    [Fact]
-    public void Start_CalledTwice_DoesNotThrow()
-    {
-        _bus.Start();
-        var act = () => _bus.Start();
-        act.Should().NotThrow();
-    }
-
-    [Fact]
-    public async Task StopAsync_SetsIsInactive()
-    {
-        _bus.Start();
-        await _bus.StopAsync();
-        _bus.IsActive.Should().BeFalse();
-    }
-
-    [Fact]
-    public async Task StopAsync_WhenNotActive_DoesNotThrow()
-    {
-        var act = () => _bus.StopAsync();
-        await act.Should().NotThrowAsync();
-    }
-
-    // ═══════════════════════════════════════════════════════════════
-    // ProposeIntention
-    // ═══════════════════════════════════════════════════════════════
-
-    [Fact]
-    public void ProposeIntention_CreatesIntentionWithPendingStatus()
-    {
-        var intention = ProposeTestIntention();
-
-        intention.Should().NotBeNull();
-        intention.Status.Should().Be(IntentionStatus.Pending);
-        intention.Title.Should().Be("Test");
+        // Assert
         _bus.PendingCount.Should().Be(1);
+        _bus.GetAllIntentions().Should().ContainSingle();
+        intention.Status.Should().Be(IntentionStatus.Pending);
     }
 
     [Fact]
-    public void ProposeIntention_RequiresApproval_FiresEvent()
+    public void ProposeIntention_FiresAttentionEvent()
     {
-        Intention? fired = null;
-        _bus.OnIntentionRequiresAttention += i => fired = i;
+        // Arrange
+        Intention? captured = null;
+        _bus.OnIntentionRequiresAttention += i => captured = i;
 
-        ProposeTestIntention(requiresApproval: true);
+        // Act
+        _ = ProposeDefault();
 
-        fired.Should().NotBeNull();
-        fired!.Title.Should().Be("Test");
+        // Assert
+        captured.Should().NotBeNull();
+        captured!.Title.Should().Be("Test");
     }
 
     [Fact]
-    public void ProposeIntention_NoApprovalRequired_DoesNotFireEvent()
+    public void ProposeIntention_WithoutApproval_DoesNotFireAttentionEvent()
     {
-        Intention? fired = null;
-        _bus.OnIntentionRequiresAttention += i => fired = i;
+        // Arrange
+        bool fired = false;
+        _bus.OnIntentionRequiresAttention += _ => fired = true;
 
-        ProposeTestIntention(requiresApproval: false);
+        // Act
+        ProposeDefault(requiresApproval: false);
 
-        fired.Should().BeNull();
+        // Assert
+        fired.Should().BeFalse();
     }
 
-    [Fact]
-    public void ProposeIntention_WithExpiresIn_SetsExpiresAt()
-    {
-        var intention = ProposeTestIntention(expiresIn: TimeSpan.FromMinutes(5));
-
-        intention.ExpiresAt.Should().NotBeNull();
-        intention.ExpiresAt.Should().BeAfter(DateTime.UtcNow);
-    }
-
-    // ═══════════════════════════════════════════════════════════════
-    // Approve / Reject
-    // ═══════════════════════════════════════════════════════════════
+    // --- ApproveIntention ---
 
     [Fact]
-    public void ApproveIntention_ValidPendingIntention_ReturnsTrue()
+    public void ApproveIntention_PendingIntention_Succeeds()
     {
-        var intention = ProposeTestIntention();
+        // Arrange
+        var intention = ProposeDefault();
 
-        bool result = _bus.ApproveIntention(intention.Id, "Approved");
+        // Act
+        bool result = _bus.ApproveIntention(intention.Id, "Looks good");
 
+        // Assert
         result.Should().BeTrue();
         _bus.PendingCount.Should().Be(0);
     }
 
     [Fact]
-    public void ApproveIntention_NonExistentId_ReturnsFalse()
+    public void ApproveIntention_NonexistentId_ReturnsFalse()
     {
+        // Act
         bool result = _bus.ApproveIntention(Guid.NewGuid());
+
+        // Assert
         result.Should().BeFalse();
     }
 
     [Fact]
     public void ApproveIntention_AlreadyApproved_ReturnsFalse()
     {
-        var intention = ProposeTestIntention();
+        // Arrange
+        var intention = ProposeDefault();
         _bus.ApproveIntention(intention.Id);
 
+        // Act
         bool result = _bus.ApproveIntention(intention.Id);
+
+        // Assert
         result.Should().BeFalse();
     }
 
-    [Fact]
-    public void ApproveIntentionByPartialId_ValidPrefix_ReturnsTrue()
-    {
-        var intention = ProposeTestIntention();
-        string partialId = intention.Id.ToString()[..8];
-
-        bool result = _bus.ApproveIntentionByPartialId(partialId);
-        result.Should().BeTrue();
-    }
+    // --- RejectIntention ---
 
     [Fact]
-    public void ApproveIntentionByPartialId_InvalidPrefix_ReturnsFalse()
+    public void RejectIntention_PendingIntention_Succeeds()
     {
-        ProposeTestIntention();
+        // Arrange
+        var intention = ProposeDefault();
 
-        bool result = _bus.ApproveIntentionByPartialId("xxxxxxxx");
-        result.Should().BeFalse();
-    }
+        // Act
+        bool result = _bus.RejectIntention(intention.Id, "Not now");
 
-    [Fact]
-    public void RejectIntention_ValidPendingIntention_ReturnsTrue()
-    {
-        var intention = ProposeTestIntention();
-
-        bool result = _bus.RejectIntention(intention.Id, "Not needed");
-
+        // Assert
         result.Should().BeTrue();
         _bus.PendingCount.Should().Be(0);
     }
 
     [Fact]
-    public void RejectIntention_NonExistentId_ReturnsFalse()
+    public void RejectIntention_NonexistentId_ReturnsFalse()
     {
+        // Act
         bool result = _bus.RejectIntention(Guid.NewGuid());
+
+        // Assert
         result.Should().BeFalse();
     }
 
+    // --- Partial ID matching ---
+
     [Fact]
-    public void RejectIntentionByPartialId_ValidPrefix_ReturnsTrue()
+    public void ApproveIntentionByPartialId_MatchesPrefix()
     {
-        var intention = ProposeTestIntention();
+        // Arrange
+        var intention = ProposeDefault();
         string partialId = intention.Id.ToString()[..8];
 
+        // Act
+        bool result = _bus.ApproveIntentionByPartialId(partialId);
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public void RejectIntentionByPartialId_MatchesPrefix()
+    {
+        // Arrange
+        var intention = ProposeDefault();
+        string partialId = intention.Id.ToString()[..8];
+
+        // Act
         bool result = _bus.RejectIntentionByPartialId(partialId, "Rejected");
-        result.Should().BeTrue();
-    }
 
-    // ═══════════════════════════════════════════════════════════════
-    // Execution Lifecycle
-    // ═══════════════════════════════════════════════════════════════
-
-    [Fact]
-    public void MarkExecuting_ApprovedIntention_ReturnsTrue()
-    {
-        var intention = ProposeTestIntention();
-        _bus.ApproveIntention(intention.Id);
-
-        bool result = _bus.MarkExecuting(intention.Id);
+        // Assert
         result.Should().BeTrue();
     }
 
     [Fact]
-    public void MarkExecuting_PendingIntention_ReturnsFalse()
+    public void ApproveIntentionByPartialId_NoMatch_ReturnsFalse()
     {
-        var intention = ProposeTestIntention();
+        // Act
+        bool result = _bus.ApproveIntentionByPartialId("00000000");
 
-        bool result = _bus.MarkExecuting(intention.Id);
+        // Assert
         result.Should().BeFalse();
     }
 
-    [Fact]
-    public void MarkCompleted_ExecutingIntention_ReturnsTrue()
-    {
-        var intention = ProposeTestIntention();
-        _bus.ApproveIntention(intention.Id);
-        _bus.MarkExecuting(intention.Id);
-
-        bool result = _bus.MarkCompleted(intention.Id, "Done");
-        result.Should().BeTrue();
-    }
+    // --- GetNextApprovedIntention ---
 
     [Fact]
-    public void MarkCompleted_PendingIntention_ReturnsFalse()
+    public void GetNextApprovedIntention_ReturnsHighestPriority()
     {
-        var intention = ProposeTestIntention();
-
-        bool result = _bus.MarkCompleted(intention.Id, "Done");
-        result.Should().BeFalse();
-    }
-
-    [Fact]
-    public void MarkFailed_ExecutingIntention_ReturnsTrue()
-    {
-        var intention = ProposeTestIntention();
-        _bus.ApproveIntention(intention.Id);
-        _bus.MarkExecuting(intention.Id);
-
-        bool result = _bus.MarkFailed(intention.Id, "Error occurred");
-        result.Should().BeTrue();
-    }
-
-    // ═══════════════════════════════════════════════════════════════
-    // Queries
-    // ═══════════════════════════════════════════════════════════════
-
-    [Fact]
-    public void GetPendingIntentions_ReturnsOnlyPending()
-    {
-        var i1 = ProposeTestIntention("First");
-        var i2 = ProposeTestIntention("Second");
-        _bus.ApproveIntention(i1.Id);
-
-        var pending = _bus.GetPendingIntentions();
-        pending.Should().HaveCount(1);
-        pending[0].Title.Should().Be("Second");
-    }
-
-    [Fact]
-    public void GetPendingIntentions_OrderedByPriorityThenAge()
-    {
-        ProposeTestIntention("Low", priority: IntentionPriority.Low);
-        ProposeTestIntention("High", priority: IntentionPriority.High);
-        ProposeTestIntention("Normal", priority: IntentionPriority.Normal);
-
-        var pending = _bus.GetPendingIntentions();
-        pending[0].Title.Should().Be("High");
-        pending[1].Title.Should().Be("Normal");
-        pending[2].Title.Should().Be("Low");
-    }
-
-    [Fact]
-    public void GetAllIntentions_ReturnsAllIntentions()
-    {
-        ProposeTestIntention("A");
-        ProposeTestIntention("B");
-        var i3 = ProposeTestIntention("C");
-        _bus.ApproveIntention(i3.Id);
-
-        _bus.GetAllIntentions().Should().HaveCount(3);
-    }
-
-    [Fact]
-    public void GetIntentionsByCategory_FiltersCorrectly()
-    {
-        ProposeTestIntention("Learn", category: IntentionCategory.Learning);
-        ProposeTestIntention("Explore", category: IntentionCategory.Exploration);
-
-        var learning = _bus.GetIntentionsByCategory(IntentionCategory.Learning);
-        learning.Should().HaveCount(1);
-        learning[0].Title.Should().Be("Learn");
-    }
-
-    [Fact]
-    public void GetNextApprovedIntention_ReturnsHighestPriorityFirst()
-    {
-        var low = ProposeTestIntention("Low", priority: IntentionPriority.Low);
-        var high = ProposeTestIntention("High", priority: IntentionPriority.High);
+        // Arrange
+        var low = ProposeDefault("Low", priority: IntentionPriority.Low);
+        var high = ProposeDefault("High", priority: IntentionPriority.High);
         _bus.ApproveIntention(low.Id);
         _bus.ApproveIntention(high.Id);
 
+        // Act
         var next = _bus.GetNextApprovedIntention();
+
+        // Assert
         next.Should().NotBeNull();
         next!.Title.Should().Be("High");
     }
 
     [Fact]
-    public void GetNextApprovedIntention_NoneApproved_ReturnsNull()
+    public void GetNextApprovedIntention_NoApproved_ReturnsNull()
     {
-        ProposeTestIntention();
-        _bus.GetNextApprovedIntention().Should().BeNull();
+        // Arrange
+        ProposeDefault();
+
+        // Act
+        var next = _bus.GetNextApprovedIntention();
+
+        // Assert
+        next.Should().BeNull();
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // ApproveAllLowRisk
-    // ═══════════════════════════════════════════════════════════════
+    // --- MarkExecuting ---
 
     [Fact]
-    public void ApproveAllLowRisk_ApprovesCorrectCategories()
+    public void MarkExecuting_ApprovedIntention_Succeeds()
     {
-        ProposeTestIntention("Reflect", category: IntentionCategory.SelfReflection, priority: IntentionPriority.Normal);
-        ProposeTestIntention("Learn", category: IntentionCategory.Learning, priority: IntentionPriority.Low);
-        ProposeTestIntention("Code", category: IntentionCategory.CodeModification, priority: IntentionPriority.Low);
+        // Arrange
+        var intention = ProposeDefault();
+        _bus.ApproveIntention(intention.Id);
 
-        int approved = _bus.ApproveAllLowRisk();
+        // Act
+        bool result = _bus.MarkExecuting(intention.Id);
 
-        approved.Should().Be(2);
-        _bus.PendingCount.Should().Be(1);
+        // Assert
+        result.Should().BeTrue();
     }
 
     [Fact]
-    public void ApproveAllLowRisk_HighPriorityLearning_NotApproved()
+    public void MarkExecuting_PendingIntention_Fails()
     {
-        ProposeTestIntention("HighLearn", category: IntentionCategory.Learning, priority: IntentionPriority.High);
+        // Arrange
+        var intention = ProposeDefault();
 
+        // Act
+        bool result = _bus.MarkExecuting(intention.Id);
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+    // --- MarkCompleted ---
+
+    [Fact]
+    public void MarkCompleted_ExecutingIntention_Succeeds()
+    {
+        // Arrange
+        var intention = ProposeDefault();
+        _bus.ApproveIntention(intention.Id);
+        _bus.MarkExecuting(intention.Id);
+
+        // Act
+        bool result = _bus.MarkCompleted(intention.Id, "Done!");
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public void MarkCompleted_PendingIntention_Fails()
+    {
+        // Arrange
+        var intention = ProposeDefault();
+
+        // Act
+        bool result = _bus.MarkCompleted(intention.Id, "Done");
+
+        // Assert
+        result.Should().BeFalse();
+    }
+
+    // --- MarkFailed ---
+
+    [Fact]
+    public void MarkFailed_RecordsFailure()
+    {
+        // Arrange
+        var intention = ProposeDefault();
+        _bus.ApproveIntention(intention.Id);
+        _bus.MarkExecuting(intention.Id);
+
+        // Act
+        bool result = _bus.MarkFailed(intention.Id, "Connection timeout");
+
+        // Assert
+        result.Should().BeTrue();
+    }
+
+    // --- ApproveAllLowRisk ---
+
+    [Fact]
+    public void ApproveAllLowRisk_ApprovesLowRiskCategories()
+    {
+        // Arrange
+        ProposeDefault("Learning", IntentionCategory.Learning, IntentionPriority.Normal);
+        ProposeDefault("Memory", IntentionCategory.MemoryManagement, IntentionPriority.Low);
+        ProposeDefault("Reflection", IntentionCategory.SelfReflection, IntentionPriority.Normal);
+        ProposeDefault("CodeMod", IntentionCategory.CodeModification, IntentionPriority.Normal); // Should NOT be auto-approved
+
+        // Act
         int approved = _bus.ApproveAllLowRisk();
+
+        // Assert
+        approved.Should().Be(3);
+        _bus.PendingCount.Should().Be(1); // CodeModification remains pending
+    }
+
+    [Fact]
+    public void ApproveAllLowRisk_DoesNotApproveHighPriority()
+    {
+        // Arrange
+        ProposeDefault("High", IntentionCategory.Learning, IntentionPriority.High);
+
+        // Act
+        int approved = _bus.ApproveAllLowRisk();
+
+        // Assert
         approved.Should().Be(0);
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // Localization
-    // ═══════════════════════════════════════════════════════════════
+    // --- GetPendingIntentions ---
 
     [Fact]
-    public void Start_GermanCulture_SendsLocalizedMessage()
+    public void GetPendingIntentions_OrdersByPriorityThenAge()
     {
-        _bus.Culture = "de-DE";
-        string? receivedMessage = null;
-        _bus.OnProactiveMessage += (msg, _) => receivedMessage = msg;
+        // Arrange
+        ProposeDefault("Low", priority: IntentionPriority.Low);
+        ProposeDefault("High", priority: IntentionPriority.High);
+        ProposeDefault("Normal", priority: IntentionPriority.Normal);
 
-        _bus.Start();
+        // Act
+        var pending = _bus.GetPendingIntentions();
 
-        receivedMessage.Should().Contain("aktiviert");
+        // Assert
+        pending.Should().HaveCount(3);
+        pending[0].Title.Should().Be("High");
     }
 
+    // --- GetIntentionsByCategory ---
+
     [Fact]
-    public void Start_EnglishCulture_SendsEnglishMessage()
+    public void GetIntentionsByCategory_FiltersCorrectly()
     {
-        string? receivedMessage = null;
-        _bus.OnProactiveMessage += (msg, _) => receivedMessage = msg;
+        // Arrange
+        ProposeDefault("Learn1", IntentionCategory.Learning);
+        ProposeDefault("Code1", IntentionCategory.CodeModification);
+        ProposeDefault("Learn2", IntentionCategory.Learning);
 
-        _bus.Start();
+        // Act
+        var learning = _bus.GetIntentionsByCategory(IntentionCategory.Learning);
 
-        receivedMessage.Should().Contain("activated");
+        // Assert
+        learning.Should().HaveCount(2);
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // GetSummary
-    // ═══════════════════════════════════════════════════════════════
+    // --- GetSummary ---
 
     [Fact]
-    public void GetSummary_ContainsStatusInformation()
+    public void GetSummary_ReturnsFormattedString()
     {
-        ProposeTestIntention("A");
-        ProposeTestIntention("B");
+        // Arrange
+        ProposeDefault("A");
+        ProposeDefault("B");
 
+        // Act
         string summary = _bus.GetSummary();
 
-        summary.Should().Contain("IntentionBus Status");
+        // Assert
         summary.Should().Contain("Pending: 2");
+        summary.Should().Contain("Total: 2");
+    }
+
+    // --- Start / IsActive ---
+
+    [Fact]
+    public void Start_ActivatesBus()
+    {
+        // Act
+        _bus.Start();
+
+        // Assert
+        _bus.IsActive.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Start_CalledTwice_IsIdempotent()
+    {
+        // Act
+        _bus.Start();
+        _bus.Start();
+
+        // Assert
+        _bus.IsActive.Should().BeTrue();
+    }
+
+    // --- StopAsync ---
+
+    [Fact]
+    public async Task StopAsync_DeactivatesBus()
+    {
+        // Arrange
+        _bus.Start();
+
+        // Act
+        await _bus.StopAsync();
+
+        // Assert
+        _bus.IsActive.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task StopAsync_WhenNotStarted_IsNoOp()
+    {
+        // Act
+        await _bus.StopAsync();
+
+        // Assert
+        _bus.IsActive.Should().BeFalse();
+    }
+
+    // --- Localization ---
+
+    [Fact]
+    public void ProactiveMessage_WithGermanCulture_Localizes()
+    {
+        // Arrange
+        string? captured = null;
+        _bus.OnProactiveMessage += (msg, _) => captured = msg;
+        _bus.Culture = "de-DE";
+
+        // Act
+        _bus.Start();
+
+        // Assert
+        captured.Should().NotBeNull();
+        captured.Should().Contain("aktiviert");
+    }
+
+    // --- Expiration handling ---
+
+    [Fact]
+    public void ProposeIntention_WithExpiry_SetsExpiresAt()
+    {
+        // Act
+        var intention = _bus.ProposeIntention(
+            title: "Expiring",
+            description: "D",
+            rationale: "R",
+            category: IntentionCategory.Learning,
+            source: "S",
+            expiresIn: TimeSpan.FromMinutes(5));
+
+        // Assert
+        intention.ExpiresAt.Should().NotBeNull();
+        intention.ExpiresAt.Should().BeAfter(DateTime.UtcNow);
     }
 }

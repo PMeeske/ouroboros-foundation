@@ -1,3 +1,4 @@
+using Ouroboros.Agent;
 using Ouroboros.Agent.MetaAI;
 
 namespace Ouroboros.Abstractions.Tests.Agent.MetaAI;
@@ -10,8 +11,8 @@ public class MemoryStatisticsAdditionalTests
     public void Permission_RecordEquality_SameValues_AreEqual()
     {
         // Arrange
-        var a = new Permission("res", Ouroboros.Agent.MetaAI.PermissionLevel.Read, "reason");
-        var b = new Permission("res", Ouroboros.Agent.MetaAI.PermissionLevel.Read, "reason");
+        var a = new Permission("res", Ouroboros.Agent.PermissionLevel.Read, "reason");
+        var b = new Permission("res", Ouroboros.Agent.PermissionLevel.Read, "reason");
 
         // Assert
         a.Should().Be(b);
@@ -21,13 +22,13 @@ public class MemoryStatisticsAdditionalTests
     public void Permission_WithExpression_CreatesModifiedCopy()
     {
         // Arrange
-        var original = new Permission("res", Ouroboros.Agent.MetaAI.PermissionLevel.Read, "reason");
+        var original = new Permission("res", Ouroboros.Agent.PermissionLevel.Read, "reason");
 
         // Act
-        var modified = original with { Level = Ouroboros.Agent.MetaAI.PermissionLevel.Admin };
+        var modified = original with { Level = Ouroboros.Agent.PermissionLevel.Admin };
 
         // Assert
-        modified.Level.Should().Be(Ouroboros.Agent.MetaAI.PermissionLevel.Admin);
+        modified.Level.Should().Be(Ouroboros.Agent.PermissionLevel.Admin);
         modified.Resource.Should().Be("res");
     }
 

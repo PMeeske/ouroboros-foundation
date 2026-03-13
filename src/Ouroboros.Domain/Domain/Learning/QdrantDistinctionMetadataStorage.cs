@@ -1,5 +1,5 @@
-// <copyright file="QdrantDistinctionMetadataStorage.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="QdrantDistinctionMetadataStorage.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 using Microsoft.Extensions.Logging;
@@ -31,10 +31,12 @@ public sealed class QdrantDistinctionMetadataStorage
         IQdrantCollectionRegistry registry,
         ILogger<QdrantDistinctionMetadataStorage> logger)
     {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
+        ArgumentNullException.ThrowIfNull(client);
+        _client = client;
         ArgumentNullException.ThrowIfNull(registry);
         _collectionName = registry.GetCollectionName(QdrantCollectionRole.DistinctionStates);
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        ArgumentNullException.ThrowIfNull(logger);
+        _logger = logger;
     }
 
     /// <summary>

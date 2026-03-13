@@ -1,5 +1,5 @@
-// <copyright file="SafeToolExecutor.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="SafeToolExecutor.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 namespace Ouroboros.Core.LawsOfForm;
@@ -23,7 +23,8 @@ public sealed class SafeToolExecutor
     /// <param name="toolLookup">The tool lookup service for resolving tools.</param>
     public SafeToolExecutor(IToolLookup toolLookup)
     {
-        this.toolLookup = toolLookup ?? throw new ArgumentNullException(nameof(toolLookup));
+        ArgumentNullException.ThrowIfNull(toolLookup);
+        this.toolLookup = toolLookup;
         this.criteria = new List<SafetyCriterion>();
     }
 

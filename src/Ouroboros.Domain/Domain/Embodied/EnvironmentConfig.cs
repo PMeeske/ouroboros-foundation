@@ -1,5 +1,5 @@
-// <copyright file="EnvironmentConfig.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="EnvironmentConfig.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 using System.Diagnostics.CodeAnalysis;

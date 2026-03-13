@@ -1,5 +1,5 @@
-// <copyright file="AtomSpace.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="AtomSpace.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 using System.Collections.Concurrent;

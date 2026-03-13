@@ -1,3 +1,4 @@
+using Ouroboros.Agent;
 using Ouroboros.Agent.MetaAI;
 
 namespace Ouroboros.Abstractions.Tests.Agent.MetaAI;
@@ -93,12 +94,12 @@ public class RoutingDecisionTests
     public void Permission_AllPropertiesSet()
     {
         // Act
-        var permission = new Ouroboros.Agent.MetaAI.Permission(
-            "filesystem", Ouroboros.Agent.MetaAI.PermissionLevel.Write, "need write access");
+        var permission = new Ouroboros.Agent.Permission(
+            "filesystem", Ouroboros.Agent.PermissionLevel.Write, "need write access");
 
         // Assert
         permission.Resource.Should().Be("filesystem");
-        permission.Level.Should().Be(Ouroboros.Agent.MetaAI.PermissionLevel.Write);
+        permission.Level.Should().Be(Ouroboros.Agent.PermissionLevel.Write);
         permission.Reason.Should().Be("need write access");
     }
 
@@ -106,22 +107,22 @@ public class RoutingDecisionTests
     public void PermissionLevel_AllValuesAreDefined()
     {
         // Act
-        var values = Enum.GetValues<Ouroboros.Agent.MetaAI.PermissionLevel>();
+        var values = Enum.GetValues<Ouroboros.Agent.PermissionLevel>();
 
         // Assert
-        values.Should().Contain(Ouroboros.Agent.MetaAI.PermissionLevel.None);
-        values.Should().Contain(Ouroboros.Agent.MetaAI.PermissionLevel.Isolated);
-        values.Should().Contain(Ouroboros.Agent.MetaAI.PermissionLevel.Read);
-        values.Should().Contain(Ouroboros.Agent.MetaAI.PermissionLevel.Write);
-        values.Should().Contain(Ouroboros.Agent.MetaAI.PermissionLevel.Execute);
-        values.Should().Contain(Ouroboros.Agent.MetaAI.PermissionLevel.Admin);
+        values.Should().Contain(Ouroboros.Agent.PermissionLevel.None);
+        values.Should().Contain(Ouroboros.Agent.PermissionLevel.Isolated);
+        values.Should().Contain(Ouroboros.Agent.PermissionLevel.Read);
+        values.Should().Contain(Ouroboros.Agent.PermissionLevel.Write);
+        values.Should().Contain(Ouroboros.Agent.PermissionLevel.Execute);
+        values.Should().Contain(Ouroboros.Agent.PermissionLevel.Admin);
     }
 
     [Fact]
     public void PermissionLevel_ReadOnly_EqualsRead()
     {
         // Assert - ReadOnly is an alias for Read
-        ((int)Ouroboros.Agent.MetaAI.PermissionLevel.ReadOnly).Should()
-            .Be((int)Ouroboros.Agent.MetaAI.PermissionLevel.Read);
+        ((int)Ouroboros.Agent.PermissionLevel.ReadOnly).Should()
+            .Be((int)Ouroboros.Agent.PermissionLevel.Read);
     }
 }

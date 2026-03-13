@@ -1,5 +1,5 @@
-// <copyright file="ConsensusProtocol.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="ConsensusProtocol.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 using System.Diagnostics.CodeAnalysis;

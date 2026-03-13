@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
-namespace Ouroboros.Agent.MetaAI;
+namespace Ouroboros.Agent;
 
 /// <summary>
 /// Defines permission levels for agent actions.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum PermissionLevel
 {
     /// <summary>No permission granted.</summary>

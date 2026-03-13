@@ -1,6 +1,6 @@
 using Ouroboros.Core.LawsOfForm;
 
-namespace Ouroboros.Core.Tests.LawsOfForm;
+namespace Ouroboros.Tests.LawsOfForm;
 
 [Trait("Category", "Unit")]
 public class EvidenceTests
@@ -8,49 +8,78 @@ public class EvidenceTests
     [Fact]
     public void Constructor_SetsProperties()
     {
-        var timestamp = new DateTime(2025, 1, 1, 12, 0, 0, DateTimeKind.Utc);
-        var sut = new Evidence("safety-check", Form.Mark, "Passed safety check", timestamp);
+        // Act
+        var evidence = new Evidence("safety_check", Form.Mark, "All safety checks passed");
 
-        sut.CriterionName.Should().Be("safety-check");
-        sut.Evaluation.Should().Be(Form.Mark);
-        sut.Description.Should().Be("Passed safety check");
-        sut.Timestamp.Should().Be(timestamp);
+        // Assert
+        evidence.CriterionName.Should().Be("safety_check");
+        evidence.Evaluation.Should().Be(Form.Mark);
+        evidence.Description.Should().Be("All safety checks passed");
     }
 
     [Fact]
-    public void Constructor_WithoutTimestamp_UsesUtcNow()
+    public void Constructor_WithoutTimestamp_SetsToUtcNow()
     {
+        // Arrange
         var before = DateTime.UtcNow;
-        var sut = new Evidence("criterion", Form.Void, "description");
-        var after = DateTime.UtcNow;
 
-        sut.Timestamp.Should().BeOnOrAfter(before);
-        sut.Timestamp.Should().BeOnOrBefore(after);
+        // Act
+        var evidence = new Evidence("test", Form.Mark, "desc");
+
+        // Assert
+        evidence.Timestamp.Should().BeOnOrAfter(before);
+        evidence.Timestamp.Should().BeOnOrBefore(DateTime.UtcNow);
     }
 
     [Fact]
-    public void Constructor_WithVoidEvaluation_SetsCorrectly()
+    public void Constructor_WithTimestamp_UsesProvided()
     {
-        var sut = new Evidence("test", Form.Void, "failed check");
+        // Arrange
+        var specificTime = new DateTime(2025, 1, 15, 10, 30, 0, DateTimeKind.Utc);
 
-        sut.Evaluation.Should().Be(Form.Void);
-    }
+        // Act
+        var evidence = new Evidence("test", Form.Void, "desc", specificTime);
 
-    [Fact]
-    public void Constructor_WithImaginaryEvaluation_SetsCorrectly()
-    {
-        var sut = new Evidence("test", Form.Imaginary, "uncertain result");
-
-        sut.Evaluation.Should().Be(Form.Imaginary);
+        // Assert
+        evidence.Timestamp.Should().Be(specificTime);
     }
 
     [Fact]
     public void RecordEquality_SameValues_AreEqual()
     {
-        var ts = new DateTime(2025, 6, 1, 0, 0, 0, DateTimeKind.Utc);
-        var a = new Evidence("c", Form.Mark, "d", ts);
-        var b = new Evidence("c", Form.Mark, "d", ts);
+        // Arrange
+        var time = DateTime.UtcNow;
+        var a = new Evidence("criterion", Form.Mark, "desc", time);
+        var b = new Evidence("criterion", Form.Mark, "desc", time);
 
+        // Assert
         a.Should().Be(b);
+    }
+
+    [Fact]
+    public void RecordEquality_DifferentEvaluation_AreNotEqual()
+    {
+        // Arrange
+        var time = DateTime.UtcNow;
+        var a = new Evidence("criterion", Form.Mark, "desc", time);
+        var b = new Evidence("criterion", Form.Void, "desc", time);
+
+        // Assert
+        a.Should().NotBe(b);
+    }
+
+    [Fact]
+    public void WithExpression_CreatesModifiedCopy()
+    {
+        // Arrange
+        var original = new Evidence("criterion", Form.Mark, "original desc");
+
+        // Act
+        var modified = original with { Description = "updated desc" };
+
+        // Assert
+        modified.CriterionName.Should().Be("criterion");
+        modified.Description.Should().Be("updated desc");
+        original.Description.Should().Be("original desc");
     }
 }

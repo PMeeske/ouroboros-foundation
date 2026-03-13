@@ -1,5 +1,5 @@
-// <copyright file="DistinctionStorageConfig.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="DistinctionStorageConfig.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 using System.IO;

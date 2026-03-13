@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Text;
+using Microsoft.Extensions.Logging;
 using Ouroboros.Domain.Autonomous.Neurons;
 
 namespace Ouroboros.Domain.Autonomous;
@@ -211,7 +212,7 @@ public sealed partial class AutonomousCoordinator
             _ = Task.Run(async () =>
             {
                 string deliverable = await InferDeliverableTypeAsync(problem);
-                Console.WriteLine($"  [Coordinator] Inferred deliverable type: {deliverable}");
+                _logger.LogDebug("Inferred deliverable type: {DeliverableType}", deliverable);
 
                 // Start problem-solving with YOLO + tools enabled
                 UserPersonaConfig config = new UserPersonaConfig

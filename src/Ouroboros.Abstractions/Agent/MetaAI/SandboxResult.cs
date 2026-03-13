@@ -1,6 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
-
-namespace Ouroboros.Agent.MetaAI;
+namespace Ouroboros.Agent;
 
 /// <summary>
 /// Result of sandboxing a step for safe execution.
@@ -9,7 +7,6 @@ namespace Ouroboros.Agent.MetaAI;
 /// <param name="SandboxedStep">The sandboxed step ready for execution.</param>
 /// <param name="Restrictions">Restrictions applied to the step.</param>
 /// <param name="Error">Error message if sandboxing failed.</param>
-[ExcludeFromCodeCoverage]
 public sealed record SandboxResult(
     bool Success,
     PlanStep? SandboxedStep,

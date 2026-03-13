@@ -1,5 +1,5 @@
-// <copyright file="ContradictionDetector.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="ContradictionDetector.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 namespace Ouroboros.Core.LawsOfForm;
@@ -22,7 +22,8 @@ public sealed class ContradictionDetector
         IClaimExtractor claimExtractor,
         double similarityThreshold = 0.8)
     {
-        this.claimExtractor = claimExtractor ?? throw new ArgumentNullException(nameof(claimExtractor));
+        ArgumentNullException.ThrowIfNull(claimExtractor);
+        this.claimExtractor = claimExtractor;
         this.similarityThreshold = similarityThreshold;
     }
 

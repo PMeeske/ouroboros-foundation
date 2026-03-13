@@ -1,37 +1,27 @@
-namespace Ouroboros.Tests.Autonomous;
-
 using Ouroboros.Domain.Autonomous;
+
+namespace Ouroboros.Tests.Autonomous;
 
 [Trait("Category", "Unit")]
 public class NeuronMessageTests
 {
     [Fact]
-    public void Constructor_RequiredProperties_AreSet()
+    public void Constructor_SetsDefaults()
     {
+        // Arrange & Act
         var message = new NeuronMessage
         {
-            SourceNeuron = "neuron.executive",
-            Topic = "goal.add",
-            Payload = "test payload"
+            SourceNeuron = "Memory",
+            Topic = "recall",
+            Payload = "some data"
         };
 
-        message.SourceNeuron.Should().Be("neuron.executive");
-        message.Topic.Should().Be("goal.add");
-        message.Payload.Should().Be("test payload");
-    }
-
-    [Fact]
-    public void Constructor_DefaultValues_AreExpected()
-    {
-        var message = new NeuronMessage
-        {
-            SourceNeuron = "src",
-            Topic = "topic",
-            Payload = "data"
-        };
-
+        // Assert
         message.Id.Should().NotBe(Guid.Empty);
+        message.SourceNeuron.Should().Be("Memory");
         message.TargetNeuron.Should().BeNull();
+        message.Topic.Should().Be("recall");
+        message.Payload.Should().Be("some data");
         message.Priority.Should().Be(IntentionPriority.Normal);
         message.TtlSeconds.Should().Be(0);
         message.ExpectsResponse.Should().BeFalse();
@@ -40,68 +30,107 @@ public class NeuronMessageTests
     }
 
     [Fact]
-    public void Id_IsUniquePerInstance()
+    public void CreatedAt_DefaultsToUtcNow()
     {
-        var m1 = new NeuronMessage { SourceNeuron = "s", Topic = "t", Payload = "p" };
-        var m2 = new NeuronMessage { SourceNeuron = "s", Topic = "t", Payload = "p" };
+        // Arrange
+        var before = DateTime.UtcNow;
 
-        m1.Id.Should().NotBe(m2.Id);
+        // Act
+        var message = new NeuronMessage
+        {
+            SourceNeuron = "Exec",
+            Topic = "decision",
+            Payload = new { action = "approve" }
+        };
+
+        // Assert
+        message.CreatedAt.Should().BeOnOrAfter(before);
+        message.CreatedAt.Should().BeOnOrBefore(DateTime.UtcNow);
     }
 
     [Fact]
     public void WithExpression_CreatesModifiedCopy()
     {
+        // Arrange
         var original = new NeuronMessage
         {
-            SourceNeuron = "src",
-            Topic = "topic",
-            Payload = "data",
-            Priority = IntentionPriority.Normal
+            SourceNeuron = "Safety",
+            Topic = "alert",
+            Payload = "warning"
         };
 
-        var modified = original with { Priority = IntentionPriority.High };
-
-        modified.Priority.Should().Be(IntentionPriority.High);
-        original.Priority.Should().Be(IntentionPriority.Normal);
-        modified.SourceNeuron.Should().Be("src");
-    }
-
-    [Fact]
-    public void TargetedMessage_SetsTargetNeuron()
-    {
-        var message = new NeuronMessage
+        // Act
+        var modified = original with
         {
-            SourceNeuron = "neuron.executive",
-            TargetNeuron = "neuron.memory",
-            Topic = "memory.recall",
-            Payload = "query"
+            TargetNeuron = "Executive",
+            Priority = IntentionPriority.High,
+            ExpectsResponse = true
         };
 
-        message.TargetNeuron.Should().Be("neuron.memory");
+        // Assert
+        modified.SourceNeuron.Should().Be("Safety");
+        modified.TargetNeuron.Should().Be("Executive");
+        modified.Priority.Should().Be(IntentionPriority.High);
+        modified.ExpectsResponse.Should().BeTrue();
+        original.TargetNeuron.Should().BeNull();
     }
 
     [Fact]
     public void CorrelationId_CanBeSetForRequestResponse()
     {
-        var requestId = Guid.NewGuid();
-        var response = new NeuronMessage
+        // Arrange
+        var correlationId = Guid.NewGuid();
+
+        // Act
+        var request = new NeuronMessage
         {
-            SourceNeuron = "neuron.memory",
-            Topic = "memory.recall.response",
-            Payload = "result",
-            CorrelationId = requestId
+            SourceNeuron = "A",
+            Topic = "query",
+            Payload = "?",
+            ExpectsResponse = true,
+            CorrelationId = correlationId
         };
 
-        response.CorrelationId.Should().Be(requestId);
+        var response = new NeuronMessage
+        {
+            SourceNeuron = "B",
+            TargetNeuron = "A",
+            Topic = "response",
+            Payload = "!",
+            CorrelationId = correlationId
+        };
+
+        // Assert
+        request.CorrelationId.Should().Be(response.CorrelationId);
     }
 
     [Fact]
-    public void CreatedAt_IsCloseToNow()
+    public void EachInstance_GetsUniqueId()
     {
-        var before = DateTime.UtcNow;
-        var message = new NeuronMessage { SourceNeuron = "s", Topic = "t", Payload = "p" };
-        var after = DateTime.UtcNow;
+        // Act
+        var a = new NeuronMessage { SourceNeuron = "A", Topic = "t", Payload = "p" };
+        var b = new NeuronMessage { SourceNeuron = "A", Topic = "t", Payload = "p" };
 
-        message.CreatedAt.Should().BeOnOrAfter(before).And.BeOnOrBefore(after);
+        // Assert
+        a.Id.Should().NotBe(b.Id);
+    }
+
+    [Fact]
+    public void Embedding_CanBeSet()
+    {
+        // Arrange
+        var embedding = new float[] { 0.1f, 0.2f, 0.3f };
+
+        // Act
+        var message = new NeuronMessage
+        {
+            SourceNeuron = "Embed",
+            Topic = "vec",
+            Payload = "data",
+            Embedding = embedding
+        };
+
+        // Assert
+        message.Embedding.Should().BeEquivalentTo(embedding);
     }
 }
