@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI.SelfImprovement;
 
@@ -62,7 +61,6 @@ public interface IProspectiveMemory
 /// <summary>
 /// Type of prospective memory reminder.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum ReminderType
 {
     /// <summary>Triggered at a specific time.</summary>

@@ -1,11 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.TemporalReasoning;
 
 /// <summary>
 /// Allen Interval Algebra relation types for temporal reasoning (detailed form).
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum TemporalRelationType
 {
     /// <summary>A ends before B starts.</summary>

@@ -2,7 +2,6 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Providers.Docker;
 
@@ -10,7 +9,6 @@ namespace Ouroboros.Providers.Docker;
 /// Interface for Docker Engine MCP client operations.
 /// Provides methods for managing containers, images, volumes, and networks.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IDockerMcpClient
 {
     /// <summary>

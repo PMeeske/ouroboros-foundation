@@ -3,7 +3,6 @@
 // Phase 2: Predictive self-monitoring with forecasts vs outcomes
 // ==========================================================
 
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI.SelfModel;
 
@@ -11,7 +10,6 @@ namespace Ouroboros.Agent.MetaAI.SelfModel;
 /// Interface for predictive monitoring and forecast tracking.
 /// Compares predictions with outcomes for self-calibration.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IPredictiveMonitor
 {
     /// <summary>

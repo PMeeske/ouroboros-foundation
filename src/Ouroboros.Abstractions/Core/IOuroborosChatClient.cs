@@ -1,5 +1,4 @@
 using Microsoft.Extensions.AI;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Abstractions.Core;
 
@@ -10,7 +9,6 @@ namespace Ouroboros.Abstractions.Core;
 /// is automatically usable with Semantic Kernel, LangChain, and any
 /// MEAI-compatible consumer.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IOuroborosChatClient : IChatClient
 {
     /// <summary>Whether this client natively supports thinking/reasoning mode.</summary>

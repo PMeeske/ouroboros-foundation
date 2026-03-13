@@ -3,7 +3,6 @@
 // </copyright>
 
 using Unit = Ouroboros.Abstractions.Unit;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.TheoryOfMind;
 
@@ -11,7 +10,6 @@ namespace Ouroboros.Agent.TheoryOfMind;
 /// Interface for Theory of Mind capabilities.
 /// Enables agents to model other agents' beliefs, desires, and intentions.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface ITheoryOfMind
 {
     /// <summary>

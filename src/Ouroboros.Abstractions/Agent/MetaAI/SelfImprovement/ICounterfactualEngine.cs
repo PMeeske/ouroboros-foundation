@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI.SelfImprovement;
 
@@ -6,7 +5,6 @@ namespace Ouroboros.Agent.MetaAI.SelfImprovement;
 /// Interface for counterfactual reasoning and regret computation.
 /// Simulates alternative action sequences and compares with actual outcomes.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface ICounterfactualEngine
 {
     /// <summary>

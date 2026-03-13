@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI.Affect;
 
@@ -53,7 +52,6 @@ public interface INeedsHierarchy
 /// <summary>
 /// Levels in the needs hierarchy, ordered from most basic to highest.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum NeedLevel
 {
     /// <summary>System health, uptime, resource availability.</summary>

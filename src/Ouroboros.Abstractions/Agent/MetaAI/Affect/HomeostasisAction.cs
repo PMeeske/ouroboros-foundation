@@ -1,11 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI.Affect;
 
 /// <summary>
 /// Actions to take when homeostasis is violated.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum HomeostasisAction
 {
     /// <summary>Log the violation but take no action</summary>

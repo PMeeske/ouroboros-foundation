@@ -3,7 +3,6 @@
 // Domain adaptation and analogical reasoning
 // ==========================================================
 
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI;
 
@@ -11,7 +10,6 @@ namespace Ouroboros.Agent.MetaAI;
 /// Interface for transfer learning capabilities.
 /// Enables applying learned skills across different domains.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface ITransferLearner
 {
     /// <summary>

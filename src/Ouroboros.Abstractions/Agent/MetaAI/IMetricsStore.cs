@@ -4,7 +4,6 @@
 // ==========================================================
 
 using System.Linq;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI;
 
@@ -12,7 +11,6 @@ namespace Ouroboros.Agent.MetaAI;
 /// Interface for persistent storage and retrieval of performance metrics.
 /// Enables long-term learning across orchestrator sessions.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IMetricsStore
 {
     /// <summary>

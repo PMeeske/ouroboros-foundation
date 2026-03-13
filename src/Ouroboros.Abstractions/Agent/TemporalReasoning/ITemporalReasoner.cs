@@ -2,7 +2,6 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.TemporalReasoning;
 
@@ -11,7 +10,6 @@ namespace Ouroboros.Agent.TemporalReasoning;
 /// Enables reasoning about time, sequences, causality, and temporal relationships between events.
 /// </summary>
 [Obsolete("No implementations exist. Scheduled for removal.")]
-[ExcludeFromCodeCoverage]
 public interface ITemporalReasoner
 {
     /// <summary>

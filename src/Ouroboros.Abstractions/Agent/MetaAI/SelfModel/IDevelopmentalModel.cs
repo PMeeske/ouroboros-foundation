@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI.SelfModel;
 
@@ -57,7 +56,6 @@ public interface IDevelopmentalModel
 /// <summary>
 /// Developmental stages based on Dreyfus Skill Acquisition Model.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum DevelopmentalStage
 {
     /// <summary>Initial stage with no prior experience.</summary>

@@ -1,11 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI;
 
 /// <summary>
 /// Base interface shared by all plan types in the MetaAI subsystem.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IPlan
 {
     /// <summary>

@@ -3,7 +3,6 @@
 // </copyright>
 
 using Ouroboros.Abstractions;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI;
 
@@ -11,7 +10,6 @@ namespace Ouroboros.Agent.MetaAI;
 /// Interface for storing and retrieving agent experiences.
 /// Provides episodic memory for learning from past actions.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IMemoryStore
 {
     /// <summary>

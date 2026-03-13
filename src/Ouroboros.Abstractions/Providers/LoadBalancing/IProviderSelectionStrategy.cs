@@ -3,7 +3,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Providers.LoadBalancing;
 
@@ -11,7 +10,6 @@ namespace Ouroboros.Providers.LoadBalancing;
 /// Strategy interface for selecting a provider from a pool of healthy providers.
 /// Implements the Strategy design pattern for pluggable provider selection algorithms.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IProviderSelectionStrategy
 {
     /// <summary>

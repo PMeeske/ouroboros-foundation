@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI.SelfImprovement;
 
@@ -47,7 +46,6 @@ public interface IMoralReasoningEngine
 /// <summary>
 /// Ethical frameworks for moral reasoning.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum MoralFramework
 {
     /// <summary>Rule-based ethics focusing on duty and rights.</summary>

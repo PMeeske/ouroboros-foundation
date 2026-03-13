@@ -3,7 +3,6 @@
 // </copyright>
 
 using Ouroboros.Abstractions.Network;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Network.Persistence;
 
@@ -11,7 +10,6 @@ namespace Ouroboros.Network.Persistence;
 /// Defines the contract for persisting Merkle-DAG nodes and edges to durable storage.
 /// Implements an append-only Write-Ahead Log pattern for crash recovery.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IGraphPersistence : IAsyncDisposable
 {
     /// <summary>

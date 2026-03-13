@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI.Affect;
 
@@ -52,7 +51,6 @@ public interface IFlowStateEngine
 /// <summary>
 /// Flow states based on the challenge-skill model.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum FlowState
 {
     /// <summary>Low challenge, high skill.</summary>

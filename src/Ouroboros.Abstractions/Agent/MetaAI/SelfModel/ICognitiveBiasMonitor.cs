@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI.SelfModel;
 
@@ -46,7 +45,6 @@ public interface ICognitiveBiasMonitor
 /// <summary>
 /// Types of cognitive biases.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum BiasType
 {
     /// <summary>Seeking information that confirms existing beliefs.</summary>

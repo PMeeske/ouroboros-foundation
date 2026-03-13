@@ -3,7 +3,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Abstractions.Agent.Dispatch;
 
@@ -12,5 +11,4 @@ namespace Ouroboros.Abstractions.Agent.Dispatch;
 /// Commands carry intent and data for a single operation.
 /// </summary>
 /// <typeparam name="TResult">The type of result produced by handling this command.</typeparam>
-[ExcludeFromCodeCoverage]
 public interface ICommand<TResult>;

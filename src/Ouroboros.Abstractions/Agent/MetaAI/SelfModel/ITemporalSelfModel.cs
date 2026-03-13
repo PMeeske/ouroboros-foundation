@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI.SelfModel;
 
@@ -6,7 +5,6 @@ namespace Ouroboros.Agent.MetaAI.SelfModel;
 /// Interface for temporal self-continuity.
 /// Tracks past self, present self, and projected future self as unified entity.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface ITemporalSelfModel
 {
     /// <summary>

@@ -2,7 +2,6 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Providers.SpeechToText;
 
@@ -10,7 +9,6 @@ namespace Ouroboros.Providers.SpeechToText;
 /// Defines the contract for speech-to-text transcription services.
 /// Supports various audio formats and providers (OpenAI Whisper, Azure, local Whisper, etc.).
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface ISpeechToTextService
 {
     /// <summary>

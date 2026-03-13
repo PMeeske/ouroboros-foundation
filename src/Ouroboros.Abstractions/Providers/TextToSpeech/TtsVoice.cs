@@ -1,11 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Providers.TextToSpeech;
 
 /// <summary>
 /// Available voices for text-to-speech synthesis.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum TtsVoice
 {
     /// <summary>Alloy - neutral, balanced voice.</summary>

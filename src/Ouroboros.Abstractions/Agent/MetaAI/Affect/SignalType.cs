@@ -1,11 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI.Affect;
 
 /// <summary>
 /// Types of valence signals.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum SignalType
 {
     /// <summary>Stress indicator from system load or failures</summary>

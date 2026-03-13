@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI.Social;
 
@@ -55,7 +54,6 @@ public interface IIntersubjectivity
 /// <summary>
 /// Method by which a proposition was grounded in common knowledge.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum GroundingMethod
 {
     /// <summary>Explicitly stated and acknowledged.</summary>

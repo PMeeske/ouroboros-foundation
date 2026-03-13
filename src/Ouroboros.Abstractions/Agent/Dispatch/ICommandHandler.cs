@@ -3,7 +3,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Abstractions.Agent.Dispatch;
 
@@ -13,7 +12,6 @@ namespace Ouroboros.Abstractions.Agent.Dispatch;
 /// </summary>
 /// <typeparam name="TCommand">The command type to handle.</typeparam>
 /// <typeparam name="TResult">The result type produced.</typeparam>
-[ExcludeFromCodeCoverage]
 public interface ICommandHandler<in TCommand, TResult>
     where TCommand : ICommand<TResult>
 {

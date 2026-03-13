@@ -1,11 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent;
 
 /// <summary>
 /// Primary use case types for model selection.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum UseCaseType
 {
     /// <summary>Generating or completing source code.</summary>

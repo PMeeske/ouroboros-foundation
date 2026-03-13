@@ -1,11 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI.WorldModel;
 
 /// <summary>
 /// Supported model architectures for world model learning.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum ModelArchitecture
 {
     /// <summary>Multi-layer perceptron (simple feed-forward network).</summary>

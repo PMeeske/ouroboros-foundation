@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI.Social;
 
@@ -57,7 +56,6 @@ public interface ISocialEmotionEngine
 /// <summary>
 /// Types of social emotions.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum SocialEmotionType
 {
     /// <summary>Feeling of responsibility for a wrong.</summary>

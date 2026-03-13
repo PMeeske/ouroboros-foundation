@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI.SelfModel;
 
@@ -57,7 +56,6 @@ public interface IAgencyModel
 /// <summary>
 /// Types of agency based on the voluntariness of the action.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum AgencyType
 {
     /// <summary>Deliberately chosen action.</summary>

@@ -2,7 +2,6 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Providers.Kubernetes;
 
@@ -10,7 +9,6 @@ namespace Ouroboros.Providers.Kubernetes;
 /// Interface for Kubernetes MCP client operations.
 /// Provides methods for managing pods, deployments, services, and reading logs.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IKubernetesMcpClient
 {
     /// <summary>

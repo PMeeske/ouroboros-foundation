@@ -2,7 +2,6 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Providers.SpeechToText;
 
@@ -10,7 +9,6 @@ namespace Ouroboros.Providers.SpeechToText;
 /// Extended STT interface that supports reactive streaming transcription.
 /// Enables real-time voice input processing.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IStreamingSttService : ISpeechToTextService
 {
     /// <summary>

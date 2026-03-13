@@ -2,7 +2,6 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Providers.DuckDuckGo;
 
@@ -10,7 +9,6 @@ namespace Ouroboros.Providers.DuckDuckGo;
 /// Interface for DuckDuckGo MCP client operations.
 /// Provides web search, news search, and instant answers — no API key required.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IDuckDuckGoMcpClient
 {
     /// <summary>

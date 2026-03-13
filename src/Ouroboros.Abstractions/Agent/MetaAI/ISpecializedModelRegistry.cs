@@ -1,6 +1,5 @@
 // Copyright (c) Ouroboros. All rights reserved.
 
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI;
 
@@ -8,7 +7,6 @@ namespace Ouroboros.Agent.MetaAI;
 /// Registry for mapping cognitive tasks to specialized model endpoints.
 /// Supports priority-based routing with a configurable fallback model.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface ISpecializedModelRegistry
 {
     /// <summary>

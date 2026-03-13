@@ -3,7 +3,6 @@
 // Automatic extraction of reusable skills from successful executions
 // ==========================================================
 
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI;
 
@@ -11,7 +10,6 @@ namespace Ouroboros.Agent.MetaAI;
 /// Interface for automatic skill extraction from successful executions.
 /// Analyzes execution patterns and extracts reusable skills.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface ISkillExtractor
 {
     /// <summary>
