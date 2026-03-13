@@ -4,8 +4,6 @@
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Ouroboros.Abstractions;
 
 namespace Ouroboros.Tools.MeTTa;
