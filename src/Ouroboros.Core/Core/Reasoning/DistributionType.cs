@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.Reasoning;
 
 /// <summary>
 /// Defines the type of probability distribution.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum DistributionType
 {
     /// <summary>

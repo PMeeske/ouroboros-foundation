@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.Learning;
 
 /// <summary>
 /// Types of feedback signals for continual learning.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum FeedbackType
 {
     /// <summary>

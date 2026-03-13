@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.LawsOfForm;
 
 /// <summary>
 /// Interface for content filtering and safety checks.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IContentFilter
 {
     /// <summary>

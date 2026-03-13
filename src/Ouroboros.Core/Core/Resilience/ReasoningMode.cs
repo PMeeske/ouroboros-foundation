@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.Resilience;
 
 /// <summary>
@@ -8,11 +6,10 @@ namespace Ouroboros.Core.Resilience;
 /// It must be kept in sync with Ouroboros.Agent.NeuralSymbolic.ReasoningMode.
 /// The integer values MUST match exactly for casting to work correctly in ResilientReasoner.
 /// Changes to one enum must be reflected in the other.
-/// 
+///
 /// Source of Truth: Ouroboros.Agent.NeuralSymbolic.ReasoningMode (defined in ReasoningResult.cs)
 /// This enum: Duplicate for Core layer use only
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum ReasoningMode
 {
     /// <summary>Try symbolic first, fall back to neural.</summary>

@@ -1,12 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Capabilities supported by an embodiment provider.
 /// </summary>
 [Flags]
-[ExcludeFromCodeCoverage]
 public enum EmbodimentCapabilities
 {
     /// <summary>No special capabilities.</summary>

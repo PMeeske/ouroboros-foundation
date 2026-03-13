@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Types of embodiment domain events.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum EmbodimentDomainEventType
 {
     /// <summary>Aggregate activated.</summary>

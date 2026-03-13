@@ -1,12 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.LawsOfForm;
 
 /// <summary>
 /// Interface for extracting claims from text.
 /// Abstracts the claim extraction logic for testability and flexibility.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IClaimExtractor
 {
     /// <summary>

@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.LawsOfForm;
 
 /// <summary>
 /// Interface for rate limiting tool executions.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IRateLimiter
 {
     /// <summary>

@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Types of limitations.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum LimitationType
 {
     /// <summary>Cannot perceive certain information.</summary>

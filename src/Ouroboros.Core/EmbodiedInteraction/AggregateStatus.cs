@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Status of the aggregate.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum AggregateStatus
 {
     /// <summary>Aggregate is inactive.</summary>

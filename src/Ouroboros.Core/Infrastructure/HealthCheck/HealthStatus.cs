@@ -2,14 +2,11 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Core.Infrastructure.HealthCheck;
 
 /// <summary>
 /// Represents the health status of a component.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum HealthStatus
 {
     /// <summary>
