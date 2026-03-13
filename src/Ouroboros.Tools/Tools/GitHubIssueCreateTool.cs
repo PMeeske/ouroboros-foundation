@@ -1,4 +1,4 @@
-// <copyright file="GitHubIssueTools.cs" company="Ouroboros">
+// <copyright file="GitHubIssueCreateTool.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
