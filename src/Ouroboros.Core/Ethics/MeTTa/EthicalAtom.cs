@@ -205,7 +205,6 @@ public static class EthicalAtomIntegrity
         }
 
         using MemoryStream ms = new MemoryStream();
-using System.Diagnostics.CodeAnalysis;
         stream.CopyTo(ms);
         return ms.ToArray();
     }
