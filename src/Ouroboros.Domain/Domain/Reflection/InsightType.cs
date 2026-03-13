@@ -2,11 +2,14 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Domain.Reflection;
 
 /// <summary>
 /// Types of insights that can be derived from performance analysis.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum InsightType
 {
     /// <summary>

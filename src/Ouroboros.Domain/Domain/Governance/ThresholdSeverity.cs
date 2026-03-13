@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Governance;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Governance;
 
 /// <summary>
 /// Defines threshold violation severity levels.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum ThresholdSeverity
 {
     /// <summary>

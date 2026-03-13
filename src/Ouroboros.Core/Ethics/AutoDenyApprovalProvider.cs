@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Ethics;
 
 /// <summary>
@@ -5,6 +7,7 @@ namespace Ouroboros.Core.Ethics;
 /// This is the safe default — if no human approval mechanism is configured,
 /// actions requiring approval are blocked rather than silently permitted.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed class AutoDenyApprovalProvider : IHumanApprovalProvider
 {
     /// <inheritdoc/>

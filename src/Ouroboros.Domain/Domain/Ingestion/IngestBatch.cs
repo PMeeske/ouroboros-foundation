@@ -2,6 +2,8 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Domain.Events;
 
 /// <summary>
@@ -12,6 +14,7 @@ namespace Ouroboros.Domain.Events;
 /// <param name="Source">The source path or identifier of the ingested data</param>
 /// <param name="Ids">List of document IDs that were ingested</param>
 /// <param name="Timestamp">When the ingestion occurred</param>
+[ExcludeFromCodeCoverage]
 public sealed record IngestBatch(
     Guid Id,
     string Source,

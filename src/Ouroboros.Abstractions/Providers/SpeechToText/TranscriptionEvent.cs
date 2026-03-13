@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Providers.SpeechToText;
 
 /// <summary>
@@ -9,6 +11,7 @@ namespace Ouroboros.Providers.SpeechToText;
 /// <param name="Offset">Time offset from start of audio.</param>
 /// <param name="Duration">Duration of this transcription segment.</param>
 /// <param name="Language">Detected language code.</param>
+[ExcludeFromCodeCoverage]
 public sealed record TranscriptionEvent(
     string Text,
     bool IsFinal,

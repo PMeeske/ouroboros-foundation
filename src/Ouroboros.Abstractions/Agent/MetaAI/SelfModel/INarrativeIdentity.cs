@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.SelfModel;
 
 /// <summary>
@@ -6,6 +8,7 @@ namespace Ouroboros.Agent.MetaAI.SelfModel;
 /// turning points, and narrative arcs.
 /// Based on McAdams (2001) Life Story Model.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface INarrativeIdentity
 {
     /// <summary>

@@ -1,4 +1,5 @@
 using Ouroboros.Core.LawsOfForm;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Core.Learning;
 
@@ -10,6 +11,7 @@ namespace Ouroboros.Core.Learning;
 /// <param name="Stage">The dream stage at which this distinction occurs.</param>
 /// <param name="ContextEmbedding">Semantic embedding of the context.</param>
 /// <param name="ImportanceWeight">How important this distinction is (0.0 to 1.0).</param>
+[ExcludeFromCodeCoverage]
 public sealed record DistinctionTrainingExample(
     string Circumstance,
     string DistinctionMade,

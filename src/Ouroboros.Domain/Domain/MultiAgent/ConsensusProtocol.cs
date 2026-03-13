@@ -2,11 +2,14 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Domain.MultiAgent;
 
 /// <summary>
 /// Protocol for reaching consensus among agents.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum ConsensusProtocol
 {
     /// <summary>

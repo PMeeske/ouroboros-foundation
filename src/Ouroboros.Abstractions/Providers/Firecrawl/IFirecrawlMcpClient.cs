@@ -2,12 +2,15 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Providers.Firecrawl;
 
 /// <summary>
 /// Interface for Firecrawl MCP client operations.
 /// Provides methods for web scraping, crawling, and content extraction.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IFirecrawlMcpClient
 {
     /// <summary>

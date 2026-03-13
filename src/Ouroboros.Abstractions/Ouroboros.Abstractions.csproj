@@ -129,6 +129,8 @@
         <Compile Include="Agent\MetaAI\WorldModel\IWorldModelEngine.cs" />
         <Compile Include="Agent\MetaAI\WorldModel\LearnedWorldModel.cs" />
         <Compile Include="Agent\MetaAI\Affect\IEmbodimentMemoryFusion.cs" />
+<<<<<<< HEAD
+=======
         <Compile Include="Agent\MetaAI\Affect\IFlowStateEngine.cs" />
         <Compile Include="Agent\MetaAI\Affect\INeedsHierarchy.cs" />
         <Compile Include="Agent\MetaAI\Executive\IAttentionController.cs" />
@@ -150,6 +152,7 @@
         <Compile Include="Agent\MetaAI\Social\IIntersubjectivity.cs" />
         <Compile Include="Agent\MetaAI\Social\ISocialCognition.cs" />
         <Compile Include="Agent\MetaAI\Social\ISocialEmotionEngine.cs" />
+>>>>>>> eef74c2e382b02e7c6abb05ea5fb22548ae66606
         <Compile Include="Agent\MetaAI\Affect\IHomeostasisPolicy.cs" />
         <Compile Include="Agent\MetaAI\Affect\AffectiveState.cs" />
         <Compile Include="Agent\MetaAI\SelfModel\IPredictiveMonitor.cs" />

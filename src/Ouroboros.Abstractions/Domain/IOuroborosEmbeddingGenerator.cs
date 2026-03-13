@@ -1,4 +1,5 @@
 using Microsoft.Extensions.AI;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Abstractions.Domain;
 
@@ -7,6 +8,7 @@ namespace Ouroboros.Abstractions.Domain;
 /// <see cref="IEmbeddingGenerator{String, Embedding}"/>.
 /// Migration target for <see cref="IEmbeddingModel"/>.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IOuroborosEmbeddingGenerator : IEmbeddingGenerator<string, Embedding<float>>
 {
 }

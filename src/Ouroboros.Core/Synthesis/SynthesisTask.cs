@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Synthesis;
 
 /// <summary>
@@ -6,6 +8,7 @@ namespace Ouroboros.Core.Synthesis;
 /// <param name="Description">A description of the synthesis task.</param>
 /// <param name="Examples">The input-output examples defining the task.</param>
 /// <param name="DSL">The domain-specific language to use for synthesis.</param>
+[ExcludeFromCodeCoverage]
 public sealed record SynthesisTask(
     string Description,
     List<InputOutputExample> Examples,

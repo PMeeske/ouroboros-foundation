@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Voice;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Voice;
 
 /// <summary>
 /// Control event for stream management (barge-in, cancel, etc.).
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record ControlEvent : InteractionEvent
 {
     /// <summary>Gets the control action to perform.</summary>

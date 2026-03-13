@@ -5,12 +5,14 @@
 namespace Ouroboros.Agent.MetaAI.WorldModel;
 
 using Ouroboros.Abstractions.Monads;
+using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
 /// Main interface for world model learning and imagination-based planning.
 /// Enables model-based reinforcement learning through learned environment models.
 /// All operations return Result types for robust error handling.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IWorldModelEngine
 {
     /// <summary>

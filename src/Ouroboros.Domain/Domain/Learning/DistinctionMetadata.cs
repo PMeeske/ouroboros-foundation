@@ -1,10 +1,12 @@
-﻿using Ouroboros.Core.Learning;
+using Ouroboros.Core.Learning;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.Learning;
 
 /// <summary>
 /// Metadata about a stored distinction.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record DistinctionMetadata(
     DistinctionId Id,
     string Circumstance,

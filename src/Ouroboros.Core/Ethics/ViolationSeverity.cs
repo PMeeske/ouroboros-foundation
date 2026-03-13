@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Ethics;
 
 /// <summary>
 /// Severity levels for ethical violations.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum ViolationSeverity
 {
     /// <summary>Minor concern, should be reviewed</summary>

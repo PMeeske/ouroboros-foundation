@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Resilience;
 
 /// <summary>
@@ -7,6 +9,7 @@ namespace Ouroboros.Core.Resilience;
 /// <param name="SymbolicAvailable">Whether symbolic reasoning is available.</param>
 /// <param name="ConsecutiveLlmFailures">Number of consecutive LLM failures.</param>
 /// <param name="LastLlmSuccess">Timestamp of last successful LLM operation, if any.</param>
+[ExcludeFromCodeCoverage]
 public sealed record ReasonerHealth(
     string CircuitState,
     bool SymbolicAvailable,

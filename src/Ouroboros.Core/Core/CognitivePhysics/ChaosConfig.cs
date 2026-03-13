@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.CognitivePhysics;
 
 /// <summary>
@@ -7,6 +9,7 @@ namespace Ouroboros.Core.CognitivePhysics;
 /// <param name="InstabilityFactor">Cooldown penalty for chaos injection.</param>
 /// <param name="CompressionReduction">Temporary compression reduction during chaos.</param>
 /// <param name="DistanceDistortion">Multiplier applied to distort semantic distance.</param>
+[ExcludeFromCodeCoverage]
 public sealed record ChaosConfig(
     double ChaosCost = 10.0,
     double InstabilityFactor = 2.0,

@@ -2,11 +2,14 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Domain.Benchmarks;
 
 /// <summary>
 /// Represents different dimensions of cognitive capabilities that can be benchmarked.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum CognitiveDimension
 {
     /// <summary>

@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Visual perception from camera/video.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record VisualPerception(
     Guid Id,
     DateTime Timestamp,

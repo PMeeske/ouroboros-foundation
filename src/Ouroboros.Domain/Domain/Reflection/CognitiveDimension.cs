@@ -2,12 +2,15 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Domain.Reflection;
 
 /// <summary>
 /// Cognitive dimensions for capability assessment.
 /// Represents different aspects of cognitive ability that can be measured.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum CognitiveDimension
 {
     /// <summary>

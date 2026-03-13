@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Ethics;
 
 /// <summary>
@@ -16,6 +18,7 @@ namespace Ouroboros.Core.Ethics;
 /// Register an implementation via DI to enable interactive approval workflows.
 /// The default <see cref="AutoDenyApprovalProvider"/> denies all requests for safety.
 /// </remarks>
+[ExcludeFromCodeCoverage]
 public enum EthicalClearanceLevel
 {
     /// <summary>Action is permitted, no ethical concerns</summary>

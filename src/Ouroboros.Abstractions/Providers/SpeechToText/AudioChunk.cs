@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Providers.SpeechToText;
 
 /// <summary>
@@ -8,6 +10,7 @@ namespace Ouroboros.Providers.SpeechToText;
 /// <param name="SampleRate">Sample rate in Hz.</param>
 /// <param name="Channels">Number of audio channels (1 for mono, 2 for stereo).</param>
 /// <param name="IsFinal">Whether this is the final chunk in a recording session.</param>
+[ExcludeFromCodeCoverage]
 public sealed record AudioChunk(
     byte[] Data,
     string Format,

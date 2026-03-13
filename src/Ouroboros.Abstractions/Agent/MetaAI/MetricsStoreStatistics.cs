@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI;
 
 /// <summary>
 /// Statistics about the metrics store.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record MetricsStoreStatistics(
     int TotalResources,
     int TotalExecutions,

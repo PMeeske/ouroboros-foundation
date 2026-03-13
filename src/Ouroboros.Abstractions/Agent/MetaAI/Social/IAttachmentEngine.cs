@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.Social;
 
 /// <summary>
@@ -58,6 +60,7 @@ public interface IAttachmentEngine
 /// <summary>
 /// Attachment styles based on Bowlby's attachment theory.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum AttachmentStyle
 {
     /// <summary>Comfortable with intimacy and autonomy.</summary>

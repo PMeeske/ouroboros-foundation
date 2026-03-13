@@ -5,12 +5,14 @@
 namespace Ouroboros.Genetic.Abstractions;
 
 using Ouroboros.Genetic.Core;
+using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
 /// Defines the main evolution engine for genetic algorithms.
 /// Orchestrates the evolution process across generations.
 /// </summary>
 /// <typeparam name="TChromosome">The type of chromosome being evolved.</typeparam>
+[ExcludeFromCodeCoverage]
 public interface IEvolutionEngine<TChromosome>
     where TChromosome : IChromosome
 {

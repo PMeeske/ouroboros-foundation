@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.LawsOfForm;
 
 /// <summary>
@@ -8,6 +10,7 @@ namespace Ouroboros.Core.LawsOfForm;
 /// <param name="Form">The form state after transition.</param>
 /// <param name="State">The certain state (if applicable).</param>
 /// <param name="Reason">The reason for the transition.</param>
+[ExcludeFromCodeCoverage]
 public record StateTransition<TState>(
     DateTimeOffset Timestamp,
     Form Form,

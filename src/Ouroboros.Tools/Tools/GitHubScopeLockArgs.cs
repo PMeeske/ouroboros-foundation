@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Tools;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Tools;
 
 /// <summary>
 /// Arguments for the GitHubScopeLockTool.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed class GitHubScopeLockArgs
 {
     /// <summary>

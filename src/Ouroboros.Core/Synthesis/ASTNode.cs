@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Synthesis;
 
 /// <summary>
@@ -6,6 +8,7 @@ namespace Ouroboros.Core.Synthesis;
 /// <param name="NodeType">The type of this node (e.g., "Apply", "Lambda", "Variable").</param>
 /// <param name="Value">The value associated with this node (e.g., primitive name, variable name).</param>
 /// <param name="Children">The child nodes of this node.</param>
+[ExcludeFromCodeCoverage]
 public sealed record ASTNode(
     string NodeType,
     string Value,

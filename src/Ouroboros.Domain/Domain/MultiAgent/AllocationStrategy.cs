@@ -2,11 +2,14 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Domain.MultiAgent;
 
 /// <summary>
 /// Strategy for allocating tasks to agents.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum AllocationStrategy
 {
     /// <summary>

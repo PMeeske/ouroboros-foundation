@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
@@ -8,6 +10,7 @@ namespace Ouroboros.Core.EmbodiedInteraction;
 /// <param name="Language">Language code.</param>
 /// <param name="Gender">Voice gender.</param>
 /// <param name="SupportedStyles">Supported speech styles.</param>
+[ExcludeFromCodeCoverage]
 public sealed record VoiceInfo(
     string Id,
     string Name,

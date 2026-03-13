@@ -45,6 +45,7 @@ public sealed class MeTTaHashAttribute : Attribute
 /// Each member carries a <see cref="MeTTaHashAttribute"/> binding its expected
 /// content hash, making the ethical atoms structurally immutable at the IL level.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum EthicalAtom
 {
     /// <summary>Core relational ethics: harm-care inseparability, meta-ethics.</summary>
@@ -204,6 +205,7 @@ public static class EthicalAtomIntegrity
         }
 
         using MemoryStream ms = new MemoryStream();
+using System.Diagnostics.CodeAnalysis;
         stream.CopyTo(ms);
         return ms.ToArray();
     }

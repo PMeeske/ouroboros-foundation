@@ -9,7 +9,8 @@ namespace Ouroboros.Domain.Autonomous;
 public abstract class Neuron : IDisposable
 {
     private readonly Subject<NeuronMessage> _outgoingMessages = new();
-    private readonly Channel<NeuronMessage> _messageChannel = Channel.CreateUnbounded<NeuronMessage>();
+    private readonly Channel<NeuronMessage> _messageChannel = Channel.CreateBounded<NeuronMessage>(
+        new BoundedChannelOptions(1024) { FullMode = BoundedChannelFullMode.DropOldest });
     private readonly CancellationTokenSource _cts = new();
 
     private volatile bool _isActive;

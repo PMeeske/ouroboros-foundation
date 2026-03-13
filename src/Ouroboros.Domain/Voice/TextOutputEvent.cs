@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Voice;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Voice;
 
 /// <summary>
 /// Text displayed to console/UI.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record TextOutputEvent : InteractionEvent
 {
     /// <summary>Gets the text to display.</summary>

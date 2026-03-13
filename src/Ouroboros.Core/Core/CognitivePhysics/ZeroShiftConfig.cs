@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.CognitivePhysics;
 
 /// <summary>
@@ -5,6 +7,7 @@ namespace Ouroboros.Core.CognitivePhysics;
 /// </summary>
 /// <param name="StabilityFactor">Multiplier applied to cost to determine cooldown increment.</param>
 /// <param name="UncertaintyPenalty">Resource penalty applied on uncertain ethics evaluations.</param>
+[ExcludeFromCodeCoverage]
 public sealed record ZeroShiftConfig(
     double StabilityFactor = 0.5,
     double UncertaintyPenalty = 5.0);

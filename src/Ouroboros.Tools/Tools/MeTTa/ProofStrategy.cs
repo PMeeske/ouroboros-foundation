@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Tools.MeTTa;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Tools.MeTTa;
 
 /// <summary>
 /// Strategy for theorem proving.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum ProofStrategy
 {
     /// <summary>Resolution-based proving.</summary>

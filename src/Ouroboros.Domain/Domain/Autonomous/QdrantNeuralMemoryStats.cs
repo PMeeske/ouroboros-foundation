@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Autonomous;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Autonomous;
 
 /// <summary>
 /// Statistics for the neural memory system.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record QdrantNeuralMemoryStats
 {
     public bool IsConnected { get; init; }

@@ -2,6 +2,8 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Domain.Embodied;
 
 /// <summary>
@@ -11,6 +13,7 @@ namespace Ouroboros.Domain.Embodied;
 /// <param name="Parameters">Configuration parameters specific to the environment</param>
 /// <param name="AvailableActions">List of action names available in this environment</param>
 /// <param name="Type">Type of environment</param>
+[ExcludeFromCodeCoverage]
 public sealed record EnvironmentConfig(
     string SceneName,
     IReadOnlyDictionary<string, object> Parameters,

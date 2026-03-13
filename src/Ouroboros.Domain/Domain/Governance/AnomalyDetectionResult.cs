@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Governance;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Governance;
 
 /// <summary>
 /// Result of anomaly detection.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record AnomalyDetectionResult
 {
     /// <summary>

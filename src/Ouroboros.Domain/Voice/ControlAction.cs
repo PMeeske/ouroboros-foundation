@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Voice;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Voice;
 
 /// <summary>
 /// Control actions for managing the interaction stream.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum ControlAction
 {
     /// <summary>Start listening for voice input.</summary>

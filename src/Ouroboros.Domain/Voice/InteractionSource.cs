@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Voice;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Voice;
 
 /// <summary>
 /// Source of an interaction event.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum InteractionSource
 {
     /// <summary>Event originated from user input.</summary>

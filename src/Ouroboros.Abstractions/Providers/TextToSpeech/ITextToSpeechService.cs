@@ -3,12 +3,15 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Providers.TextToSpeech;
 
 /// <summary>
 /// Defines the contract for text-to-speech synthesis services.
 /// Supports various providers (OpenAI TTS, Azure, local engines, etc.).
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface ITextToSpeechService
 {
     /// <summary>

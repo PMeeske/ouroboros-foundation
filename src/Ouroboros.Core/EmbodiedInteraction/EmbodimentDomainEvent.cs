@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
@@ -6,6 +8,7 @@ namespace Ouroboros.Core.EmbodiedInteraction;
 /// <param name="EventType">Type of domain event.</param>
 /// <param name="Timestamp">When the event occurred.</param>
 /// <param name="Details">Event details.</param>
+[ExcludeFromCodeCoverage]
 public sealed record EmbodimentDomainEvent(
     EmbodimentDomainEventType EventType,
     DateTime Timestamp,

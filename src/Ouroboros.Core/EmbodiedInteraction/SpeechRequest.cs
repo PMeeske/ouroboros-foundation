@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
@@ -7,6 +9,7 @@ namespace Ouroboros.Core.EmbodiedInteraction;
 /// <param name="Priority">Priority (higher = more urgent).</param>
 /// <param name="Emotion">Optional emotion to convey.</param>
 /// <param name="Interruptible">Can this be interrupted by barge-in.</param>
+[ExcludeFromCodeCoverage]
 public sealed record SpeechRequest(
     string Text,
     int Priority = 0,

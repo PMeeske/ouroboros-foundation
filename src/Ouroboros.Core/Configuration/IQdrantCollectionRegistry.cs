@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Core.Configuration;
 
@@ -8,6 +9,7 @@ namespace Ouroboros.Core.Configuration;
 /// Resolves Qdrant collection names by role.
 /// Seeded from configuration defaults, enriched at startup via live collection discovery.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IQdrantCollectionRegistry
 {
     /// <summary>

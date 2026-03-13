@@ -3,6 +3,8 @@
 // Enables learning how to learn more effectively
 // ==========================================================
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.MetaLearning;
 
 /// <summary>
@@ -10,6 +12,7 @@ namespace Ouroboros.Agent.MetaAI.MetaLearning;
 /// Enables the agent to learn how to learn more effectively by optimizing learning strategies,
 /// performing few-shot adaptation, and suggesting optimal hyperparameters.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IMetaLearner
 {
     /// <summary>

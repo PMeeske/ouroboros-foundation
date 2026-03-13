@@ -3,12 +3,15 @@
 // Phase 3: Affective Dynamics - SLA regulation & corrective triggers
 // ==========================================================
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.Affect;
 
 /// <summary>
 /// Interface for homeostasis policy management.
 /// Enforces SLA boundaries and triggers corrective actions.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IHomeostasisPolicy
 {
     /// <summary>
