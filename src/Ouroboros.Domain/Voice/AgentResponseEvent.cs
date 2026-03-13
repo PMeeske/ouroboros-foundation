@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Voice;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Voice;
 
 /// <summary>
 /// Agent response token/chunk streamed word-by-word or sentence-by-sentence.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record AgentResponseEvent : InteractionEvent
 {
     /// <summary>Gets the text chunk.</summary>

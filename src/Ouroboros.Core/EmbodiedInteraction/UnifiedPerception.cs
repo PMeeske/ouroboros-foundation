@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
@@ -7,6 +9,7 @@ namespace Ouroboros.Core.EmbodiedInteraction;
 /// <param name="Modality">Sensor modality.</param>
 /// <param name="Perception">The perception event.</param>
 /// <param name="Timestamp">When perceived.</param>
+[ExcludeFromCodeCoverage]
 public sealed record UnifiedPerception(
     string Source,
     SensorModality Modality,

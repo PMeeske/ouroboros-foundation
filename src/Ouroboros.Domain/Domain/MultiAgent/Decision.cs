@@ -2,6 +2,8 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Domain.MultiAgent;
 
 /// <summary>
@@ -11,6 +13,7 @@ namespace Ouroboros.Domain.MultiAgent;
 /// <param name="Accepted">Whether the proposal was accepted.</param>
 /// <param name="Votes">The votes cast by each agent.</param>
 /// <param name="ConsensusScore">Overall consensus score (0.0 to 1.0).</param>
+[ExcludeFromCodeCoverage]
 public sealed record Decision(
     string Proposal,
     bool Accepted,

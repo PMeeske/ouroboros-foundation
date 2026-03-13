@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Synthesis;
 
 /// <summary>
@@ -6,6 +8,7 @@ namespace Ouroboros.Core.Synthesis;
 /// <param name="Root">The root node of the AST.</param>
 /// <param name="Depth">The maximum depth of the tree.</param>
 /// <param name="NodeCount">The total number of nodes in the tree.</param>
+[ExcludeFromCodeCoverage]
 public sealed record AbstractSyntaxTree(
     ASTNode Root,
     int Depth,

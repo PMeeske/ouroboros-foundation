@@ -2,11 +2,14 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Domain.MultiAgent;
 
 /// <summary>
 /// Defines types of messages that can be exchanged between agents.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum MessageType
 {
     /// <summary>

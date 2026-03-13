@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Reasoning;
 
 /// <summary>
@@ -7,6 +9,7 @@ namespace Ouroboros.Core.Reasoning;
 /// <param name="CausalPaths">The causal paths from causes to the effect.</param>
 /// <param name="Attributions">Attribution scores for each potential cause.</param>
 /// <param name="NarrativeExplanation">A human-readable narrative explanation.</param>
+[ExcludeFromCodeCoverage]
 public sealed record Explanation(
     string Effect,
     List<CausalPath> CausalPaths,

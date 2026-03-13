@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Voice;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Voice;
 
 /// <summary>
 /// Error event for stream error handling.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record ErrorEvent : InteractionEvent
 {
     /// <summary>Gets the error message.</summary>

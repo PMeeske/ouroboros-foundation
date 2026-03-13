@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.CognitivePhysics;
 
 /// <summary>
@@ -7,6 +9,7 @@ namespace Ouroboros.Core.CognitivePhysics;
 /// <param name="PenaltyFactor">Rate at which compression degrades on failure.</param>
 /// <param name="MinCompression">Lower bound for compression (most efficient).</param>
 /// <param name="MaxCompression">Upper bound for compression (least efficient).</param>
+[ExcludeFromCodeCoverage]
 public sealed record EvolutionaryConfig(
     double LearningRate = 0.05,
     double PenaltyFactor = 0.1,

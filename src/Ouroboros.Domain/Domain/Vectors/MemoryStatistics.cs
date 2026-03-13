@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Vectors;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Vectors;
 
 /// <summary>
 /// Statistics about Ouroboros's vector memory usage.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record MemoryStatistics(
     int TotalCollections,
     long TotalVectors,

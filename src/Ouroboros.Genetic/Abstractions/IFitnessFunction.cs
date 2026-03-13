@@ -2,6 +2,8 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Genetic.Abstractions;
 
 /// <summary>
@@ -9,6 +11,7 @@ namespace Ouroboros.Genetic.Abstractions;
 /// Fitness functions can evaluate based on test results, user satisfaction, or other metrics.
 /// </summary>
 /// <typeparam name="TGene">The type of gene in the chromosomes being evaluated.</typeparam>
+[ExcludeFromCodeCoverage]
 public interface IFitnessFunction<TGene>
 {
     /// <summary>

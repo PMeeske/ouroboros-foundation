@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Autonomous;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Autonomous;
 
 /// <summary>
 /// Statistics for a Qdrant collection.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record QdrantCollectionStats
 {
     public required string Name { get; init; }

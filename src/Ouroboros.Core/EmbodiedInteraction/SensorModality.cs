@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Sensor modality types.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum SensorModality
 {
     /// <summary>Microphone/audio input.</summary>

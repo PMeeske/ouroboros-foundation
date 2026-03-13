@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Tools.MeTTa;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Tools.MeTTa;
 
 /// <summary>
 /// Strategy for rule induction.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum InductionStrategy
 {
     /// <summary>First Order Inductive Learner.</summary>

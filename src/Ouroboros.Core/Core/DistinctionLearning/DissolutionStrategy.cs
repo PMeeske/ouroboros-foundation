@@ -2,11 +2,14 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.DistinctionLearning;
 
 /// <summary>
 /// Strategy for dissolving low-value distinctions.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum DissolutionStrategy
 {
     /// <summary>

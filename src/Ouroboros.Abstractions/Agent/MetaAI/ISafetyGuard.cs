@@ -2,12 +2,15 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI;
 
 /// <summary>
 /// Interface for safety guard that validates agent actions before execution.
 /// Ensures actions comply with safety policies and ethical constraints.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface ISafetyGuard
 {
     /// <summary>

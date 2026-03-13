@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Providers.SpeechToText;
 
 /// <summary>
@@ -7,6 +9,7 @@ namespace Ouroboros.Providers.SpeechToText;
 /// <param name="Language">The detected or specified language.</param>
 /// <param name="Duration">Duration of the audio in seconds.</param>
 /// <param name="Segments">Optional word/segment-level timestamps.</param>
+[ExcludeFromCodeCoverage]
 public sealed record TranscriptionResult(
     string Text,
     string? Language = null,

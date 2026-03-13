@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Capability that the virtual self possesses.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum Capability
 {
     /// <summary>Can perceive audio/speech.</summary>

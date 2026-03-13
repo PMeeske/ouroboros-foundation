@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Domain.States;
 
 /// <summary>
@@ -8,6 +10,7 @@ namespace Ouroboros.Domain.States;
 /// <param name="RevisionText">The updated markdown content.</param>
 /// <param name="Iteration">The 1-based iteration count for the revision loop.</param>
 /// <param name="Goal">Optional goal or rubric supplied to the editor.</param>
+[ExcludeFromCodeCoverage]
 public sealed record DocumentRevision(
     string FilePath,
     string RevisionText,

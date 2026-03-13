@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI;
 
 /// <summary>
@@ -6,6 +8,7 @@ namespace Ouroboros.Agent.MetaAI;
 /// <param name="Resource">The resource being accessed.</param>
 /// <param name="Level">The permission level required.</param>
 /// <param name="Reason">Reason for the permission request.</param>
+[ExcludeFromCodeCoverage]
 public sealed record Permission(
     string Resource,
     PermissionLevel Level,

@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Hyperon;
 
 /// <summary>
@@ -6,6 +8,7 @@ namespace Ouroboros.Core.Hyperon;
 /// Examples: Human, Mortal, Socrates, implies.
 /// </summary>
 /// <param name="Name">The symbol's name.</param>
+[ExcludeFromCodeCoverage]
 public sealed record Symbol(string Name) : Atom
 {
     /// <inheritdoc/>

@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Governance;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Governance;
 
 /// <summary>
 /// Defines actions to take when approval times out.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum ApprovalTimeoutAction
 {
     /// <summary>

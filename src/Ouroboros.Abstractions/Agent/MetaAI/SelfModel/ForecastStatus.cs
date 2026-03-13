@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.SelfModel;
 
 /// <summary>
 /// Status of a forecast.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum ForecastStatus
 {
     /// <summary>Forecast is pending - target time not reached</summary>

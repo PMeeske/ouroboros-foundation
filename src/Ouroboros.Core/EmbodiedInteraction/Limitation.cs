@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
@@ -6,6 +8,7 @@ namespace Ouroboros.Core.EmbodiedInteraction;
 /// <param name="Type">Type of limitation.</param>
 /// <param name="Description">Human-readable description.</param>
 /// <param name="Severity">Severity level (0.0-1.0).</param>
+[ExcludeFromCodeCoverage]
 public sealed record Limitation(
     LimitationType Type,
     string Description,

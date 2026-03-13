@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Reasoning;
 
 /// <summary>
@@ -7,6 +9,7 @@ namespace Ouroboros.Core.Reasoning;
 /// <param name="Effect">The effect variable.</param>
 /// <param name="Strength">The strength of the causal relationship.</param>
 /// <param name="Type">The type of edge (direct, confounded, mediated, collider).</param>
+[ExcludeFromCodeCoverage]
 public sealed record CausalEdge(
     string Cause,
     string Effect,

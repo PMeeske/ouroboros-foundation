@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.MetaLearning;
 
 /// <summary>
 /// Enumeration of learning approaches.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum LearningApproach
 {
     /// <summary>Supervised learning with labeled examples.</summary>

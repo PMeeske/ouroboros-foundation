@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Synthesis;
 
 /// <summary>
@@ -6,6 +8,7 @@ namespace Ouroboros.Core.Synthesis;
 /// <param name="Input">The input value for the example.</param>
 /// <param name="ExpectedOutput">The expected output value for the given input.</param>
 /// <param name="TimeoutSeconds">Optional timeout for execution of this example.</param>
+[ExcludeFromCodeCoverage]
 public sealed record InputOutputExample(
     object Input,
     object ExpectedOutput,

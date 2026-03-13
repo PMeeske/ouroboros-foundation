@@ -4,6 +4,7 @@
 
 using Ouroboros.Abstractions;
 using Ouroboros.Abstractions.Monads;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.WorldModel;
 
@@ -11,6 +12,7 @@ namespace Ouroboros.Agent.WorldModel;
 /// Interface for predictive world models enabling model-based planning.
 /// Allows agents to simulate future states and plan action sequences.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IWorldModel
 {
     /// <summary>

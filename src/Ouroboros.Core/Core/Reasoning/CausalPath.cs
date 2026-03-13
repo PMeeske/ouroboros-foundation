@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Reasoning;
 
 /// <summary>
@@ -7,6 +9,7 @@ namespace Ouroboros.Core.Reasoning;
 /// <param name="TotalEffect">The total causal effect along this path.</param>
 /// <param name="IsDirect">Whether this is a direct path (no mediators).</param>
 /// <param name="Edges">The edges comprising this path.</param>
+[ExcludeFromCodeCoverage]
 public sealed record CausalPath(
     List<string> Variables,
     double TotalEffect,

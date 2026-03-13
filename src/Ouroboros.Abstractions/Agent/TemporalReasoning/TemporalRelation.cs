@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.TemporalReasoning;
 
 /// <summary>
 /// Represents a temporal relation between two events (Allen's interval algebra) — simplified canonical form.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum TemporalRelation
 {
     /// <summary>Event A happens before Event B.</summary>

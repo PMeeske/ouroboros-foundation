@@ -2,6 +2,8 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.CognitivePhysics;
 
 /// <summary>
@@ -10,6 +12,7 @@ namespace Ouroboros.Core.CognitivePhysics;
 /// </summary>
 /// <param name="State">The cognitive state for this branch.</param>
 /// <param name="Weight">The coherence weight of this branch (0.0 to 1.0).</param>
+[ExcludeFromCodeCoverage]
 public sealed record CognitiveBranch(
     CognitiveState State,
     double Weight);

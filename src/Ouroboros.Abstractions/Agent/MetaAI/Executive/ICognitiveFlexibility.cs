@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.Executive;
 
 /// <summary>
@@ -5,6 +7,7 @@ namespace Ouroboros.Agent.MetaAI.Executive;
 /// Detects when current strategy is failing and triggers strategy switching.
 /// Implements SCAMPER creative reasoning and conceptual blending.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface ICognitiveFlexibility
 {
     /// <summary>

@@ -2,6 +2,8 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Domain.States;
 
 /// <summary>
@@ -9,4 +11,5 @@ namespace Ouroboros.Domain.States;
 /// Used in the refinement loop to identify areas for improvement.
 /// </summary>
 /// <param name="CritiqueText">The critique text with feedback and suggestions</param>
+[ExcludeFromCodeCoverage]
 public sealed record Critique(string CritiqueText) : ReasoningState("Critique", CritiqueText);

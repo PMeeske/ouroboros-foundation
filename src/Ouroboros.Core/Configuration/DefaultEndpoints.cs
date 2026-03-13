@@ -1,6 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Configuration;
 
 /// <summary>Default service endpoint constants.</summary>
+[ExcludeFromCodeCoverage]
 public static class DefaultEndpoints
 {
     /// <summary>Default Ollama HTTP endpoint.</summary>

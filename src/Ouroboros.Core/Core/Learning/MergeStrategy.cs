@@ -2,11 +2,14 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Learning;
 
 /// <summary>
 /// Strategies for merging multiple LoRA/PEFT adapters.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum MergeStrategy
 {
     /// <summary>

@@ -3,6 +3,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Abstractions.Agent.Dispatch;
 
 /// <summary>
@@ -11,6 +13,7 @@ namespace Ouroboros.Abstractions.Agent.Dispatch;
 /// Host layers (CLI, WebAPI, Android) register an implementation backed
 /// by their preferred dispatch mechanism (e.g. MediatR, custom DI lookup).
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IDispatcher
 {
     /// <summary>

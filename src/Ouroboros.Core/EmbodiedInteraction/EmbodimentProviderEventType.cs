@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Types of embodiment provider events.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum EmbodimentProviderEventType
 {
     /// <summary>Provider connected.</summary>

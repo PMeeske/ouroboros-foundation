@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.Executive;
 
 /// <summary>
@@ -51,6 +53,7 @@ public interface IAttentionController
 /// <summary>
 /// Mode of attention allocation.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum AttentionMode
 {
     /// <summary>Single-target focused attention.</summary>
