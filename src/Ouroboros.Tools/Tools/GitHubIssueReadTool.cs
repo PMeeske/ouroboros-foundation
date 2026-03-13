@@ -43,7 +43,7 @@ public sealed class GitHubIssueReadTool : ITool
         {
             GitHubIssueReadArgs args = ToolJson.Deserialize<GitHubIssueReadArgs>(input);
 
-            Issue issue = await this.client.Issue.Get(this.owner, this.repo, args.IssueNumber);
+            Issue issue = await this.client.Issue.Get(this.owner, this.repo, args.IssueNumber).ConfigureAwait(false);
 
             string result = $"Issue #{issue.Number}: {issue.Title}\n" +
                             $"State: {issue.State}\n" +

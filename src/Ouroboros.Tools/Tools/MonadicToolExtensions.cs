@@ -14,14 +14,14 @@ public static class MonadicToolExtensions
     /// </summary>
     /// <returns></returns>
     public static Step<string, Result<string, string>> ToStep(this ITool tool)
-        => async input => await tool.InvokeAsync(input);
+        => async input => await tool.InvokeAsync(input).ConfigureAwait(false);
 
     /// <summary>
     /// Convert tool to Kleisli arrow.
     /// </summary>
     /// <returns></returns>
     public static KleisliResult<string, string, string> ToKleisli(this ITool tool)
-        => async input => await tool.InvokeAsync(input);
+        => async input => await tool.InvokeAsync(input).ConfigureAwait(false);
 
     /// <summary>
     /// Chain tools together monadically.
@@ -31,10 +31,10 @@ public static class MonadicToolExtensions
     {
         return async input =>
         {
-            Result<string, string> firstResult = await first.InvokeAsync(input);
+            Result<string, string> firstResult = await first.InvokeAsync(input).ConfigureAwait(false);
             return await firstResult.Match(
                 success => second.InvokeAsync(success),
-                failure => Task.FromResult(Result<string, string>.Failure(failure)));
+                failure => Task.FromResult(Result<string, string>.Failure(failure))).ConfigureAwait(false);
         };
     }
 
@@ -46,10 +46,10 @@ public static class MonadicToolExtensions
     {
         return async input =>
         {
-            Result<string, string> firstResult = await first.InvokeAsync(input);
+            Result<string, string> firstResult = await first.InvokeAsync(input).ConfigureAwait(false);
             return firstResult.IsSuccess
                 ? firstResult
-                : await fallback.InvokeAsync(input);
+                : await fallback.InvokeAsync(input).ConfigureAwait(false);
         };
     }
 
@@ -61,7 +61,7 @@ public static class MonadicToolExtensions
     {
         return async input =>
         {
-            Result<string, string> result = await tool.InvokeAsync(input);
+            Result<string, string> result = await tool.InvokeAsync(input).ConfigureAwait(false);
             return result.Map(mapper);
         };
     }
@@ -76,7 +76,7 @@ public static class MonadicToolExtensions
     {
         return async (input, context) =>
         {
-            Result<string, string> result = await tool.InvokeAsync(input);
+            Result<string, string> result = await tool.InvokeAsync(input).ConfigureAwait(false);
             string log = logMessage ?? $"Tool '{tool.Name}' executed";
             return (result, [log]);
         };

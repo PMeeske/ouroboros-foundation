@@ -23,7 +23,7 @@ public class DistinctionStorageServiceExtensionsTests
     public void AddDistinctionStorage_WithCustomConfig_ShouldUseCustomConfig()
     {
         var services = new ServiceCollection();
-        var customConfig = new DistinctionStorageConfig("/custom/path");
+        var customConfig = new DistinctionStorageConfig("/custom/path", 1024L * 1024 * 1024, TimeSpan.FromDays(30));
 
         services.AddDistinctionStorage(customConfig);
 

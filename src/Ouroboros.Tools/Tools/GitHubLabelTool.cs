@@ -58,14 +58,14 @@ public sealed class GitHubLabelTool : ITool
                 foreach (string label in args.AddLabels)
                 {
                     // Ensure label exists in repository
-                    await this.EnsureLabelExistsAsync(label);
+                    await this.EnsureLabelExistsAsync(label).ConfigureAwait(false);
                 }
 
                 await this.client.Issue.Labels.AddToIssue(
                     this.owner,
                     this.repo,
                     args.IssueNumber,
-                    args.AddLabels);
+                    args.AddLabels).ConfigureAwait(false);
                 
                 results.Add($"Added labels: {string.Join(", ", args.AddLabels)}");
             }
@@ -81,7 +81,7 @@ public sealed class GitHubLabelTool : ITool
                             this.owner,
                             this.repo,
                             args.IssueNumber,
-                            label);
+                            label).ConfigureAwait(false);
                     }
                     catch (NotFoundException)
                     {
@@ -115,7 +115,7 @@ public sealed class GitHubLabelTool : ITool
     {
         try
         {
-            await this.client.Issue.Labels.Get(this.owner, this.repo, labelName);
+            await this.client.Issue.Labels.Get(this.owner, this.repo, labelName).ConfigureAwait(false);
         }
         catch (NotFoundException)
         {
@@ -124,7 +124,7 @@ public sealed class GitHubLabelTool : ITool
             {
                 Description = $"Label created automatically",
             };
-            await this.client.Issue.Labels.Create(this.owner, this.repo, newLabel);
+            await this.client.Issue.Labels.Create(this.owner, this.repo, newLabel).ConfigureAwait(false);
         }
     }
 }

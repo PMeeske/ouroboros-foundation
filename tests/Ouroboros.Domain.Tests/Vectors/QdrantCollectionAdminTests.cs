@@ -43,7 +43,7 @@ public class QdrantCollectionAdminTests
     }
 
     [Fact]
-    public void AddCollectionLink_ShouldAddLink()
+    public async Task AddCollectionLink_ShouldAddLink()
     {
         var client = new QdrantClient("localhost", 6334);
         var mockRegistry = new Mock<IQdrantCollectionRegistry>();
@@ -58,11 +58,12 @@ public class QdrantCollectionAdminTests
         admin.AddCollectionLink(link);
 
         admin.CollectionLinks.Should().Contain(link);
+        await admin.DisposeAsync().ConfigureAwait(false);
         client.Dispose();
     }
 
     [Fact]
-    public void AddCollectionLink_Duplicate_ShouldNotAddTwice()
+    public async Task AddCollectionLink_Duplicate_ShouldNotAddTwice()
     {
         var client = new QdrantClient("localhost", 6334);
         var mockRegistry = new Mock<IQdrantCollectionRegistry>();
@@ -78,11 +79,12 @@ public class QdrantCollectionAdminTests
         admin.AddCollectionLink(link);
 
         admin.CollectionLinks.Count(l => l.SourceCollection == "a" && l.TargetCollection == "b").Should().Be(1);
+        await admin.DisposeAsync().ConfigureAwait(false);
         client.Dispose();
     }
 
     [Fact]
-    public void GetLinkedCollections_ShouldReturnMatchingLinks()
+    public async Task GetLinkedCollections_ShouldReturnMatchingLinks()
     {
         var client = new QdrantClient("localhost", 6334);
         var mockRegistry = new Mock<IQdrantCollectionRegistry>();
@@ -98,6 +100,7 @@ public class QdrantCollectionAdminTests
         var linked = admin.GetLinkedCollections("a");
 
         linked.Should().HaveCount(1);
+        await admin.DisposeAsync().ConfigureAwait(false);
         client.Dispose();
     }
 }

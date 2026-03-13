@@ -73,7 +73,7 @@ public class OuroborosNeuralNetworkTests : IDisposable
     [Fact]
     public void RegisterNeuron_AddsNeuron()
     {
-        var neuron = new StubNeuron("n1");
+        using var neuron = new StubNeuron("n1");
         _network.RegisterNeuron(neuron);
 
         _network.Neurons.Should().HaveCount(1);
@@ -83,7 +83,7 @@ public class OuroborosNeuralNetworkTests : IDisposable
     [Fact]
     public void RegisterNeuron_SetsNetworkAndBusReferences()
     {
-        var neuron = new StubNeuron("n1");
+        using var neuron = new StubNeuron("n1");
         _network.RegisterNeuron(neuron);
 
         neuron.Network.Should().BeSameAs(_network);
@@ -98,8 +98,8 @@ public class OuroborosNeuralNetworkTests : IDisposable
         using var net = new OuroborosNeuralNetwork(bus, topology: topology);
 
         var sharedTopics = new HashSet<string> { "shared.topic" };
-        var n1 = new StubNeuron("n1", sharedTopics);
-        var n2 = new StubNeuron("n2", sharedTopics);
+        using var n1 = new StubNeuron("n1", sharedTopics);
+        using var n2 = new StubNeuron("n2", sharedTopics);
 
         net.RegisterNeuron(n1);
         net.RegisterNeuron(n2);
@@ -115,7 +115,7 @@ public class OuroborosNeuralNetworkTests : IDisposable
     [Fact]
     public async Task UnregisterNeuronAsync_RemovesNeuron()
     {
-        var neuron = new StubNeuron("n1");
+        using var neuron = new StubNeuron("n1");
         _network.RegisterNeuron(neuron);
 
         await _network.UnregisterNeuronAsync("n1");
@@ -144,7 +144,7 @@ public class OuroborosNeuralNetworkTests : IDisposable
     [Fact]
     public void Start_ActivatesAllNeurons()
     {
-        var neuron = new StubNeuron("n1");
+        using var neuron = new StubNeuron("n1");
         _network.RegisterNeuron(neuron);
 
         _network.Start();
@@ -176,7 +176,7 @@ public class OuroborosNeuralNetworkTests : IDisposable
     [Fact]
     public async Task RouteMessageAsync_TargetedMessage_RoutesToTarget()
     {
-        var target = new StubNeuron("n1");
+        using var target = new StubNeuron("n1");
         _network.RegisterNeuron(target);
         target.Start();
 
@@ -197,7 +197,7 @@ public class OuroborosNeuralNetworkTests : IDisposable
     [Fact]
     public async Task RouteMessageAsync_TopicMessage_RoutesToSubscribers()
     {
-        var subscriber = new StubNeuron("sub", new HashSet<string> { "events.new" });
+        using var subscriber = new StubNeuron("sub", new HashSet<string> { "events.new" });
         _network.RegisterNeuron(subscriber);
         subscriber.Start();
 
@@ -224,7 +224,7 @@ public class OuroborosNeuralNetworkTests : IDisposable
     [Fact]
     public async Task RouteMessageAsync_SameSourceNeuron_DoesNotRouteBack()
     {
-        var neuron = new StubNeuron("n1", new HashSet<string> { "test.msg" });
+        using var neuron = new StubNeuron("n1", new HashSet<string> { "test.msg" });
         _network.RegisterNeuron(neuron);
         neuron.Start();
 
@@ -248,8 +248,8 @@ public class OuroborosNeuralNetworkTests : IDisposable
     [Fact]
     public async Task BroadcastAsync_RoutesToAllExceptSource()
     {
-        var n1 = new StubNeuron("n1");
-        var n2 = new StubNeuron("n2");
+        using var n1 = new StubNeuron("n1");
+        using var n2 = new StubNeuron("n2");
         _network.RegisterNeuron(n1);
         _network.RegisterNeuron(n2);
         n1.Start();
@@ -275,7 +275,7 @@ public class OuroborosNeuralNetworkTests : IDisposable
 
         _network.SetMessageFilters(new List<IMessageFilter> { mockFilter.Object });
 
-        var subscriber = new StubNeuron("n1", new HashSet<string> { "blocked.topic" });
+        using var subscriber = new StubNeuron("n1", new HashSet<string> { "blocked.topic" });
         _network.RegisterNeuron(subscriber);
         subscriber.Start();
 
@@ -301,7 +301,7 @@ public class OuroborosNeuralNetworkTests : IDisposable
 
         _network.SetMessageFilters(new List<IMessageFilter> { mockFilter.Object });
 
-        var subscriber = new StubNeuron("n1", new HashSet<string> { "allowed.topic" });
+        using var subscriber = new StubNeuron("n1", new HashSet<string> { "allowed.topic" });
         _network.RegisterNeuron(subscriber);
         subscriber.Start();
 
@@ -333,7 +333,7 @@ public class OuroborosNeuralNetworkTests : IDisposable
     [Fact]
     public void GetNeuron_ExistingId_ReturnsNeuron()
     {
-        var neuron = new StubNeuron("n1");
+        using var neuron = new StubNeuron("n1");
         _network.RegisterNeuron(neuron);
 
         _network.GetNeuron("n1").Should().BeSameAs(neuron);
@@ -348,8 +348,10 @@ public class OuroborosNeuralNetworkTests : IDisposable
     [Fact]
     public void GetNeuronsByType_ReturnsMatchingNeurons()
     {
-        _network.RegisterNeuron(new StubNeuron("n1"));
-        _network.RegisterNeuron(new StubNeuron("n2"));
+        using var sn1 = new StubNeuron("n1");
+        using var sn2 = new StubNeuron("n2");
+        _network.RegisterNeuron(sn1);
+        _network.RegisterNeuron(sn2);
 
         _network.GetNeuronsByType(NeuronType.Custom).Should().HaveCount(2);
     }
@@ -373,7 +375,8 @@ public class OuroborosNeuralNetworkTests : IDisposable
     [Fact]
     public void GetNetworkState_ContainsStatusInfo()
     {
-        _network.RegisterNeuron(new StubNeuron("n1"));
+        using var sn = new StubNeuron("n1");
+        _network.RegisterNeuron(sn);
 
         string state = _network.GetNetworkState();
         state.Should().Contain("Ouroboros Neural Network");
@@ -391,7 +394,7 @@ public class OuroborosNeuralNetworkTests : IDisposable
         using var bus = new IntentionBus();
         using var net = new OuroborosNeuralNetwork(bus, topology: topology);
 
-        var subscriber = new StubNeuron("sub", new HashSet<string> { "test.topic" });
+        using var subscriber = new StubNeuron("sub", new HashSet<string> { "test.topic" });
         net.RegisterNeuron(subscriber);
         subscriber.Start();
 
@@ -417,7 +420,7 @@ public class OuroborosNeuralNetworkTests : IDisposable
         using var bus = new IntentionBus();
         using var net = new OuroborosNeuralNetwork(bus, topology: topology);
 
-        var subscriber = new StubNeuron("sub", new HashSet<string> { "test.topic" });
+        using var subscriber = new StubNeuron("sub", new HashSet<string> { "test.topic" });
         net.RegisterNeuron(subscriber);
         subscriber.Start();
 

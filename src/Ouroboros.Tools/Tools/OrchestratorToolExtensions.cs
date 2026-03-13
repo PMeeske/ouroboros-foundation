@@ -26,7 +26,7 @@ public static class OrchestratorToolExtensions
                 System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
                 try
                 {
-                    Result<string, string> result = await tool.InvokeAsync(input, ct);
+                    Result<string, string> result = await tool.InvokeAsync(input, ct).ConfigureAwait(false);
                     sw.Stop();
                     metricsCallback(tool.Name, sw.Elapsed.TotalMilliseconds, result.IsSuccess);
                     return result;
@@ -66,7 +66,7 @@ public static class OrchestratorToolExtensions
                             "No suitable tool selected for input");
                     }
 
-                    return await selected.InvokeAsync(input, ct);
+                    return await selected.InvokeAsync(input, ct).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException) { throw; }
                 catch (InvalidOperationException ex)
@@ -95,7 +95,7 @@ public static class OrchestratorToolExtensions
                 try
                 {
                     Task<Result<string, string>>[] tasks = tools.Select(t => t.InvokeAsync(input, ct)).ToArray();
-                    Result<string, string>[] results = await Task.WhenAll(tasks);
+                    Result<string, string>[] results = await Task.WhenAll(tasks).ConfigureAwait(false);
 
                     string[] successes = results
                         .Where(r => r.IsSuccess)
@@ -143,7 +143,7 @@ public static class OrchestratorToolExtensions
                         return Result<string, string>.Failure("Operation cancelled");
                     }
 
-                    lastResult = await tool.InvokeAsync(input, ct);
+                    lastResult = await tool.InvokeAsync(input, ct).ConfigureAwait(false);
 
                     if (lastResult.IsSuccess)
                     {
@@ -152,7 +152,7 @@ public static class OrchestratorToolExtensions
 
                     if (i < maxRetries - 1)
                     {
-                        await Task.Delay(delayMs * (i + 1), ct);
+                        await Task.Delay(delayMs * (i + 1), ct).ConfigureAwait(false);
                     }
                 }
 
@@ -191,7 +191,7 @@ public static class OrchestratorToolExtensions
                 }
 
                 // Execute tool
-                Result<string, string> result = await tool.InvokeAsync(input, ct);
+                Result<string, string> result = await tool.InvokeAsync(input, ct).ConfigureAwait(false);
 
                 // Cache successful results
                 if (result.IsSuccess)
@@ -224,7 +224,7 @@ public static class OrchestratorToolExtensions
 
                 try
                 {
-                    return await tool.InvokeAsync(input, cts.Token);
+                    return await tool.InvokeAsync(input, cts.Token).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {
@@ -248,7 +248,7 @@ public static class OrchestratorToolExtensions
             primary.Description,
             async (input, ct) =>
             {
-                Result<string, string> result = await primary.InvokeAsync(input, ct);
+                Result<string, string> result = await primary.InvokeAsync(input, ct).ConfigureAwait(false);
 
                 if (result.IsSuccess)
                 {
@@ -256,7 +256,7 @@ public static class OrchestratorToolExtensions
                 }
 
                 // Try fallback
-                return await fallback.InvokeAsync(input, ct);
+                return await fallback.InvokeAsync(input, ct).ConfigureAwait(false);
             },
             primary.JsonSchema);
     }

@@ -329,7 +329,7 @@ public sealed partial class HyperonMeTTaEngine : IMeTTaEngine, IDisposable
                 continue; // Skip empty lines and comments
             }
 
-            Result<Unit, string> result = await AddFactAsync(trimmed, ct);
+            Result<Unit, string> result = await AddFactAsync(trimmed, ct).ConfigureAwait(false);
             if (!result.IsSuccess)
             {
                 return result;

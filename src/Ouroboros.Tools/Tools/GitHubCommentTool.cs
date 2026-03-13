@@ -56,7 +56,7 @@ public sealed class GitHubCommentTool : ITool
                 this.owner,
                 this.repo,
                 args.IssueNumber,
-                args.Body);
+                args.Body).ConfigureAwait(false);
 
             return Result<string, string>.Success(
                 $"✅ Comment added successfully to issue #{args.IssueNumber}\n" +

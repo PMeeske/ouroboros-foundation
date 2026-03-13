@@ -104,7 +104,7 @@ public class QdrantNeuralMemoryTests
         var client = new Mock<QdrantClient>("localhost").Object;
         var mockRegistry = CreateMockRegistry();
 
-        var memory = new QdrantNeuralMemory(client, mockRegistry.Object, CreateSettings());
+        using var memory = new QdrantNeuralMemory(client, mockRegistry.Object, CreateSettings());
         var act = () => memory.Dispose();
         act.Should().NotThrow();
     }

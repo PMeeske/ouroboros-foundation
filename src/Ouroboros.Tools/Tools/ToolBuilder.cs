@@ -23,8 +23,8 @@ public static class ToolBuilder
                 }
 
                 result = await result.Match(
-                    async success => await tool.InvokeAsync(success, ct),
-                    failure => Task.FromResult(Result<string, string>.Failure(failure)));
+                    async success => await tool.InvokeAsync(success, ct).ConfigureAwait(false),
+                    failure => Task.FromResult(Result<string, string>.Failure(failure))).ConfigureAwait(false);
 
                 if (result.IsFailure)
                 {
@@ -51,7 +51,7 @@ public static class ToolBuilder
                     return Result<string, string>.Failure("Operation cancelled");
                 }
 
-                Result<string, string> result = await tool.InvokeAsync(input, ct);
+                Result<string, string> result = await tool.InvokeAsync(input, ct).ConfigureAwait(false);
                 if (result.IsSuccess)
                 {
                     return result;
@@ -74,7 +74,7 @@ public static class ToolBuilder
             try
             {
                 ITool selectedTool = selector(input);
-                return await selectedTool.InvokeAsync(input, ct);
+                return await selectedTool.InvokeAsync(input, ct).ConfigureAwait(false);
             }
             catch (OperationCanceledException) { throw; }
             catch (InvalidOperationException ex)

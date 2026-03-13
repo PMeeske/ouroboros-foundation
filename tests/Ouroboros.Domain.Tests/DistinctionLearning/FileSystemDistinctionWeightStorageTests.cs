@@ -12,7 +12,7 @@ public class FileSystemDistinctionWeightStorageTests : IDisposable
     public FileSystemDistinctionWeightStorageTests()
     {
         _tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-        _storage = new FileSystemDistinctionWeightStorage(new DistinctionStorageConfig(_tempDir));
+        _storage = new FileSystemDistinctionWeightStorage(new DistinctionStorageConfig(_tempDir, 1024L * 1024 * 1024, TimeSpan.FromDays(30)));
     }
 
     public void Dispose()

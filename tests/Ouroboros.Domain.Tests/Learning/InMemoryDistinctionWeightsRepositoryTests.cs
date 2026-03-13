@@ -8,8 +8,8 @@ namespace Ouroboros.Tests.Learning;
 public class InMemoryDistinctionWeightsRepositoryTests
 {
     private static DistinctionWeights MakeWeights(DistinctionId? id = null, double fitness = 0.5) =>
-        new(id ?? new DistinctionId(Guid.NewGuid()), "test", new float[] { 1f, 2f, 3f }, fitness,
-            DreamStage.Distinction, DateTime.UtcNow, DateTime.UtcNow);
+        new(id ?? new DistinctionId(Guid.NewGuid()), new float[] { 1f, 2f, 3f }, new float[] { 0.5f }, new float[] { 0.1f },
+            DreamStage.Distinction, fitness, "test", DateTime.UtcNow, DateTime.UtcNow);
 
     [Fact]
     public async Task StoreAndGet_ShouldRoundTrip()
@@ -41,8 +41,8 @@ public class InMemoryDistinctionWeightsRepositoryTests
         var id2 = new DistinctionId(Guid.NewGuid());
 
         await repo.StoreDistinctionWeightsAsync(id1, MakeWeights(id1));
-        await repo.StoreDistinctionWeightsAsync(id2, new DistinctionWeights(id2, "other",
-            new float[] { 10f, 20f, 30f }, 0.5, DreamStage.Distinction, DateTime.UtcNow, DateTime.UtcNow));
+        await repo.StoreDistinctionWeightsAsync(id2, new DistinctionWeights(id2, new float[] { 10f, 20f, 30f },
+            new float[] { 0.5f }, new float[] { 0.1f }, DreamStage.Distinction, 0.5, "other", DateTime.UtcNow, DateTime.UtcNow));
 
         var result = await repo.FindSimilarDistinctionsAsync(new float[] { 1f, 2f, 3f }, topK: 2);
 

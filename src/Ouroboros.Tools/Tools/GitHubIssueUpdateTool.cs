@@ -78,7 +78,7 @@ public sealed class GitHubIssueUpdateTool : ITool
                 }
             }
 
-            Issue updatedIssue = await this.client.Issue.Update(this.owner, this.repo, args.IssueNumber, update);
+            Issue updatedIssue = await this.client.Issue.Update(this.owner, this.repo, args.IssueNumber, update).ConfigureAwait(false);
 
             return Result<string, string>.Success(
                 $"✅ Issue #{updatedIssue.Number} updated successfully\n" +

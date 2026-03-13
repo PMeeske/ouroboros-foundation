@@ -75,7 +75,7 @@ public sealed class GitHubIssueCreateTool : ITool
                 }
             }
 
-            Issue issue = await this.client.Issue.Create(this.owner, this.repo, newIssue);
+            Issue issue = await this.client.Issue.Create(this.owner, this.repo, newIssue).ConfigureAwait(false);
 
             return Result<string, string>.Success(
                 $"✅ Issue #{issue.Number} created successfully\n" +

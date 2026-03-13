@@ -107,8 +107,8 @@ public class AgentPresenceControllerTests
     [Fact]
     public void Dispose_ShouldNotThrow()
     {
-        var stream = new InteractionStream();
-        var controller = new AgentPresenceController(stream);
+        using var stream = new InteractionStream();
+        using var controller = new AgentPresenceController(stream);
 
         var act = () =>
         {

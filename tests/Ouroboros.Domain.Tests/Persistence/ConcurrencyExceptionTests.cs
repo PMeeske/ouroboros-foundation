@@ -49,7 +49,7 @@ public class ConcurrencyExceptionTests
     [Fact]
     public void CanBeCaughtAsException()
     {
-        var act = () => throw new ConcurrencyException("main", 0, 1);
+        Action act = () => throw new ConcurrencyException("main", 0, 1);
 
         act.Should().Throw<ConcurrencyException>()
             .Which.BranchId.Should().Be("main");

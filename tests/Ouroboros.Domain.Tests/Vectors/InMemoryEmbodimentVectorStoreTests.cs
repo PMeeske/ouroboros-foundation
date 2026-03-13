@@ -4,8 +4,17 @@ using Ouroboros.Domain.Vectors;
 namespace Ouroboros.Tests.Vectors;
 
 [Trait("Category", "Unit")]
-public class InMemoryEmbodimentVectorStoreTests
+public class InMemoryEmbodimentVectorStoreTests : IAsyncLifetime
 {
+    private readonly InMemoryEmbodimentVectorStore _store = new();
+
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
+    {
+        await _store.DisposeAsync().ConfigureAwait(false);
+    }
+
     private static float[] MakeEmbedding(float seed, int dim = 4)
     {
         var v = new float[dim];
@@ -14,13 +23,14 @@ public class InMemoryEmbodimentVectorStoreTests
     }
 
     private static FusedPerception MakePerception(SensorModality modality = SensorModality.Text) =>
-        new(Guid.NewGuid(), DateTime.UtcNow, modality, "test understanding", 0.9,
-            HasAudio: modality == SensorModality.Audio,
-            HasVisual: modality == SensorModality.Vision,
-            Modalities: new Dictionary<SensorModality, object>());
+        new(Guid.NewGuid(), DateTime.UtcNow,
+            modality == SensorModality.Audio ? new List<AudioPerception>() { } : new List<AudioPerception>(),
+            modality == SensorModality.Visual ? new List<VisualPerception>() { } : new List<VisualPerception>(),
+            modality == SensorModality.Text ? new List<TextPerception>() { } : new List<TextPerception>(),
+            "test understanding", 0.9);
 
     private static EmbodimentStateSnapshot MakeSnapshot() =>
-        new(Guid.NewGuid(), DateTime.UtcNow, EmbodimentState.Active, "test",
+        new(Guid.NewGuid(), DateTime.UtcNow, EmbodimentState.Awake, "test",
             0.8, new HashSet<SensorModality> { SensorModality.Text }, null);
 
     private static AffordanceRecord MakeAffordance() =>
@@ -29,19 +39,17 @@ public class InMemoryEmbodimentVectorStoreTests
     [Fact]
     public async Task InitializeAsync_ShouldCompleteWithoutError()
     {
-        await using var store = new InMemoryEmbodimentVectorStore();
-        await store.InitializeAsync();
+        await _store.InitializeAsync().ConfigureAwait(false);
     }
 
     [Fact]
     public async Task StorePerception_ThenRecall_ShouldReturnResults()
     {
-        await using var store = new InMemoryEmbodimentVectorStore();
         var embedding = MakeEmbedding(1f);
         var perception = MakePerception();
 
-        await store.StorePerceptionAsync(perception, embedding);
-        var results = await store.RecallPerceptionsAsync(embedding, limit: 5);
+        await _store.StorePerceptionAsync(perception, embedding).ConfigureAwait(false);
+        var results = await _store.RecallPerceptionsAsync(embedding, limit: 5).ConfigureAwait(false);
 
         results.Should().HaveCount(1);
         results[0].Score.Should().BeGreaterThan(0.9f);
@@ -50,12 +58,10 @@ public class InMemoryEmbodimentVectorStoreTests
     [Fact]
     public async Task RecallPerceptions_WithModalityFilter_ShouldFilterResults()
     {
-        await using var store = new InMemoryEmbodimentVectorStore();
+        await _store.StorePerceptionAsync(MakePerception(SensorModality.Audio), MakeEmbedding(1f)).ConfigureAwait(false);
+        await _store.StorePerceptionAsync(MakePerception(SensorModality.Text), MakeEmbedding(2f)).ConfigureAwait(false);
 
-        await store.StorePerceptionAsync(MakePerception(SensorModality.Audio), MakeEmbedding(1f));
-        await store.StorePerceptionAsync(MakePerception(SensorModality.Text), MakeEmbedding(2f));
-
-        var results = await store.RecallPerceptionsAsync(MakeEmbedding(1f), modalityFilter: SensorModality.Audio);
+        var results = await _store.RecallPerceptionsAsync(MakeEmbedding(1f), modalityFilter: SensorModality.Audio).ConfigureAwait(false);
 
         results.Should().HaveCount(1);
     }
@@ -63,11 +69,10 @@ public class InMemoryEmbodimentVectorStoreTests
     [Fact]
     public async Task StoreState_ThenRecall_ShouldReturnResults()
     {
-        await using var store = new InMemoryEmbodimentVectorStore();
         var embedding = MakeEmbedding(1f);
 
-        await store.StoreStateSnapshotAsync(MakeSnapshot(), embedding);
-        var results = await store.RecallStatesAsync(embedding, limit: 5);
+        await _store.StoreStateSnapshotAsync(MakeSnapshot(), embedding).ConfigureAwait(false);
+        var results = await _store.RecallStatesAsync(embedding, limit: 5).ConfigureAwait(false);
 
         results.Should().HaveCount(1);
     }
@@ -75,11 +80,10 @@ public class InMemoryEmbodimentVectorStoreTests
     [Fact]
     public async Task StoreAffordance_ThenFind_ShouldReturnResults()
     {
-        await using var store = new InMemoryEmbodimentVectorStore();
         var embedding = MakeEmbedding(1f);
 
-        await store.StoreAffordanceAsync(MakeAffordance(), embedding);
-        var results = await store.FindAffordancesAsync(embedding, limit: 5);
+        await _store.StoreAffordanceAsync(MakeAffordance(), embedding).ConfigureAwait(false);
+        var results = await _store.FindAffordancesAsync(embedding, limit: 5).ConfigureAwait(false);
 
         results.Should().HaveCount(1);
     }
@@ -87,36 +91,32 @@ public class InMemoryEmbodimentVectorStoreTests
     [Fact]
     public async Task GetCounts_AfterStoring_ShouldReflectCounts()
     {
-        await using var store = new InMemoryEmbodimentVectorStore();
+        await _store.StorePerceptionAsync(MakePerception(), MakeEmbedding(1f)).ConfigureAwait(false);
+        await _store.StorePerceptionAsync(MakePerception(), MakeEmbedding(2f)).ConfigureAwait(false);
+        await _store.StoreStateSnapshotAsync(MakeSnapshot(), MakeEmbedding(3f)).ConfigureAwait(false);
+        await _store.StoreAffordanceAsync(MakeAffordance(), MakeEmbedding(4f)).ConfigureAwait(false);
 
-        await store.StorePerceptionAsync(MakePerception(), MakeEmbedding(1f));
-        await store.StorePerceptionAsync(MakePerception(), MakeEmbedding(2f));
-        await store.StoreStateSnapshotAsync(MakeSnapshot(), MakeEmbedding(3f));
-        await store.StoreAffordanceAsync(MakeAffordance(), MakeEmbedding(4f));
-
-        var counts = await store.GetCountsAsync();
+        var counts = await _store.GetCountsAsync().ConfigureAwait(false);
 
         counts.Perceptions.Should().Be(2);
-        counts.States.Should().Be(1);
+        counts.StateSnapshots.Should().Be(1);
         counts.Affordances.Should().Be(1);
     }
 
     [Fact]
     public async Task RecallPerceptions_WhenEmpty_ShouldReturnEmpty()
     {
-        await using var store = new InMemoryEmbodimentVectorStore();
-        var results = await store.RecallPerceptionsAsync(MakeEmbedding(1f));
+        var results = await _store.RecallPerceptionsAsync(MakeEmbedding(1f)).ConfigureAwait(false);
         results.Should().BeEmpty();
     }
 
     [Fact]
     public async Task RecallPerceptions_WithLimit_ShouldRespectLimit()
     {
-        await using var store = new InMemoryEmbodimentVectorStore();
         for (int i = 0; i < 10; i++)
-            await store.StorePerceptionAsync(MakePerception(), MakeEmbedding(i));
+            await _store.StorePerceptionAsync(MakePerception(), MakeEmbedding(i)).ConfigureAwait(false);
 
-        var results = await store.RecallPerceptionsAsync(MakeEmbedding(1f), limit: 3);
+        var results = await _store.RecallPerceptionsAsync(MakeEmbedding(1f), limit: 3).ConfigureAwait(false);
         results.Should().HaveCount(3);
     }
 }

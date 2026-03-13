@@ -45,10 +45,10 @@ public sealed partial class AdvancedMeTTaEngine : IAdvancedMeTTaEngine
         {
             return strategy switch
             {
-                InductionStrategy.FOIL => await InduceFoilRulesAsync(observations, ct),
-                InductionStrategy.GOLEM => await InduceGolemRulesAsync(observations, ct),
-                InductionStrategy.Progol => await InduceProgolRulesAsync(observations, ct),
-                InductionStrategy.ILP => await InduceIlpRulesAsync(observations, ct),
+                InductionStrategy.FOIL => await InduceFoilRulesAsync(observations, ct).ConfigureAwait(false),
+                InductionStrategy.GOLEM => await InduceGolemRulesAsync(observations, ct).ConfigureAwait(false),
+                InductionStrategy.Progol => await InduceProgolRulesAsync(observations, ct).ConfigureAwait(false),
+                InductionStrategy.ILP => await InduceIlpRulesAsync(observations, ct).ConfigureAwait(false),
                 _ => Result<List<Rule>, string>.Failure($"Unknown induction strategy: {strategy}"),
             };
         }
@@ -80,9 +80,9 @@ public sealed partial class AdvancedMeTTaEngine : IAdvancedMeTTaEngine
         {
             return strategy switch
             {
-                ProofStrategy.Resolution => await ProveByResolutionAsync(theorem, axioms, ct),
-                ProofStrategy.Tableaux => await ProveByTableauxAsync(theorem, axioms, ct),
-                ProofStrategy.NaturalDeduction => await ProveByNaturalDeductionAsync(theorem, axioms, ct),
+                ProofStrategy.Resolution => await ProveByResolutionAsync(theorem, axioms, ct).ConfigureAwait(false),
+                ProofStrategy.Tableaux => await ProveByTableauxAsync(theorem, axioms, ct).ConfigureAwait(false),
+                ProofStrategy.NaturalDeduction => await ProveByNaturalDeductionAsync(theorem, axioms, ct).ConfigureAwait(false),
                 _ => Result<ProofTrace, string>.Failure($"Unknown proof strategy: {strategy}"),
             };
         }

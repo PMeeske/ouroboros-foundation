@@ -62,6 +62,6 @@ public sealed class MeTTaRuleTool : ITool
             rule = input;
         }
 
-        return await this.engine.ApplyRuleAsync(rule, ct);
+        return await this.engine.ApplyRuleAsync(rule, ct).ConfigureAwait(false);
     }
 }

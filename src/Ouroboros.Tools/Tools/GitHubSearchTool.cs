@@ -56,8 +56,8 @@ public sealed class GitHubSearchTool : ITool
 
             return searchType switch
             {
-                "issues" => await this.SearchIssuesAsync(args.Query, args.MaxResults ?? 10),
-                "code" => await this.SearchCodeAsync(args.Query, args.MaxResults ?? 10),
+                "issues" => await this.SearchIssuesAsync(args.Query, args.MaxResults ?? 10).ConfigureAwait(false),
+                "code" => await this.SearchCodeAsync(args.Query, args.MaxResults ?? 10).ConfigureAwait(false),
                 _ => Result<string, string>.Failure($"Unknown search type: {searchType}. Valid types: issues, code")
             };
         }
@@ -84,7 +84,7 @@ public sealed class GitHubSearchTool : ITool
                 PerPage = Math.Min(maxResults, 100),
             };
 
-            SearchIssuesResult result = await this.client.Search.SearchIssues(request);
+            SearchIssuesResult result = await this.client.Search.SearchIssues(request).ConfigureAwait(false);
 
             if (result.TotalCount == 0)
             {
@@ -121,7 +121,7 @@ public sealed class GitHubSearchTool : ITool
                 PerPage = Math.Min(maxResults, 100),
             };
 
-            SearchCodeResult result = await this.client.Search.SearchCode(request);
+            SearchCodeResult result = await this.client.Search.SearchCode(request).ConfigureAwait(false);
 
             if (result.TotalCount == 0)
             {

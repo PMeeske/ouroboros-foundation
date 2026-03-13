@@ -204,13 +204,13 @@ public class Result<T>
             if (command.StartsWith("suggest"))
             {
                 var dsl = command.Substring(8);
-                var suggestions = await SuggestNextSteps(dsl);
+                var suggestions = await SuggestNextSteps(dsl).ConfigureAwait(false);
                 return $"Suggestions: {string.Join(", ", suggestions.Select(s => s.Step))}";
             }
             if (command.StartsWith("complete"))
             {
                 var partial = command.Substring(9);
-                var completions = await GetTokenCompletions(partial);
+                var completions = await GetTokenCompletions(partial).ConfigureAwait(false);
                 return $"Completions: {string.Join(", ", completions)}";
             }
             if (command == "help")

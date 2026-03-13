@@ -7,7 +7,7 @@ public class VoiceSideChannelTests : IAsyncDisposable
 {
     private readonly VoiceSideChannel _channel = new(maxQueueSize: 5);
 
-    public async ValueTask DisposeAsync() => await _channel.DisposeAsync();
+    public async ValueTask DisposeAsync() => await _channel.DisposeAsync().ConfigureAwait(false);
 
     // ═══════════════════════════════════════════════════════════════
     // Construction

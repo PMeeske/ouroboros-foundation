@@ -15,7 +15,7 @@ public class VoiceSideChannelExtensionsTests : IAsyncDisposable
         _channel.MessageSkipped += (_, msg) => _skippedMessages.Add(msg);
     }
 
-    public async ValueTask DisposeAsync() => await _channel.DisposeAsync();
+    public async ValueTask DisposeAsync() => await _channel.DisposeAsync().ConfigureAwait(false);
 
     [Fact]
     public void SayAs_DelegatesToSayWithPersona()

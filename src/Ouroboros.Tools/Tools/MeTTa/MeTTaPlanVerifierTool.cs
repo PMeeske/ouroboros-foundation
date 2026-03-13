@@ -62,7 +62,7 @@ public sealed class MeTTaPlanVerifierTool : ITool
             plan = input;
         }
 
-        Result<bool, string> result = await this.engine.VerifyPlanAsync(plan, ct);
+        Result<bool, string> result = await this.engine.VerifyPlanAsync(plan, ct).ConfigureAwait(false);
 
         return result.Match(
             isValid => Result<string, string>.Success(isValid ? "Plan is valid" : "Plan is invalid"),

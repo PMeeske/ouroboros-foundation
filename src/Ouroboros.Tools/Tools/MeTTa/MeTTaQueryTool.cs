@@ -67,6 +67,6 @@ public sealed class MeTTaQueryTool : ITool
             query = input;
         }
 
-        return await this.engine.ExecuteQueryAsync(query, ct);
+        return await this.engine.ExecuteQueryAsync(query, ct).ConfigureAwait(false);
     }
 }

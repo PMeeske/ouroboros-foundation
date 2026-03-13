@@ -8,12 +8,14 @@ public class EnvironmentInfoTests
     [Fact]
     public void Constructor_ShouldSetProperties()
     {
-        var info = new EnvironmentInfo("TestEnv", 100, 3, 10, true);
+        var actions = new List<string> { "move", "jump", "shoot" };
+        var observations = new List<string> { "position", "velocity" };
+        var info = new EnvironmentInfo("TestEnv", "A test environment", actions, observations, EnvironmentType.Gym);
 
         info.Name.Should().Be("TestEnv");
-        info.MaxSteps.Should().Be(100);
-        info.ObservationDimension.Should().Be(3);
-        info.ActionDimension.Should().Be(10);
-        info.IsContinuous.Should().BeTrue();
+        info.Description.Should().Be("A test environment");
+        info.AvailableActions.Should().HaveCount(3);
+        info.Observations.Should().HaveCount(2);
+        info.Type.Should().Be(EnvironmentType.Gym);
     }
 }

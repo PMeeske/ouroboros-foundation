@@ -210,7 +210,7 @@ public class InMemoryEventStoreTests
         {
             try
             {
-                await _store.AppendEventsAsync(BranchId, new[] { CreateEvent() }, expectedVersion: 0);
+                await _store.AppendEventsAsync(BranchId, new[] { CreateEvent() }, expectedVersion: 0).ConfigureAwait(false);
                 Interlocked.Increment(ref successCount);
             }
             catch (ConcurrencyException)

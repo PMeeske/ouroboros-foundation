@@ -18,6 +18,6 @@ public class EmbodiedTransitionTests
         transition.Action.Should().Be(action);
         transition.StateAfter.Should().Be(after);
         transition.Reward.Should().Be(1.0);
-        transition.Done.Should().BeFalse();
+        transition.Terminal.Should().BeFalse();
     }
 }

@@ -35,7 +35,7 @@ public static class AdvancedToolBuilder
                 {
                     if (predicate(input))
                     {
-                        return await tool.InvokeAsync(input, ct);
+                        return await tool.InvokeAsync(input, ct).ConfigureAwait(false);
                     }
                 }
 
@@ -63,7 +63,7 @@ public static class AdvancedToolBuilder
 
                 foreach (ITool tool in tools)
                 {
-                    Result<string, string> result = await tool.InvokeAsync(input, ct);
+                    Result<string, string> result = await tool.InvokeAsync(input, ct).ConfigureAwait(false);
                     result.Match(
                         success => results.Add(success),
                         failure => { /* Skip failed tools */ });

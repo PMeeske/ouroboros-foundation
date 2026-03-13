@@ -99,7 +99,7 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
     {
         if (flows.TryGetValue(flowName, out HyperonFlow? flow))
         {
-            await flow.ExecuteAsync(ct);
+            await flow.ExecuteAsync(ct).ConfigureAwait(false);
         }
     }
 
@@ -124,8 +124,8 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
             {
                 try
                 {
-                    await PerformReflectionAsync(loopId, reflectionDepth, cts.Token);
-                    await Task.Delay(loopInterval, cts.Token);
+                    await PerformReflectionAsync(loopId, reflectionDepth, cts.Token).ConfigureAwait(false);
+                    await Task.Delay(loopInterval, cts.Token).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {
@@ -226,19 +226,19 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
     private async Task PerformReflectionAsync(string loopId, int depth, CancellationToken ct)
     {
         // Add reflection event
-        await hyperonEngine.AddFactAsync($"(Reflection {loopId} {DateTime.UtcNow.Ticks} {depth})", ct);
+        await hyperonEngine.AddFactAsync($"(Reflection {loopId} {DateTime.UtcNow.Ticks} {depth})", ct).ConfigureAwait(false);
 
         // Query for thoughts to reflect on
         Result<string, string> thoughtsResult = await hyperonEngine.ExecuteQueryAsync(
             "(match &self (Thought $content $type) (: $content $type))",
-            ct);
+            ct).ConfigureAwait(false);
 
         if (thoughtsResult.IsSuccess && !string.IsNullOrEmpty(thoughtsResult.Value))
         {
             // Add meta-cognition atom
             await hyperonEngine.AddFactAsync(
                 $"(MetaCognition {loopId} reflecting-on {thoughtsResult.Value})",
-                ct);
+                ct).ConfigureAwait(false);
         }
 
         // Recursive reflection if depth > 1
@@ -246,7 +246,7 @@ public sealed class HyperonFlowIntegration : IAsyncDisposable
         {
             await hyperonEngine.AddFactAsync(
                 $"(DeepReflection {loopId} depth-{depth} {DateTime.UtcNow.Ticks})",
-                ct);
+                ct).ConfigureAwait(false);
         }
     }
 

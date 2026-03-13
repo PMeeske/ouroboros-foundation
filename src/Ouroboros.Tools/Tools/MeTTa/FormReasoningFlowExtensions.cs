@@ -28,8 +28,8 @@ public static class FormReasoningFlowExtensions
         return flow.Transform(async (engine, ct) =>
         {
             // Add distinction fact
-            await engine.AddFactAsync($"(Distinction {context} Mark)", ct);
-            await engine.AddFactAsync($"(DistinctionDrawn {context} {DateTime.UtcNow.Ticks})", ct);
+            await engine.AddFactAsync($"(Distinction {context} Mark)", ct).ConfigureAwait(false);
+            await engine.AddFactAsync($"(DistinctionDrawn {context} {DateTime.UtcNow.Ticks})", ct).ConfigureAwait(false);
 
             onDistinction?.Invoke(Form.Mark);
         });
@@ -51,7 +51,7 @@ public static class FormReasoningFlowExtensions
         {
             // Query current state
             Result<string, string> currentResult = await engine.ExecuteQueryAsync(
-                $"(match &self (Distinction {context} $state) $state)", ct);
+                $"(match &self (Distinction {context} $state) $state)", ct).ConfigureAwait(false);
 
             Form newState = Form.Void;
 
@@ -65,8 +65,8 @@ public static class FormReasoningFlowExtensions
             }
 
             // Update distinction
-            await engine.AddFactAsync($"(Distinction {context} {FormToSymbol(newState)})", ct);
-            await engine.AddFactAsync($"(DistinctionCrossed {context} {DateTime.UtcNow.Ticks})", ct);
+            await engine.AddFactAsync($"(Distinction {context} {FormToSymbol(newState)})", ct).ConfigureAwait(false);
+            await engine.AddFactAsync($"(DistinctionCrossed {context} {DateTime.UtcNow.Ticks})", ct).ConfigureAwait(false);
 
             onCrossed?.Invoke(newState);
         });
@@ -87,12 +87,12 @@ public static class FormReasoningFlowExtensions
         return flow.Transform(async (engine, ct) =>
         {
             // Add re-entry fact
-            await engine.AddFactAsync($"(ReEntry {context} Imaginary)", ct);
-            await engine.AddFactAsync($"(ReEntryCreated {context} {DateTime.UtcNow.Ticks})", ct);
+            await engine.AddFactAsync($"(ReEntry {context} Imaginary)", ct).ConfigureAwait(false);
+            await engine.AddFactAsync($"(ReEntryCreated {context} {DateTime.UtcNow.Ticks})", ct).ConfigureAwait(false);
 
             // Add self-reference rule
             await engine.ApplyRuleAsync(
-                $"(implies (ReEntry {context} $x) (SelfReference {context}))", ct);
+                $"(implies (ReEntry {context} $x) (SelfReference {context}))", ct).ConfigureAwait(false);
 
             onReEntry?.Invoke(Form.Imaginary);
         });
@@ -116,7 +116,7 @@ public static class FormReasoningFlowExtensions
         {
             // Check guard state
             Result<string, string> guardResult = await engine.ExecuteQueryAsync(
-                $"(match &self (Distinction {guard} Mark) True)", ct);
+                $"(match &self (Distinction {guard} Mark) True)", ct).ConfigureAwait(false);
 
             if (!guardResult.IsSuccess || !guardResult.Value.Contains("True"))
             {
@@ -125,7 +125,7 @@ public static class FormReasoningFlowExtensions
             }
 
             // Execute gated query
-            Result<string, string> result = await engine.ExecuteQueryAsync(query, ct);
+            Result<string, string> result = await engine.ExecuteQueryAsync(query, ct).ConfigureAwait(false);
 
             if (result.IsSuccess)
             {
@@ -133,7 +133,7 @@ public static class FormReasoningFlowExtensions
 
                 // Log gated inference
                 await engine.AddFactAsync(
-                    $"(GatedInference {guard} executed {DateTime.UtcNow.Ticks})", ct);
+                    $"(GatedInference {guard} executed {DateTime.UtcNow.Ticks})", ct).ConfigureAwait(false);
             }
         });
     }
@@ -152,15 +152,15 @@ public static class FormReasoningFlowExtensions
         {
             // Query for double-crossed forms
             Result<string, string> result = await engine.ExecuteQueryAsync(
-                $"(match &self (Distinction {context} (cross (cross $x))) $x)", ct);
+                $"(match &self (Distinction {context} (cross (cross $x))) $x)", ct).ConfigureAwait(false);
 
             if (result.IsSuccess && !string.IsNullOrWhiteSpace(result.Value))
             {
                 // Apply simplification
                 await engine.AddFactAsync(
-                    $"(Distinction {context} {result.Value})", ct);
+                    $"(Distinction {context} {result.Value})", ct).ConfigureAwait(false);
                 await engine.AddFactAsync(
-                    $"(LawOfCrossingApplied {context} {DateTime.UtcNow.Ticks})", ct);
+                    $"(LawOfCrossingApplied {context} {DateTime.UtcNow.Ticks})", ct).ConfigureAwait(false);
             }
         });
     }
@@ -179,15 +179,15 @@ public static class FormReasoningFlowExtensions
         {
             // Query for repeated forms
             Result<string, string> result = await engine.ExecuteQueryAsync(
-                $"(match &self (Distinction {context} (call $x $x)) $x)", ct);
+                $"(match &self (Distinction {context} (call $x $x)) $x)", ct).ConfigureAwait(false);
 
             if (result.IsSuccess && !string.IsNullOrWhiteSpace(result.Value))
             {
                 // Apply condensation
                 await engine.AddFactAsync(
-                    $"(Distinction {context} {result.Value})", ct);
+                    $"(Distinction {context} {result.Value})", ct).ConfigureAwait(false);
                 await engine.AddFactAsync(
-                    $"(LawOfCallingApplied {context} {DateTime.UtcNow.Ticks})", ct);
+                    $"(LawOfCallingApplied {context} {DateTime.UtcNow.Ticks})", ct).ConfigureAwait(false);
             }
         });
     }
@@ -209,7 +209,7 @@ public static class FormReasoningFlowExtensions
         return flow.Transform(async (engine, ct) =>
         {
             Result<string, string> result = await engine.ExecuteQueryAsync(
-                $"(match &self (Distinction {context} $state) $state)", ct);
+                $"(match &self (Distinction {context} $state) $state)", ct).ConfigureAwait(false);
 
             if (!result.IsSuccess)
             {
@@ -223,7 +223,7 @@ public static class FormReasoningFlowExtensions
             {
                 onUncertain?.Invoke();
                 await engine.AddFactAsync(
-                    $"(UncertaintyDetected {context} {DateTime.UtcNow.Ticks})", ct);
+                    $"(UncertaintyDetected {context} {DateTime.UtcNow.Ticks})", ct).ConfigureAwait(false);
             }
             else
             {
@@ -251,7 +251,7 @@ public static class FormReasoningFlowExtensions
         return flow.Transform(async (engine, ct) =>
         {
             Result<string, string> result = await engine.ExecuteQueryAsync(
-                $"(match &self (Distinction {context} $state) $state)", ct);
+                $"(match &self (Distinction {context} $state) $state)", ct).ConfigureAwait(false);
 
             if (!result.IsSuccess)
             {
@@ -289,7 +289,7 @@ public static class FormReasoningFlowExtensions
         {
             // Query all distinctions
             Result<string, string> distinctions = await engine.ExecuteQueryAsync(
-                "(match &self (Distinction $ctx $state) (: $ctx $state))", ct);
+                "(match &self (Distinction $ctx $state) (: $ctx $state))", ct).ConfigureAwait(false);
 
             if (!distinctions.IsSuccess || string.IsNullOrWhiteSpace(distinctions.Value))
             {
@@ -320,17 +320,17 @@ public static class FormReasoningFlowExtensions
 
             // Add meta-level facts
             await engine.AddFactAsync(
-                $"(FormStatistics marked {marked} void {voidCount} imaginary {imaginary})", ct);
+                $"(FormStatistics marked {marked} void {voidCount} imaginary {imaginary})", ct).ConfigureAwait(false);
 
             if (imaginary > 0)
             {
                 await engine.AddFactAsync(
-                    $"(SystemHasUncertainty count {imaginary})", ct);
+                    $"(SystemHasUncertainty count {imaginary})", ct).ConfigureAwait(false);
             }
 
             double certaintyRatio = (marked + voidCount) / (double)(marked + voidCount + imaginary);
             await engine.AddFactAsync(
-                $"(CertaintyRatio {certaintyRatio:F2})", ct);
+                $"(CertaintyRatio {certaintyRatio:F2})", ct).ConfigureAwait(false);
 
             onMeta?.Invoke($"Forms: {marked} marked, {voidCount} void, {imaginary} imaginary. Certainty: {certaintyRatio:P0}");
         });

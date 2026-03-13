@@ -16,7 +16,7 @@ public class DistinctionFitnessTrackerTests
     public async Task UpdateFitnessAsync_CorrectPrediction_ShouldIncreaseOrMaintainFitness()
     {
         var id = new DistinctionId(Guid.NewGuid());
-        var weights = new DistinctionWeights(id, "test", new float[] { 1f }, 0.5, Core.LawsOfForm.DreamStage.Distinction, DateTime.UtcNow, DateTime.UtcNow);
+        var weights = new DistinctionWeights(id, new float[] { 1f }, new float[] { 0.5f }, new float[] { 0.1f }, Core.LawsOfForm.DreamStage.Distinction, 0.5, "test", DateTime.UtcNow, DateTime.UtcNow);
 
         _mockRepo.Setup(r => r.GetDistinctionWeightsAsync(id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<DistinctionWeights, string>.Success(weights));

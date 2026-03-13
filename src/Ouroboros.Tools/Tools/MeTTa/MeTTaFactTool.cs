@@ -64,7 +64,7 @@ public sealed class MeTTaFactTool : ITool
             fact = input;
         }
 
-        Result<Unit, string> result = await this.engine.AddFactAsync(fact, ct);
+        Result<Unit, string> result = await this.engine.AddFactAsync(fact, ct).ConfigureAwait(false);
 
         return result.Match(
             _ => Result<string, string>.Success("Fact added successfully"),

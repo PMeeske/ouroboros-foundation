@@ -46,7 +46,7 @@ public sealed class DelegateTool : ITool
         {
             try
             {
-                string result = await executor(s);
+                string result = await executor(s).ConfigureAwait(false);
                 return Result<string, string>.Success(result);
             }
             catch (OperationCanceledException) { throw; }
@@ -96,7 +96,7 @@ public sealed class DelegateTool : ITool
             try
             {
                 T args = ToolJson.Deserialize<T>(raw);
-                string result = await function(args);
+                string result = await function(args).ConfigureAwait(false);
                 return Result<string, string>.Success(result);
             }
             catch (OperationCanceledException) { throw; }

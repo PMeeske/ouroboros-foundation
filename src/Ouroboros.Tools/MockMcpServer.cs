@@ -13,7 +13,7 @@ namespace Ouroboros.Tools
 
         public static async Task<ToolExecutionResult> ExecuteTool(string toolName, object parameters)
         {
-            await Task.Delay(10);
+            await Task.Delay(10).ConfigureAwait(false);
             return new ToolExecutionResult(true, $"Executed {toolName} with result");
         }
     }

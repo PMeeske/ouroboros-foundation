@@ -88,8 +88,8 @@ public class MockPeftIntegrationTests
     public async Task TrainOnDistinctionAsync_ShouldReturnModifiedWeights()
     {
         var peft = new MockPeftIntegration();
-        var example = new DistinctionTrainingExample("test", "distinction", DreamStage.Distinction);
-        var config = new DistinctionTrainingConfig(3, 0.001, true);
+        var example = new DistinctionTrainingExample("test", "distinction", DreamStage.Distinction, new float[] { 0.1f, 0.2f, 0.3f }, 0.8);
+        var config = new DistinctionTrainingConfig(3, 0.001, 1.0, true);
 
         var result = await peft.TrainOnDistinctionAsync("model", new byte[100], example, config);
 

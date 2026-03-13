@@ -96,10 +96,10 @@ public sealed class MeTTaTool : ITool
             // Execute the appropriate operation based on type
             return operation switch
             {
-                "query" => await this.engine.ExecuteQueryAsync(expression, ct),
-                "add_fact" => await this.ExecuteAddFactAsync(expression, ct),
-                "apply_rule" => await this.engine.ApplyRuleAsync(expression, ct),
-                "verify_plan" => await this.ExecuteVerifyPlanAsync(expression, ct),
+                "query" => await this.engine.ExecuteQueryAsync(expression, ct).ConfigureAwait(false),
+                "add_fact" => await this.ExecuteAddFactAsync(expression, ct).ConfigureAwait(false),
+                "apply_rule" => await this.engine.ApplyRuleAsync(expression, ct).ConfigureAwait(false),
+                "verify_plan" => await this.ExecuteVerifyPlanAsync(expression, ct).ConfigureAwait(false),
                 _ => Result<string, string>.Failure($"Unknown operation: {operation}. Valid operations: query, add_fact, apply_rule, verify_plan")
             };
         }
@@ -116,7 +116,7 @@ public sealed class MeTTaTool : ITool
 
     private async Task<Result<string, string>> ExecuteAddFactAsync(string fact, CancellationToken ct)
     {
-        Result<Unit, string> result = await this.engine.AddFactAsync(fact, ct);
+        Result<Unit, string> result = await this.engine.AddFactAsync(fact, ct).ConfigureAwait(false);
         return result.Match(
             _ => Result<string, string>.Success($"Fact added successfully: {fact}"),
             error => Result<string, string>.Failure(error));
@@ -124,7 +124,7 @@ public sealed class MeTTaTool : ITool
 
     private async Task<Result<string, string>> ExecuteVerifyPlanAsync(string plan, CancellationToken ct)
     {
-        Result<bool, string> result = await this.engine.VerifyPlanAsync(plan, ct);
+        Result<bool, string> result = await this.engine.VerifyPlanAsync(plan, ct).ConfigureAwait(false);
         return result.Match(
             isValid => Result<string, string>.Success(isValid ? $"✓ Plan is valid: {plan}" : $"✗ Plan is invalid: {plan}"),
             error => Result<string, string>.Failure(error));

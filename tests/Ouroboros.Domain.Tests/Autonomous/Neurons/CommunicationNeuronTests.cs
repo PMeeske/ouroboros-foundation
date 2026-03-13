@@ -102,7 +102,7 @@ public class CommunicationNeuronTests : IDisposable
     public async Task ProcessMessage_ShareInsight_ProposesIntention()
     {
         // Use a separate neuron instance to avoid double-dispose with network
-        var neuron = new CommunicationNeuron();
+        using var neuron = new CommunicationNeuron();
         using var bus = new IntentionBus();
         using var network = new OuroborosNeuralNetwork(bus);
         network.RegisterNeuron(neuron);

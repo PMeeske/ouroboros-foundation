@@ -44,14 +44,14 @@ public sealed class HttpMeTTaEngine : IMeTTaEngine
         try
         {
             var payload = new { query };
-            HttpResponseMessage response = await this.client.PostAsJsonAsync("/query", payload, ct);
+            HttpResponseMessage response = await this.client.PostAsJsonAsync("/query", payload, ct).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
-                return Result<string, string>.Failure($"HTTP {response.StatusCode}: {await response.Content.ReadAsStringAsync(ct)}");
+                return Result<string, string>.Failure($"HTTP {response.StatusCode}: {await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false)}");
             }
 
-            QueryResponse? result = await response.Content.ReadFromJsonAsync<QueryResponse>(cancellationToken: ct);
+            QueryResponse? result = await response.Content.ReadFromJsonAsync<QueryResponse>(cancellationToken: ct).ConfigureAwait(false);
 
             return result?.Result != null
                 ? Result<string, string>.Success(result.Result)
@@ -74,11 +74,11 @@ public sealed class HttpMeTTaEngine : IMeTTaEngine
         try
         {
             var payload = new { fact };
-            HttpResponseMessage response = await this.client.PostAsJsonAsync("/fact", payload, ct);
+            HttpResponseMessage response = await this.client.PostAsJsonAsync("/fact", payload, ct).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
-                return Result<Unit, string>.Failure($"HTTP {response.StatusCode}: {await response.Content.ReadAsStringAsync(ct)}");
+                return Result<Unit, string>.Failure($"HTTP {response.StatusCode}: {await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false)}");
             }
 
             return Result<Unit, string>.Success(Unit.Value);
@@ -100,14 +100,14 @@ public sealed class HttpMeTTaEngine : IMeTTaEngine
         try
         {
             var payload = new { rule };
-            HttpResponseMessage response = await this.client.PostAsJsonAsync("/rule", payload, ct);
+            HttpResponseMessage response = await this.client.PostAsJsonAsync("/rule", payload, ct).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
-                return Result<string, string>.Failure($"HTTP {response.StatusCode}: {await response.Content.ReadAsStringAsync(ct)}");
+                return Result<string, string>.Failure($"HTTP {response.StatusCode}: {await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false)}");
             }
 
-            QueryResponse? result = await response.Content.ReadFromJsonAsync<QueryResponse>(cancellationToken: ct);
+            QueryResponse? result = await response.Content.ReadFromJsonAsync<QueryResponse>(cancellationToken: ct).ConfigureAwait(false);
 
             return result?.Result != null
                 ? Result<string, string>.Success(result.Result)
@@ -130,14 +130,14 @@ public sealed class HttpMeTTaEngine : IMeTTaEngine
         try
         {
             var payload = new { plan };
-            HttpResponseMessage response = await this.client.PostAsJsonAsync("/verify", payload, ct);
+            HttpResponseMessage response = await this.client.PostAsJsonAsync("/verify", payload, ct).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
-                return Result<bool, string>.Failure($"HTTP {response.StatusCode}: {await response.Content.ReadAsStringAsync(ct)}");
+                return Result<bool, string>.Failure($"HTTP {response.StatusCode}: {await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false)}");
             }
 
-            VerifyResponse? result = await response.Content.ReadFromJsonAsync<VerifyResponse>(cancellationToken: ct);
+            VerifyResponse? result = await response.Content.ReadFromJsonAsync<VerifyResponse>(cancellationToken: ct).ConfigureAwait(false);
 
             return result != null
                 ? Result<bool, string>.Success(result.IsValid)
@@ -159,11 +159,11 @@ public sealed class HttpMeTTaEngine : IMeTTaEngine
     {
         try
         {
-            HttpResponseMessage response = await this.client.PostAsync("/reset", null, ct);
+            HttpResponseMessage response = await this.client.PostAsync("/reset", null, ct).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
-                return Result<Unit, string>.Failure($"HTTP {response.StatusCode}: {await response.Content.ReadAsStringAsync(ct)}");
+                return Result<Unit, string>.Failure($"HTTP {response.StatusCode}: {await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false)}");
             }
 
             return Result<Unit, string>.Success(Unit.Value);

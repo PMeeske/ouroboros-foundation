@@ -2,14 +2,11 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Tools;
 
 /// <summary>
 /// Defines the contract for tools that can be invoked within the pipeline system.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface ITool
 {
     /// <summary>

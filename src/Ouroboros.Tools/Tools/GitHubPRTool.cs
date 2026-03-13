@@ -65,7 +65,7 @@ public sealed class GitHubPRTool : ITool
                 Draft = args.Draft ?? false,
             };
 
-            PullRequest pr = await this.client.PullRequest.Create(this.owner, this.repo, newPr);
+            PullRequest pr = await this.client.PullRequest.Create(this.owner, this.repo, newPr).ConfigureAwait(false);
 
             // Add labels if provided
             if (args.Labels != null && args.Labels.Length > 0)
@@ -74,7 +74,7 @@ public sealed class GitHubPRTool : ITool
                     this.owner,
                     this.repo,
                     pr.Number,
-                    args.Labels);
+                    args.Labels).ConfigureAwait(false);
             }
 
             return Result<string, string>.Success(

@@ -49,14 +49,14 @@ public sealed class GitHubScopeLockTool : ITool
             GitHubScopeLockArgs args = ToolJson.Deserialize<GitHubScopeLockArgs>(input);
 
             // Step 1: Add scope-locked label to issue
-            Result<bool, string> labelResult = await this.AddScopeLockedLabelAsync(args.IssueNumber, ct);
+            Result<bool, string> labelResult = await this.AddScopeLockedLabelAsync(args.IssueNumber, ct).ConfigureAwait(false);
             if (!labelResult.IsSuccess)
             {
                 return Result<string, string>.Failure($"Failed to add label: {labelResult.Error}");
             }
 
             // Step 2: Add confirmation comment
-            Result<bool, string> commentResult = await this.AddConfirmationCommentAsync(args.IssueNumber, args.Milestone, ct);
+            Result<bool, string> commentResult = await this.AddConfirmationCommentAsync(args.IssueNumber, args.Milestone, ct).ConfigureAwait(false);
             if (!commentResult.IsSuccess)
             {
                 return Result<string, string>.Failure($"Failed to add comment: {commentResult.Error}");
@@ -65,7 +65,7 @@ public sealed class GitHubScopeLockTool : ITool
             // Step 3: Update milestone if provided
             if (!string.IsNullOrEmpty(args.Milestone))
             {
-                Result<bool, string> milestoneResult = await this.UpdateMilestoneAsync(args.IssueNumber, args.Milestone, ct);
+                Result<bool, string> milestoneResult = await this.UpdateMilestoneAsync(args.IssueNumber, args.Milestone, ct).ConfigureAwait(false);
                 if (!milestoneResult.IsSuccess)
                 {
                     return Result<string, string>.Failure($"Failed to update milestone: {milestoneResult.Error}");
@@ -97,7 +97,7 @@ public sealed class GitHubScopeLockTool : ITool
             // First, ensure the label exists in the repository
             try
             {
-                await this.client.Issue.Labels.Get(this.owner, this.repo, "scope-locked");
+                await this.client.Issue.Labels.Get(this.owner, this.repo, "scope-locked").ConfigureAwait(false);
             }
             catch (NotFoundException)
             {
@@ -106,11 +106,11 @@ public sealed class GitHubScopeLockTool : ITool
                 {
                     Description = "Scope is locked to prevent uncontrolled scope creep",
                 };
-                await this.client.Issue.Labels.Create(this.owner, this.repo, newLabel);
+                await this.client.Issue.Labels.Create(this.owner, this.repo, newLabel).ConfigureAwait(false);
             }
 
             // Add the label to the issue
-            await this.client.Issue.Labels.AddToIssue(this.owner, this.repo, issueNumber, new[] { "scope-locked" });
+            await this.client.Issue.Labels.AddToIssue(this.owner, this.repo, issueNumber, new[] { "scope-locked" }).ConfigureAwait(false);
 
             return Result<bool, string>.Success(true);
         }
@@ -136,7 +136,7 @@ public sealed class GitHubScopeLockTool : ITool
                                    : $"**Milestone:** {milestone}\n\n") +
                                "To request scope changes, please open a new issue and reference this locked scope.";
 
-            await this.client.Issue.Comment.Create(this.owner, this.repo, issueNumber, commentBody);
+            await this.client.Issue.Comment.Create(this.owner, this.repo, issueNumber, commentBody).ConfigureAwait(false);
 
             return Result<bool, string>.Success(true);
         }
@@ -152,7 +152,7 @@ public sealed class GitHubScopeLockTool : ITool
         try
         {
             // Find the milestone by name
-            IReadOnlyList<Milestone> milestones = await this.client.Issue.Milestone.GetAllForRepository(this.owner, this.repo);
+            IReadOnlyList<Milestone> milestones = await this.client.Issue.Milestone.GetAllForRepository(this.owner, this.repo).ConfigureAwait(false);
             Milestone? milestone = milestones.FirstOrDefault(m => m.Title.Equals(milestoneName, StringComparison.OrdinalIgnoreCase));
 
             if (milestone == null)
@@ -166,7 +166,7 @@ public sealed class GitHubScopeLockTool : ITool
                 Milestone = milestone.Number,
             };
 
-            await this.client.Issue.Update(this.owner, this.repo, issueNumber, issueUpdate);
+            await this.client.Issue.Update(this.owner, this.repo, issueNumber, issueUpdate).ConfigureAwait(false);
 
             return Result<bool, string>.Success(true);
         }

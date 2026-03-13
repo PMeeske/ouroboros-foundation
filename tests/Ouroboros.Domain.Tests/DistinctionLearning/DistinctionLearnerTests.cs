@@ -24,7 +24,7 @@ public class DistinctionLearnerTests
     {
         var learner = CreateLearner();
         var state = DistinctionState.Initial();
-        var observation = new Observation("test content", DateTime.UtcNow, 0.8);
+        var observation = new Observation("test content", DateTime.UtcNow, 0.8, new Dictionary<string, object> { ["source"] = "test" });
 
         var result = await learner.UpdateFromDistinctionAsync(state, observation, "Distinction");
 
@@ -69,8 +69,8 @@ public class DistinctionLearnerTests
     {
         var observations = new[]
         {
-            new Observation("this contains test data", DateTime.UtcNow, 0.9),
-            new Observation("no match here", DateTime.UtcNow, 0.8),
+            new Observation("this contains test data", DateTime.UtcNow, 0.9, new Dictionary<string, object> { ["source"] = "test" }),
+            new Observation("no match here", DateTime.UtcNow, 0.8, new Dictionary<string, object> { ["source"] = "test" }),
         };
 
         var result = await CreateLearner().EvaluateDistinctionFitnessAsync("test", observations);

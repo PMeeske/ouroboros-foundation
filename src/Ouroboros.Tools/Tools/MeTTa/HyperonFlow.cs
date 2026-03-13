@@ -38,7 +38,7 @@ public sealed class HyperonFlow
         {
             foreach (string fact in facts)
             {
-                await hyperonEngine.AddFactAsync(fact, ct);
+                await hyperonEngine.AddFactAsync(fact, ct).ConfigureAwait(false);
             }
         });
         return this;
@@ -53,7 +53,7 @@ public sealed class HyperonFlow
     {
         steps.Add(async ct =>
         {
-            await hyperonEngine.ApplyRuleAsync(rule, ct);
+            await hyperonEngine.ApplyRuleAsync(rule, ct).ConfigureAwait(false);
         });
         return this;
     }
@@ -68,7 +68,7 @@ public sealed class HyperonFlow
     {
         steps.Add(async ct =>
         {
-            Result<string, string> result = await hyperonEngine.ExecuteQueryAsync(query, ct);
+            Result<string, string> result = await hyperonEngine.ExecuteQueryAsync(query, ct).ConfigureAwait(false);
             if (result.IsSuccess)
             {
                 resultHandler?.Invoke(result.Value);
@@ -113,7 +113,7 @@ public sealed class HyperonFlow
         foreach (Func<CancellationToken, Task> step in steps)
         {
             ct.ThrowIfCancellationRequested();
-            await step(ct);
+            await step(ct).ConfigureAwait(false);
         }
     }
 }

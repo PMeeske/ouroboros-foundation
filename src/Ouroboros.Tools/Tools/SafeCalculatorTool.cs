@@ -69,7 +69,7 @@ public sealed class SafeCalculatorTool : ITool
 
         return await parsedResult.Match(
             parsed => this.ProcessCalculation(parsed, ct),
-            error => Task.FromResult(Result<string, string>.Failure(error)));
+            error => Task.FromResult(Result<string, string>.Failure(error))).ConfigureAwait(false);
     }
 
     private async Task<Result<string, string>> ProcessCalculation(ParsedInput parsed, CancellationToken ct)
@@ -78,12 +78,12 @@ public sealed class SafeCalculatorTool : ITool
         
         return await computeResult.Match(
             calculatedValue => this.VerifyAndFormat(parsed, calculatedValue, ct),
-            error => Task.FromResult(Result<string, string>.Failure(error)));
+            error => Task.FromResult(Result<string, string>.Failure(error))).ConfigureAwait(false);
     }
 
     private async Task<Result<string, string>> VerifyAndFormat(ParsedInput parsed, double calculatedValue, CancellationToken ct)
     {
-        Result<bool, string> verifyResult = await this.VerifyCalculationAsync(parsed.Expression, calculatedValue, ct);
+        Result<bool, string> verifyResult = await this.VerifyCalculationAsync(parsed.Expression, calculatedValue, ct).ConfigureAwait(false);
         
         return verifyResult
             .MapError(error => $"Verification failed: {error}")
@@ -161,7 +161,7 @@ public sealed class SafeCalculatorTool : ITool
             // NOTE: DataTable.Compute() is used for basic arithmetic evaluation.
             // While not ideal for production (has security considerations), it works for this demonstration.
             // For production use, consider using NCalc or implementing a custom expression parser.
-            DataTable dataTable = new DataTable();
+            using DataTable dataTable = new DataTable();
             object result = dataTable.Compute(expression, string.Empty);
             double value = Convert.ToDouble(result, CultureInfo.InvariantCulture);
             return Result<double, string>.Success(value);
@@ -182,7 +182,7 @@ public sealed class SafeCalculatorTool : ITool
 
     private async Task<Result<bool, string>> VerifyCalculationAsync(string expression, double result, CancellationToken ct) =>
         this.useSymbolicVerification && this.symbolicEngine != null
-            ? await this.SymbolicVerificationAsync(expression, result, ct)
+            ? await this.SymbolicVerificationAsync(expression, result, ct).ConfigureAwait(false)
             : SimulatedVerification(expression, result);
 
     private async Task<Result<bool, string>> SymbolicVerificationAsync(string expression, double result, CancellationToken ct)
@@ -190,7 +190,7 @@ public sealed class SafeCalculatorTool : ITool
         try
         {
             string mettaExpression = ConvertToMeTTaExpression(expression);
-            Result<string, string> mettaResult = await this.symbolicEngine!.ExecuteQueryAsync(mettaExpression, ct);
+            Result<string, string> mettaResult = await this.symbolicEngine!.ExecuteQueryAsync(mettaExpression, ct).ConfigureAwait(false);
 
             return mettaResult
                 .Bind(TryParseMeTTaNumber)

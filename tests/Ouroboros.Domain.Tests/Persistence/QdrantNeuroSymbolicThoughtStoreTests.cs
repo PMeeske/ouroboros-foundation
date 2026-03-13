@@ -61,11 +61,12 @@ public class QdrantNeuroSymbolicThoughtStoreTests : IDisposable
     }
 
     [Fact]
-    public void Constructor_WithValidArgs_CreatesInstance()
+    public async Task Constructor_WithValidArgs_CreatesInstance()
     {
         var store = new QdrantNeuroSymbolicThoughtStore(_client, _registry.Object, _settings);
 
         store.Should().NotBeNull();
+        await store.DisposeAsync().ConfigureAwait(false);
     }
 
     #endregion
@@ -73,20 +74,22 @@ public class QdrantNeuroSymbolicThoughtStoreTests : IDisposable
     #region SupportsSemanticSearch
 
     [Fact]
-    public void SupportsSemanticSearch_WithEmbeddingFunc_ReturnsTrue()
+    public async Task SupportsSemanticSearch_WithEmbeddingFunc_ReturnsTrue()
     {
         Func<string, Task<float[]>> embeddingFunc = _ => Task.FromResult(new float[768]);
         var store = new QdrantNeuroSymbolicThoughtStore(_client, _registry.Object, _settings, embeddingFunc);
 
         store.SupportsSemanticSearch.Should().BeTrue();
+        await store.DisposeAsync().ConfigureAwait(false);
     }
 
     [Fact]
-    public void SupportsSemanticSearch_WithoutEmbeddingFunc_ReturnsFalse()
+    public async Task SupportsSemanticSearch_WithoutEmbeddingFunc_ReturnsFalse()
     {
         var store = new QdrantNeuroSymbolicThoughtStore(_client, _registry.Object, _settings);
 
         store.SupportsSemanticSearch.Should().BeFalse();
+        await store.DisposeAsync().ConfigureAwait(false);
     }
 
     #endregion
@@ -94,13 +97,14 @@ public class QdrantNeuroSymbolicThoughtStoreTests : IDisposable
     #region Collection Name Resolution
 
     [Fact]
-    public void Constructor_ResolvesCollectionNames()
+    public async Task Constructor_ResolvesCollectionNames()
     {
-        _ = new QdrantNeuroSymbolicThoughtStore(_client, _registry.Object, _settings);
+        var store = new QdrantNeuroSymbolicThoughtStore(_client, _registry.Object, _settings);
 
         _registry.Verify(r => r.GetCollectionName(QdrantCollectionRole.NeuroThoughts), Times.Once);
         _registry.Verify(r => r.GetCollectionName(QdrantCollectionRole.ThoughtRelations), Times.Once);
         _registry.Verify(r => r.GetCollectionName(QdrantCollectionRole.ThoughtResults), Times.Once);
+        await store.DisposeAsync().ConfigureAwait(false);
     }
 
     #endregion

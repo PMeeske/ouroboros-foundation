@@ -26,7 +26,7 @@ public sealed class RetrievalTool(TrackedVectorStore store, IEmbeddingModel embe
         try
         {
             RetrievalArgs args = ToolJson.Deserialize<RetrievalArgs>(input);
-            IReadOnlyCollection<Document> docs = await store.GetSimilarDocuments(embed, args.Q, amount: args.K, cancellationToken: ct);
+            IReadOnlyCollection<Document> docs = await store.GetSimilarDocuments(embed, args.Q, amount: args.K, cancellationToken: ct).ConfigureAwait(false);
 
             if (docs.Count == 0)
             {

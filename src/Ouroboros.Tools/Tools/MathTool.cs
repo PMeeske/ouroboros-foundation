@@ -31,7 +31,7 @@ public sealed class MathTool : ITool
 
         try
         {
-            DataTable dataTable = new DataTable();
+            using DataTable dataTable = new DataTable();
             object result = dataTable.Compute(input, string.Empty);
 
             // Use InvariantCulture to ensure consistent decimal separator (always '.')

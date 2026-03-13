@@ -136,18 +136,18 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
             return Result<string, string>.Failure("MeTTa engine is not initialized. Ensure metta executable is in PATH.");
         }
 
-        await this.@lock.WaitAsync(ct);
+        await this.@lock.WaitAsync(ct).ConfigureAwait(false);
         try
         {
             // Send query to MeTTa
-            await this.stdin.WriteLineAsync(query.AsMemory(), ct);
-            await this.stdin.FlushAsync();
+            await this.stdin.WriteLineAsync(query.AsMemory(), ct).ConfigureAwait(false);
+            await this.stdin.FlushAsync().ConfigureAwait(false);
 
             // Read response with timeout
             using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
             cts.CancelAfter(TimeSpan.FromSeconds(30));
 
-            string? response = await this.stdout.ReadLineAsync();
+            string? response = await this.stdout.ReadLineAsync().ConfigureAwait(false);
 
             if (string.IsNullOrEmpty(response))
             {
@@ -182,13 +182,13 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
             return Result<Unit, string>.Failure("MeTTa engine is not initialized");
         }
 
-        await this.@lock.WaitAsync(ct);
+        await this.@lock.WaitAsync(ct).ConfigureAwait(false);
         try
         {
             // Add fact using MeTTa assertion syntax
             string command = $"!(add-atom &self {fact})";
-            await this.stdin.WriteLineAsync(command.AsMemory(), ct);
-            await this.stdin.FlushAsync();
+            await this.stdin.WriteLineAsync(command.AsMemory(), ct).ConfigureAwait(false);
+            await this.stdin.FlushAsync().ConfigureAwait(false);
 
             return Result<Unit, string>.Success(Unit.Value);
         }
@@ -218,17 +218,17 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
             return Result<string, string>.Failure("MeTTa engine is not initialized");
         }
 
-        await this.@lock.WaitAsync(ct);
+        await this.@lock.WaitAsync(ct).ConfigureAwait(false);
         try
         {
             // Apply rule and get result
-            await this.stdin.WriteLineAsync(rule.AsMemory(), ct);
-            await this.stdin.FlushAsync();
+            await this.stdin.WriteLineAsync(rule.AsMemory(), ct).ConfigureAwait(false);
+            await this.stdin.FlushAsync().ConfigureAwait(false);
 
             using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
             cts.CancelAfter(TimeSpan.FromSeconds(10));
 
-            string? response = await this.stdout.ReadLineAsync();
+            string? response = await this.stdout.ReadLineAsync().ConfigureAwait(false);
 
             return !string.IsNullOrEmpty(response)
                 ? Result<string, string>.Success(response)
@@ -257,7 +257,7 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
     {
         // Use MeTTa query to verify plan
         string query = $"!(match &self (verify-plan {plan}) $result)";
-        Result<string, string> result = await this.ExecuteQueryAsync(query, ct);
+        Result<string, string> result = await this.ExecuteQueryAsync(query, ct).ConfigureAwait(false);
 
         return result.Match(
             success => success.Contains("True") || success.Contains("true")
@@ -274,13 +274,13 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
             return Result<Unit, string>.Failure("MeTTa engine is not initialized");
         }
 
-        await this.@lock.WaitAsync(ct);
+        await this.@lock.WaitAsync(ct).ConfigureAwait(false);
         try
         {
             // Clear the space
             string command = "!(clear-space &self)";
-            await this.stdin.WriteLineAsync(command.AsMemory(), ct);
-            await this.stdin.FlushAsync();
+            await this.stdin.WriteLineAsync(command.AsMemory(), ct).ConfigureAwait(false);
+            await this.stdin.FlushAsync().ConfigureAwait(false);
 
             return Result<Unit, string>.Success(Unit.Value);
         }
