@@ -1,5 +1,5 @@
-// <copyright file="QdrantVectorStore.Admin.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="QdrantVectorStore.Admin.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 using Microsoft.Extensions.Logging;

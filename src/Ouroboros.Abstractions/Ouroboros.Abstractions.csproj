@@ -84,6 +84,9 @@
         <Compile Include="Agent\TemporalReasoning\Timeline.cs" />
         <Compile Include="Agent\UseCase.cs" />
         <Compile Include="Agent\UseCaseType.cs" />
+        <Compile Include="Errors\ErrorCodes.cs" />
+        <Compile Include="Errors\ErrorSeverity.cs" />
+        <Compile Include="Errors\OuroborosError.cs" />
         <Compile Include="Domain\EmbodiedTransition.cs" />
         <Compile Include="Domain\PredictedState.cs" />
         <Compile Include="Domain\SensorState.cs" />
@@ -212,6 +215,16 @@
         <Compile Include="Providers\TextToSpeech\StreamingTtsExtensions.cs" />
         <Compile Include="Providers\TextToSpeech\TextToSpeechOptions.cs" />
         <Compile Include="Providers\TextToSpeech\TtsVoice.cs" />
+        <Compile Include="Providers\Audio\AudioCaptureOptions.cs" />
+        <Compile Include="Providers\Audio\DeviceChangeEventArgs.cs" />
+        <Compile Include="Providers\Audio\IMicrophoneManager.cs" />
+        <Compile Include="Providers\Audio\ISpeechToChatBridge.cs" />
+        <Compile Include="Providers\Audio\MicrophoneBackend.cs" />
+        <Compile Include="Providers\Audio\MicrophoneDevice.cs" />
+        <Compile Include="Providers\Audio\SpeechInputMode.cs" />
+        <Compile Include="Providers\Audio\SpeechState.cs" />
+        <Compile Include="Providers\Audio\SpeechStateChangedEventArgs.cs" />
+        <Compile Include="Providers\Audio\SpeechTranscribedEventArgs.cs" />
         <Compile Include="Unit.cs" />
     </ItemGroup>
 

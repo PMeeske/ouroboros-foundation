@@ -93,7 +93,7 @@ public sealed class ConversationChainBuilderTests
             .Llm()
             .UpdateMemory();
 
-        var result = await builder.RunAsync();
+        _ = await builder.RunAsync();
 
         memory.GetTurns().Should().HaveCountGreaterThanOrEqualTo(1);
     }

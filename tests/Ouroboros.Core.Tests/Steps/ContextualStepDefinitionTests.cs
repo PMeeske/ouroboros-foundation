@@ -71,7 +71,7 @@ public sealed class ContextualStepDefinitionTests
             Task.FromResult<Step<int, string>>(x => Task.FromResult($"{ctx}:{x}"));
 
         var def = new ContextualStepDefinition<int, string, string>(ctxStep);
-        var (result, logs) = await def.InvokeAsync(5, "ctx");
+        var (result, _) = await def.InvokeAsync(5, "ctx");
 
         result.Should().Be("ctx:5");
     }

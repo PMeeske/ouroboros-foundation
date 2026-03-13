@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.SelfModification;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.SelfModification;
 
 /// <summary>
 /// Represents a proposed code change for self-modification.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record CodeChangeProposal(
     string Id,
     string FilePath,

@@ -1,5 +1,5 @@
-// <copyright file="DistinctionLearningConstants.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="DistinctionLearningConstants.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 namespace Ouroboros.Core.DistinctionLearning;

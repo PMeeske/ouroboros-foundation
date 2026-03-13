@@ -1,6 +1,8 @@
-// <copyright file="EnvironmentState.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="EnvironmentState.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
+
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.Environment;
 
@@ -10,6 +12,7 @@ namespace Ouroboros.Domain.Environment;
 /// </summary>
 /// <param name="StateData">Dictionary containing the state data</param>
 /// <param name="IsTerminal">Whether this state is terminal (episode ended)</param>
+[ExcludeFromCodeCoverage]
 public sealed record EnvironmentState(
     IReadOnlyDictionary<string, object> StateData,
     bool IsTerminal = false);

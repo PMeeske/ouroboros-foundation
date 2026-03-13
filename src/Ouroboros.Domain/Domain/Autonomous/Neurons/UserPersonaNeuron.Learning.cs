@@ -4,6 +4,7 @@
 
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace Ouroboros.Domain.Autonomous.Neurons;
 
@@ -25,7 +26,7 @@ public sealed partial class UserPersonaNeuron
         _sessionMessageCount = 0;
         _lastMessageTime = DateTime.UtcNow;
 
-        Console.WriteLine($"  [UserPersonaNeuron] Training started - GenerateFunction: {(GenerateFunction != null ? "SET" : "NULL")}, OnUserMessage subscribers: {(OnUserMessage != null ? "SET" : "NULL")}");
+        _logger.LogDebug("Training started - GenerateFunction: {HasGenerate}, OnUserMessage subscribers: {HasOnUserMessage}", GenerateFunction != null ? "SET" : "NULL", OnUserMessage != null ? "SET" : "NULL");
 
         SendMessage("training.started", new { Config = _config });
 
@@ -46,18 +47,18 @@ public sealed partial class UserPersonaNeuron
                 // Wait for the previous response to complete first (if any)
                 if (_responseWaiter != null)
                 {
-                    Console.WriteLine("  [UserPersonaNeuron] Waiting for Ouroboros response...");
+                    _logger.LogDebug("Waiting for Ouroboros response");
                     using CancellationTokenSource timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
                     timeoutCts.CancelAfter(TimeSpan.FromMinutes(5)); // 5 minute timeout
 
                     try
                     {
                         await _responseWaiter.Task.WaitAsync(timeoutCts.Token);
-                        Console.WriteLine("  [UserPersonaNeuron] Response received, starting interval timer...");
+                        _logger.LogDebug("Response received, starting interval timer");
                     }
                     catch (OperationCanceledException) when (!ct.IsCancellationRequested)
                     {
-                        Console.WriteLine("  [UserPersonaNeuron] Response timeout, continuing...");
+                        _logger.LogDebug("Response timeout, continuing");
                     }
                 }
 
@@ -82,13 +83,13 @@ public sealed partial class UserPersonaNeuron
 
     private async Task GenerateAndSendQuestionAsync(CancellationToken ct)
     {
-        Console.WriteLine("  [UserPersonaNeuron] GenerateAndSendQuestionAsync called...");
+        _logger.LogDebug("GenerateAndSendQuestionAsync called");
         await GenerateNextMessageAsync(ct);
 
         // Immediately send the question (don't wait for OnTick)
         if (_pendingQuestions.TryDequeue(out string? question))
         {
-            Console.WriteLine($"  [UserPersonaNeuron] Sending question: {question[..Math.Min(50, question.Length)]}...");
+            _logger.LogDebug("Sending question: {QuestionPreview}", question[..Math.Min(50, question.Length)]);
             _lastMessageTime = DateTime.UtcNow;
             _sessionMessageCount++;
             _conversationHistory.Add($"User: {question}");
@@ -99,12 +100,12 @@ public sealed partial class UserPersonaNeuron
             // Fire the event to send the message
             if (OnUserMessage != null)
             {
-                Console.WriteLine("  [UserPersonaNeuron] Invoking OnUserMessage event...");
+                _logger.LogDebug("Invoking OnUserMessage event");
                 OnUserMessage.Invoke(question, _config);
             }
             else
             {
-                Console.WriteLine("  [UserPersonaNeuron] WARNING: OnUserMessage is null!");
+                _logger.LogWarning("OnUserMessage is null - no handler registered");
                 _responseWaiter.TrySetResult(true); // No message sent, don't wait
             }
 
@@ -119,7 +120,7 @@ public sealed partial class UserPersonaNeuron
         }
         else
         {
-            Console.WriteLine("  [UserPersonaNeuron] WARNING: No question in pending queue!");
+            _logger.LogWarning("No question in pending queue");
         }
     }
 

@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Numerics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.VectorCompression;
 
@@ -18,6 +19,7 @@ public sealed class FourierVectorCompressor
     /// <summary>
     /// Compression strategies for selecting which components to keep.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public enum CompressionStrategy
     {
         /// <summary>Keep lowest frequency components (smoothest features).</summary>

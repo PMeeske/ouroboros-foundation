@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.MetaLearning;
 
 /// <summary>
 /// Report on learning efficiency and bottlenecks.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record LearningEfficiencyReport(
     double AverageIterationsToLearn,
     double AverageExamplesNeeded,

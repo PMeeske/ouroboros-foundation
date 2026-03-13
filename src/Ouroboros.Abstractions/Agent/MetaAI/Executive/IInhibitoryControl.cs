@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.Executive;
 
 /// <summary>
@@ -6,6 +8,7 @@ namespace Ouroboros.Agent.MetaAI.Executive;
 /// and modulates autonomous action firing.
 /// Based on Miyake et al. (2000) Executive Functions model.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IInhibitoryControl
 {
     /// <summary>

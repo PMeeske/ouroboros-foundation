@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Diagnostics;
 
 /// <summary>
 /// Histogram bucket for tracking value distributions.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed class HistogramBucket
 {
     /// <summary>

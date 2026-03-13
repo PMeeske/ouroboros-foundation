@@ -8,6 +8,8 @@
 // Unified interface for all orchestrators in the suite
 // ==========================================================
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent;
 
 /// <summary>
@@ -17,6 +19,7 @@ namespace Ouroboros.Agent;
 /// </summary>
 /// <typeparam name="TInput">The input type for orchestration.</typeparam>
 /// <typeparam name="TOutput">The output type from orchestration.</typeparam>
+[ExcludeFromCodeCoverage]
 public interface IOrchestrator<TInput, TOutput>
 {
     /// <summary>

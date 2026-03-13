@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Represents the agent's virtual embodiment state.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum EmbodimentState
 {
     /// <summary>Not active, no sensors running.</summary>

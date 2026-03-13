@@ -1,12 +1,15 @@
-// <copyright file="DependencyType.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="DependencyType.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
+
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.MultiAgent;
 
 /// <summary>
 /// Defines the type of dependency between tasks.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum DependencyType
 {
     /// <summary>

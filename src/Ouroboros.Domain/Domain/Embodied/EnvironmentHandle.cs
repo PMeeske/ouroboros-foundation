@@ -1,6 +1,8 @@
-// <copyright file="EnvironmentHandle.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="EnvironmentHandle.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
+
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.Embodied;
 
@@ -12,6 +14,7 @@ namespace Ouroboros.Domain.Embodied;
 /// <param name="SceneName">Name of the loaded scene</param>
 /// <param name="Type">Type of environment</param>
 /// <param name="IsRunning">Whether the environment is currently running</param>
+[ExcludeFromCodeCoverage]
 public sealed record EnvironmentHandle(
     Guid Id,
     string SceneName,

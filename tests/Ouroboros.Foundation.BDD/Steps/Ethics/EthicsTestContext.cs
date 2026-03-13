@@ -181,7 +181,7 @@ public sealed class EthicsTestContext
         }
     }
 
-    public Form ClearanceToFormCertainty(EthicalClearance clearance, bool traditionsDisagree)
+    public static Form ClearanceToFormCertainty(EthicalClearance clearance, bool traditionsDisagree)
     {
         // Traditions disagreeing → fundamental uncertainty
         if (traditionsDisagree)

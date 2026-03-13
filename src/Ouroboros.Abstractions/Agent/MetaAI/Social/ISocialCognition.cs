@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.Social;
 
 /// <summary>
@@ -56,6 +58,7 @@ public interface ISocialCognition
 /// <summary>
 /// Levels of formality in communication.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum FormalityLevel
 {
     /// <summary>Used with very close relations.</summary>

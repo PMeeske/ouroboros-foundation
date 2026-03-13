@@ -1,5 +1,5 @@
-// <copyright file="FormMeTTaBridge.Evaluation.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="FormMeTTaBridge.Evaluation.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 using Ouroboros.Core.LawsOfForm;

@@ -1,5 +1,5 @@
-// <copyright file="CodeFixGeneRecordTests.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="CodeFixGeneRecordTests.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 namespace Ouroboros.Tests.Genetic.Extensions;
@@ -194,7 +194,7 @@ public class CodeFixGeneRecordTests
         });
 
         // Act
-        var (child1, child2) = GeneticRoslynBridge.Crossover(parent1, parent2, seed: 42);
+        var (child1, _) = GeneticRoslynBridge.Crossover(parent1, parent2, seed: 42);
 
         // Assert
         child1.Genes.Should().AllSatisfy(g =>

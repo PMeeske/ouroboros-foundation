@@ -1,5 +1,5 @@
-// <copyright file="PolicyEngine.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="PolicyEngine.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 using System.Collections.Concurrent;

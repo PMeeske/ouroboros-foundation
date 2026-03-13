@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.SelfModel;
 
 /// <summary>
 /// Represents a forecast made by the agent.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record Forecast(
     Guid Id,
     string Description,

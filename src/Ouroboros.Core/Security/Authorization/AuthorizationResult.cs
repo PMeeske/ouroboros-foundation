@@ -1,5 +1,5 @@
-// <copyright file="AuthorizationProvider.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="AuthorizationProvider.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 namespace Ouroboros.Core.Security.Authorization;

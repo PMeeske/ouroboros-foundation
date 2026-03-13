@@ -1,6 +1,8 @@
-// <copyright file="TriState.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="TriState.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
+
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Core.LawsOfForm;
 
@@ -8,6 +10,7 @@ namespace Ouroboros.Core.LawsOfForm;
 /// Three-valued logic state based on Laws of Form.
 /// Used for reasoning about certainty in AI systems.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum TriState
 {
     /// <summary>

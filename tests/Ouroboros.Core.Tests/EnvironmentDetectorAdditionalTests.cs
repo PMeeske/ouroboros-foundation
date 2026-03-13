@@ -11,7 +11,7 @@ public class EnvironmentDetectorAdditionalTests
     [Fact]
     public void GetEnvironmentName_ReturnsNullableString()
     {
-        var result = EnvironmentDetector.GetEnvironmentName();
+        _ = EnvironmentDetector.GetEnvironmentName();
         // Can be null or a string — just verify it doesn't throw
     }
 

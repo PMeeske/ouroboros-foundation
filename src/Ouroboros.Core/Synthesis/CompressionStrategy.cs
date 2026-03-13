@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Synthesis;
 
 /// <summary>
 /// Compression strategy for library learning.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum CompressionStrategy
 {
     /// <summary>

@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Providers.SpeechToText;
 
 /// <summary>
@@ -8,6 +10,7 @@ namespace Ouroboros.Providers.SpeechToText;
 /// <param name="Temperature">Sampling temperature (0-1). Lower = more deterministic.</param>
 /// <param name="TimestampGranularity">Granularity for timestamps: "word", "segment", or null.</param>
 /// <param name="Prompt">Optional prompt to guide the transcription style.</param>
+[ExcludeFromCodeCoverage]
 public sealed record TranscriptionOptions(
     string? Language = null,
     string ResponseFormat = "json",

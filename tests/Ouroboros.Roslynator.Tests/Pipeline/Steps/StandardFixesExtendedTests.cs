@@ -36,7 +36,7 @@ public sealed class StandardFixesExtendedTests
         var tree = CSharpSyntaxTree.ParseText("class OldClass { }");
         var root = tree.GetRoot();
         var classDecl = root.DescendantNodes().OfType<ClassDeclarationSyntax>().First();
-        var newClassDecl = classDecl.WithIdentifier(SyntaxFactory.Identifier("NewClass"));
+        _ = classDecl.WithIdentifier(SyntaxFactory.Identifier("NewClass"));
 
         var workspace = new AdhocWorkspace();
         var project = workspace.AddProject("TestProject", LanguageNames.CSharp);

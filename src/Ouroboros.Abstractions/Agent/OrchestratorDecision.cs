@@ -1,10 +1,12 @@
 using Ouroboros.Abstractions.Core;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent;
 
 /// <summary>
 /// Result of orchestrator's model selection decision.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record OrchestratorDecision(
     IChatCompletionModel SelectedModel,
     string ModelName,

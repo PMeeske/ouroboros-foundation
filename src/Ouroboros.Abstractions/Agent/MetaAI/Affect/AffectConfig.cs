@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.Affect;
 
 /// <summary>
 /// Configuration for affect monitoring.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record AffectConfig(
     double StressThreshold = 0.7,
     double ConfidenceDecayRate = 0.01,

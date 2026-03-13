@@ -1,15 +1,17 @@
-// <copyright file="IReasoner.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="IReasoner.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 namespace Ouroboros.Core.Resilience;
 
 using Ouroboros.Core.Monads;
+using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
 /// Unified reasoning interface that abstracts over LLM and symbolic reasoning
 /// with automatic fallback and circuit breaking.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IReasoner
 {
     /// <summary>

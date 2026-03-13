@@ -1,8 +1,9 @@
-// <copyright file="EpisodeEvent.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="EpisodeEvent.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 using Ouroboros.Domain.Environment;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.Events;
 
@@ -13,6 +14,7 @@ namespace Ouroboros.Domain.Events;
 /// <param name="Id">Unique identifier for this event</param>
 /// <param name="Episode">The complete episode data</param>
 /// <param name="Timestamp">When this episode was recorded</param>
+[ExcludeFromCodeCoverage]
 public sealed record EpisodeEvent(
     Guid Id,
     Episode Episode,

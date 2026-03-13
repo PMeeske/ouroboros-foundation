@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Providers.Docker;
 
 /// <summary>
 /// Represents a Docker network.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record DockerNetworkInfo
 {
     /// <summary>Gets the network ID.</summary>

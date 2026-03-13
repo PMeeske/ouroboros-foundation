@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
@@ -7,6 +9,7 @@ namespace Ouroboros.Core.EmbodiedInteraction;
 /// <param name="Modality">Output modality.</param>
 /// <param name="Content">Content to output.</param>
 /// <param name="Parameters">Additional parameters.</param>
+[ExcludeFromCodeCoverage]
 public sealed record ActionRequest(
     string TargetActuator,
     ActuatorModality Modality,

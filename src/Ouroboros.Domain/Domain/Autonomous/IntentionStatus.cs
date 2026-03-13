@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Autonomous;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Autonomous;
 
 /// <summary>
 /// Status of an intention.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum IntentionStatus
 {
     /// <summary>Waiting for user decision.</summary>

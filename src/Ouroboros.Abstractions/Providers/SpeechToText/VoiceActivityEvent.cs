@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Providers.SpeechToText;
 
 /// <summary>
@@ -6,6 +8,7 @@ namespace Ouroboros.Providers.SpeechToText;
 /// <param name="Activity">The type of voice activity detected.</param>
 /// <param name="Timestamp">When the activity was detected.</param>
 /// <param name="Confidence">Confidence in the detection (0.0-1.0).</param>
+[ExcludeFromCodeCoverage]
 public sealed record VoiceActivityEvent(
     VoiceActivity Activity,
     DateTimeOffset Timestamp,

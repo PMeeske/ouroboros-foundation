@@ -1,4 +1,4 @@
-namespace Ouroboros.Agent.MetaAI;
+namespace Ouroboros.Agent;
 
 /// <summary>
 /// Represents a permission for an agent action.

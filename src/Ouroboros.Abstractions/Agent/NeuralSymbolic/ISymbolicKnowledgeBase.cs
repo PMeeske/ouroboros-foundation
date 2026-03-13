@@ -1,4 +1,5 @@
 using Ouroboros.Abstractions;
+using System.Diagnostics.CodeAnalysis;
 
 // ==========================================================
 // Symbolic Knowledge Base Interface
@@ -10,6 +11,7 @@ namespace Ouroboros.Agent.NeuralSymbolic;
 /// <summary>
 /// Interface for managing symbolic knowledge and executing MeTTa queries.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface ISymbolicKnowledgeBase
 {
     /// <summary>

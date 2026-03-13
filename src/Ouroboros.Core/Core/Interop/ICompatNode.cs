@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Interop;
 
 /// <summary>
 /// Compatible node interface for interop with various pipeline systems
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface ICompatNode<TIn, TOut>
 {
     /// <summary>Executes the node with the given input and returns the output asynchronously.</summary>

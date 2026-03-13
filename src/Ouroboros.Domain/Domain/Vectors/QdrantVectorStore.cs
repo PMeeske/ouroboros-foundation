@@ -1,5 +1,5 @@
-// <copyright file="QdrantVectorStore.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="QdrantVectorStore.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 using Microsoft.Extensions.Logging;
@@ -37,7 +37,8 @@ public sealed partial class QdrantVectorStore : IAdvancedVectorStore, IAsyncDisp
         ILogger? logger = null,
         QdrantCollectionRole role = QdrantCollectionRole.PipelineVectors)
     {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
+        ArgumentNullException.ThrowIfNull(client);
+        _client = client;
         ArgumentNullException.ThrowIfNull(registry);
         _collectionName = registry.GetCollectionName(role);
         _logger = logger;

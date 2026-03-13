@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.Affect;
 
 /// <summary>
 /// Result of a policy evaluation.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record PolicyViolation(
     Guid RuleId,
     string RuleName,

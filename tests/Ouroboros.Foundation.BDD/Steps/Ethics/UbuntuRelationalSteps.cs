@@ -10,7 +10,6 @@ public class UbuntuRelationalSteps
 {
     private readonly EthicsTestContext _ctx;
     private string? _relationalState;
-    private ProposedAction? _actionA;
     private ProposedAction? _actionB;
 
     public UbuntuRelationalSteps(EthicsTestContext ctx) => _ctx = ctx;
@@ -131,7 +130,7 @@ public class UbuntuRelationalSteps
     [Given("action A benefits me and harms the user")]
     public void GivenActionABenefitsMeAndHarmsTheUser()
     {
-        _actionA = _ctx.CreateAction(
+        _ctx.CreateAction(
             "self-benefit",
             "Benefits the agent at the expense of the user",
             potentialEffects: new[] { "agent_benefit", "user_harm" });

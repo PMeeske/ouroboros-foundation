@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.TemporalReasoning;
 
 /// <summary>
 /// Default configuration values for temporal queries.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class TemporalQueryDefaults
 {
     /// <summary>

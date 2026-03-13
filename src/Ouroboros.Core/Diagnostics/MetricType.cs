@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Diagnostics;
 
 /// <summary>
 /// Metric type enumeration.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum MetricType
 {
     /// <summary>

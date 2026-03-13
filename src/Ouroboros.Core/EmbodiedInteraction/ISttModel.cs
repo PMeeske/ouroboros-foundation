@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Interface for Speech-to-Text models.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface ISttModel
 {
     /// <summary>

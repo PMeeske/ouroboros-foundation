@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Resilience;
 
 /// <summary>
@@ -10,6 +12,7 @@ namespace Ouroboros.Core.Resilience;
 /// Source of Truth: Ouroboros.Agent.NeuralSymbolic.ReasoningMode (defined in ReasoningResult.cs)
 /// This enum: Duplicate for Core layer use only
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum ReasoningMode
 {
     /// <summary>Try symbolic first, fall back to neural.</summary>

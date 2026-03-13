@@ -1,8 +1,8 @@
-// <copyright file="SafetyGuardExtensions.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="SafetyGuardExtensions.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
-namespace Ouroboros.Agent.MetaAI;
+namespace Ouroboros.Agent;
 
 /// <summary>
 /// Extension methods for ISafetyGuard providing backward compatibility.

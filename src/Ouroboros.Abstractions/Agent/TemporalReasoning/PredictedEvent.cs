@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.TemporalReasoning;
 
 /// <summary>
 /// Represents a predicted future event based on temporal patterns.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record PredictedEvent(
     string EventType,
     string Description,

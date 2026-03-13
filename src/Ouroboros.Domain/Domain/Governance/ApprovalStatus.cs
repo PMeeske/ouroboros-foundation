@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Governance;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Governance;
 
 /// <summary>
 /// Defines approval request statuses.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum ApprovalStatus
 {
     /// <summary>

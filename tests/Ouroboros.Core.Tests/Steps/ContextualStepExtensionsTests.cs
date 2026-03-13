@@ -112,7 +112,7 @@ public class ContextualStepExtensionsTests
         var step = ContextualStep.LiftPure<int, string, object>(x => x.ToString());
         var safe = step.TryStep();
 
-        var (result, logs) = await safe(42, new object());
+        var (result, _) = await safe(42, new object());
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().Be("42");
     }
@@ -135,7 +135,7 @@ public class ContextualStepExtensionsTests
         var step = ContextualStep.LiftPure<int, int, object>(x => x * 2);
         var optional = step.TryOption<int, int, object>(x => x > 5);
 
-        var (result, logs) = await optional(5, new object());
+        var (result, _) = await optional(5, new object());
         result.HasValue.Should().BeTrue();
         result.Value.Should().Be(10);
     }
@@ -146,7 +146,7 @@ public class ContextualStepExtensionsTests
         var step = ContextualStep.LiftPure<int, int, object>(x => x * 2);
         var optional = step.TryOption<int, int, object>(x => x > 100);
 
-        var (result, logs) = await optional(5, new object());
+        var (result, _) = await optional(5, new object());
         result.HasValue.Should().BeFalse();
     }
 

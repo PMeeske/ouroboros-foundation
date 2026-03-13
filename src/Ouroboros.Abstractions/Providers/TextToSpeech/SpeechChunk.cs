@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Providers.TextToSpeech;
 
 /// <summary>
@@ -9,6 +11,7 @@ namespace Ouroboros.Providers.TextToSpeech;
 /// <param name="Text">The text this chunk represents (for debugging/display).</param>
 /// <param name="IsSentenceEnd">Indicates a natural pause point (sentence boundary).</param>
 /// <param name="IsComplete">True if this is the final chunk.</param>
+[ExcludeFromCodeCoverage]
 public sealed record SpeechChunk(
     byte[] AudioData,
     string Format,

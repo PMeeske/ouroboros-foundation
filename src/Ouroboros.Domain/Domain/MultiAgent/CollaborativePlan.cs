@@ -1,6 +1,8 @@
-// <copyright file="CollaborativePlan.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="CollaborativePlan.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
+
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.MultiAgent;
 
@@ -11,6 +13,7 @@ namespace Ouroboros.Domain.MultiAgent;
 /// <param name="Assignments">Task assignments for each agent.</param>
 /// <param name="Dependencies">Dependencies between tasks.</param>
 /// <param name="EstimatedDuration">Estimated time to complete the plan.</param>
+[ExcludeFromCodeCoverage]
 public sealed record CollaborativePlan(
     string Goal,
     List<TaskAssignment> Assignments,

@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent;
 
 /// <summary>
 /// Classification of model types for orchestration decisions.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum ModelType
 {
     /// <summary>General-purpose model suitable for a broad range of tasks.</summary>

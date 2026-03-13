@@ -1,8 +1,9 @@
-// <copyright file="ISkillRegistry.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="ISkillRegistry.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 using Ouroboros.Abstractions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI;
 
@@ -10,6 +11,7 @@ namespace Ouroboros.Agent.MetaAI;
 /// Interface for managing a registry of agent skills.
 /// Supports skill discovery, registration, and retrieval.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface ISkillRegistry
 {
     /// <summary>

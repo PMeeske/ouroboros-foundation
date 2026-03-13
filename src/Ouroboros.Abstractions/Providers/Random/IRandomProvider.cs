@@ -1,6 +1,8 @@
-// <copyright file="IRandomProvider.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="IRandomProvider.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
+
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Providers.Random;
 
@@ -9,6 +11,7 @@ namespace Ouroboros.Providers.Random;
 /// Implementations may use cryptographic or deterministic (seeded) generators,
 /// allowing consumers to be decoupled from the concrete randomness source.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IRandomProvider
 {
     /// <summary>

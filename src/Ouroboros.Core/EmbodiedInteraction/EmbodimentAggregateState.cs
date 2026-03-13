@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
@@ -8,6 +10,7 @@ namespace Ouroboros.Core.EmbodiedInteraction;
 /// <param name="Status">Current status.</param>
 /// <param name="Capabilities">Aggregate capabilities.</param>
 /// <param name="LastUpdatedAt">Last update timestamp.</param>
+[ExcludeFromCodeCoverage]
 public sealed record EmbodimentAggregateState(
     string AggregateId,
     string Name,

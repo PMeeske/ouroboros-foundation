@@ -1,5 +1,5 @@
-// <copyright file="Interpreter.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="Interpreter.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 namespace Ouroboros.Core.Hyperon;
@@ -168,11 +168,24 @@ public sealed class Interpreter
 
     /// <summary>
     /// Creates a monadic query that can be composed with other operations.
+    /// When an <paramref name="interpreter"/> is provided, its grounded operation
+    /// registry is reused across queries, ensuring consistent behavior when
+    /// custom operations have been registered.
     /// </summary>
     /// <param name="query">The query atom.</param>
+    /// <param name="interpreter">
+    /// Optional interpreter instance whose grounded operations registry will be
+    /// shared. When <c>null</c>, a fresh interpreter is created per invocation.
+    /// </param>
     /// <returns>A function that evaluates the query against a space.</returns>
-    public static Func<IAtomSpace, IEnumerable<Atom>> Query(Atom query) =>
-        space => new Interpreter(space).Evaluate(query);
+    public static Func<IAtomSpace, IEnumerable<Atom>> Query(
+        Atom query,
+        Interpreter? interpreter = null) =>
+        space =>
+        {
+            var interp = interpreter ?? new Interpreter(space);
+            return interp.Evaluate(query);
+        };
 
     /// <summary>
     /// Composes two queries using monadic bind (SelectMany).

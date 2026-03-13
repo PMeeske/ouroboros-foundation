@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Synthesis;
 
 /// <summary>
@@ -6,6 +8,7 @@ namespace Ouroboros.Core.Synthesis;
 /// <param name="Steps">The execution steps taken during program execution.</param>
 /// <param name="FinalResult">The final result produced by the program.</param>
 /// <param name="Duration">The time taken to execute the program.</param>
+[ExcludeFromCodeCoverage]
 public sealed record ExecutionTrace(
     List<ExecutionStep> Steps,
     object FinalResult,

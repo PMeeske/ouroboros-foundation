@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.Events;
 
@@ -11,4 +12,5 @@ namespace Ouroboros.Domain.Events;
 [JsonDerivedType(typeof(EnvironmentStepEvent), typeDiscriminator: "EnvironmentStep")]
 [JsonDerivedType(typeof(EpisodeEvent), typeDiscriminator: "Episode")]
 [JsonDerivedType(typeof(StepExecutionEvent), typeDiscriminator: "StepExecution")]
+[ExcludeFromCodeCoverage]
 public abstract record PipelineEvent(Guid Id, string Kind, DateTime Timestamp);

@@ -1,6 +1,8 @@
-// <copyright file="IngestBatch.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="IngestBatch.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
+
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.Events;
 
@@ -12,6 +14,7 @@ namespace Ouroboros.Domain.Events;
 /// <param name="Source">The source path or identifier of the ingested data</param>
 /// <param name="Ids">List of document IDs that were ingested</param>
 /// <param name="Timestamp">When the ingestion occurred</param>
+[ExcludeFromCodeCoverage]
 public sealed record IngestBatch(
     Guid Id,
     string Source,

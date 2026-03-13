@@ -2,6 +2,8 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.Affect;
 
 /// <summary>
@@ -9,6 +11,7 @@ namespace Ouroboros.Agent.MetaAI.Affect;
 /// Combines dense vector search, sparse keyword matching, and payload filtering
 /// for cross-modal memory retrieval across sensory modalities.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IEmbodimentMemoryFusion
 {
     /// <summary>

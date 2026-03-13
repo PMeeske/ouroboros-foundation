@@ -1,4 +1,6 @@
 ﻿using System.Text;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Text.Json;
 using Ouroboros.Core.Randomness;
 using Ouroboros.Providers.Random;
@@ -12,6 +14,7 @@ namespace Ouroboros.Domain.Autonomous.Neurons;
 /// </summary>
 public sealed partial class UserPersonaNeuron : Neuron
 {
+    private readonly ILogger _logger;
     private readonly List<TrainingInteraction> _interactions = [];
     private readonly List<string> _conversationHistory = [];
     private readonly Queue<string> _pendingQuestions = new();
@@ -41,6 +44,15 @@ public sealed partial class UserPersonaNeuron : Neuron
         "response.generated",
         "system.tick",
     };
+
+    /// <summary>
+    /// Creates a new UserPersonaNeuron instance.
+    /// </summary>
+    /// <param name="logger">Optional logger instance.</param>
+    public UserPersonaNeuron(ILogger<UserPersonaNeuron>? logger = null)
+    {
+        _logger = logger ?? NullLogger<UserPersonaNeuron>.Instance;
+    }
 
     /// <summary>
     /// Delegate for generating questions using LLM.
@@ -94,7 +106,7 @@ public sealed partial class UserPersonaNeuron : Neuron
     /// </summary>
     public async Task StartTrainingDirectAsync(UserPersonaConfig config)
     {
-        Console.WriteLine("  [UserPersonaNeuron] StartTrainingDirectAsync called");
+        _logger.LogDebug("StartTrainingDirectAsync called");
         _config = config;
         await StartTrainingAsync(config, CancellationToken.None);
     }
@@ -117,7 +129,7 @@ public sealed partial class UserPersonaNeuron : Neuron
     /// </summary>
     public void RecordInteraction(string userMessage, string systemResponse)
     {
-        Console.WriteLine("  [UserPersonaNeuron] RecordInteraction - Ouroboros responded, signaling completion");
+        _logger.LogDebug("RecordInteraction - Ouroboros responded, signaling completion");
         _conversationHistory.Add($"User: {userMessage}");
         _conversationHistory.Add($"Ouroboros: {systemResponse}");
 

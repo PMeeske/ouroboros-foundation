@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI;
 
 /// <summary>
 /// Configuration for transfer learning behavior.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record TransferLearningConfig(
     double MinTransferabilityThreshold = 0.5,
     int MaxAdaptationAttempts = 3,

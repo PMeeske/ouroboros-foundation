@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Ethics;
 
 /// <summary>
 /// Severity levels for ethical concerns.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum ConcernLevel
 {
     /// <summary>Informational, for awareness</summary>

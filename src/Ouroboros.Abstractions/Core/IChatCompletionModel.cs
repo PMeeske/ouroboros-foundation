@@ -3,6 +3,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Abstractions.Core;
 
 /// <summary>
@@ -10,6 +12,7 @@ namespace Ouroboros.Abstractions.Core;
 /// Provides the minimal contract for text generation used across the pipeline.
 /// </summary>
 [Obsolete("Use IOuroborosChatClient (which extends IChatClient from Microsoft.Extensions.AI) instead. Will be removed in v3.")]
+[ExcludeFromCodeCoverage]
 public interface IChatCompletionModel
 {
     /// <summary>

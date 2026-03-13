@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Ethics;
 
 /// <summary>
 /// Types of self-modification requests.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum ModificationType
 {
     /// <summary>Adding new capabilities or skills</summary>

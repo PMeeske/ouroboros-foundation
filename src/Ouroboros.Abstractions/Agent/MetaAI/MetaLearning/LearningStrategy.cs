@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.MetaLearning;
 
 /// <summary>
 /// Represents a learning strategy for a specific type of task.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record LearningStrategy(
     string Name,
     string Description,

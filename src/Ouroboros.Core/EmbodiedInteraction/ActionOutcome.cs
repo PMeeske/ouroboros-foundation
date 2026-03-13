@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
@@ -9,6 +11,7 @@ namespace Ouroboros.Core.EmbodiedInteraction;
 /// <param name="Duration">How long the action took.</param>
 /// <param name="Result">Result data if any.</param>
 /// <param name="Error">Error message if failed.</param>
+[ExcludeFromCodeCoverage]
 public sealed record ActionOutcome(
     string ActuatorId,
     string ActionType,

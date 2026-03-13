@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
@@ -7,6 +9,7 @@ namespace Ouroboros.Core.EmbodiedInteraction;
 /// <param name="Success">Whether action succeeded.</param>
 /// <param name="Error">Error message if failed.</param>
 /// <param name="Duration">How long the action took.</param>
+[ExcludeFromCodeCoverage]
 public sealed record ActionResult(
     ActionRequest Request,
     bool Success,

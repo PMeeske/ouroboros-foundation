@@ -1,9 +1,12 @@
-﻿namespace Ouroboros.Domain.Voice;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Voice;
 
 /// <summary>
 /// Text typed by user via keyboard.
 /// Can be partial (character-by-character streaming) or complete.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record TextInputEvent : InteractionEvent
 {
     /// <summary>Gets the text content.</summary>
