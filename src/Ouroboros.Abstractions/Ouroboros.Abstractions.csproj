@@ -84,6 +84,8 @@
         <Compile Include="Agent\TemporalReasoning\Timeline.cs" />
         <Compile Include="Agent\UseCase.cs" />
         <Compile Include="Agent\UseCaseType.cs" />
+        <Compile Include="Errors\ErrorCodes.cs" />
+        <Compile Include="Errors\OuroborosError.cs" />
         <Compile Include="Domain\EmbodiedTransition.cs" />
         <Compile Include="Domain\PredictedState.cs" />
         <Compile Include="Domain\SensorState.cs" />

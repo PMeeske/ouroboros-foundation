@@ -70,7 +70,7 @@ public static class Arrow
                 return Result<TOutput, Exception>.Success(result);
             }
             catch (OperationCanceledException) { throw; }
-            catch (Exception ex) when (ex is not OperationCanceledException)
+            catch (Exception ex)
             {
                 return Result<TOutput, Exception>.Failure(ex);
             }

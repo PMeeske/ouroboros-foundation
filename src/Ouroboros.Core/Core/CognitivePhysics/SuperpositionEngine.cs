@@ -1,5 +1,5 @@
-// <copyright file="SuperpositionEngine.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="SuperpositionEngine.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 namespace Ouroboros.Core.CognitivePhysics;
@@ -68,6 +68,8 @@ public sealed class SuperpositionEngine
         CognitiveBranch? best = null;
         double bestScore = double.MinValue;
 
+        float[] originEmbedding = await _embeddingProvider.CreateEmbeddingsAsync(origin);
+
         foreach (CognitiveBranch branch in branches)
         {
             EthicsGateResult ethics = await _ethicsEvaluator(origin, branch.State.Focus);
@@ -76,7 +78,6 @@ public sealed class SuperpositionEngine
             if (ethics.IsDenied)
                 continue;
 
-            float[] originEmbedding = await _embeddingProvider.CreateEmbeddingsAsync(origin);
             float[] branchEmbedding = await _embeddingProvider.CreateEmbeddingsAsync(branch.State.Focus);
             double coherence = 1.0 - SemanticDistance.Compute(originEmbedding, branchEmbedding);
 

@@ -1,5 +1,5 @@
-// <copyright file="GeneticEvolutionStep.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="GeneticEvolutionStep.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 namespace Ouroboros.Genetic.Steps;

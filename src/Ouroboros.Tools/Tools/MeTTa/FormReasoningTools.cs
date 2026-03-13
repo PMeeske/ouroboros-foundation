@@ -1,5 +1,5 @@
-// <copyright file="FormReasoningTools.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="FormReasoningTools.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 using Ouroboros.Core.Hyperon;
