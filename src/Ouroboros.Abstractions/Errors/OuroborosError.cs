@@ -36,6 +36,18 @@ public sealed record OuroborosError
     public Exception? InnerException { get; init; }
 
     /// <summary>
+    /// Gets the severity level of this error.
+    /// Defaults to <see cref="ErrorSeverity.Error"/>.
+    /// </summary>
+    public ErrorSeverity Severity { get; init; } = ErrorSeverity.Error;
+
+    /// <summary>
+    /// Gets the timestamp when this error was created.
+    /// Defaults to <see cref="DateTimeOffset.UtcNow"/>.
+    /// </summary>
+    public DateTimeOffset Timestamp { get; init; } = DateTimeOffset.UtcNow;
+
+    /// <summary>
     /// Creates an <see cref="OuroborosError"/> from a code and message.
     /// </summary>
     /// <param name="code">The machine-readable error code.</param>

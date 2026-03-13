@@ -2,6 +2,8 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Ouroboros.Abstractions;
 
 namespace Ouroboros.Tools.MeTTa;
@@ -20,6 +22,7 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
     private readonly StreamReader? stdout;
     private readonly StreamReader? stderr;
     private readonly SemaphoreSlim @lock = new(1, 1);
+    private readonly ILogger _logger;
     private bool disposed;
 
     /// <summary>
@@ -27,8 +30,9 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
     /// Creates a new subprocess-based MeTTa engine.
     /// </summary>
     /// <param name="mettaExecutablePath">Path to the MeTTa executable (defaults to 'metta' in PATH).</param>
-    public SubprocessMeTTaEngine(string? mettaExecutablePath = null)
+    public SubprocessMeTTaEngine(string? mettaExecutablePath = null, ILogger<SubprocessMeTTaEngine>? logger = null)
     {
+        _logger = logger ?? NullLogger<SubprocessMeTTaEngine>.Instance;
         // If path is provided, use it (legacy/local override).
         // If not, default to docker execution using a Python REPL wrapper
         // because the 'metta' binary in the container may not support --repl or interactive mode correctly via pipe.
@@ -112,13 +116,13 @@ public sealed class SubprocessMeTTaEngine : IMeTTaEngine
         catch (System.ComponentModel.Win32Exception ex)
         {
             // Executable not found or not accessible
-            Console.WriteLine($"Warning: MeTTa executable not found: {ex.Message}");
+            _logger.LogWarning(ex, "MeTTa executable not found");
         }
         catch (InvalidOperationException ex)
         {
             // If MeTTa executable is not found, we continue with null process
             // Methods will return appropriate errors when called
-            Console.WriteLine($"Warning: Could not start MeTTa subprocess: {ex.Message}");
+            _logger.LogWarning(ex, "Could not start MeTTa subprocess");
         }
     }
 

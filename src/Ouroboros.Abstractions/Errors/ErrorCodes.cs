@@ -47,4 +47,31 @@ public static class ErrorCodes
 
     /// <summary>Serialization or deserialization of a value failed.</summary>
     public const string SerializationFailed = "SERIAL_001";
+
+    /// <summary>A tool execution failed.</summary>
+    public const string ToolExecutionFailed = "TOOL_001";
+
+    /// <summary>A tool was not authorized by the ethics framework.</summary>
+    public const string ToolNotAuthorized = "TOOL_002";
+
+    /// <summary>An I/O operation failed.</summary>
+    public const string IoOperationFailed = "IO_001";
+
+    /// <summary>A network operation failed.</summary>
+    public const string NetworkOperationFailed = "NET_001";
+
+    /// <summary>A memory operation failed.</summary>
+    public const string MemoryOperationFailed = "MEM_001";
+
+    /// <summary>A parse operation failed.</summary>
+    public const string ParseOperationFailed = "PARSE_001";
+
+    /// <summary>An embedding operation failed.</summary>
+    public const string EmbeddingOperationFailed = "EMBED_001";
+
+    /// <summary>A pipeline step failed.</summary>
+    public const string PipelineStepFailed = "PIPE_001";
+
+    /// <summary>A Qdrant vector database operation failed.</summary>
+    public const string QdrantOperationFailed = "QDRANT_001";
 }
