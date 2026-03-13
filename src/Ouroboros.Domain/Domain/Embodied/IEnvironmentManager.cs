@@ -3,6 +3,7 @@
 // </copyright>
 
 using Ouroboros.Abstractions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.Embodied;
 
@@ -10,6 +11,7 @@ namespace Ouroboros.Domain.Embodied;
 /// Interface for managing embodied simulation environments.
 /// Handles environment lifecycle (creation, reset, destruction) and discovery.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IEnvironmentManager
 {
     /// <summary>

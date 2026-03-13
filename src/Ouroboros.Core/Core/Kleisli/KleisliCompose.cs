@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Kleisli;
 
 /// <summary>
@@ -11,6 +13,7 @@ namespace Ouroboros.Core.Kleisli;
 /// <param name="f">The first Kleisli arrow.</param>
 /// <param name="g">The second Kleisli arrow.</param>
 /// <returns>A composed Kleisli arrow.</returns>
+[ExcludeFromCodeCoverage]
 public delegate Kleisli<TIn, TOut> KleisliCompose<TIn, TMid, TOut>(
     Kleisli<TIn, TMid> f,
     Kleisli<TMid, TOut> g);

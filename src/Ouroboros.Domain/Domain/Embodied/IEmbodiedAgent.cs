@@ -3,6 +3,7 @@
 // </copyright>
 
 using Ouroboros.Abstractions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.Embodied;
 
@@ -10,6 +11,7 @@ namespace Ouroboros.Domain.Embodied;
 /// Interface for embodied agents that can perceive, act, learn, and plan in simulated environments.
 /// Grounds cognition in sensorimotor experience for physical reasoning.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IEmbodiedAgent
 {
     /// <summary>

@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 // <copyright file="IEmbodimentVectorStore.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
@@ -9,6 +11,7 @@ namespace Ouroboros.Core.EmbodiedInteraction;
 /// and affordance maps. Provider-agnostic: implementations may use Qdrant, Pinecone,
 /// in-memory, or any vector database.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IEmbodimentVectorStore : IAsyncDisposable
 {
     /// <summary>

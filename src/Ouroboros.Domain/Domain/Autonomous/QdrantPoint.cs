@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Autonomous;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Autonomous;
 
 /// <summary>
 /// Represents a point to upsert to Qdrant.
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal sealed record QdrantPoint
 {
     public required string Id { get; init; }

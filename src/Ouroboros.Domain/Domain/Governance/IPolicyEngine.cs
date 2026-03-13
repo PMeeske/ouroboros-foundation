@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Governance;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Governance;
 
 /// <summary>
 /// Interface for policy engine operations.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IPolicyEngine
 {
     /// <summary>

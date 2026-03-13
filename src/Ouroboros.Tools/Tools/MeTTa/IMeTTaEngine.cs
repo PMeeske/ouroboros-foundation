@@ -3,6 +3,7 @@
 // </copyright>
 
 using Ouroboros.Abstractions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Tools.MeTTa;
 
@@ -10,6 +11,7 @@ namespace Ouroboros.Tools.MeTTa;
 /// Represents a MeTTa symbolic reasoning engine that can execute queries,
 /// apply rules, and perform plan verification.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IMeTTaEngine : IDisposable
 {
     /// <summary>

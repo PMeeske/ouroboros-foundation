@@ -7,10 +7,12 @@ using Ouroboros.Abstractions;
 namespace Ouroboros.Core.DistinctionLearning;
 
 using Ouroboros.Core.Monads;
+using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
 /// Interface for storing and managing distinction learning weights.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IDistinctionWeightStorage
 {
     /// <summary>

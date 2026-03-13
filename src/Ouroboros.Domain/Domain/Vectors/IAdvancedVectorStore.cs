@@ -1,10 +1,12 @@
-﻿using LangChain.DocumentLoaders;
+using LangChain.DocumentLoaders;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.Vectors;
 
 /// <summary>
 /// Extended vector store interface with advanced capabilities like filtering, counting, and batch operations.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IAdvancedVectorStore : IVectorStore
 {
     /// <summary>

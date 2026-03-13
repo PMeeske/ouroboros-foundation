@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Domain.Persistence;
 
 /// <summary>
 /// Interface for persisting and retrieving pipeline events (event sourcing).
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IEventStore
 {
     /// <summary>

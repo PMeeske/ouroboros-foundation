@@ -3,6 +3,7 @@
 // </copyright>
 
 using Ouroboros.Abstractions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Core.Synthesis;
 
@@ -10,6 +11,7 @@ namespace Ouroboros.Core.Synthesis;
 /// Interface for a neural-guided program synthesis engine with library learning.
 /// Implements DreamCoder-style wake-sleep algorithm for program synthesis and learning.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IProgramSynthesisEngine
 {
     /// <summary>

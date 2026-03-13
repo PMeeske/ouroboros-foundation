@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Kleisli;
 
 /// <summary>
@@ -7,4 +9,5 @@ namespace Ouroboros.Core.Kleisli;
 /// <typeparam name="TOutput">The output type.</typeparam>
 /// <param name="input">The input value.</param>
 /// <returns>A Task containing an Option of the computation result.</returns>
+[ExcludeFromCodeCoverage]
 public delegate Task<Option<TOutput>> KleisliOption<in TInput, TOutput>(TInput input);

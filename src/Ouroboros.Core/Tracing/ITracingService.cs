@@ -1,11 +1,13 @@
 using System.Diagnostics;
 using Ouroboros.Abstractions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Core.Tracing
 {
     /// <summary>
     /// Defines a service for recording and managing diagnostic tracing information.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public interface ITracingService
     {
         /// <summary>

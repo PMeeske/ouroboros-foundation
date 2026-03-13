@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 // <copyright file="IBenchmarkSuite.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -8,6 +10,7 @@ namespace Ouroboros.Domain.Benchmarks;
 /// Interface for benchmark suite implementations that evaluate AI capabilities
 /// across multiple dimensions and standard benchmarks.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IBenchmarkSuite
 {
     /// <summary>

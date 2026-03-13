@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 // <copyright file="IAdvancedMeTTaEngine.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -7,6 +9,7 @@ namespace Ouroboros.Tools.MeTTa;
 /// <summary>
 /// Advanced MeTTa engine with rule learning, theorem proving, and abductive reasoning.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IAdvancedMeTTaEngine : IMeTTaEngine
 {
     /// <summary>

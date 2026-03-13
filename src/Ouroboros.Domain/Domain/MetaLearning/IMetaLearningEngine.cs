@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 // <copyright file="IMetaLearningEngine.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -8,6 +10,7 @@ namespace Ouroboros.Domain.MetaLearning;
 /// Implements meta-learning capabilities for fast adaptation to new tasks.
 /// Supports MAML, Reptile, and other meta-learning algorithms.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IMetaLearningEngine
 {
     /// <summary>

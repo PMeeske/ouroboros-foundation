@@ -5,11 +5,13 @@
 namespace Ouroboros.Core.Reasoning;
 
 using Ouroboros.Core.Monads;
+using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
 /// Interface for causal reasoning engine implementing Pearl's causal inference framework.
 /// Supports causal discovery, do-calculus, counterfactual reasoning, and intervention planning.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface ICausalReasoningEngine
 {
     /// <summary>

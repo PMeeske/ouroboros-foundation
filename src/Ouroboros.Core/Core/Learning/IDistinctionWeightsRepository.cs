@@ -7,11 +7,13 @@ using Ouroboros.Abstractions;
 namespace Ouroboros.Core.Learning;
 
 using Ouroboros.Core.Monads;
+using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
 /// Repository interface for storing and retrieving distinction weights with typed IDs.
 /// This provides a higher-level abstraction over raw weight storage.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IDistinctionWeightsRepository
 {
     /// <summary>

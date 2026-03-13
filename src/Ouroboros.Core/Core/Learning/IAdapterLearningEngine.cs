@@ -7,11 +7,13 @@ using Ouroboros.Abstractions;
 namespace Ouroboros.Core.Learning;
 
 using Ouroboros.Core.Monads;
+using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
 /// Interface for Parameter-Efficient Fine-Tuning (PEFT) adapter learning engine.
 /// Provides continual learning capabilities without catastrophic forgetting through LoRA adapters.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IAdapterLearningEngine
 {
     /// <summary>

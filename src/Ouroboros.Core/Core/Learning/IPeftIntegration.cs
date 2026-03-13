@@ -5,11 +5,13 @@
 namespace Ouroboros.Core.Learning;
 
 using Ouroboros.Core.Monads;
+using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
 /// Interface for HuggingFace PEFT (Parameter-Efficient Fine-Tuning) integration.
 /// Abstracts the communication with Python PEFT library via Python.NET or REST API.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IPeftIntegration
 {
     /// <summary>

@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 // <copyright file="IEthicsAuditLog.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -8,6 +10,7 @@ namespace Ouroboros.Core.Ethics;
 /// Interface for logging and querying ethical evaluation audit trails.
 /// All ethical evaluations MUST be logged for accountability and review.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IEthicsAuditLog
 {
     /// <summary>

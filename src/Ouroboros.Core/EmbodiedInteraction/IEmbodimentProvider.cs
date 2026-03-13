@@ -3,6 +3,7 @@
 // </copyright>
 
 using Ouroboros.Abstractions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Core.EmbodiedInteraction;
 
@@ -11,6 +12,7 @@ namespace Ouroboros.Core.EmbodiedInteraction;
 /// Provides a general interface for different embodiment backends
 /// (Tapo cameras, virtual sensors, robotic systems, etc.).
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IEmbodimentProvider : IDisposable
 {
     /// <summary>

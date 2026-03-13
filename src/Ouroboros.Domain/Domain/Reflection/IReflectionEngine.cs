@@ -8,11 +8,13 @@ using Ouroboros.Core.LawsOfForm;
 using Ouroboros.Core.Monads;
 using Ouroboros.Domain.Environment;
 using Ouroboros.Domain.Persistence;
+using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
 /// Interface for the reflection engine providing meta-cognitive analysis capabilities.
 /// Follows functional programming principles with Result monad for error handling.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IReflectionEngine
 {
     /// <summary>

@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 // <copyright file="IModel.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -8,6 +10,7 @@ namespace Ouroboros.Domain.MetaLearning;
 /// Represents a machine learning model that can be adapted through meta-learning.
 /// Provides interfaces for prediction, cloning, and parameter updates.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IModel
 {
     /// <summary>

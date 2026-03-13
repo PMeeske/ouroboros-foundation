@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 // <copyright file="IThoughtStore.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
@@ -8,6 +10,7 @@ namespace Ouroboros.Domain.Persistence;
 /// Interface for persisting and retrieving agent thoughts.
 /// Enables thought continuity across sessions and introspective analysis.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IThoughtStore
 {
     /// <summary>

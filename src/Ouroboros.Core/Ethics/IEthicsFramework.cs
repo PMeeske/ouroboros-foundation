@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 // <copyright file="IEthicsFramework.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -9,6 +11,7 @@ namespace Ouroboros.Core.Ethics;
 /// Provides ethical evaluation capabilities for all agent actions.
 /// This framework CANNOT be disabled or bypassed - it is a foundational safety mechanism.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IEthicsFramework
 {
     /// <summary>

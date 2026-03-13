@@ -7,10 +7,12 @@ using Ouroboros.Abstractions;
 namespace Ouroboros.Core.Learning;
 
 using Ouroboros.Core.Monads;
+using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
 /// Interface for adapter metadata storage using vector database.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IAdapterStorage
 {
     /// <summary>

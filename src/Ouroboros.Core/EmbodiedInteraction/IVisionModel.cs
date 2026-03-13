@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Interface for vision/image analysis models.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IVisionModel
 {
     /// <summary>

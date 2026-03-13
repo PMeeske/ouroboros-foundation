@@ -7,10 +7,12 @@ using Ouroboros.Abstractions;
 namespace Ouroboros.Core.DistinctionLearning;
 
 using Ouroboros.Core.Monads;
+using System.Diagnostics.CodeAnalysis;
 
 /// <summary>
 /// Interface for distinction learning - learning from the consciousness dream cycle.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IDistinctionLearner
 {
     /// <summary>
