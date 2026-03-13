@@ -1,5 +1,5 @@
-// <copyright file="IMemoryStoreContractTests.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="IMemoryStoreContractTests.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 namespace Ouroboros.Abstractions.Tests.Agent;

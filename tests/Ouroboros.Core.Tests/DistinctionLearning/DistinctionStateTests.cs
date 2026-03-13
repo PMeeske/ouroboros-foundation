@@ -18,7 +18,7 @@ public sealed class DistinctionStateTests
     [Fact]
     public void Void_IsSameAsInitial()
     {
-        var initial = DistinctionState.Initial();
+        _ = DistinctionState.Initial();
         var voidState = DistinctionState.Void();
 
         voidState.ActiveDistinctions.Should().BeEmpty();

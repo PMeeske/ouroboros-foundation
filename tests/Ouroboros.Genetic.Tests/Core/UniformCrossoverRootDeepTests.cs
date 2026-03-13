@@ -1,5 +1,5 @@
-// <copyright file="UniformCrossoverRootDeepTests.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="UniformCrossoverRootDeepTests.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 namespace Ouroboros.Tests.Genetic.Core;
@@ -167,7 +167,7 @@ public class UniformCrossoverRootDeepTests
         var parent2 = new Chromosome<int>(new List<int> { 3, 4 });
 
         // Act
-        var (offspring1, offspring2) = crossover.Crossover(parent1, parent2);
+        var (offspring1, _) = crossover.Crossover(parent1, parent2);
 
         // Assert -- genes from either parent
         for (int i = 0; i < 2; i++)

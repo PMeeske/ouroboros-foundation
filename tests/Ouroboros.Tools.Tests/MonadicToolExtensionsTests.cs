@@ -1,5 +1,5 @@
-// <copyright file="MonadicToolExtensionsTests.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="MonadicToolExtensionsTests.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 namespace Ouroboros.Tests.Tools;
@@ -246,7 +246,7 @@ public class MonadicToolExtensionsTests
         var contextual = tool.ToContextual<string>("Custom log message");
 
         // Act
-        var (result, logs) = await contextual("input", "context");
+        var (_, logs) = await contextual("input", "context");
 
         // Assert
         logs.Should().Contain("Custom log message");
