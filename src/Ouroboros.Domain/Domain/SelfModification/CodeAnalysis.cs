@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.SelfModification;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.SelfModification;
 
 /// <summary>
 /// Analysis of code for reflection purposes.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record CodeAnalysis(
     string FilePath,
     IReadOnlyList<string> Classes,

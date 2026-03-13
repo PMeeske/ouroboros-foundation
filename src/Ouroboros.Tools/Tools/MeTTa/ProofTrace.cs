@@ -1,4 +1,6 @@
-﻿namespace Ouroboros.Tools.MeTTa;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Tools.MeTTa;
 
 /// <summary>
 /// Represents a proof trace with steps.
@@ -6,6 +8,7 @@
 /// <param name="Steps">Proof steps.</param>
 /// <param name="Proved">Whether the theorem was proved.</param>
 /// <param name="CounterExample">Counter-example if not proved.</param>
+[ExcludeFromCodeCoverage]
 public sealed record ProofTrace(
     List<ProofStep> Steps,
     bool Proved,

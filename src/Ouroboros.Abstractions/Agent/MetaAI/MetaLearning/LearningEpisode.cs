@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.MetaLearning;
 
 /// <summary>
 /// Represents a recorded learning episode for meta-learning analysis.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record LearningEpisode(
     Guid Id,
     string TaskType,

@@ -114,7 +114,7 @@ public class MetaLearningEdgeCaseTests
     {
         // Arrange
         var skill = new Ouroboros.Agent.MetaAI.Skill(
-            "s", "d", new List<string>(), new List<Ouroboros.Agent.MetaAI.PlanStep>(),
+            "s", "d", new List<string>(), new List<Ouroboros.Agent.PlanStep>(),
             0.9, 1, DateTime.UtcNow, DateTime.UtcNow);
         var patterns = new List<string>();
 
@@ -130,7 +130,7 @@ public class MetaLearningEdgeCaseTests
     {
         // Arrange
         var skill = new Ouroboros.Agent.MetaAI.Skill(
-            "s", "d", new List<string>(), new List<Ouroboros.Agent.MetaAI.PlanStep>(),
+            "s", "d", new List<string>(), new List<Ouroboros.Agent.PlanStep>(),
             0.9, 1, DateTime.UtcNow, DateTime.UtcNow);
         var original = new AdaptedModel("task", skill, 10, 0.5, 1.0, new List<string>());
 

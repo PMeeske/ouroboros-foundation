@@ -1,5 +1,5 @@
-// <copyright file="ApplicationStepExtensionsTests.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="ApplicationStepExtensionsTests.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 #if NET8_0_OR_GREATER

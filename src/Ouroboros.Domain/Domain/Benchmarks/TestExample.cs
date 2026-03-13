@@ -1,6 +1,8 @@
-// <copyright file="TestExample.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="TestExample.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
+
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.Benchmarks;
 
@@ -10,6 +12,7 @@ namespace Ouroboros.Domain.Benchmarks;
 /// <param name="Input">The input to be processed.</param>
 /// <param name="ExpectedOutput">The expected output for validation.</param>
 /// <param name="Validator">Function to validate the actual output against the expected output.</param>
+[ExcludeFromCodeCoverage]
 public sealed record TestExample(
     string Input,
     string ExpectedOutput,

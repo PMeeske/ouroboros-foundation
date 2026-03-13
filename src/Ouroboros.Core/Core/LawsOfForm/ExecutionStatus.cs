@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.LawsOfForm;
 
 /// <summary>
 /// Represents the execution status of a tool.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum ExecutionStatus
 {
     /// <summary>

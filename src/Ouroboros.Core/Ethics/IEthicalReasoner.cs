@@ -1,6 +1,8 @@
-// <copyright file="IEthicalReasoner.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="IEthicalReasoner.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
+
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Core.Ethics;
 
@@ -8,6 +10,7 @@ namespace Ouroboros.Core.Ethics;
 /// Interface for ethical reasoning logic.
 /// Separates reasoning algorithms from the framework interface.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IEthicalReasoner
 {
     /// <summary>

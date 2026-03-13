@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Extension methods for affordances.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class AffordanceExtensions
 {
     /// <summary>

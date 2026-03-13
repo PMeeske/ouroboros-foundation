@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI;
 
 /// <summary>
@@ -9,6 +11,7 @@ namespace Ouroboros.Agent.MetaAI;
 /// <param name="Reason">Explanation for the routing decision.</param>
 /// <param name="RequiresHumanOversight">Whether human oversight is required.</param>
 /// <param name="AlternativeActions">Suggested alternative actions if available.</param>
+[ExcludeFromCodeCoverage]
 public sealed record RoutingDecision(
     bool ShouldProceed,
     double ConfidenceLevel,

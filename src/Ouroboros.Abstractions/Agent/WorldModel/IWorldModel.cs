@@ -1,9 +1,10 @@
-// <copyright file="IWorldModel.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="IWorldModel.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 using Ouroboros.Abstractions;
 using Ouroboros.Abstractions.Monads;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.WorldModel;
 
@@ -11,6 +12,7 @@ namespace Ouroboros.Agent.WorldModel;
 /// Interface for predictive world models enabling model-based planning.
 /// Allows agents to simulate future states and plan action sequences.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IWorldModel
 {
     /// <summary>

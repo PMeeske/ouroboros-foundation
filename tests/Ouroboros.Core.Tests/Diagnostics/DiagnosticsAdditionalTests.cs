@@ -81,7 +81,7 @@ public class DistributedTracingAdditionalTests
     [Fact]
     public void GetTraceId_NoActiveActivity_ReturnsNull()
     {
-        var traceId = DistributedTracing.GetTraceId();
+        _ = DistributedTracing.GetTraceId();
 
         // May be null if no current activity
         // Just ensure it doesn't throw
@@ -90,7 +90,7 @@ public class DistributedTracingAdditionalTests
     [Fact]
     public void GetSpanId_NoActiveActivity_ReturnsNull()
     {
-        var spanId = DistributedTracing.GetSpanId();
+        _ = DistributedTracing.GetSpanId();
 
         // May be null if no current activity
     }

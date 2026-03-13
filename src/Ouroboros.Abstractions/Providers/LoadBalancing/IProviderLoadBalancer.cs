@@ -3,6 +3,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Providers.LoadBalancing;
 
 /// <summary>
@@ -10,6 +12,7 @@ namespace Ouroboros.Providers.LoadBalancing;
 /// Implements intelligent routing to prevent rate limiting and maximize availability.
 /// </summary>
 /// <typeparam name="T">Type of provider being load balanced.</typeparam>
+[ExcludeFromCodeCoverage]
 public interface IProviderLoadBalancer<T>
 {
     /// <summary>

@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Voice;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Voice;
 
 /// <summary>
 /// Agent presence state change event.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record PresenceStateEvent : InteractionEvent
 {
     /// <summary>Gets the new presence state.</summary>

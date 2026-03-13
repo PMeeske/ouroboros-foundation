@@ -1,8 +1,9 @@
-// <copyright file="ITheoryOfMind.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="ITheoryOfMind.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 using Unit = Ouroboros.Abstractions.Unit;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.TheoryOfMind;
 
@@ -10,6 +11,7 @@ namespace Ouroboros.Agent.TheoryOfMind;
 /// Interface for Theory of Mind capabilities.
 /// Enables agents to model other agents' beliefs, desires, and intentions.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface ITheoryOfMind
 {
     /// <summary>

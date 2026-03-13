@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Tools;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Tools;
 
 /// <summary>
 /// Arguments for reading a GitHub issue.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed class GitHubIssueReadArgs
 {
     /// <summary>

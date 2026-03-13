@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Reasoning;
 
 /// <summary>
@@ -8,6 +10,7 @@ namespace Ouroboros.Core.Reasoning;
 /// <param name="Variance">The variance of the distribution.</param>
 /// <param name="Samples">Empirical samples from the distribution.</param>
 /// <param name="Probabilities">Probability mass function for discrete distributions.</param>
+[ExcludeFromCodeCoverage]
 public sealed record Distribution(
     DistributionType Type,
     double Mean,

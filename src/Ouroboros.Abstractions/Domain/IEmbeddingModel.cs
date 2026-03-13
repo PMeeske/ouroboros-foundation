@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Domain;
 
 /// <summary>
@@ -5,6 +7,7 @@ namespace Ouroboros.Domain;
 /// Provides a wrapper around various embedding providers with a consistent interface.
 /// </summary>
 [Obsolete("Use IOuroborosEmbeddingGenerator (which extends IEmbeddingGenerator from Microsoft.Extensions.AI) instead. Will be removed in v3.")]
+[ExcludeFromCodeCoverage]
 public interface IEmbeddingModel
 {
     /// <summary>Generates an embedding vector for the given text input.</summary>

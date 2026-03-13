@@ -1,6 +1,8 @@
-// <copyright file="AgentGroup.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="AgentGroup.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
+
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.MultiAgent;
 
@@ -10,6 +12,7 @@ namespace Ouroboros.Domain.MultiAgent;
 /// <param name="Name">The name of the group.</param>
 /// <param name="Members">The agents that belong to this group.</param>
 /// <param name="Type">The message distribution strategy for the group.</param>
+[ExcludeFromCodeCoverage]
 public sealed record AgentGroup(
     string Name,
     List<AgentId> Members,

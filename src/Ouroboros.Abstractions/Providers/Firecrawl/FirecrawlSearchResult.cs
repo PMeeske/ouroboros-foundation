@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Providers.Firecrawl;
 
 /// <summary>
 /// A search result with scraped content.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record FirecrawlSearchResult
 {
     /// <summary>Gets the result URL.</summary>

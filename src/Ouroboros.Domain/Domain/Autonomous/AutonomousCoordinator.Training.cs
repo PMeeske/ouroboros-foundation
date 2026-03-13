@@ -2,6 +2,7 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using Microsoft.Extensions.Logging;
 using Ouroboros.Domain.Autonomous.Neurons;
 
 namespace Ouroboros.Domain.Autonomous;
@@ -22,11 +23,11 @@ public sealed partial class AutonomousCoordinator
     /// <param name="config">Optional user persona configuration.</param>
     public void StartAutoTraining(UserPersonaConfig? config = null)
     {
-        Console.WriteLine("  [Coordinator] StartAutoTraining called");
+        _logger.LogDebug("StartAutoTraining called");
 
         if (_userPersonaNeuron == null)
         {
-            Console.WriteLine("  [Coordinator] Creating new UserPersonaNeuron...");
+            _logger.LogDebug("Creating new UserPersonaNeuron");
             _userPersonaNeuron = new UserPersonaNeuron();
             _network.RegisterNeuron(_userPersonaNeuron);
 
@@ -36,7 +37,7 @@ public sealed partial class AutonomousCoordinator
                     .ContinueWith(
                         t => System.Diagnostics.Debug.WriteLine($"Auto-training handler faulted: {t.Exception}"),
                         System.Threading.Tasks.TaskContinuationOptions.OnlyOnFaulted);
-            Console.WriteLine("  [Coordinator] OnUserMessage handler wired");
+            _logger.LogDebug("OnUserMessage handler wired");
 
             // Wire up generation function - use full chat if available and tools enabled
             _userPersonaNeuron.GenerateFunction = async (prompt, ct) =>
@@ -46,7 +47,7 @@ public sealed partial class AutonomousCoordinator
                 // In problem-solving mode with tools, use full chat pipeline
                 if (config.ProblemSolvingMode && config.UseTools && FullChatWithToolsFunction != null)
                 {
-                    Console.WriteLine("  [UserPersona] Using full chat with tools...");
+                    _logger.LogDebug("Using full chat with tools");
                     return await FullChatWithToolsFunction(prompt, ct);
                 }
 
@@ -58,7 +59,7 @@ public sealed partial class AutonomousCoordinator
 
                 return "Generation function not available.";
             };
-            Console.WriteLine($"  [Coordinator] GenerateFunction: {(ThinkFunction != null ? "SET (with tools support)" : "NULL")}");
+            _logger.LogDebug("GenerateFunction: {Status}", ThinkFunction != null ? "SET (with tools support)" : "NULL");
 
             // Wire up evaluation function if we have MeTTa
             if (MeTTaQueryFunction != null)
@@ -90,7 +91,7 @@ public sealed partial class AutonomousCoordinator
             }
         }
 
-        Console.WriteLine("  [Coordinator] Broadcasting training.start...");
+        _logger.LogDebug("Broadcasting training.start");
 
         // Configure and start - call directly instead of broadcast to ensure immediate execution
         UserPersonaConfig trainingConfig = config ?? new UserPersonaConfig();
@@ -99,26 +100,26 @@ public sealed partial class AutonomousCoordinator
         if (trainingConfig.YoloMode)
         {
             IsYoloMode = true;
-            Console.WriteLine("  [Coordinator] YOLO Mode enabled for problem-solving");
+            _logger.LogDebug("YOLO Mode enabled for problem-solving");
         }
 
         // Suppress proactive messages during problem-solving to avoid noise
         if (trainingConfig.ProblemSolvingMode)
         {
             SetSuppressProactiveMessages?.Invoke(true);
-            Console.WriteLine("  [Coordinator] Suppressing proactive messages during problem-solving");
+            _logger.LogDebug("Suppressing proactive messages during problem-solving");
         }
 
         _ = Task.Run(async () =>
         {
             try
             {
-                Console.WriteLine("  [Coordinator] Starting training directly on neuron...");
+                _logger.LogDebug("Starting training directly on neuron");
                 await _userPersonaNeuron.StartTrainingDirectAsync(trainingConfig);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                Console.WriteLine($"  [Coordinator] Training start error: {ex.Message}");
+                _logger.LogWarning(ex, "Training start error");
             }
         });
 
@@ -167,14 +168,14 @@ public sealed partial class AutonomousCoordinator
             if (wasYoloFromTraining && !_config.YoloMode)
             {
                 IsYoloMode = false;
-                Console.WriteLine("  [Coordinator] YOLO Mode restored to config default (off)");
+                _logger.LogDebug("YOLO Mode restored to config default (off)");
             }
 
             // Re-enable proactive messages if they were suppressed for problem-solving
             if (_userPersonaNeuron.Config.ProblemSolvingMode)
             {
                 SetSuppressProactiveMessages?.Invoke(false);
-                Console.WriteLine("  [Coordinator] Proactive messages re-enabled");
+                _logger.LogDebug("Proactive messages re-enabled");
             }
 
             _ = _network.BroadcastAsync("training.stop", null!, "coordinator");

@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.TemporalReasoning;
 
 /// <summary>
 /// Parameters for querying temporal events.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record TemporalQuery(
     DateTime? StartAfter = null,
     DateTime? StartBefore = null,

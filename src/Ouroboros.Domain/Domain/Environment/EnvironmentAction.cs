@@ -1,6 +1,8 @@
-// <copyright file="EnvironmentAction.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="EnvironmentAction.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
+
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.Environment;
 
@@ -10,6 +12,7 @@ namespace Ouroboros.Domain.Environment;
 /// </summary>
 /// <param name="ActionType">The type/name of the action</param>
 /// <param name="Parameters">Optional parameters for the action</param>
+[ExcludeFromCodeCoverage]
 public sealed record EnvironmentAction(
     string ActionType,
     IReadOnlyDictionary<string, object>? Parameters = null);

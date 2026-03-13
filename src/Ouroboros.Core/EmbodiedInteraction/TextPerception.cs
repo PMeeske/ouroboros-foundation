@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
 /// Text input perception.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record TextPerception(
     Guid Id,
     DateTime Timestamp,

@@ -1,5 +1,5 @@
-// <copyright file="Telemetry.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="Telemetry.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 namespace Ouroboros.Diagnostics;
@@ -110,6 +110,6 @@ public static class Telemetry
         string dims = string.Join(';', Dims.OrderBy(kv => kv.Key).Select(kv => $"d{kv.Key}={kv.Value}"));
         double avgToolMicros = toolLatencySamples == 0 ? 0 : (double)toolLatencyMicros / toolLatencySamples;
         string toolTop = string.Join(',', ToolNameCounts.OrderByDescending(kv => kv.Value).Take(5).Select(kv => $"{kv.Key}={kv.Value}"));
-        Console.WriteLine($"[telemetry] embReq={embeddings} embFail={embFailures} vectors={vectors} approxTokens={approxTokens} agentIters={agentIterations} agentTools={agentToolCalls} agentRetries={agentRetries} streamChunks={streamChunks} avgToolUs={avgToolMicros:F1} tools[{toolTop}] {dims}");
+        System.Diagnostics.Debug.WriteLine($"[telemetry] embReq={embeddings} embFail={embFailures} vectors={vectors} approxTokens={approxTokens} agentIters={agentIterations} agentTools={agentToolCalls} agentRetries={agentRetries} streamChunks={streamChunks} avgToolUs={avgToolMicros:F1} tools[{toolTop}] {dims}");
     }
 }

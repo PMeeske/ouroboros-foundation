@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.States;
 
@@ -15,4 +16,5 @@ namespace Ouroboros.Domain.States;
 [JsonDerivedType(typeof(DocumentRevision), "DocumentRevision")]
 [JsonDerivedType(typeof(Thinking), "Thinking")]
 [JsonDerivedType(typeof(OperatingCostAuditResult), "OperatingCostAudit")]
+[ExcludeFromCodeCoverage]
 public abstract record ReasoningState(string Kind, string Text);

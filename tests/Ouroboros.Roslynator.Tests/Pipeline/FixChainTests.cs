@@ -79,7 +79,7 @@ public sealed class FixChainTests
     public async Task ExecuteAsync_IdentityPipeline_ReturnsOriginalDocument()
     {
         // Arrange
-        var (document, root, diagnostic) = CreateTestContext();
+        var (document, _, diagnostic) = CreateTestContext();
         var chain = new IdentityChain();
 
         // Act
@@ -94,7 +94,7 @@ public sealed class FixChainTests
     public async Task ExecuteAsync_ModifyingPipeline_ReturnsChangedDocument()
     {
         // Arrange
-        var (document, root, diagnostic) = CreateTestContext();
+        var (document, _, diagnostic) = CreateTestContext();
         var chain = new ModifyingChain();
 
         // Act
@@ -110,7 +110,7 @@ public sealed class FixChainTests
     public async Task ExecuteAsync_WithCancellationToken_PassesTokenThrough()
     {
         // Arrange
-        var (document, root, diagnostic) = CreateTestContext();
+        var (document, _, diagnostic) = CreateTestContext();
         var chain = new IdentityChain();
         using var cts = new CancellationTokenSource();
 

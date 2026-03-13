@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Reasoning;
 
 /// <summary>
@@ -8,6 +10,7 @@ namespace Ouroboros.Core.Reasoning;
 /// <param name="Parents">The parent variables that influence the outcome.</param>
 /// <param name="Function">The function mapping parent values to outcome value.</param>
 /// <param name="NoiseVariance">The variance of the noise term.</param>
+[ExcludeFromCodeCoverage]
 public sealed record StructuralEquation(
     string Outcome,
     List<string> Parents,

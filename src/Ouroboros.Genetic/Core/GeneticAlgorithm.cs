@@ -1,5 +1,5 @@
-// <copyright file="GeneticAlgorithm.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="GeneticAlgorithm.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 namespace Ouroboros.Genetic.Core;
@@ -12,7 +12,17 @@ using Ouroboros.Providers.Random;
 /// Standard genetic algorithm implementation using selection, crossover, and mutation.
 /// Follows functional programming principles with immutable operations.
 /// </summary>
+/// <remarks>
+/// Deprecated: This class is part of the original Genetic API.
+/// New code should use <see cref="EvolutionEngine{TChromosome}"/> instead, which provides:
+/// <list type="bullet">
+///   <item>Monadic <c>Result</c>-based error handling instead of exceptions</item>
+///   <item>Pluggable crossover/mutation via function delegates</item>
+///   <item>Population-level evolution results via <see cref="EvolutionPopulation{TChromosome}"/></item>
+/// </list>
+/// </remarks>
 /// <typeparam name="TGene">The type of gene in the chromosomes.</typeparam>
+[Obsolete("Use EvolutionEngine<TChromosome> instead. See Ouroboros.Genetic.Core.EvolutionEngine<TChromosome>.")]
 public sealed class GeneticAlgorithm<TGene> : IGeneticAlgorithm<TGene>
 {
     private readonly RouletteWheelSelection<TGene> selection;

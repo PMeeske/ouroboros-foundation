@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
@@ -7,6 +9,7 @@ namespace Ouroboros.Core.EmbodiedInteraction;
 /// <param name="Confidence">Detection confidence.</param>
 /// <param name="BoundingBox">Bounding box (x, y, width, height) normalized 0-1.</param>
 /// <param name="Attributes">Additional attributes.</param>
+[ExcludeFromCodeCoverage]
 public sealed record DetectedObject(
     string Label,
     double Confidence,

@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Governance;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Governance;
 
 /// <summary>
 /// Maintenance execution status.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum MaintenanceStatus
 {
     /// <summary>

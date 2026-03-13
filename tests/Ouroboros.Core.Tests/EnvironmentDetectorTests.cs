@@ -10,7 +10,7 @@ public class EnvironmentDetectorTests
     {
         // This test verifies the method doesn't throw
         // Actual value depends on runtime environment
-        var result = EnvironmentDetector.GetEnvironmentName();
+        _ = EnvironmentDetector.GetEnvironmentName();
         // Result may be null or a string - both are valid
     }
 

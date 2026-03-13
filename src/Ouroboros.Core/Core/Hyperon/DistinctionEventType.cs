@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Hyperon;
 
 /// <summary>
 /// Types of distinction events that can occur.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum DistinctionEventType
 {
     /// <summary>

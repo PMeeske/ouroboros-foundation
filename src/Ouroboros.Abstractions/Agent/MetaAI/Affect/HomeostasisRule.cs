@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.Affect;
 
 /// <summary>
 /// Represents a homeostasis policy for maintaining affective equilibrium.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record HomeostasisRule(
     Guid Id,
     string Name,

@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Ethics;
 
 /// <summary>
@@ -10,6 +12,7 @@ namespace Ouroboros.Core.Ethics;
 /// CLI hosts should use a console-based provider; API hosts should use
 /// a webhook/polling-based provider.
 /// </remarks>
+[ExcludeFromCodeCoverage]
 public interface IHumanApprovalProvider
 {
     /// <summary>

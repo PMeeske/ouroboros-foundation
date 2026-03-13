@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Providers.Docker;
 
 /// <summary>
 /// Represents a Docker image.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record DockerImageInfo
 {
     /// <summary>Gets the image ID.</summary>

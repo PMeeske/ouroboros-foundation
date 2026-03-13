@@ -3,6 +3,8 @@
 // </copyright>
 
 using System.Text;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Ouroboros.Domain.Autonomous.Neurons;
 
 namespace Ouroboros.Domain.Autonomous;
@@ -17,6 +19,7 @@ public sealed partial class AutonomousCoordinator : IDisposable
     private readonly OuroborosNeuralNetwork _network;
     private readonly AutonomousConfiguration _config;
     private readonly CancellationTokenSource _cts = new();
+    private readonly ILogger _logger;
     private readonly List<ProactiveMessageEventArgs> _messageHistory = [];
 
     private Task? _coordinationTask;
@@ -25,8 +28,9 @@ public sealed partial class AutonomousCoordinator : IDisposable
     /// <summary>
     /// Creates a new autonomous coordinator.
     /// </summary>
-    public AutonomousCoordinator(AutonomousConfiguration? config = null)
+    public AutonomousCoordinator(AutonomousConfiguration? config = null, ILogger<AutonomousCoordinator>? logger = null)
     {
+        _logger = logger ?? NullLogger<AutonomousCoordinator>.Instance;
         _config = config ?? new AutonomousConfiguration();
         _intentionBus = new IntentionBus();
         _network = new OuroborosNeuralNetwork(_intentionBus);

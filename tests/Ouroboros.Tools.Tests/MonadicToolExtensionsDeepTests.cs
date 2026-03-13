@@ -213,7 +213,7 @@ public class MonadicToolExtensionsDeepTests
         var contextual = tool.ToContextual<Dictionary<string, object>>();
 
         var ctx = new Dictionary<string, object> { ["key"] = "value" };
-        var (result, logs) = await contextual("input", ctx);
+        var (result, _) = await contextual("input", ctx);
 
         result.IsSuccess.Should().BeTrue();
     }

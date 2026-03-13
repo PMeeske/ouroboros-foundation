@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Providers.SpeechToText;
 
 /// <summary>
 /// A streaming transcription session for interactive audio input.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IStreamingTranscriptionSession : IAsyncDisposable
 {
     /// <summary>

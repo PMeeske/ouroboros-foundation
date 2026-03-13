@@ -2,11 +2,14 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.Affect;
 
 /// <summary>
 /// Represents the current affective state of an agent.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record AffectiveState(
     Guid Id,
     double Valence,

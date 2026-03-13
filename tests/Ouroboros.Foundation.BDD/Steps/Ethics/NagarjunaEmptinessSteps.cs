@@ -15,7 +15,6 @@ public class NagarjunaEmptinessSteps
     private bool _conceptsSeparable;
     private bool _categoriesAreUltimate;
     private EthicalClearance? _conventionalEvaluation;
-    private EthicalClearance? _ultimateEvaluation;
 
     public NagarjunaEmptinessSteps(EthicsTestContext ctx) => _ctx = ctx;
 
@@ -243,7 +242,6 @@ public class NagarjunaEmptinessSteps
 
         _ctx.Note("Evaluator, evaluated, and evaluation are all empty");
         _ctx.LastFormCertainty = Form.Imaginary;
-        _ultimateEvaluation = _ctx.LastClearance;
     }
 
     [Then("I should recognize that evaluator, evaluated, and evaluation are all empty")]

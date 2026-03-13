@@ -1,9 +1,12 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.LawsOfForm;
 
 /// <summary>
 /// Interface for tool lookup operations.
 /// Abstracts tool registry to avoid circular dependencies.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IToolLookup
 {
     /// <summary>

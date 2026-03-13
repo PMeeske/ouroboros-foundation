@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
@@ -6,6 +8,7 @@ namespace Ouroboros.Core.EmbodiedInteraction;
 /// <param name="MinApproachDistance">Minimum approach distance.</param>
 /// <param name="MaxApproachDistance">Maximum approach distance.</param>
 /// <param name="ForceRange">Required grip force range.</param>
+[ExcludeFromCodeCoverage]
 public sealed record GripRequirement(
     double MinApproachDistance,
     double MaxApproachDistance,

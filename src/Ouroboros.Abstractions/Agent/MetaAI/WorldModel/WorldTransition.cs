@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Agent.MetaAI.WorldModel;
 
 /// <summary>
 /// Represents a state transition observed in the environment.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record WorldTransition(
     WorldState FromState,
     AgentAction Action,

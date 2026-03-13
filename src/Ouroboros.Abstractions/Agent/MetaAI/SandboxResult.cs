@@ -1,4 +1,4 @@
-namespace Ouroboros.Agent.MetaAI;
+namespace Ouroboros.Agent;
 
 /// <summary>
 /// Result of sandboxing a step for safe execution.

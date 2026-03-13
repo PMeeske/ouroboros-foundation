@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Persistence;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Persistence;
 
 /// <summary>
 /// Memory layer types in Ouroboros's cognitive architecture.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum MemoryLayer
 {
     /// <summary>Immediate working memory - active thoughts.</summary>

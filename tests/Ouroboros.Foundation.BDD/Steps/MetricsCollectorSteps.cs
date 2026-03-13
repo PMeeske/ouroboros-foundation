@@ -224,7 +224,7 @@ public class MetricsCollectorSteps
     }
 
     // Helper method to parse labels from string like "status=success"
-    private Dictionary<string, string> ParseLabel(string label)
+    private static Dictionary<string, string> ParseLabel(string label)
     {
         var parts = label.Split('=');
         if (parts.Length != 2)
@@ -236,7 +236,7 @@ public class MetricsCollectorSteps
     }
 
     // Helper method to check if labels match
-    private bool LabelsMatch(Dictionary<string, string> actual, Dictionary<string, string> expected)
+    private static bool LabelsMatch(Dictionary<string, string> actual, Dictionary<string, string> expected)
     {
         if (actual.Count != expected.Count)
         {

@@ -1,3 +1,4 @@
+using Ouroboros.Agent;
 using Ouroboros.Agent.MetaAI;
 
 namespace Ouroboros.Abstractions.Tests.Agent.MetaAI;
@@ -9,7 +10,7 @@ public class SafetyCheckResultTests
     public void Allowed_CreatesAllowedResult()
     {
         // Act
-        var result = Ouroboros.Agent.MetaAI.SafetyCheckResult.Allowed();
+        var result = Ouroboros.Agent.SafetyCheckResult.Allowed();
 
         // Assert
         result.IsAllowed.Should().BeTrue();
@@ -24,7 +25,7 @@ public class SafetyCheckResultTests
     public void Allowed_WithCustomReason_SetsReason()
     {
         // Act
-        var result = Ouroboros.Agent.MetaAI.SafetyCheckResult.Allowed("Custom reason");
+        var result = Ouroboros.Agent.SafetyCheckResult.Allowed("Custom reason");
 
         // Assert
         result.Reason.Should().Be("Custom reason");
@@ -37,7 +38,7 @@ public class SafetyCheckResultTests
         var violations = new List<string> { "violation1", "violation2" };
 
         // Act
-        var result = Ouroboros.Agent.MetaAI.SafetyCheckResult.Denied(
+        var result = Ouroboros.Agent.SafetyCheckResult.Denied(
             "Unsafe action", violations, 0.95);
 
         // Assert
@@ -52,7 +53,7 @@ public class SafetyCheckResultTests
     public void Denied_DefaultRiskScore_IsOne()
     {
         // Act
-        var result = Ouroboros.Agent.MetaAI.SafetyCheckResult.Denied(
+        var result = Ouroboros.Agent.SafetyCheckResult.Denied(
             "reason", new List<string>());
 
         // Assert
@@ -63,8 +64,8 @@ public class SafetyCheckResultTests
     public void Safe_IsAliasForIsAllowed()
     {
         // Arrange
-        var allowed = Ouroboros.Agent.MetaAI.SafetyCheckResult.Allowed();
-        var denied = Ouroboros.Agent.MetaAI.SafetyCheckResult.Denied(
+        var allowed = Ouroboros.Agent.SafetyCheckResult.Allowed();
+        var denied = Ouroboros.Agent.SafetyCheckResult.Denied(
             "reason", new List<string>());
 
         // Assert
@@ -76,41 +77,41 @@ public class SafetyCheckResultTests
     public void Warnings_ReturnsEmptyList()
     {
         // Assert
-        Ouroboros.Agent.MetaAI.SafetyCheckResult.Warnings.Should().BeEmpty();
+        Ouroboros.Agent.SafetyCheckResult.Warnings.Should().BeEmpty();
     }
 
     [Fact]
     public void RequiredLevel_WithPermissions_ReturnsFirstLevel()
     {
         // Arrange
-        var permissions = new List<Ouroboros.Agent.MetaAI.Permission>
+        var permissions = new List<Ouroboros.Agent.Permission>
         {
-            new("resource", Ouroboros.Agent.MetaAI.PermissionLevel.Write, "reason")
+            new("resource", Ouroboros.Agent.PermissionLevel.Write, "reason")
         };
 
-        var result = new Ouroboros.Agent.MetaAI.SafetyCheckResult(
+        var result = new Ouroboros.Agent.SafetyCheckResult(
             true, "ok", permissions, 0.0, new List<string>());
 
         // Assert
-        result.RequiredLevel.Should().Be(Ouroboros.Agent.MetaAI.PermissionLevel.Write);
+        result.RequiredLevel.Should().Be(Ouroboros.Agent.PermissionLevel.Write);
     }
 
     [Fact]
     public void RequiredLevel_WithNoPermissions_ReturnsNone()
     {
         // Arrange
-        var result = Ouroboros.Agent.MetaAI.SafetyCheckResult.Allowed();
+        var result = Ouroboros.Agent.SafetyCheckResult.Allowed();
 
         // Assert
-        result.RequiredLevel.Should().Be(Ouroboros.Agent.MetaAI.PermissionLevel.None);
+        result.RequiredLevel.Should().Be(Ouroboros.Agent.PermissionLevel.None);
     }
 
     [Fact]
     public void RecordEquality_SameValues_AreEqual()
     {
         // Arrange
-        var a = Ouroboros.Agent.MetaAI.SafetyCheckResult.Allowed("ok");
-        var b = Ouroboros.Agent.MetaAI.SafetyCheckResult.Allowed("ok");
+        var a = Ouroboros.Agent.SafetyCheckResult.Allowed("ok");
+        var b = Ouroboros.Agent.SafetyCheckResult.Allowed("ok");
 
         // Assert
         a.Should().Be(b);

@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Reasoning;
 
 /// <summary>
@@ -6,6 +8,7 @@ namespace Ouroboros.Core.Reasoning;
 /// <param name="Values">The observed values for each variable.</param>
 /// <param name="Timestamp">When the observation was made.</param>
 /// <param name="Context">Optional context information about the observation.</param>
+[ExcludeFromCodeCoverage]
 public sealed record Observation(
     Dictionary<string, object> Values,
     DateTime Timestamp,

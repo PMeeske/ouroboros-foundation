@@ -1,6 +1,8 @@
-// <copyright file="CausalModels.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="CausalModels.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
+
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Core.Reasoning;
 
@@ -11,6 +13,7 @@ namespace Ouroboros.Core.Reasoning;
 /// <param name="Variables">The variables in the causal graph.</param>
 /// <param name="Edges">The causal edges between variables.</param>
 /// <param name="Equations">Structural equations defining causal relationships.</param>
+[ExcludeFromCodeCoverage]
 public sealed record CausalGraph(
     List<Variable> Variables,
     List<CausalEdge> Edges,

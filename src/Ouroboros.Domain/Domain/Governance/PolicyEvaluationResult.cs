@@ -1,5 +1,5 @@
-// <copyright file="PolicyEvaluation.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="PolicyEvaluation.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 namespace Ouroboros.Domain.Governance;

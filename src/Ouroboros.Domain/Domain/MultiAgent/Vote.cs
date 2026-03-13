@@ -1,6 +1,8 @@
-// <copyright file="Vote.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="Vote.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
+
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.MultiAgent;
 
@@ -11,6 +13,7 @@ namespace Ouroboros.Domain.MultiAgent;
 /// <param name="InFavor">Whether the vote is in favor of the proposal.</param>
 /// <param name="Confidence">Confidence level of the vote (0.0 to 1.0).</param>
 /// <param name="Reasoning">Optional explanation for the vote.</param>
+[ExcludeFromCodeCoverage]
 public sealed record Vote(
     AgentId Voter,
     bool InFavor,

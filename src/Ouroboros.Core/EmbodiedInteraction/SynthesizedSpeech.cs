@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.EmbodiedInteraction;
 
 /// <summary>
@@ -9,6 +11,7 @@ namespace Ouroboros.Core.EmbodiedInteraction;
 /// <param name="SampleRate">Sample rate.</param>
 /// <param name="Duration">Speech duration.</param>
 /// <param name="Timestamp">When synthesized.</param>
+[ExcludeFromCodeCoverage]
 public sealed record SynthesizedSpeech(
     string Text,
     byte[] AudioData,

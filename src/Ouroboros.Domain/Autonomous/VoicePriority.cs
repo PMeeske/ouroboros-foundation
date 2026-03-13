@@ -1,8 +1,11 @@
-﻿namespace Ouroboros.Domain.Autonomous;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ouroboros.Domain.Autonomous;
 
 /// <summary>
 /// Priority levels for voice messages.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum VoicePriority
 {
     /// <summary>Background announcements that can be skipped.</summary>

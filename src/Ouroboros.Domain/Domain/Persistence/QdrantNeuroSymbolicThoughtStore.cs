@@ -39,7 +39,8 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
         QdrantSettings settings,
         Func<string, Task<float[]>>? embeddingFunc = null)
     {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
+        ArgumentNullException.ThrowIfNull(client);
+        _client = client;
         ArgumentNullException.ThrowIfNull(registry);
         ArgumentNullException.ThrowIfNull(settings);
         _embeddingFunc = embeddingFunc;

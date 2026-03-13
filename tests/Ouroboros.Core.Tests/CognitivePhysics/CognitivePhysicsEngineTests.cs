@@ -1,5 +1,5 @@
-// <copyright file="CognitivePhysicsEngineTests.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="CognitivePhysicsEngineTests.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 using System.Collections.Immutable;
@@ -94,7 +94,7 @@ public class CognitivePhysicsEngineTests
     [Fact]
     public async Task TickStep_ShouldDecrementCooldown()
     {
-        CognitivePhysicsEngine engine = CreateEngine();
+        _ = CreateEngine();
         CognitiveState state = CognitiveState.Create("test") with { Cooldown = 3.0 };
 
         CognitiveState result = await CognitivePhysicsEngine.TickStep(2.0)(state);

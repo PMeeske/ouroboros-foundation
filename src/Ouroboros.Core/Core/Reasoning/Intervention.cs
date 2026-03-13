@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Reasoning;
 
 /// <summary>
@@ -8,6 +10,7 @@ namespace Ouroboros.Core.Reasoning;
 /// <param name="ExpectedEffect">The expected effect size of the intervention.</param>
 /// <param name="Confidence">Confidence level in the intervention effect.</param>
 /// <param name="SideEffects">List of variables that may be affected as side effects.</param>
+[ExcludeFromCodeCoverage]
 public sealed record Intervention(
     string TargetVariable,
     object NewValue,

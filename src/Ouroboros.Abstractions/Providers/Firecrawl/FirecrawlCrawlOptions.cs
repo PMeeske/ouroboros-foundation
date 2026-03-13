@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Providers.Firecrawl;
 
 /// <summary>
 /// Options for crawling a website.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public sealed record FirecrawlCrawlOptions
 {
     /// <summary>Gets the maximum number of pages to crawl (default: 50).</summary>

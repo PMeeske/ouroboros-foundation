@@ -1,9 +1,12 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Processing;
 
 /// <summary>
 /// Interface for processing large contexts by recursively chunking them into smaller pieces.
 /// Implements map-reduce pattern for parallel chunk processing with adaptive chunking strategies.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IRecursiveChunkProcessor
 {
     /// <summary>

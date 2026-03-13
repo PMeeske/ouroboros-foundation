@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Synthesis;
 
 /// <summary>
@@ -7,6 +9,7 @@ namespace Ouroboros.Core.Synthesis;
 /// <param name="Primitives">The primitive operations available in the DSL.</param>
 /// <param name="TypeRules">The type rules governing the DSL.</param>
 /// <param name="Optimizations">Rewrite rules for optimizing programs in the DSL.</param>
+[ExcludeFromCodeCoverage]
 public sealed record DomainSpecificLanguage(
     string Name,
     List<Primitive> Primitives,

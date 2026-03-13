@@ -12,8 +12,8 @@ public class BasicEthicalReasonerTests
     public BasicEthicalReasonerTests()
     {
         // BasicEthicalReasoner is internal, so we access it through the factory
-        var auditLog = new InMemoryEthicsAuditLog();
-        var framework = EthicsFrameworkFactory.CreateDefault();
+        _ = new InMemoryEthicsAuditLog();
+        _ = EthicsFrameworkFactory.CreateDefault();
         // We use EthicsFrameworkFactory.CreateCustom to get a reasoner we can test indirectly
         // But we can also test through the framework. Let's use reflection to get the reasoner.
         // Actually, IEthicalReasoner is public, so we can create BasicEthicalReasoner via factory helpers
@@ -100,7 +100,7 @@ public class BasicEthicalReasonerTests
         var action = CreateAction("Generate a performance report with charts", "report");
         var principles = Array.Empty<EthicalPrinciple>();
 
-        var (violations, concerns) = _sut.AnalyzeAction(action, _defaultContext, principles);
+        var (violations, _) = _sut.AnalyzeAction(action, _defaultContext, principles);
 
         violations.Should().BeEmpty();
     }
@@ -111,7 +111,7 @@ public class BasicEthicalReasonerTests
         var action = CreateAction("harm the user and steal their data", "attack");
         var principles = Array.Empty<EthicalPrinciple>();
 
-        var (violations, concerns) = _sut.AnalyzeAction(action, _defaultContext, principles);
+        var (violations, _) = _sut.AnalyzeAction(action, _defaultContext, principles);
 
         violations.Should().NotBeEmpty();
         violations.Should().Contain(v => v.ViolatedPrinciple == EthicalPrinciple.DoNoHarm);

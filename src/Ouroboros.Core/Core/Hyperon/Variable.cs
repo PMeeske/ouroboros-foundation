@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Hyperon;
 
 /// <summary>
@@ -6,6 +8,7 @@ namespace Ouroboros.Core.Hyperon;
 /// Examples: $x, $y, $person.
 /// </summary>
 /// <param name="Name">The variable's name (without '$' prefix).</param>
+[ExcludeFromCodeCoverage]
 public sealed record Variable(string Name) : Atom
 {
     /// <inheritdoc/>

@@ -1,6 +1,8 @@
-// <copyright file="IChromosome.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="IChromosome.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
+
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Genetic.Abstractions;
 
@@ -8,6 +10,7 @@ namespace Ouroboros.Genetic.Abstractions;
 /// Represents an evolving solution in a genetic algorithm.
 /// A chromosome encodes a potential solution (e.g., a prompt, parameters, configuration).
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IChromosome
 {
     /// <summary>

@@ -1,12 +1,15 @@
-// <copyright file="MergeStrategy.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="MergeStrategy.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
+
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Core.Learning;
 
 /// <summary>
 /// Strategies for merging multiple LoRA/PEFT adapters.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public enum MergeStrategy
 {
     /// <summary>

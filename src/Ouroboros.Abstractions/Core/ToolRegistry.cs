@@ -3,11 +3,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Abstractions.Core;
 
 /// <summary>
 /// Represents a tool registry for managing available tools.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public class ToolRegistry
 {
     /// <summary>

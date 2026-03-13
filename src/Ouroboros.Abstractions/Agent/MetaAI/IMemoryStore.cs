@@ -1,8 +1,9 @@
-// <copyright file="IMemoryStore.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="IMemoryStore.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 using Ouroboros.Abstractions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Agent.MetaAI;
 
@@ -10,6 +11,7 @@ namespace Ouroboros.Agent.MetaAI;
 /// Interface for storing and retrieving agent experiences.
 /// Provides episodic memory for learning from past actions.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IMemoryStore
 {
     /// <summary>

@@ -1,9 +1,10 @@
-// <copyright file="IPolicy.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="IPolicy.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 using Ouroboros.Abstractions;
 using Ouroboros.Domain.Environment;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.Reinforcement;
 
@@ -11,6 +12,7 @@ namespace Ouroboros.Domain.Reinforcement;
 /// Interface for reinforcement learning policies.
 /// Selects actions based on environment state.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IPolicy
 {
     /// <summary>

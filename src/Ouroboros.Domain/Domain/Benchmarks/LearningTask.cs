@@ -1,8 +1,9 @@
-// <copyright file="LearningTask.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="LearningTask.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 using Ouroboros.Core.Learning;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.Benchmarks;
 
@@ -12,6 +13,7 @@ namespace Ouroboros.Domain.Benchmarks;
 /// <param name="Name">The name of the learning task.</param>
 /// <param name="TrainingData">The training examples for the task.</param>
 /// <param name="TestData">The test examples for evaluation.</param>
+[ExcludeFromCodeCoverage]
 public sealed record LearningTask(
     string Name,
     List<TrainingExample> TrainingData,

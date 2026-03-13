@@ -1,6 +1,8 @@
-// <copyright file="ToolExecution.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
+// <copyright file="ToolExecution.cs" company="Ouroboros">
+// Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
+
+using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain;
 
@@ -12,6 +14,7 @@ namespace Ouroboros.Domain;
 /// <param name="Arguments">The arguments passed to the tool</param>
 /// <param name="Output">The output/result produced by the tool</param>
 /// <param name="Timestamp">When the tool was executed</param>
+[ExcludeFromCodeCoverage]
 public sealed record ToolExecution(
     string ToolName,
     string Arguments,

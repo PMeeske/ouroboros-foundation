@@ -5,6 +5,10 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 using Google.Protobuf.Collections;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Ouroboros.Core.Configuration;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
@@ -24,6 +28,7 @@ public sealed partial class QdrantNeuralMemory : IDisposable
     private readonly string _memoriesCollection;
     private readonly int _defaultVectorSize;
     private readonly ConcurrentDictionary<string, bool> _initializedCollections = new();
+    private readonly ILogger _logger;
     private readonly bool _disposeClient;
 
     /// <summary>
@@ -35,15 +40,18 @@ public sealed partial class QdrantNeuralMemory : IDisposable
     public QdrantNeuralMemory(
         QdrantClient client,
         IQdrantCollectionRegistry registry,
-        QdrantSettings settings)
+        QdrantSettings settings,
+        ILogger<QdrantNeuralMemory>? logger = null)
     {
-        _client = client ?? throw new ArgumentNullException(nameof(client));
+        ArgumentNullException.ThrowIfNull(client);
+        _client = client;
         ArgumentNullException.ThrowIfNull(registry);
         ArgumentNullException.ThrowIfNull(settings);
         _neuronMessagesCollection = registry.GetCollectionName(QdrantCollectionRole.NeuronMessages);
         _intentionsCollection = registry.GetCollectionName(QdrantCollectionRole.Intentions);
         _memoriesCollection = registry.GetCollectionName(QdrantCollectionRole.Memories);
         _defaultVectorSize = settings.DefaultVectorSize;
+        _logger = logger ?? NullLogger<QdrantNeuralMemory>.Instance;
         _disposeClient = false;
     }
 
@@ -96,13 +104,13 @@ public sealed partial class QdrantNeuralMemory : IDisposable
             }
 
             // Dimension mismatch - need to migrate
-            Console.WriteLine($"  \u26a0 Qdrant: {collectionName} dimension mismatch ({currentSize} \u2192 {vectorSize})");
+            _logger.LogWarning("Qdrant: {CollectionName} dimension mismatch ({CurrentSize} -> {VectorSize})", collectionName, currentSize, vectorSize);
 
             ulong pointCount = await _client.CountAsync(collectionName, exact: true, cancellationToken: ct);
 
             if (pointCount == 0)
             {
-                Console.WriteLine($"    Recreating empty collection...");
+                _logger.LogInformation("Recreating empty collection {CollectionName}", collectionName);
                 await _client.DeleteCollectionAsync(collectionName, cancellationToken: ct);
                 await _client.CreateCollectionAsync(
                     collectionName,
@@ -111,14 +119,12 @@ public sealed partial class QdrantNeuralMemory : IDisposable
             }
             else if (EmbedFunction != null)
             {
-                Console.WriteLine($"    Migrating {pointCount} points with new embeddings...");
+                _logger.LogInformation("Migrating {PointCount} points with new embeddings in {CollectionName}", pointCount, collectionName);
                 await MigrateCollectionAsync(collectionName, vectorSize, ct);
             }
             else
             {
-                Console.WriteLine($"    \u26a0 Cannot re-embed {pointCount} points (no embedding function)");
-                Console.WriteLine($"    Creating backup and recreating collection...");
-                Console.WriteLine($"    \u26a0 Data in {collectionName} will be reset");
+                _logger.LogWarning("Cannot re-embed {PointCount} points (no embedding function), data in {CollectionName} will be reset", pointCount, collectionName);
                 await _client.DeleteCollectionAsync(collectionName, cancellationToken: ct);
                 await _client.CreateCollectionAsync(
                     collectionName,
@@ -151,7 +157,7 @@ public sealed partial class QdrantNeuralMemory : IDisposable
         {
             // 1. Scroll through all points and extract payloads
             List<(string Id, Dictionary<string, string> Payload)> allPayloads = await ScrollAllPayloadsAsync(collectionName, ct);
-            Console.WriteLine($"    Retrieved {allPayloads.Count} payloads for migration");
+            _logger.LogInformation("Retrieved {PayloadCount} payloads for migration", allPayloads.Count);
 
             // 2. Delete old collection
             await _client.DeleteCollectionAsync(collectionName, cancellationToken: ct);
@@ -202,7 +208,7 @@ public sealed partial class QdrantNeuralMemory : IDisposable
                 }
             }
 
-            Console.WriteLine($"    \u2713 Migrated {migrated} points ({failed} failed)");
+            _logger.LogInformation("Migrated {Migrated} points ({Failed} failed)", migrated, failed);
         }
         catch (OperationCanceledException)
         {
@@ -210,7 +216,7 @@ public sealed partial class QdrantNeuralMemory : IDisposable
         }
         catch (Grpc.Core.RpcException ex)
         {
-            Console.WriteLine($"    \u26a0 Migration RPC error: {ex.Status.Detail}");
+            _logger.LogWarning(ex, "Migration RPC error for {CollectionName}", collectionName);
             await _client.CreateCollectionAsync(
                 collectionName,
                 new VectorParams { Size = (ulong)newVectorSize, Distance = Distance.Cosine },
@@ -218,7 +224,7 @@ public sealed partial class QdrantNeuralMemory : IDisposable
         }
         catch (HttpRequestException ex)
         {
-            Console.WriteLine($"    \u26a0 Migration failed: {ex.Message}");
+            _logger.LogWarning(ex, "Migration failed for {CollectionName}", collectionName);
             await _client.CreateCollectionAsync(
                 collectionName,
                 new VectorParams { Size = (ulong)newVectorSize, Distance = Distance.Cosine },

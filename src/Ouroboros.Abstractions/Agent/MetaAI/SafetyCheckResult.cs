@@ -1,4 +1,4 @@
-namespace Ouroboros.Agent.MetaAI;
+namespace Ouroboros.Agent;
 
 /// <summary>
 /// Result of a safety check evaluation.

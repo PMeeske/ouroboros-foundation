@@ -2,12 +2,15 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Providers.TextToSpeech;
 
 /// <summary>
 /// Extended TTS interface that supports reactive streaming synthesis.
 /// Enables real-time voice output as LLM generates text.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public interface IStreamingTtsService : ITextToSpeechService
 {
     /// <summary>

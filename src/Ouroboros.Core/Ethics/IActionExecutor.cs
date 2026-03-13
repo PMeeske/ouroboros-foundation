@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Ouroboros.Core.Ethics;
 
 /// <summary>
@@ -5,6 +7,7 @@ namespace Ouroboros.Core.Ethics;
 /// </summary>
 /// <typeparam name="TAction">The type of action to execute.</typeparam>
 /// <typeparam name="TResult">The type of result produced.</typeparam>
+[ExcludeFromCodeCoverage]
 public interface IActionExecutor<in TAction, TResult>
 {
     /// <summary>
