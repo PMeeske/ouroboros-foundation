@@ -2,7 +2,7 @@
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
-namespace Ouroboros.Agent.MetaAI;
+namespace Ouroboros.Agent;
 
 /// <summary>
 /// Represents a single step in a plan.

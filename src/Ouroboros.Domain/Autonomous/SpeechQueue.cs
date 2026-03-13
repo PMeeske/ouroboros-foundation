@@ -3,6 +3,8 @@
 // </copyright>
 
 using System.Reactive.Linq;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Reactive.Subjects;
 
 namespace Ouroboros.Domain.Autonomous;
@@ -23,6 +25,7 @@ public sealed class SpeechQueue : IDisposable
     private readonly Subject<SpeechRequest> _speechSubject = new();
     private readonly IDisposable _subscription;
     private Func<string, string, CancellationToken, Task>? _synthesizer;
+    private ILogger _logger = NullLogger<SpeechQueue>.Instance;
     private bool _disposed;
 
     private SpeechQueue()
@@ -40,7 +43,7 @@ public sealed class SpeechQueue : IDisposable
                     catch (OperationCanceledException) { throw; }
                     catch (Exception ex) when (ex is not OperationCanceledException)
                     {
-                        Console.WriteLine($"  [SpeechQueue] Error: {ex.Message}");
+                        _logger.LogError(ex, "SpeechQueue synthesis error");
                     }
                 }
 
@@ -50,7 +53,7 @@ public sealed class SpeechQueue : IDisposable
             .Concat() // Process one at a time, in order
             .Subscribe(
                 _ => { },
-                ex => Console.WriteLine($"  [SpeechQueue] Stream error: {ex.Message}"));
+                ex => _logger.LogError(ex, "SpeechQueue stream error"));
     }
 
     /// <summary>
@@ -59,6 +62,14 @@ public sealed class SpeechQueue : IDisposable
     public void SetSynthesizer(Func<string, string, CancellationToken, Task> synthesizer)
     {
         _synthesizer = synthesizer;
+    }
+
+    /// <summary>
+    /// Sets the logger instance for the speech queue.
+    /// </summary>
+    public void SetLogger(ILogger<SpeechQueue> logger)
+    {
+        _logger = logger ?? NullLogger<SpeechQueue>.Instance;
     }
 
     /// <summary>

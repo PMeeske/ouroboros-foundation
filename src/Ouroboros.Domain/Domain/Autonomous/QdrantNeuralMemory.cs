@@ -7,6 +7,8 @@ using System.Text.Json;
 using Google.Protobuf.Collections;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Ouroboros.Core.Configuration;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
@@ -214,7 +216,7 @@ public sealed partial class QdrantNeuralMemory : IDisposable
         }
         catch (Grpc.Core.RpcException ex)
         {
-            Console.WriteLine($"    \u26a0 Migration RPC error: {ex.Status.Detail}");
+            _logger.LogWarning(ex, "Migration RPC error for {CollectionName}", collectionName);
             await _client.CreateCollectionAsync(
                 collectionName,
                 new VectorParams { Size = (ulong)newVectorSize, Distance = Distance.Cosine },
@@ -222,7 +224,7 @@ public sealed partial class QdrantNeuralMemory : IDisposable
         }
         catch (HttpRequestException ex)
         {
-            Console.WriteLine($"    \u26a0 Migration failed: {ex.Message}");
+            _logger.LogWarning(ex, "Migration failed for {CollectionName}", collectionName);
             await _client.CreateCollectionAsync(
                 collectionName,
                 new VectorParams { Size = (ulong)newVectorSize, Distance = Distance.Cosine },

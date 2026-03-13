@@ -1,3 +1,4 @@
+using Ouroboros.Agent;
 using Ouroboros.Agent.MetaAI;
 
 namespace Ouroboros.Abstractions.Tests.Agent.MetaAI.SelfImprovement;
