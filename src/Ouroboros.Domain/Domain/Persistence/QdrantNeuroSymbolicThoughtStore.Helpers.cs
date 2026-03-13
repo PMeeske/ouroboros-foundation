@@ -1,4 +1,4 @@
-// <copyright file="QdrantNeuroSymbolicThoughtStore.Helpers.cs" company="Ouroboros">
+﻿// <copyright file="QdrantNeuroSymbolicThoughtStore.Helpers.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -18,14 +18,14 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore
     private async Task EnsureInitializedAsync(CancellationToken ct)
     {
         if (!_initialized)
-            await InitializeAsync(ct);
+            await InitializeAsync(ct).ConfigureAwait(false);
     }
 
     private async Task<float[]> GenerateEmbeddingAsync(string text, CancellationToken ct)
     {
         if (_embeddingFunc != null)
         {
-            return await _embeddingFunc(text);
+            return await _embeddingFunc(text).ConfigureAwait(false);
         }
         return new float[_vectorSize]; // Zero vector if no embedding
     }
@@ -225,7 +225,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore
         visited.Add(current.Id);
 
         // Find outgoing relations
-        IReadOnlyList<ThoughtRelation> relations = await GetRelationsForThoughtAsync(current.Id, ct);
+        IReadOnlyList<ThoughtRelation> relations = await GetRelationsForThoughtAsync(current.Id, ct).ConfigureAwait(false);
         List<ThoughtRelation> outgoing = relations.Where(r => r.SourceThoughtId == current.Id).ToList();
 
         if (outgoing.Count == 0)
@@ -240,7 +240,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore
             if (allThoughts.TryGetValue(rel.TargetThoughtId, out PersistedThought? nextThought) && !visited.Contains(nextThought.Id))
             {
                 currentChain.Add(nextThought);
-                await FindChainsRecursiveAsync(sessionId, nextThought, currentChain, allChains, visited, allThoughts, maxDepth, ct);
+                await FindChainsRecursiveAsync(sessionId, nextThought, currentChain, allChains, visited, allThoughts, maxDepth, ct).ConfigureAwait(false);
                 currentChain.RemoveAt(currentChain.Count - 1);
             }
         }
@@ -256,7 +256,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore
             _client.Dispose();
             _disposed = true;
         }
-        await Task.CompletedTask;
+        await Task.CompletedTask.ConfigureAwait(false);
     }
 
     #endregion

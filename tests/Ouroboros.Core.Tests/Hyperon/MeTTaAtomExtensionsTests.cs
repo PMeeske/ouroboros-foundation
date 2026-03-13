@@ -1,6 +1,7 @@
 using Ouroboros.Abstractions.Monads;
 using Ouroboros.Core.Hyperon;
 using Ouroboros.Core.LawsOfForm;
+using LoF = Ouroboros.Core.LawsOfForm.Form;
 
 namespace Ouroboros.Core.Tests.Hyperon;
 
@@ -57,7 +58,7 @@ public class MeTTaAtomExtensionsTests
     [Fact]
     public void ToMeTTa_Mark_ReturnsMarkSymbol()
     {
-        var result = Form.Mark.ToMeTTa();
+        var result = LoF.Mark.ToMeTTa();
 
         result.Should().BeOfType<Symbol>();
         result.ToSExpr().Should().Be("Mark");
@@ -66,7 +67,7 @@ public class MeTTaAtomExtensionsTests
     [Fact]
     public void ToMeTTa_Void_ReturnsVoidSymbol()
     {
-        var result = Form.Void.ToMeTTa();
+        var result = LoF.Void.ToMeTTa();
 
         result.Should().BeOfType<Symbol>();
         result.ToSExpr().Should().Be("Void");
@@ -75,7 +76,7 @@ public class MeTTaAtomExtensionsTests
     [Fact]
     public void ToMeTTa_Imaginary_ReturnsImaginarySymbol()
     {
-        var result = Form.Imaginary.ToMeTTa();
+        var result = LoF.Imaginary.ToMeTTa();
 
         result.Should().BeOfType<Symbol>();
         result.ToSExpr().Should().Be("Imaginary");
@@ -92,7 +93,7 @@ public class MeTTaAtomExtensionsTests
         var result = atom.ToForm();
 
         result.HasValue.Should().BeTrue();
-        result.Value.Should().Be(Form.Mark);
+        result.Value.Should().Be(LoF.Mark);
     }
 
     [Theory]
@@ -106,7 +107,7 @@ public class MeTTaAtomExtensionsTests
         var result = atom.ToForm();
 
         result.HasValue.Should().BeTrue();
-        result.Value.Should().Be(Form.Void);
+        result.Value.Should().Be(LoF.Void);
     }
 
     [Theory]
@@ -119,7 +120,7 @@ public class MeTTaAtomExtensionsTests
         var result = atom.ToForm();
 
         result.HasValue.Should().BeTrue();
-        result.Value.Should().Be(Form.Imaginary);
+        result.Value.Should().Be(LoF.Imaginary);
     }
 
     [Fact]

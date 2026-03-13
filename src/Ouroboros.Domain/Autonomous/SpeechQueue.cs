@@ -1,4 +1,4 @@
-// <copyright file="SpeechQueue.cs" company="Ouroboros">
+﻿// <copyright file="SpeechQueue.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -38,7 +38,7 @@ public sealed class SpeechQueue : IDisposable
                 {
                     try
                     {
-                        await _synthesizer(request.Text, request.Persona, ct);
+                        await _synthesizer(request.Text, request.Persona, ct).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException) { throw; }
                     catch (Exception ex) when (ex is not OperationCanceledException)
@@ -95,7 +95,7 @@ public sealed class SpeechQueue : IDisposable
 
         _speechSubject.OnNext(new SpeechRequest(text, persona, tcs));
 
-        await tcs.Task;
+        await tcs.Task.ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

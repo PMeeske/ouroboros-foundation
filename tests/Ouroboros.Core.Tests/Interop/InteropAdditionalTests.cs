@@ -40,7 +40,7 @@ public class CompatInteropAdditionalTests
         };
 
         var node = kleisli.ToCompatNode("Parse");
-        var result = await ("42" | node);
+        var result = await ("42" | node).ConfigureAwait(false);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().Be(42);
@@ -66,7 +66,7 @@ public class CompatInteropAdditionalTests
         };
 
         var node = kleisliOption.ToCompatNode("OnlyPositive");
-        var result = await (5 | node);
+        var result = await (5 | node).ConfigureAwait(false);
 
         result.HasValue.Should().BeTrue();
         result.Value.Should().Be(5);
@@ -88,7 +88,7 @@ public class CompatInteropAdditionalTests
         Func<int, string> f = x => $"val={x}";
         var node = f.ToCompatNode("Format");
 
-        var result = await (42 | node);
+        var result = await (42 | node).ConfigureAwait(false);
         result.Should().Be("val=42");
     }
 
@@ -111,7 +111,7 @@ public class CompatInteropAdditionalTests
         };
 
         var node = f.ToCompatNode("AsyncFormat");
-        var result = await (10 | node);
+        var result = await (10 | node).ConfigureAwait(false);
 
         result.Should().Be("async=10");
     }
@@ -151,7 +151,7 @@ public class PipelineBuilderAdditionalTests
         var builder = new PipelineBuilder<string>("Test")
             .AddStep(step, "Length");
 
-        var result = await builder.ExecuteAsync("hello");
+        var result = await builder.ExecuteAsync("hello").ConfigureAwait(false);
         result.Should().Be(5);
     }
 
@@ -169,7 +169,7 @@ public class PipelineBuilderAdditionalTests
         var builder = new PipelineBuilder<string>("Test")
             .AddResultStep(kleisli, "Parse");
 
-        var result = await builder.ExecuteAsync("42");
+        var result = await builder.ExecuteAsync("42").ConfigureAwait(false);
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().Be(42);
     }
@@ -182,7 +182,7 @@ public class PipelineBuilderAdditionalTests
         var builder = new PipelineBuilder<string>("Test")
             .AddFunc(f, "Length");
 
-        var result = await builder.ExecuteAsync("hello");
+        var result = await builder.ExecuteAsync("hello").ConfigureAwait(false);
         result.Should().Be(5);
     }
 }
@@ -200,7 +200,7 @@ public class TypedPipelineBuilderAdditionalTests
             .AddStep(step1, "Length")
             .Then(step2, "Format");
 
-        var result = await builder.ExecuteAsync("hello");
+        var result = await builder.ExecuteAsync("hello").ConfigureAwait(false);
         result.Should().Be("len=5");
     }
 
@@ -214,7 +214,7 @@ public class TypedPipelineBuilderAdditionalTests
             .AddStep(step, "Length")
             .Then(f, "Format");
 
-        var result = await builder.ExecuteAsync("hello");
+        var result = await builder.ExecuteAsync("hello").ConfigureAwait(false);
         result.Should().Be("len=5");
     }
 
@@ -252,7 +252,7 @@ public class LambdaNodeAdditionalTests
         });
 
         using var cts = new CancellationTokenSource();
-        await node.InvokeAsync(42, cts.Token);
+        await node.InvokeAsync(42, cts.Token).ConfigureAwait(false);
 
         capturedToken.Should().Be(cts.Token);
     }
@@ -264,28 +264,28 @@ public class EnhancedStepsAdditionalTests
     [Fact]
     public async Task Upper_ConvertsToUpperCase()
     {
-        var result = await EnhancedSteps.Upper("hello world");
+        var result = await EnhancedSteps.Upper("hello world").ConfigureAwait(false);
         result.Should().Be("HELLO WORLD");
     }
 
     [Fact]
     public async Task Length_ReturnsStringLength()
     {
-        var result = await EnhancedSteps.Length("hello");
+        var result = await EnhancedSteps.Length("hello").ConfigureAwait(false);
         result.Should().Be(5);
     }
 
     [Fact]
     public async Task Show_FormatsNumber()
     {
-        var result = await EnhancedSteps.Show(42);
+        var result = await EnhancedSteps.Show(42).ConfigureAwait(false);
         result.Should().Be("length=42");
     }
 
     [Fact]
     public async Task SafeParse_ValidNumber_ReturnsSuccess()
     {
-        var result = await EnhancedSteps.SafeParse("42");
+        var result = await EnhancedSteps.SafeParse("42").ConfigureAwait(false);
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().Be(42);
     }
@@ -293,7 +293,7 @@ public class EnhancedStepsAdditionalTests
     [Fact]
     public async Task SafeParse_InvalidNumber_ReturnsFailure()
     {
-        var result = await EnhancedSteps.SafeParse("abc");
+        var result = await EnhancedSteps.SafeParse("abc").ConfigureAwait(false);
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Contain("Cannot parse");
     }
@@ -301,7 +301,7 @@ public class EnhancedStepsAdditionalTests
     [Fact]
     public async Task OnlyPositive_PositiveNumber_ReturnsSome()
     {
-        var result = await EnhancedSteps.OnlyPositive(5);
+        var result = await EnhancedSteps.OnlyPositive(5).ConfigureAwait(false);
         result.HasValue.Should().BeTrue();
         result.Value.Should().Be(5);
     }
@@ -309,14 +309,14 @@ public class EnhancedStepsAdditionalTests
     [Fact]
     public async Task OnlyPositive_Zero_ReturnsNone()
     {
-        var result = await EnhancedSteps.OnlyPositive(0);
+        var result = await EnhancedSteps.OnlyPositive(0).ConfigureAwait(false);
         result.HasValue.Should().BeFalse();
     }
 
     [Fact]
     public async Task OnlyPositive_Negative_ReturnsNone()
     {
-        var result = await EnhancedSteps.OnlyPositive(-3);
+        var result = await EnhancedSteps.OnlyPositive(-3).ConfigureAwait(false);
         result.HasValue.Should().BeFalse();
     }
 }

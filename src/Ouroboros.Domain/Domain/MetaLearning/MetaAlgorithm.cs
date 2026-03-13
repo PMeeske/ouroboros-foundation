@@ -1,8 +1,6 @@
-// <copyright file="MetaAlgorithm.cs" company="Ouroboros">
+﻿// <copyright file="MetaAlgorithm.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
-
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.MetaLearning;
 
@@ -10,7 +8,6 @@ namespace Ouroboros.Domain.MetaLearning;
 /// Specifies the meta-learning algorithm to use for model training.
 /// Each algorithm has different trade-offs between performance and computational complexity.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum MetaAlgorithm
 {
     /// <summary>

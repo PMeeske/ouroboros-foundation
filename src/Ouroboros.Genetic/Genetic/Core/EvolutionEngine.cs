@@ -1,4 +1,4 @@
-// <copyright file="EvolutionEngine.cs" company="Ouroboros">
+﻿// <copyright file="EvolutionEngine.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -82,7 +82,7 @@ public sealed class EvolutionEngine<TChromosome> : IEvolutionEngine<TChromosome>
         EvolutionPopulation<TChromosome> currentPopulation = initialPopulation;
 
         // Evaluate initial population fitness
-        Result<EvolutionPopulation<TChromosome>> evaluatedPopulation = await this.EvaluatePopulationAsync(currentPopulation);
+        Result<EvolutionPopulation<TChromosome>> evaluatedPopulation = await this.EvaluatePopulationAsync(currentPopulation).ConfigureAwait(false);
         if (evaluatedPopulation.IsFailure)
         {
             return Result<EvolutionPopulation<TChromosome>>.Failure($"Initial fitness evaluation failed: {evaluatedPopulation.Error}");
@@ -93,7 +93,7 @@ public sealed class EvolutionEngine<TChromosome> : IEvolutionEngine<TChromosome>
         // Evolve for specified generations
         for (int generation = 0; generation < generations; generation++)
         {
-            Result<EvolutionPopulation<TChromosome>> nextGenResult = await this.EvolveGenerationAsync(currentPopulation, generation + 1);
+            Result<EvolutionPopulation<TChromosome>> nextGenResult = await this.EvolveGenerationAsync(currentPopulation, generation + 1).ConfigureAwait(false);
             if (nextGenResult.IsFailure)
             {
                 return Result<EvolutionPopulation<TChromosome>>.Failure($"Evolution failed at generation {generation + 1}: {nextGenResult.Error}");
@@ -165,7 +165,7 @@ public sealed class EvolutionEngine<TChromosome> : IEvolutionEngine<TChromosome>
         EvolutionPopulation<TChromosome> newPopulation = new EvolutionPopulation<TChromosome>(newChromosomes);
 
         // Evaluate fitness of new population
-        return await this.EvaluatePopulationAsync(newPopulation);
+        return await this.EvaluatePopulationAsync(newPopulation).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -178,7 +178,7 @@ public sealed class EvolutionEngine<TChromosome> : IEvolutionEngine<TChromosome>
 
         foreach (TChromosome chromosome in population.Chromosomes)
         {
-            Result<double> fitnessResult = await this.fitnessFunction.EvaluateAsync(chromosome);
+            Result<double> fitnessResult = await this.fitnessFunction.EvaluateAsync(chromosome).ConfigureAwait(false);
             if (fitnessResult.IsFailure)
             {
                 return Result<EvolutionPopulation<TChromosome>>.Failure($"Fitness evaluation failed for chromosome {chromosome.Id}: {fitnessResult.Error}");

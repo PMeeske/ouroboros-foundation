@@ -45,19 +45,19 @@ public sealed class CodeReflectionNeuron : Neuron
         switch (message.Topic)
         {
             case "code.analyze":
-                await HandleCodeAnalyzeAsync(message, ct);
+                await HandleCodeAnalyzeAsync(message, ct).ConfigureAwait(false);
                 break;
 
             case "code.search":
-                await HandleCodeSearchAsync(message, ct);
+                await HandleCodeSearchAsync(message, ct).ConfigureAwait(false);
                 break;
 
             case "self.modify":
-                await HandleSelfModifyAsync(message, ct);
+                await HandleSelfModifyAsync(message, ct).ConfigureAwait(false);
                 break;
 
             case "reflection.request":
-                string status = await _gitService!.GetStatusAsync(ct);
+                string status = await _gitService!.GetStatusAsync(ct).ConfigureAwait(false);
                 SendResponse(message, new { GitStatus = status, Service = "active" });
                 break;
         }
@@ -70,7 +70,7 @@ public sealed class CodeReflectionNeuron : Neuron
         if ((DateTime.UtcNow - _lastCodeScan).TotalSeconds >= CodeScanIntervalSeconds)
         {
             _lastCodeScan = DateTime.UtcNow;
-            await PerformCodeHealthCheckAsync(ct);
+            await PerformCodeHealthCheckAsync(ct).ConfigureAwait(false);
         }
     }
 
@@ -78,7 +78,7 @@ public sealed class CodeReflectionNeuron : Neuron
     {
         try
         {
-            string status = await _gitService!.GetStatusAsync(ct);
+            string status = await _gitService!.GetStatusAsync(ct).ConfigureAwait(false);
 
             // If there are uncommitted changes, notify
             if (status.Contains("modified") || status.Contains("new file"))
@@ -113,7 +113,7 @@ public sealed class CodeReflectionNeuron : Neuron
             return;
         }
 
-        CodeAnalysis analysis = await _gitService!.AnalyzeFileAsync(filePath, ct);
+        CodeAnalysis analysis = await _gitService!.AnalyzeFileAsync(filePath, ct).ConfigureAwait(false);
         SendResponse(message, analysis);
 
         // If issues found, propose fixes
@@ -131,7 +131,7 @@ public sealed class CodeReflectionNeuron : Neuron
     private async Task HandleCodeSearchAsync(NeuronMessage message, CancellationToken ct)
     {
         string query = message.Payload?.ToString() ?? "";
-        IReadOnlyList<(string File, int Line, string Content)> results = await _gitService!.SearchCodeAsync(query, false, ct);
+        IReadOnlyList<(string File, int Line, string Content)> results = await _gitService!.SearchCodeAsync(query, false, ct).ConfigureAwait(false);
 
         SendResponse(message, new
         {

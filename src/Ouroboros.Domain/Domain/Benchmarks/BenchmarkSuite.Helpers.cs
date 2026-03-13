@@ -1,4 +1,4 @@
-// <copyright file="BenchmarkSuite.Helpers.cs" company="Ouroboros">
+﻿// <copyright file="BenchmarkSuite.Helpers.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -15,7 +15,7 @@ public sealed partial class BenchmarkSuite
         string taskId,
         CancellationToken ct)
     {
-        await Task.Delay(10, ct);
+        await Task.Delay(10, ct).ConfigureAwait(false);
 
         SeededRandomProvider random = new SeededRandomProvider(taskId.GetHashCode());
         string difficulty = random.Next(3) switch
@@ -50,7 +50,7 @@ public sealed partial class BenchmarkSuite
         string subject,
         CancellationToken ct)
     {
-        await Task.Delay(50, ct);
+        await Task.Delay(50, ct).ConfigureAwait(false);
 
         SeededRandomProvider random = new SeededRandomProvider(subject.GetHashCode());
         int questionCount = random.Next(50, 100);
@@ -63,7 +63,7 @@ public sealed partial class BenchmarkSuite
         TaskSequence sequence,
         CancellationToken ct)
     {
-        await Task.Delay(100, ct);
+        await Task.Delay(100, ct).ConfigureAwait(false);
 
         SeededRandomProvider random = new SeededRandomProvider(sequence.Name.GetHashCode());
         double initialAccuracy = 0.85 + (random.NextDouble() * 0.1);
@@ -77,7 +77,7 @@ public sealed partial class BenchmarkSuite
         CognitiveDimension dimension,
         CancellationToken ct)
     {
-        await Task.Delay(50, ct);
+        await Task.Delay(50, ct).ConfigureAwait(false);
 
         List<TaskResult> tasks = new List<TaskResult>();
         SeededRandomProvider random = new SeededRandomProvider((int)dimension);

@@ -308,7 +308,7 @@ public class EthicalHomeostasisEngineTests
                     0.3, isResolvable: true);
                 _engine.TryResolveTension(t.Id);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 lock (exceptions) exceptions.Add(ex);
             }

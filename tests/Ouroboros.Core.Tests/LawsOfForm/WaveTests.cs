@@ -1,4 +1,5 @@
 using Ouroboros.Core.LawsOfForm;
+using LoF = Ouroboros.Core.LawsOfForm.Form;
 
 namespace Ouroboros.Core.Tests.LawsOfForm;
 
@@ -42,7 +43,7 @@ public class WaveTests
     {
         var sut = new Wave(1.0, 0.0);
 
-        sut.ToFormAt(0.25).Should().Be(Form.Mark);
+        sut.ToFormAt(0.25).Should().Be(LoF.Mark);
     }
 
     [Fact]
@@ -50,7 +51,7 @@ public class WaveTests
     {
         var sut = new Wave(1.0, 0.0);
 
-        sut.ToFormAt(0.75).Should().Be(Form.Void);
+        sut.ToFormAt(0.75).Should().Be(LoF.Void);
     }
 
     [Fact]

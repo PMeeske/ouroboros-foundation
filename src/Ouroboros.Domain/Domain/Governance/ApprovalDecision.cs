@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
-namespace Ouroboros.Domain.Governance;
+﻿namespace Ouroboros.Domain.Governance;
 
 /// <summary>
 /// Defines approval decisions.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum ApprovalDecision
 {
     /// <summary>

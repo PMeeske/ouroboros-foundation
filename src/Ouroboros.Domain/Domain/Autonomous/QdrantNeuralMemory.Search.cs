@@ -1,4 +1,4 @@
-// <copyright file="QdrantNeuralMemory.Search.cs" company="Ouroboros">
+﻿// <copyright file="QdrantNeuralMemory.Search.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -20,7 +20,7 @@ public sealed partial class QdrantNeuralMemory
     {
         try
         {
-            bool exists = await _client.CollectionExistsAsync(_neuronMessagesCollection, ct);
+            bool exists = await _client.CollectionExistsAsync(_neuronMessagesCollection, ct).ConfigureAwait(false);
             if (!exists) return Array.Empty<NeuronMessage>();
 
             IReadOnlyList<ScoredPoint> results = await _client.SearchAsync(
@@ -28,7 +28,7 @@ public sealed partial class QdrantNeuralMemory
                 queryVector,
                 limit: (ulong)limit,
                 payloadSelector: new WithPayloadSelector { Enable = true },
-                cancellationToken: ct);
+                cancellationToken: ct).ConfigureAwait(false);
 
             return results.Select(r =>
             {
@@ -68,7 +68,7 @@ public sealed partial class QdrantNeuralMemory
     {
         try
         {
-            bool exists = await _client.CollectionExistsAsync(_memoriesCollection, ct);
+            bool exists = await _client.CollectionExistsAsync(_memoriesCollection, ct).ConfigureAwait(false);
             if (!exists) return Array.Empty<string>();
 
             IReadOnlyList<ScoredPoint> results = await _client.SearchAsync(
@@ -76,7 +76,7 @@ public sealed partial class QdrantNeuralMemory
                 queryVector,
                 limit: (ulong)limit,
                 payloadSelector: new WithPayloadSelector { Enable = true },
-                cancellationToken: ct);
+                cancellationToken: ct).ConfigureAwait(false);
 
             return results.Select(r =>
                 r.Payload.TryGetValue("content", out Value? c) ? c.StringValue : "").ToList();
@@ -105,7 +105,7 @@ public sealed partial class QdrantNeuralMemory
     {
         try
         {
-            bool exists = await _client.CollectionExistsAsync(_intentionsCollection, ct);
+            bool exists = await _client.CollectionExistsAsync(_intentionsCollection, ct).ConfigureAwait(false);
             if (!exists) return Array.Empty<Intention>();
 
             IReadOnlyList<ScoredPoint> results = await _client.SearchAsync(
@@ -113,7 +113,7 @@ public sealed partial class QdrantNeuralMemory
                 queryVector,
                 limit: (ulong)limit,
                 payloadSelector: new WithPayloadSelector { Enable = true },
-                cancellationToken: ct);
+                cancellationToken: ct).ConfigureAwait(false);
 
             return results.Select(r =>
             {
@@ -153,14 +153,14 @@ public sealed partial class QdrantNeuralMemory
     {
         try
         {
-            bool exists = await _client.CollectionExistsAsync(collectionName, ct);
+            bool exists = await _client.CollectionExistsAsync(collectionName, ct).ConfigureAwait(false);
             if (!exists)
             {
                 return new QdrantCollectionStats { Name = collectionName, Exists = false };
             }
 
-            CollectionInfo info = await _client.GetCollectionInfoAsync(collectionName, ct);
-            ulong count = await _client.CountAsync(collectionName, exact: true, cancellationToken: ct);
+            CollectionInfo info = await _client.GetCollectionInfoAsync(collectionName, ct).ConfigureAwait(false);
+            ulong count = await _client.CountAsync(collectionName, exact: true, cancellationToken: ct).ConfigureAwait(false);
             int vectorSize = (int)(info.Config?.Params?.VectorsConfig?.Params?.Size ?? 0);
 
             return new QdrantCollectionStats
@@ -182,9 +182,9 @@ public sealed partial class QdrantNeuralMemory
     /// </summary>
     public async Task<QdrantNeuralMemoryStats> GetStatsAsync(CancellationToken ct = default)
     {
-        QdrantCollectionStats messagesStats = await GetCollectionStatsAsync(_neuronMessagesCollection, ct);
-        QdrantCollectionStats intentionsStats = await GetCollectionStatsAsync(_intentionsCollection, ct);
-        QdrantCollectionStats memoriesStats = await GetCollectionStatsAsync(_memoriesCollection, ct);
+        QdrantCollectionStats messagesStats = await GetCollectionStatsAsync(_neuronMessagesCollection, ct).ConfigureAwait(false);
+        QdrantCollectionStats intentionsStats = await GetCollectionStatsAsync(_intentionsCollection, ct).ConfigureAwait(false);
+        QdrantCollectionStats memoriesStats = await GetCollectionStatsAsync(_memoriesCollection, ct).ConfigureAwait(false);
 
         return new QdrantNeuralMemoryStats
         {

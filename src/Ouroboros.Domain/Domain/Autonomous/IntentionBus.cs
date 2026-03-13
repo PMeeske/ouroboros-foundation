@@ -1,4 +1,4 @@
-// <copyright file="IntentionBus.cs" company="Ouroboros">
+﻿// <copyright file="IntentionBus.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -144,7 +144,7 @@ public sealed class IntentionBus : IDisposable
         {
             try
             {
-                await _expirationTask.WaitAsync(TimeSpan.FromSeconds(5));
+                await _expirationTask.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
             }
             catch (TimeoutException)
             {
@@ -358,7 +358,7 @@ public sealed class IntentionBus : IDisposable
         {
             try
             {
-                await Task.Delay(TimeSpan.FromSeconds(30), _cts.Token);
+                await Task.Delay(TimeSpan.FromSeconds(30), _cts.Token).ConfigureAwait(false);
 
                 DateTime now = DateTime.UtcNow;
                 List<Intention> expired = _intentions.Values
@@ -381,7 +381,7 @@ public sealed class IntentionBus : IDisposable
             {
                 break;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 System.Diagnostics.Trace.TraceWarning($"IntentionBus expiration loop error: {ex.Message}");
                 // Continue the loop -- don't let a transient error kill cleanup
@@ -435,7 +435,8 @@ public sealed class IntentionBus : IDisposable
         _isActive = false;
         _cts.Cancel();
         try { _expirationTask?.Wait(TimeSpan.FromSeconds(2)); }
-        catch { /* timeout or cancellation — proceed with disposal */ }
+        catch (AggregateException) { /* timeout or cancellation -- proceed with disposal */ }
+        catch (ObjectDisposedException) { /* already disposed -- proceed */ }
         _cts.Dispose();
         _intentionEvents.Dispose();
         _newIntentions.Dispose();

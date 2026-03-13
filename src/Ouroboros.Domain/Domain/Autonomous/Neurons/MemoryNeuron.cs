@@ -50,15 +50,15 @@ public sealed class MemoryNeuron : Neuron
         switch (message.Topic)
         {
             case "memory.store":
-                await HandleMemoryStoreAsync(message, ct);
+                await HandleMemoryStoreAsync(message, ct).ConfigureAwait(false);
                 break;
 
             case "memory.recall":
-                await HandleMemoryRecallAsync(message, ct);
+                await HandleMemoryRecallAsync(message, ct).ConfigureAwait(false);
                 break;
 
             case "memory.consolidate":
-                await HandleMemoryConsolidationAsync(ct);
+                await HandleMemoryConsolidationAsync(ct).ConfigureAwait(false);
                 break;
 
             case "learning.fact":
@@ -71,8 +71,8 @@ public sealed class MemoryNeuron : Neuron
                     // Auto-store if we have embedding capability
                     if (EmbedFunction != null && StoreFunction != null)
                     {
-                        float[] embedding = await EmbedFunction(fact, ct);
-                        await StoreFunction("fact", fact, embedding, ct);
+                        float[] embedding = await EmbedFunction(fact, ct).ConfigureAwait(false);
+                        await StoreFunction("fact", fact, embedding, ct).ConfigureAwait(false);
                     }
                 }
                 break;
@@ -118,8 +118,8 @@ public sealed class MemoryNeuron : Neuron
 
                 if (EmbedFunction != null && StoreFunction != null)
                 {
-                    float[] embedding = await EmbedFunction(content, ct);
-                    await StoreFunction(category, content, embedding, ct);
+                    float[] embedding = await EmbedFunction(content, ct).ConfigureAwait(false);
+                    await StoreFunction(category, content, embedding, ct).ConfigureAwait(false);
                     _memoryCount++;
 
                     SendResponse(message, new { Success = true, MemoryCount = _memoryCount });
@@ -149,8 +149,8 @@ public sealed class MemoryNeuron : Neuron
 
             if (EmbedFunction != null && SearchFunction != null)
             {
-                float[] embedding = await EmbedFunction(query, ct);
-                IReadOnlyList<string> results = await SearchFunction(embedding, 5, ct);
+                float[] embedding = await EmbedFunction(query, ct).ConfigureAwait(false);
+                IReadOnlyList<string> results = await SearchFunction(embedding, 5, ct).ConfigureAwait(false);
                 SendResponse(message, new { Query = query, Results = results });
             }
             else

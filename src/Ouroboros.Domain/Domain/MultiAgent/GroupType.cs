@@ -1,15 +1,12 @@
-// <copyright file="GroupType.cs" company="Ouroboros">
+﻿// <copyright file="GroupType.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
-
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.MultiAgent;
 
 /// <summary>
 /// Defines how messages are distributed within an agent group.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum GroupType
 {
     /// <summary>

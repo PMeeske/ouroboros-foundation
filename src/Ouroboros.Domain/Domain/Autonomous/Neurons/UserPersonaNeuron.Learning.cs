@@ -1,4 +1,4 @@
-// <copyright file="UserPersonaNeuron.Learning.cs" company="Ouroboros">
+﻿// <copyright file="UserPersonaNeuron.Learning.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -35,7 +35,7 @@ public sealed partial class UserPersonaNeuron
         _ = Task.Run(() => TrainingLoopAsync(_trainingCts.Token));
 
         // Generate and send initial question immediately
-        await GenerateAndSendQuestionAsync(ct);
+        await GenerateAndSendQuestionAsync(ct).ConfigureAwait(false);
     }
 
     private async Task TrainingLoopAsync(CancellationToken ct)
@@ -53,7 +53,7 @@ public sealed partial class UserPersonaNeuron
 
                     try
                     {
-                        await _responseWaiter.Task.WaitAsync(timeoutCts.Token);
+                        await _responseWaiter.Task.WaitAsync(timeoutCts.Token).ConfigureAwait(false);
                         _logger.LogDebug("Response received, starting interval timer");
                     }
                     catch (OperationCanceledException) when (!ct.IsCancellationRequested)
@@ -63,11 +63,11 @@ public sealed partial class UserPersonaNeuron
                 }
 
                 // Now wait the configured interval before next message
-                await Task.Delay(TimeSpan.FromSeconds(_config.MessageIntervalSeconds), ct);
+                await Task.Delay(TimeSpan.FromSeconds(_config.MessageIntervalSeconds), ct).ConfigureAwait(false);
 
                 if (_isTrainingActive && _sessionMessageCount < _config.MaxSessionMessages)
                 {
-                    await GenerateAndSendQuestionAsync(ct);
+                    await GenerateAndSendQuestionAsync(ct).ConfigureAwait(false);
                 }
             }
             catch (OperationCanceledException)
@@ -84,7 +84,7 @@ public sealed partial class UserPersonaNeuron
     private async Task GenerateAndSendQuestionAsync(CancellationToken ct)
     {
         _logger.LogDebug("GenerateAndSendQuestionAsync called");
-        await GenerateNextMessageAsync(ct);
+        await GenerateNextMessageAsync(ct).ConfigureAwait(false);
 
         // Immediately send the question (don't wait for OnTick)
         if (_pendingQuestions.TryDequeue(out string? question))
@@ -183,7 +183,7 @@ public sealed partial class UserPersonaNeuron
         try
         {
             string prompt = BuildQuestionGenerationPrompt();
-            string question = await GenerateFunction(prompt, ct);
+            string question = await GenerateFunction(prompt, ct).ConfigureAwait(false);
 
             if (!string.IsNullOrWhiteSpace(question))
             {

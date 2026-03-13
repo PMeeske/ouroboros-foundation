@@ -38,7 +38,7 @@ public sealed record BenchmarkTask(
         {
             return false;
         }
-        catch (Exception)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             return false;
         }

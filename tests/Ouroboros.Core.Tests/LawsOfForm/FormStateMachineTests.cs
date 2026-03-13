@@ -1,4 +1,5 @@
 using Ouroboros.Core.LawsOfForm;
+using LoF = Ouroboros.Core.LawsOfForm.Form;
 
 namespace Ouroboros.Core.Tests.LawsOfForm;
 
@@ -12,7 +13,7 @@ public class FormStateMachineTests
 
         sut.IsCertain.Should().BeTrue();
         sut.IsIndeterminate.Should().BeFalse();
-        sut.CurrentForm.Should().Be(Form.Mark);
+        sut.CurrentForm.Should().Be(LoF.Mark);
         sut.CurrentState.HasValue.Should().BeTrue();
         sut.CurrentState.Value.Should().Be("Follower");
         sut.OscillationPhase.Should().Be(0.0);
@@ -48,7 +49,7 @@ public class FormStateMachineTests
 
         sut.IsIndeterminate.Should().BeTrue();
         sut.IsCertain.Should().BeFalse();
-        sut.CurrentForm.Should().Be(Form.Imaginary);
+        sut.CurrentForm.Should().Be(LoF.Imaginary);
         sut.OscillationPhase.Should().Be(0.5);
         sut.CurrentState.HasValue.Should().BeFalse();
     }

@@ -1,4 +1,4 @@
-// <copyright file="CoreNeurons.cs" company="Ouroboros">
+﻿// <copyright file="CoreNeurons.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -63,7 +63,7 @@ public sealed class ExecutiveNeuron : Neuron
 
             case "decision.request":
                 // Another neuron requests a decision
-                await HandleDecisionRequestAsync(message, ct);
+                await HandleDecisionRequestAsync(message, ct).ConfigureAwait(false);
                 break;
 
             case "system.status":
@@ -81,7 +81,7 @@ public sealed class ExecutiveNeuron : Neuron
         if ((DateTime.UtcNow - _lastReflection).TotalSeconds >= ReflectionIntervalSeconds)
         {
             _lastReflection = DateTime.UtcNow;
-            await PerformSelfReflectionAsync(ct);
+            await PerformSelfReflectionAsync(ct).ConfigureAwait(false);
         }
 
         // Process task queue

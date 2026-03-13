@@ -21,7 +21,7 @@ public class AsyncKleisliExtensionsTests
         var identity = AsyncKleisliExtensions.Identity<int>();
 
         // Act
-        var results = await CollectAsync(identity(42));
+        var results = await CollectAsync(identity(42)).ConfigureAwait(false);
 
         // Assert
         results.Should().ContainSingle().Which.Should().Be(42);
@@ -36,7 +36,7 @@ public class AsyncKleisliExtensionsTests
         var doubled = AsyncKleisliExtensions.Lift<int, int>(x => x * 2);
 
         // Act
-        var results = await CollectAsync(doubled(5));
+        var results = await CollectAsync(doubled(5)).ConfigureAwait(false);
 
         // Assert
         results.Should().ContainSingle().Which.Should().Be(10);
@@ -56,7 +56,7 @@ public class AsyncKleisliExtensionsTests
             });
 
         // Act
-        var results = await CollectAsync(asyncDoubled(7));
+        var results = await CollectAsync(asyncDoubled(7)).ConfigureAwait(false);
 
         // Assert
         results.Should().ContainSingle().Which.Should().Be(14);
@@ -72,7 +72,7 @@ public class AsyncKleisliExtensionsTests
             x => ToAsyncEnumerable(Enumerable.Range(0, x)));
 
         // Act
-        var results = await CollectAsync(expand(3));
+        var results = await CollectAsync(expand(3)).ConfigureAwait(false);
 
         // Assert
         results.Should().BeEquivalentTo(new[] { 0, 1, 2 });
@@ -90,7 +90,7 @@ public class AsyncKleisliExtensionsTests
         var composed = doubler.Then(toString);
 
         // Act
-        var results = await CollectAsync(composed(5));
+        var results = await CollectAsync(composed(5)).ConfigureAwait(false);
 
         // Assert
         results.Should().ContainSingle().Which.Should().Be("10");
@@ -106,7 +106,7 @@ public class AsyncKleisliExtensionsTests
         var composed = expand.Then(doubler);
 
         // Act
-        var results = await CollectAsync(composed(3));
+        var results = await CollectAsync(composed(3)).ConfigureAwait(false);
 
         // Assert
         results.Should().BeEquivalentTo(new[] { 6, 8 }); // 3*2=6, 4*2=8
@@ -122,7 +122,7 @@ public class AsyncKleisliExtensionsTests
         var mapped = source.Map<int, int, string>(n => $"value:{n}");
 
         // Act
-        var results = await CollectAsync(mapped(10));
+        var results = await CollectAsync(mapped(10)).ConfigureAwait(false);
 
         // Assert
         results.Should().BeEquivalentTo(new[] { "value:10", "value:11", "value:12" });
@@ -142,7 +142,7 @@ public class AsyncKleisliExtensionsTests
         });
 
         // Act
-        var results = await CollectAsync(mapped(42));
+        var results = await CollectAsync(mapped(42)).ConfigureAwait(false);
 
         // Assert
         results.Should().ContainSingle().Which.Should().Be("async:42");
@@ -178,7 +178,7 @@ public class AsyncKleisliExtensionsTests
         });
 
         // Act
-        var results = await CollectAsync(filtered(0));
+        var results = await CollectAsync(filtered(0)).ConfigureAwait(false);
 
         // Assert
         results.Should().BeEquivalentTo(new[] { 3, 4 });
@@ -194,7 +194,7 @@ public class AsyncKleisliExtensionsTests
         var limited = source.Take<int, int>(3);
 
         // Act
-        var results = await CollectAsync(limited(0));
+        var results = await CollectAsync(limited(0)).ConfigureAwait(false);
 
         // Assert
         results.Should().HaveCount(3);
@@ -207,7 +207,7 @@ public class AsyncKleisliExtensionsTests
         AsyncKleisli<int, int> source = x => ToAsyncEnumerable(new[] { 1, 2, 3 });
         var limited = source.Take<int, int>(0);
 
-        var results = await CollectAsync(limited(0));
+        var results = await CollectAsync(limited(0)).ConfigureAwait(false);
         results.Should().BeEmpty();
     }
 
@@ -221,7 +221,7 @@ public class AsyncKleisliExtensionsTests
         var distinct = source.Distinct<int, int>();
 
         // Act
-        var results = await CollectAsync(distinct(0));
+        var results = await CollectAsync(distinct(0)).ConfigureAwait(false);
 
         // Assert
         results.Should().BeEquivalentTo(new[] { 1, 2, 3 });
@@ -238,7 +238,7 @@ public class AsyncKleisliExtensionsTests
         var merged = first.Union(second);
 
         // Act
-        var results = await CollectAsync(merged(0));
+        var results = await CollectAsync(merged(0)).ConfigureAwait(false);
 
         // Assert
         results.Should().HaveCount(4);
@@ -250,7 +250,7 @@ public class AsyncKleisliExtensionsTests
     private static async Task<List<T>> CollectAsync<T>(IAsyncEnumerable<T> source)
     {
         var items = new List<T>();
-        await foreach (var item in source)
+        await foreach (var item in source.ConfigureAwait(false))
         {
             items.Add(item);
         }

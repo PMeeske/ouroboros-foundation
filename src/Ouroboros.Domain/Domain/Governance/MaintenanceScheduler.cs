@@ -1,4 +1,4 @@
-// <copyright file="MaintenanceScheduler.cs" company="Ouroboros">
+﻿// <copyright file="MaintenanceScheduler.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -60,7 +60,7 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
         
         try
         {
-            await _schedulerTask;
+            await _schedulerTask.ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
@@ -92,7 +92,7 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
 
         try
         {
-            Result<object> result = await task.Execute(ct);
+            Result<object> result = await task.Execute(ct).ConfigureAwait(false);
             
             execution = execution with
             {
@@ -188,13 +188,13 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
                     {
                         try
                         {
-                            await ExecuteTaskAsync(task, ct);
+                            await ExecuteTaskAsync(task, ct).ConfigureAwait(false);
                         }
                         catch (OperationCanceledException)
                         {
                             // Expected during shutdown
                         }
-                        catch (Exception)
+                        catch (Exception ex) when (ex is not OperationCanceledException)
                         {
                             // Logged in ExecuteTaskAsync
                         }
@@ -202,7 +202,7 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
                 }
 
                 // Check every minute
-                await Task.Delay(TimeSpan.FromMinutes(1), ct);
+                await Task.Delay(TimeSpan.FromMinutes(1), ct).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
@@ -245,7 +245,7 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
             IsEnabled = true,
             Execute = async ct =>
             {
-                Result<CompactionResult> result = await compactor(ct);
+                Result<CompactionResult> result = await compactor(ct).ConfigureAwait(false);
                 return result.IsSuccess
                     ? Result<object>.Success(result.Value)
                     : Result<object>.Failure(result.Error);
@@ -272,7 +272,7 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
             IsEnabled = true,
             Execute = async ct =>
             {
-                Result<ArchiveResult> result = await archiver(archiveAge, ct);
+                Result<ArchiveResult> result = await archiver(archiveAge, ct).ConfigureAwait(false);
                 return result.IsSuccess
                     ? Result<object>.Success(result.Value)
                     : Result<object>.Failure(result.Error);
@@ -298,7 +298,7 @@ public sealed class MaintenanceScheduler : IMaintenanceScheduler
             IsEnabled = true,
             Execute = async ct =>
             {
-                Result<AnomalyDetectionResult> result = await detector(ct);
+                Result<AnomalyDetectionResult> result = await detector(ct).ConfigureAwait(false);
                 return result.IsSuccess
                     ? Result<object>.Success(result.Value)
                     : Result<object>.Failure(result.Error);

@@ -1,8 +1,6 @@
-// <copyright file="IMessageFilter.cs" company="Ouroboros">
+﻿// <copyright file="IMessageFilter.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
-
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.Autonomous;
 
@@ -10,7 +8,6 @@ namespace Ouroboros.Domain.Autonomous;
 /// Interface for filtering neuron messages before routing.
 /// Enables ethical evaluation and other checks on inter-neuron messaging.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IMessageFilter
 {
     /// <summary>

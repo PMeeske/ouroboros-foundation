@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
-namespace Ouroboros.Domain.Autonomous;
+﻿namespace Ouroboros.Domain.Autonomous;
 
 /// <summary>
 /// Categories of autonomous intentions.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum IntentionCategory
 {
     /// <summary>Self-reflection and introspection.</summary>

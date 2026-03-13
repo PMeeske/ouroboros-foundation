@@ -1,4 +1,4 @@
-// <copyright file="AutonomousCoordinator.cs" company="Ouroboros">
+﻿// <copyright file="AutonomousCoordinator.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -154,10 +154,10 @@ public sealed partial class AutonomousCoordinator : IDisposable
         _isActive = false;
         _cts.Cancel();
 
-        await _network.StopAsync();
+        await _network.StopAsync().ConfigureAwait(false);
 
-        if (_coordinationTask != null) await _coordinationTask;
-        if (_executionTask != null) await _executionTask;
+        if (_coordinationTask != null) await _coordinationTask.ConfigureAwait(false);
+        if (_executionTask != null) await _executionTask.ConfigureAwait(false);
 
         RaiseProactiveMessage(
             "💤 Autonomous mode deactivated. I'll wait for your instructions.",
@@ -233,7 +233,7 @@ public sealed partial class AutonomousCoordinator : IDisposable
         {
             try
             {
-                await Task.Delay(TimeSpan.FromSeconds(_config.TickIntervalSeconds), _cts.Token);
+                await Task.Delay(TimeSpan.FromSeconds(_config.TickIntervalSeconds), _cts.Token).ConfigureAwait(false);
 
                 // Auto-approve configured categories
                 AutoApproveConfiguredCategories();
@@ -241,7 +241,7 @@ public sealed partial class AutonomousCoordinator : IDisposable
                 // Autonomous topic discovery
                 if ((DateTime.UtcNow - _lastTopicDiscovery).TotalSeconds >= TopicDiscoveryIntervalSeconds)
                 {
-                    await DiscoverAndProposeTopicsAsync(_cts.Token);
+                    await DiscoverAndProposeTopicsAsync(_cts.Token).ConfigureAwait(false);
                     _lastTopicDiscovery = DateTime.UtcNow;
                 }
 
@@ -276,13 +276,13 @@ public sealed partial class AutonomousCoordinator : IDisposable
         {
             try
             {
-                await Task.Delay(TimeSpan.FromSeconds(5), _cts.Token);
+                await Task.Delay(TimeSpan.FromSeconds(5), _cts.Token).ConfigureAwait(false);
 
                 // Execute next approved intention
                 Intention? intention = _intentionBus.GetNextApprovedIntention();
                 if (intention != null)
                 {
-                    await ExecuteIntentionAsync(intention, _cts.Token);
+                    await ExecuteIntentionAsync(intention, _cts.Token).ConfigureAwait(false);
                 }
             }
             catch (OperationCanceledException)
@@ -310,7 +310,7 @@ public sealed partial class AutonomousCoordinator : IDisposable
             {
                 if (StoreIntentionFunction != null)
                 {
-                    await StoreIntentionFunction(intention, CancellationToken.None);
+                    await StoreIntentionFunction(intention, CancellationToken.None).ConfigureAwait(false);
                 }
             }
             catch (HttpRequestException ex)

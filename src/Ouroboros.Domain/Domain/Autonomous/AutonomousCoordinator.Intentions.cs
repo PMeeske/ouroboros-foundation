@@ -1,4 +1,4 @@
-// <copyright file="AutonomousCoordinator.Intentions.cs" company="Ouroboros">
+﻿// <copyright file="AutonomousCoordinator.Intentions.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -86,8 +86,8 @@ public sealed partial class AutonomousCoordinator
             {
                 try
                 {
-                    float[] queryEmbed = await EmbedFunction("interesting topics to explore or research", ct);
-                    IReadOnlyList<string> memories = await SearchQdrantFunction(queryEmbed, 5, ct);
+                    float[] queryEmbed = await EmbedFunction("interesting topics to explore or research", ct).ConfigureAwait(false);
+                    IReadOnlyList<string> memories = await SearchQdrantFunction(queryEmbed, 5, ct).ConfigureAwait(false);
                     if (memories.Count > 0)
                     {
                         contextBuilder.AppendLine("Related memories:");
@@ -117,7 +117,7 @@ public sealed partial class AutonomousCoordinator
             contextBuilder.AppendLine($"Preferred research tool: {researchTool}");
             contextBuilder.AppendLine("Be creative and proactive! Suggest something genuinely interesting.");
 
-            string response = await ThinkFunction(contextBuilder.ToString(), ct);
+            string response = await ThinkFunction(contextBuilder.ToString(), ct).ConfigureAwait(false);
 
             // Parse the response
             TopicSuggestion? topic = ParseTopicResponse(response);
@@ -218,7 +218,7 @@ public sealed partial class AutonomousCoordinator
             // Validate intention using MeTTa symbolic reasoning (if enabled)
             if (EnableMeTTaValidation && MeTTaQueryFunction != null)
             {
-                (bool IsValid, string? Reason) validationResult = await ValidateIntentionWithMeTTaAsync(intention, ct);
+                (bool IsValid, string? Reason) validationResult = await ValidateIntentionWithMeTTaAsync(intention, ct).ConfigureAwait(false);
                 if (!validationResult.IsValid)
                 {
                     _intentionBus.MarkFailed(intention.Id, $"MeTTa validation failed: {validationResult.Reason}");
@@ -235,13 +235,13 @@ public sealed partial class AutonomousCoordinator
                 result = intention.Action.ActionType switch
                 {
                     "tool" when ExecuteToolFunction != null =>
-                        await ExecuteToolFunction(intention.Action.ToolName!, intention.Action.ToolInput ?? "", ct),
+                        await ExecuteToolFunction(intention.Action.ToolName!, intention.Action.ToolInput ?? "", ct).ConfigureAwait(false),
 
                     "message" =>
                         ExecuteMessageAction(intention),
 
                     "code_change" =>
-                        await ExecuteCodeChangeAsync(intention, ct),
+                        await ExecuteCodeChangeAsync(intention, ct).ConfigureAwait(false),
 
                     "goal" =>
                         ExecuteGoalAction(intention),
@@ -249,22 +249,22 @@ public sealed partial class AutonomousCoordinator
                     "task_execution" =>
                         ExecuteTaskAction(intention),
 
-                    _ => await ExecuteGenericIntentionAsync(intention, ct)
+                    _ => await ExecuteGenericIntentionAsync(intention, ct).ConfigureAwait(false)
                 };
             }
             else
             {
                 // No explicit action - execute based on category
-                result = await ExecuteIntentionByCategoryAsync(intention, ct);
+                result = await ExecuteIntentionByCategoryAsync(intention, ct).ConfigureAwait(false);
             }
 
             _intentionBus.MarkCompleted(intention.Id, result);
 
             // Record execution as MeTTa fact for future reasoning
-            await RecordExecutionAsMeTTaFactAsync(intention, result, ct);
+            await RecordExecutionAsMeTTaFactAsync(intention, result, ct).ConfigureAwait(false);
 
             // Notify network of completion
-            await _network.BroadcastAsync("intention.completed", new { IntentionId = intention.Id, Result = result }, "coordinator");
+            await _network.BroadcastAsync("intention.completed", new { IntentionId = intention.Id, Result = result }, "coordinator").ConfigureAwait(false);
 
             // Raise message so user sees the result
             RaiseProactiveMessage($"✅ {intention.Title}: {result}", IntentionPriority.Normal, "coordinator");
@@ -289,7 +289,7 @@ public sealed partial class AutonomousCoordinator
 
             // Check if this type of action is allowed by current rules
             string query = $"!(match &self (allowed-action {categorySymbol} $result) $result)";
-            string result = await MeTTaQueryFunction!(query, ct);
+            string result = await MeTTaQueryFunction!(query, ct).ConfigureAwait(false);
 
             // If we got "blocked" or similar negative result, reject
             if (result.Contains("blocked", StringComparison.OrdinalIgnoreCase) ||
@@ -303,7 +303,7 @@ public sealed partial class AutonomousCoordinator
             if (intention.Category == IntentionCategory.CodeModification)
             {
                 string safetyQuery = "!(match &self (safety-constraint code-modification $constraint) $constraint)";
-                string safetyResult = await MeTTaQueryFunction(safetyQuery, ct);
+                string safetyResult = await MeTTaQueryFunction(safetyQuery, ct).ConfigureAwait(false);
                 if (safetyResult.Contains("require-review", StringComparison.OrdinalIgnoreCase))
                 {
                     // Code modification requires human review - this is already handled by approval
@@ -337,12 +337,12 @@ public sealed partial class AutonomousCoordinator
 
             // Record the execution as a fact
             string fact = $"(executed-intention \"{intention.Id}\" {categorySymbol} \"{timestamp}\")";
-            await MeTTaAddFactFunction(fact, ct);
+            await MeTTaAddFactFunction(fact, ct).ConfigureAwait(false);
 
             // Record the outcome
             string outcomeKind = result.Length > 100 ? "complex" : "simple";
             string outcomeFact = $"(intention-outcome \"{intention.Id}\" {outcomeKind} success)";
-            await MeTTaAddFactFunction(outcomeFact, ct);
+            await MeTTaAddFactFunction(outcomeFact, ct).ConfigureAwait(false);
         }
         catch (OperationCanceledException) { throw; }
         catch (InvalidOperationException ex)
@@ -365,7 +365,7 @@ public sealed partial class AutonomousCoordinator
     private async Task<string> ExecuteGenericIntentionAsync(Intention intention, CancellationToken ct)
     {
         // For unknown action types, broadcast to network
-        await _network.BroadcastAsync($"intention.execute.{intention.Action?.ActionType ?? "unknown"}", intention, "coordinator");
+        await _network.BroadcastAsync($"intention.execute.{intention.Action?.ActionType ?? "unknown"}", intention, "coordinator").ConfigureAwait(false);
         return $"Intention broadcast for execution: {intention.Title}";
     }
 
@@ -378,7 +378,7 @@ public sealed partial class AutonomousCoordinator
                 ExecuteSelfReflection(intention),
 
             IntentionCategory.CodeModification =>
-                await ExecuteCodeAnalysisAsync(intention, ct),
+                await ExecuteCodeAnalysisAsync(intention, ct).ConfigureAwait(false),
 
             IntentionCategory.GoalPursuit =>
                 ExecuteGoalPursuit(intention),
@@ -387,7 +387,7 @@ public sealed partial class AutonomousCoordinator
                 ExecuteCommunication(intention),
 
             IntentionCategory.Exploration =>
-                await ExecuteResearchAsync(intention, ct),
+                await ExecuteResearchAsync(intention, ct).ConfigureAwait(false),
 
             IntentionCategory.MemoryManagement =>
                 ExecuteMemoryOperation(intention),
@@ -416,7 +416,7 @@ public sealed partial class AutonomousCoordinator
         if (!_config.EnableCodeModification)
             return "Code analysis disabled by configuration";
 
-        await _network.BroadcastAsync("code.analyze", new { Description = intention.Description }, "coordinator");
+        await _network.BroadcastAsync("code.analyze", new { Description = intention.Description }, "coordinator").ConfigureAwait(false);
         return "Code analysis requested";
     }
 
@@ -438,11 +438,11 @@ public sealed partial class AutonomousCoordinator
         if (ExecuteToolFunction != null)
         {
             string preferredTool = GetPreferredResearchTool();
-            string result = await ExecuteToolFunction(preferredTool, intention.Description, ct);
+            string result = await ExecuteToolFunction(preferredTool, intention.Description, ct).ConfigureAwait(false);
             return $"Research completed using {preferredTool}: {result[..Math.Min(200, result.Length)]}...";
         }
 
-        await _network.BroadcastAsync("research.request", intention.Description, "coordinator");
+        await _network.BroadcastAsync("research.request", intention.Description, "coordinator").ConfigureAwait(false);
         return "Research request broadcast";
     }
 
@@ -490,7 +490,7 @@ public sealed partial class AutonomousCoordinator
             return "Code modification is disabled";
 
         // Broadcast to code neuron for execution
-        await _network.BroadcastAsync("code.execute_change", intention.Action ?? new IntentionAction { ActionType = "code_change" }, "coordinator");
+        await _network.BroadcastAsync("code.execute_change", intention.Action ?? new IntentionAction { ActionType = "code_change" }, "coordinator").ConfigureAwait(false);
         return "Code change request sent to code neuron";
     }
 

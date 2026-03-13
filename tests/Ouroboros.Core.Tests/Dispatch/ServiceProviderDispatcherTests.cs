@@ -38,7 +38,7 @@ public sealed class ServiceProviderDispatcherTests
         var provider = services.BuildServiceProvider();
 
         var dispatcher = new ServiceProviderDispatcher(provider);
-        var result = await dispatcher.SendAsync<string>(new TestCommand("test"));
+        var result = await dispatcher.SendAsync<string>(new TestCommand("test")).ConfigureAwait(false);
 
         result.Should().Be("handled:test");
     }
@@ -53,7 +53,7 @@ public sealed class ServiceProviderDispatcherTests
 
         var act = () => dispatcher.SendAsync<string>(new TestCommand("test"));
         await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*No command handler*TestCommand*");
+            .WithMessage("*No command handler*TestCommand*").ConfigureAwait(false);
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public sealed class ServiceProviderDispatcherTests
         var provider = services.BuildServiceProvider();
 
         var dispatcher = new ServiceProviderDispatcher(provider);
-        var result = await dispatcher.QueryAsync<int>(new TestQuery(5));
+        var result = await dispatcher.QueryAsync<int>(new TestQuery(5)).ConfigureAwait(false);
 
         result.Should().Be(50);
     }
@@ -79,13 +79,13 @@ public sealed class ServiceProviderDispatcherTests
 
         var act = () => dispatcher.QueryAsync<int>(new TestQuery(5));
         await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*No query handler*TestQuery*");
+            .WithMessage("*No query handler*TestQuery*").ConfigureAwait(false);
     }
 
     [Fact]
     public async Task SendAsync_PassesCancellationToken()
     {
-        var cts = new CancellationTokenSource();
+        using var cts = new CancellationTokenSource();
         CancellationToken capturedToken = default;
 
         var handler = new Mock<ICommandHandler<TestCommand, string>>();
@@ -100,7 +100,7 @@ public sealed class ServiceProviderDispatcherTests
         var provider = services.BuildServiceProvider();
 
         var dispatcher = new ServiceProviderDispatcher(provider);
-        await dispatcher.SendAsync<string>(new TestCommand("test"), cts.Token);
+        await dispatcher.SendAsync<string>(new TestCommand("test"), cts.Token).ConfigureAwait(false);
 
         capturedToken.Should().Be(cts.Token);
     }

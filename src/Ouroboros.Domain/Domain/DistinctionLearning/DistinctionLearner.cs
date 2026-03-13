@@ -1,4 +1,4 @@
-// <copyright file="DistinctionLearner.cs" company="Ouroboros">
+﻿// <copyright file="DistinctionLearner.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -115,7 +115,7 @@ public sealed class DistinctionLearner : IDistinctionLearner
     {
         try
         {
-            Result<List<DistinctionWeightMetadata>, string> listResult = await _storage.ListWeightsAsync(ct);
+            Result<List<DistinctionWeightMetadata>, string> listResult = await _storage.ListWeightsAsync(ct).ConfigureAwait(false);
             if (listResult.IsFailure)
             {
                 return Result<Unit, string>.Failure($"Failed to list weights: {listResult.Error}");
@@ -133,7 +133,7 @@ public sealed class DistinctionLearner : IDistinctionLearner
 
             foreach (DistinctionWeightMetadata weight in toDissolve)
             {
-                Result<Unit, string> dissolveResult = await _storage.DissolveWeightsAsync(weight.Path, ct);
+                Result<Unit, string> dissolveResult = await _storage.DissolveWeightsAsync(weight.Path, ct).ConfigureAwait(false);
                 if (dissolveResult.IsFailure)
                 {
                     _logger?.LogWarning("Failed to dissolve {Id}: {Error}", weight.Id, dissolveResult.Error);

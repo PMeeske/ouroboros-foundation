@@ -10,7 +10,7 @@ public sealed class ContextualStepDefinitionAdditionalTests
             new Func<int, int>(_ => throw new InvalidOperationException("boom")));
         var optionDef = def.TryOption(_ => true);
 
-        var (result, logs) = await optionDef.InvokeAsync(9, new object());
+        var (result, logs) = await optionDef.InvokeAsync(9, new object()).ConfigureAwait(false);
         result.HasValue.Should().BeFalse();
         logs.Should().ContainSingle(l => l.Contains("boom"));
     }
@@ -22,8 +22,8 @@ public sealed class ContextualStepDefinitionAdditionalTests
             new Func<int, int>(_ => throw new OperationCanceledException()));
         var tryDef = def.TryStep();
 
-        var act = async () => await tryDef.InvokeAsync(9, new object());
-        await act.Should().ThrowAsync<OperationCanceledException>();
+        var act = async () => await tryDef.InvokeAsync(9, new object()).ConfigureAwait(false);
+        await act.Should().ThrowAsync<OperationCanceledException>().ConfigureAwait(false);
     }
 
     [Fact]
@@ -47,7 +47,7 @@ public sealed class ContextualStepDefinitionAdditionalTests
             ContextualStep.LiftPure<int, string, object>(x => x.ToString(), "stringified");
 
         var composed = def.Pipe(step2).Pipe(step3);
-        var (result, logs) = await composed.InvokeAsync(4, new object());
+        var (result, logs) = await composed.InvokeAsync(4, new object()).ConfigureAwait(false);
 
         result.Should().Be("10"); // (4+1)*2 = 10
         logs.Should().Contain("doubled");
@@ -61,7 +61,7 @@ public sealed class ContextualStepDefinitionAdditionalTests
             .Pipe<int>(x => x * 2, "step2");
 
         var step = def.Forget(new object());
-        var (result, logs) = await step(4);
+        var (result, logs) = await step(4).ConfigureAwait(false);
 
         result.Should().Be(10); // (4+1)*2 = 10
         logs.Should().Contain("step1");
@@ -75,7 +75,7 @@ public sealed class ContextualStepDefinitionAdditionalTests
             .Pipe<int>(x => x * 2, "step2");
 
         var step = def.ForgetAll(new object());
-        var result = await step(4);
+        var result = await step(4).ConfigureAwait(false);
 
         result.Should().Be(10);
     }
@@ -88,7 +88,7 @@ public sealed class ContextualStepDefinitionAdditionalTests
             .WithLog("log2")
             .WithLog("log3");
 
-        var (_, logs) = await def.InvokeAsync(1, new object());
+        var (_, logs) = await def.InvokeAsync(1, new object()).ConfigureAwait(false);
         logs.Should().HaveCount(3);
         logs.Should().ContainInOrder("log1", "log2", "log3");
     }
@@ -98,7 +98,7 @@ public sealed class ContextualStepDefinitionAdditionalTests
     {
         var def = ContextualStepDefinition<int, string, object>.LiftPure(
             x => x.ToString(), "created");
-        var (result, logs) = await def.InvokeAsync(42, new object());
+        var (result, logs) = await def.InvokeAsync(42, new object()).ConfigureAwait(false);
 
         result.Should().Be("42");
         logs.Should().ContainSingle("created");
@@ -110,7 +110,7 @@ public sealed class ContextualStepDefinitionAdditionalTests
         Step<int, string> step = x => Task.FromResult(x.ToString());
         var def = ContextualStepDefinition<int, string, object>.FromPure(step, "from-pure");
 
-        var (result, logs) = await def.InvokeAsync(7, new object());
+        var (result, logs) = await def.InvokeAsync(7, new object()).ConfigureAwait(false);
         result.Should().Be("7");
         logs.Should().ContainSingle("from-pure");
     }

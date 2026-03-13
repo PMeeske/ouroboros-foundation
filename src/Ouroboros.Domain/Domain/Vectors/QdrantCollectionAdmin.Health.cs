@@ -1,4 +1,4 @@
-// <copyright file="QdrantCollectionAdmin.Health.cs" company="Ouroboros">
+﻿// <copyright file="QdrantCollectionAdmin.Health.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -20,7 +20,7 @@ public sealed partial class QdrantCollectionAdmin
         CancellationToken ct = default)
     {
         List<CollectionHealthReport> reports = new List<CollectionHealthReport>();
-        await RefreshCollectionCacheAsync(ct);
+        await RefreshCollectionCacheAsync(ct).ConfigureAwait(false);
 
         foreach ((string? name, CollectionInfo? info) in _collectionCache)
         {
@@ -54,7 +54,7 @@ public sealed partial class QdrantCollectionAdmin
         CancellationToken ct = default)
     {
         List<string> healed = new List<string>();
-        IReadOnlyList<CollectionHealthReport> healthReports = await HealthCheckAsync(targetDimension, ct);
+        IReadOnlyList<CollectionHealthReport> healthReports = await HealthCheckAsync(targetDimension, ct).ConfigureAwait(false);
 
         foreach (string collectionName in healthReports.Where(r => r.DimensionMismatch).Select(report => report.CollectionName))
         {
@@ -63,12 +63,12 @@ public sealed partial class QdrantCollectionAdmin
                 CollectionInfo? info = _collectionCache.GetValueOrDefault(collectionName);
                 Distance distance = info?.DistanceMetric ?? Distance.Cosine;
 
-                await _client.DeleteCollectionAsync(collectionName, cancellationToken: ct);
+                await _client.DeleteCollectionAsync(collectionName, cancellationToken: ct).ConfigureAwait(false);
 
                 await _client.CreateCollectionAsync(
                     collectionName,
                     new VectorParams { Size = (ulong)targetDimension, Distance = distance },
-                    cancellationToken: ct);
+                    cancellationToken: ct).ConfigureAwait(false);
 
                 healed.Add(collectionName);
             }
@@ -78,7 +78,7 @@ public sealed partial class QdrantCollectionAdmin
             }
         }
 
-        await RefreshCollectionCacheAsync(ct);
+        await RefreshCollectionCacheAsync(ct).ConfigureAwait(false);
 
         return healed.AsReadOnly();
     }
@@ -88,7 +88,7 @@ public sealed partial class QdrantCollectionAdmin
     /// </summary>
     public async Task<string> GenerateMemoryMapAsync(CancellationToken ct = default)
     {
-        await RefreshCollectionCacheAsync(ct);
+        await RefreshCollectionCacheAsync(ct).ConfigureAwait(false);
 
         StringBuilder sb = new System.Text.StringBuilder();
         sb.AppendLine("\u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557");
@@ -149,7 +149,7 @@ public sealed partial class QdrantCollectionAdmin
     /// </summary>
     public async Task<MemoryStatistics> GetMemoryStatisticsAsync(CancellationToken ct = default)
     {
-        await RefreshCollectionCacheAsync(ct);
+        await RefreshCollectionCacheAsync(ct).ConfigureAwait(false);
 
         int totalCollections = _collectionCache.Count;
         long totalPoints = _collectionCache.Values.Sum(c => (long)c.PointsCount);

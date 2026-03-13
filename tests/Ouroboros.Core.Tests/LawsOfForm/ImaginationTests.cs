@@ -1,4 +1,5 @@
 using Ouroboros.Core.LawsOfForm;
+using LoF = Ouroboros.Core.LawsOfForm.Form;
 
 namespace Ouroboros.Core.Tests.LawsOfForm;
 
@@ -8,7 +9,7 @@ public class ImaginationTests
     [Fact]
     public void I_ReturnsImaginaryForm()
     {
-        Imagination.I.Should().Be(Form.Imaginary);
+        Imagination.I.Should().Be(LoF.Imaginary);
     }
 
     [Fact]
@@ -30,10 +31,10 @@ public class ImaginationTests
     [Fact]
     public void Oscillate_CreateOscillator_ReturnsCorrectStates()
     {
-        var osc = Imagination.Oscillate(Form.Mark, Form.Void);
+        var osc = Imagination.Oscillate(LoF.Mark, LoF.Void);
 
-        osc.AtTime(0).Should().Be(Form.Mark);
-        osc.AtTime(1).Should().Be(Form.Void);
+        osc.AtTime(0).Should().Be(LoF.Mark);
+        osc.AtTime(1).Should().Be(LoF.Void);
     }
 
     [Fact]
@@ -57,7 +58,7 @@ public class ImaginationTests
     [Fact]
     public void Apply_Void_ReturnsImaginary()
     {
-        var result = Imagination.Apply(Form.Void);
+        var result = Imagination.Apply(LoF.Void);
 
         result.IsImaginary().Should().BeTrue();
     }
@@ -65,7 +66,7 @@ public class ImaginationTests
     [Fact]
     public void Apply_Mark_ReturnsImaginaryWithPhaseShift()
     {
-        var result = Imagination.Apply(Form.Mark);
+        var result = Imagination.Apply(LoF.Mark);
 
         result.IsImaginary().Should().BeTrue();
     }
@@ -73,59 +74,59 @@ public class ImaginationTests
     [Fact]
     public void Conjugate_RealForm_ReturnsSelf()
     {
-        Imagination.Conjugate(Form.Mark).Should().Be(Form.Mark);
-        Imagination.Conjugate(Form.Void).Should().Be(Form.Void);
+        Imagination.Conjugate(LoF.Mark).Should().Be(LoF.Mark);
+        Imagination.Conjugate(LoF.Void).Should().Be(LoF.Void);
     }
 
     [Fact]
     public void Magnitude_Void_ReturnsZero()
     {
-        Imagination.Magnitude(Form.Void).Should().Be(0.0);
+        Imagination.Magnitude(LoF.Void).Should().Be(0.0);
     }
 
     [Fact]
     public void Magnitude_Mark_ReturnsOne()
     {
-        Imagination.Magnitude(Form.Mark).Should().Be(1.0);
+        Imagination.Magnitude(LoF.Mark).Should().Be(1.0);
     }
 
     [Fact]
     public void Magnitude_Imaginary_ReturnsOne()
     {
-        Imagination.Magnitude(Form.Imaginary).Should().Be(1.0);
+        Imagination.Magnitude(LoF.Imaginary).Should().Be(1.0);
     }
 
     [Fact]
     public void Phase_Void_ReturnsZero()
     {
-        Imagination.Phase(Form.Void).Should().Be(0.0);
+        Imagination.Phase(LoF.Void).Should().Be(0.0);
     }
 
     [Fact]
     public void Phase_Mark_ReturnsPi()
     {
-        Imagination.Phase(Form.Mark).Should().BeApproximately(Math.PI, 1e-10);
+        Imagination.Phase(LoF.Mark).Should().BeApproximately(Math.PI, 1e-10);
     }
 
     [Fact]
     public void Project_RealForm_ReturnsSelf()
     {
-        Imagination.Project(Form.Mark).Should().Be(Form.Mark);
-        Imagination.Project(Form.Void).Should().Be(Form.Void);
+        Imagination.Project(LoF.Mark).Should().Be(LoF.Mark);
+        Imagination.Project(LoF.Void).Should().Be(LoF.Void);
     }
 
     [Fact]
     public void Sample_RealForm_IsConstant()
     {
-        Imagination.Sample(Form.Mark, 0).Should().Be(Form.Mark);
-        Imagination.Sample(Form.Mark, 1).Should().Be(Form.Mark);
+        Imagination.Sample(LoF.Mark, 0).Should().Be(LoF.Mark);
+        Imagination.Sample(LoF.Mark, 1).Should().Be(LoF.Mark);
     }
 
     [Fact]
     public void Sample_ImaginaryForm_Oscillates()
     {
-        Imagination.Sample(Form.Imaginary, 0).Should().Be(Form.Void);
-        Imagination.Sample(Form.Imaginary, 1).Should().Be(Form.Mark);
+        Imagination.Sample(LoF.Imaginary, 0).Should().Be(LoF.Void);
+        Imagination.Sample(LoF.Imaginary, 1).Should().Be(LoF.Mark);
     }
 
     [Fact]
@@ -139,9 +140,9 @@ public class ImaginationTests
     [Fact]
     public void Superimpose_TwoRealForms_UsesIndication()
     {
-        var result = Imagination.Superimpose(Form.Mark, Form.Void);
+        var result = Imagination.Superimpose(LoF.Mark, LoF.Void);
 
         // Form.Call with Mark and Void should produce a result
-        result.Should().NotBe(default(Form));
+        result.Should().NotBe(default(LoF));
     }
 }

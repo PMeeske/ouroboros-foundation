@@ -1,4 +1,4 @@
-using Microsoft.CodeAnalysis.CodeActions;
+﻿using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
 
 namespace Ouroboros.Roslynator.Pipeline;
@@ -35,7 +35,7 @@ public static class FixChainArrows
                 ),
                 context.Diagnostics);
 
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
         };
     }
 

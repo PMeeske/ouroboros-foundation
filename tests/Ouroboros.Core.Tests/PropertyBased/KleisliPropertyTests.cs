@@ -37,12 +37,12 @@ public class KleisliPropertyTests
         // Left: (f >=> g) >=> h
         Result<int, string> leftComposed = await ComposeKleisliResult(
             ComposeKleisliResult(f, g),
-            h)(input);
+            h)(input).ConfigureAwait(false);
 
         // Right: f >=> (g >=> h)
         Result<int, string> rightComposed = await ComposeKleisliResult(
             f,
-            ComposeKleisliResult(g, h))(input);
+            ComposeKleisliResult(g, h))(input).ConfigureAwait(false);
 
         return (leftComposed.IsSuccess == rightComposed.IsSuccess &&
                 (leftComposed.IsFailure || leftComposed.Value == rightComposed.Value));
@@ -76,12 +76,12 @@ public class KleisliPropertyTests
         // Left: (f >=> g) >=> h
         Result<int, string> leftComposed = await ComposeKleisliResult(
             ComposeKleisliResult(f, g),
-            h)(input);
+            h)(input).ConfigureAwait(false);
 
         // Right: f >=> (g >=> h)
         Result<int, string> rightComposed = await ComposeKleisliResult(
             f,
-            ComposeKleisliResult(g, h))(input);
+            ComposeKleisliResult(g, h))(input).ConfigureAwait(false);
 
         return (leftComposed.IsSuccess == rightComposed.IsSuccess &&
                 (leftComposed.IsFailure || leftComposed.Value == rightComposed.Value) &&
@@ -104,8 +104,8 @@ public class KleisliPropertyTests
         KleisliResult<int, int, string> f = x =>
             Task.FromResult(Result<int, string>.Success(x * 3 + 7));
 
-        Result<int, string> composed = await ComposeKleisliResult(identity, f)(input);
-        Result<int, string> direct = await f(input);
+        Result<int, string> composed = await ComposeKleisliResult(identity, f)(input).ConfigureAwait(false);
+        Result<int, string> direct = await f(input).ConfigureAwait(false);
 
         return (composed.IsSuccess == direct.IsSuccess &&
                 composed.Value == direct.Value);
@@ -127,8 +127,8 @@ public class KleisliPropertyTests
         KleisliResult<int, int, string> identity = x =>
             Task.FromResult(Result<int, string>.Success(x));
 
-        Result<int, string> composed = await ComposeKleisliResult(f, identity)(input);
-        Result<int, string> direct = await f(input);
+        Result<int, string> composed = await ComposeKleisliResult(f, identity)(input).ConfigureAwait(false);
+        Result<int, string> direct = await f(input).ConfigureAwait(false);
 
         return (composed.IsSuccess == direct.IsSuccess &&
                 composed.Value == direct.Value);
@@ -152,8 +152,8 @@ public class KleisliPropertyTests
                 ? Result<int, string>.Success(x * 2)
                 : Result<int, string>.Failure("negative"));
 
-        Result<int, string> composed = await ComposeKleisliResult(identity, f)(input);
-        Result<int, string> direct = await f(input);
+        Result<int, string> composed = await ComposeKleisliResult(identity, f)(input).ConfigureAwait(false);
+        Result<int, string> direct = await f(input).ConfigureAwait(false);
 
         return (composed.IsSuccess == direct.IsSuccess &&
                 (composed.IsFailure || composed.Value == direct.Value) &&
@@ -178,8 +178,8 @@ public class KleisliPropertyTests
         KleisliResult<int, int, string> identity = x =>
             Task.FromResult(Result<int, string>.Success(x));
 
-        Result<int, string> composed = await ComposeKleisliResult(f, identity)(input);
-        Result<int, string> direct = await f(input);
+        Result<int, string> composed = await ComposeKleisliResult(f, identity)(input).ConfigureAwait(false);
+        Result<int, string> direct = await f(input).ConfigureAwait(false);
 
         return (composed.IsSuccess == direct.IsSuccess &&
                 (composed.IsFailure || composed.Value == direct.Value) &&
@@ -203,13 +203,13 @@ public class KleisliPropertyTests
     {
         return async input =>
         {
-            Result<TMid, TError> firstResult = await f(input);
+            Result<TMid, TError> firstResult = await f(input).ConfigureAwait(false);
             if (firstResult.IsFailure)
             {
                 return Result<TOut, TError>.Failure(firstResult.Error);
             }
 
-            return await g(firstResult.Value);
+            return await g(firstResult.Value).ConfigureAwait(false);
         };
     }
 }

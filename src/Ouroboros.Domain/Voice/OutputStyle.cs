@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
-namespace Ouroboros.Domain.Voice;
+﻿namespace Ouroboros.Domain.Voice;
 
 /// <summary>
 /// Styles for text output display.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum OutputStyle
 {
     /// <summary>Normal conversational output.</summary>

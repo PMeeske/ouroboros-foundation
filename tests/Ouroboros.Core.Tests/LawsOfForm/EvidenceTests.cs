@@ -1,6 +1,7 @@
 using Ouroboros.Core.LawsOfForm;
+using LoF = Ouroboros.Core.LawsOfForm.Form;
 
-namespace Ouroboros.Tests.LawsOfForm;
+namespace Ouroboros.Core.Tests.LawsOfForm;
 
 [Trait("Category", "Unit")]
 public class EvidenceTests
@@ -9,11 +10,11 @@ public class EvidenceTests
     public void Constructor_SetsProperties()
     {
         // Act
-        var evidence = new Evidence("safety_check", Form.Mark, "All safety checks passed");
+        var evidence = new Evidence("safety_check", LoF.Mark, "All safety checks passed");
 
         // Assert
         evidence.CriterionName.Should().Be("safety_check");
-        evidence.Evaluation.Should().Be(Form.Mark);
+        evidence.Evaluation.Should().Be(LoF.Mark);
         evidence.Description.Should().Be("All safety checks passed");
     }
 
@@ -24,7 +25,7 @@ public class EvidenceTests
         var before = DateTime.UtcNow;
 
         // Act
-        var evidence = new Evidence("test", Form.Mark, "desc");
+        var evidence = new Evidence("test", LoF.Mark, "desc");
 
         // Assert
         evidence.Timestamp.Should().BeOnOrAfter(before);
@@ -38,7 +39,7 @@ public class EvidenceTests
         var specificTime = new DateTime(2025, 1, 15, 10, 30, 0, DateTimeKind.Utc);
 
         // Act
-        var evidence = new Evidence("test", Form.Void, "desc", specificTime);
+        var evidence = new Evidence("test", LoF.Void, "desc", specificTime);
 
         // Assert
         evidence.Timestamp.Should().Be(specificTime);
@@ -49,8 +50,8 @@ public class EvidenceTests
     {
         // Arrange
         var time = DateTime.UtcNow;
-        var a = new Evidence("criterion", Form.Mark, "desc", time);
-        var b = new Evidence("criterion", Form.Mark, "desc", time);
+        var a = new Evidence("criterion", LoF.Mark, "desc", time);
+        var b = new Evidence("criterion", LoF.Mark, "desc", time);
 
         // Assert
         a.Should().Be(b);
@@ -61,8 +62,8 @@ public class EvidenceTests
     {
         // Arrange
         var time = DateTime.UtcNow;
-        var a = new Evidence("criterion", Form.Mark, "desc", time);
-        var b = new Evidence("criterion", Form.Void, "desc", time);
+        var a = new Evidence("criterion", LoF.Mark, "desc", time);
+        var b = new Evidence("criterion", LoF.Void, "desc", time);
 
         // Assert
         a.Should().NotBe(b);
@@ -72,7 +73,7 @@ public class EvidenceTests
     public void WithExpression_CreatesModifiedCopy()
     {
         // Arrange
-        var original = new Evidence("criterion", Form.Mark, "original desc");
+        var original = new Evidence("criterion", LoF.Mark, "original desc");
 
         // Act
         var modified = original with { Description = "updated desc" };

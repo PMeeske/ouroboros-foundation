@@ -1,4 +1,4 @@
-// <copyright file="AutonomousCoordinator.Training.cs" company="Ouroboros">
+﻿// <copyright file="AutonomousCoordinator.Training.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -48,13 +48,13 @@ public sealed partial class AutonomousCoordinator
                 if (config.ProblemSolvingMode && config.UseTools && FullChatWithToolsFunction != null)
                 {
                     _logger.LogDebug("Using full chat with tools");
-                    return await FullChatWithToolsFunction(prompt, ct);
+                    return await FullChatWithToolsFunction(prompt, ct).ConfigureAwait(false);
                 }
 
                 // Otherwise use basic LLM
                 if (ThinkFunction != null)
                 {
-                    return await ThinkFunction(prompt, ct);
+                    return await ThinkFunction(prompt, ct).ConfigureAwait(false);
                 }
 
                 return "Generation function not available.";
@@ -76,7 +76,7 @@ public sealed partial class AutonomousCoordinator
 
                     try
                     {
-                        string result = await ThinkFunction(evalPrompt, ct);
+                        string result = await ThinkFunction(evalPrompt, ct).ConfigureAwait(false);
                         if (double.TryParse(result.Trim(), out double score))
                         {
                             return Math.Clamp(score, 0.0, 1.0);
@@ -115,7 +115,7 @@ public sealed partial class AutonomousCoordinator
             try
             {
                 _logger.LogDebug("Starting training directly on neuron");
-                await _userPersonaNeuron.StartTrainingDirectAsync(trainingConfig);
+                await _userPersonaNeuron.StartTrainingDirectAsync(trainingConfig).ConfigureAwait(false);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
@@ -232,7 +232,7 @@ public sealed partial class AutonomousCoordinator
             if (DisplayAndSpeakFunction != null)
             {
                 // Display and wait for User TTS to complete before processing
-                await DisplayAndSpeakFunction(userMessage, userPersona, _cts.Token);
+                await DisplayAndSpeakFunction(userMessage, userPersona, _cts.Token).ConfigureAwait(false);
             }
             else
             {
@@ -242,7 +242,7 @@ public sealed partial class AutonomousCoordinator
             }
 
             // Process through the main chat pipeline (User has finished speaking)
-            string response = await ProcessChatFunction(message, _cts.Token);
+            string response = await ProcessChatFunction(message, _cts.Token).ConfigureAwait(false);
 
             // Display Ouroboros's response
             string responseLabel = config.SelfDialogueMode ? "🐍 [Ouroboros-A]" : "🐍";
@@ -251,7 +251,7 @@ public sealed partial class AutonomousCoordinator
             if (DisplayAndSpeakFunction != null)
             {
                 // Display and wait for Ouroboros TTS to complete
-                await DisplayAndSpeakFunction(ouroResponse, null, _cts.Token);
+                await DisplayAndSpeakFunction(ouroResponse, null, _cts.Token).ConfigureAwait(false);
             }
             else
             {
@@ -260,7 +260,7 @@ public sealed partial class AutonomousCoordinator
             }
 
             // Notify the persona of the response for evaluation
-            await _network.BroadcastAsync("response.generated", response, "coordinator");
+            await _network.BroadcastAsync("response.generated", response, "coordinator").ConfigureAwait(false);
 
             // Record the interaction
             _userPersonaNeuron?.RecordInteraction(message, response);
@@ -456,7 +456,7 @@ public sealed partial class AutonomousCoordinator
                 Reply with ONLY the type word (code, design, plan, analysis, or document).
                 """;
 
-            string result = await ThinkFunction(prompt, ct);
+            string result = await ThinkFunction(prompt, ct).ConfigureAwait(false);
             string type = result.Trim().ToLowerInvariant();
 
             // Validate response

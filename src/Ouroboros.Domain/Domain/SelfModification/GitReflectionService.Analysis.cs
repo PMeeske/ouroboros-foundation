@@ -1,4 +1,4 @@
-// <copyright file="GitReflectionService.Analysis.cs" company="Ouroboros">
+﻿// <copyright file="GitReflectionService.Analysis.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -36,7 +36,7 @@ public sealed partial class GitReflectionService
                 int lineCount = 0;
                 try
                 {
-                    lineCount = (await File.ReadAllLinesAsync(file, ct)).Length;
+                    lineCount = (await File.ReadAllLinesAsync(file, ct).ConfigureAwait(false)).Length;
                 }
                 catch (IOException)
                 {
@@ -77,7 +77,7 @@ public sealed partial class GitReflectionService
             throw new FileNotFoundException($"File not found: {filePath}");
         }
 
-        string content = await File.ReadAllTextAsync(fullPath, ct);
+        string content = await File.ReadAllTextAsync(fullPath, ct).ConfigureAwait(false);
         string[] lines = content.Split('\n');
 
         // Extract classes
@@ -142,7 +142,7 @@ public sealed partial class GitReflectionService
         CancellationToken ct = default)
     {
         List<(string, int, string)> results = new();
-        IReadOnlyList<RepoFileInfo> files = await ListSourceFilesAsync(ct: ct);
+        IReadOnlyList<RepoFileInfo> files = await ListSourceFilesAsync(ct: ct).ConfigureAwait(false);
 
         Regex? regex = isRegex ? new Regex(pattern, RegexOptions.IgnoreCase) : null;
 
@@ -152,7 +152,7 @@ public sealed partial class GitReflectionService
 
             try
             {
-                string[] lines = await File.ReadAllLinesAsync(file.FullPath, ct);
+                string[] lines = await File.ReadAllLinesAsync(file.FullPath, ct).ConfigureAwait(false);
                 for (int i = 0; i < lines.Length; i++)
                 {
                     bool match = regex != null
@@ -179,7 +179,7 @@ public sealed partial class GitReflectionService
     /// </summary>
     public async Task<string> GetCodebaseOverviewAsync(CancellationToken ct = default)
     {
-        IReadOnlyList<RepoFileInfo> files = await ListSourceFilesAsync(ct: ct);
+        IReadOnlyList<RepoFileInfo> files = await ListSourceFilesAsync(ct: ct).ConfigureAwait(false);
         StringBuilder sb = new();
 
         sb.AppendLine("╔═══════════════════════════════════════════════════════════════╗");
@@ -218,7 +218,7 @@ public sealed partial class GitReflectionService
     /// </summary>
     public async Task<string> GetStatusAsync(CancellationToken ct = default)
     {
-        (bool success, string output, string error) = await ExecuteGitAsync(["status", "--porcelain"], ct);
+        (bool success, string output, string error) = await ExecuteGitAsync(["status", "--porcelain"], ct).ConfigureAwait(false);
         if (!success)
         {
             return $"Git status failed: {error}";
@@ -254,7 +254,7 @@ public sealed partial class GitReflectionService
     /// </summary>
     public async Task<string> GetCurrentBranchAsync(CancellationToken ct = default)
     {
-        (bool success, string output, _) = await ExecuteGitAsync(["branch", "--show-current"], ct);
+        (bool success, string output, _) = await ExecuteGitAsync(["branch", "--show-current"], ct).ConfigureAwait(false);
         return success ? output : "unknown";
     }
 
@@ -266,7 +266,7 @@ public sealed partial class GitReflectionService
         CancellationToken ct = default)
     {
         (bool success, string output, _) = await ExecuteGitAsync(
-            ["log", "--oneline", "--date=iso", $"-n{count}", "--format=%h|%s|%ai"], ct);
+            ["log", "--oneline", "--date=iso", $"-n{count}", "--format=%h|%s|%ai"], ct).ConfigureAwait(false);
 
         if (!success || string.IsNullOrWhiteSpace(output))
         {
@@ -291,7 +291,7 @@ public sealed partial class GitReflectionService
     /// </summary>
     public async Task<string> GetFileDiffAsync(string filePath, CancellationToken ct = default)
     {
-        (bool success, string output, _) = await ExecuteGitAsync(["diff", "--", filePath], ct);
+        (bool success, string output, _) = await ExecuteGitAsync(["diff", "--", filePath], ct).ConfigureAwait(false);
         return success ? output : "No changes or file not tracked";
     }
 

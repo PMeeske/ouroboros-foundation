@@ -1,8 +1,6 @@
-// <copyright file="IFitnessFunction.cs" company="Ouroboros">
+﻿// <copyright file="IFitnessFunction.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
-
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Genetic.Abstractions;
 
@@ -11,7 +9,6 @@ namespace Ouroboros.Genetic.Abstractions;
 /// Follows functional programming principles with monadic error handling.
 /// </summary>
 /// <typeparam name="TChromosome">The type of chromosome to evaluate.</typeparam>
-[ExcludeFromCodeCoverage]
 public interface IEvolutionFitnessFunction<TChromosome>
     where TChromosome : IChromosome
 {

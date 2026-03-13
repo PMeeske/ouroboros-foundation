@@ -1,6 +1,7 @@
 using Ouroboros.Core.LawsOfForm;
+using LoF = Ouroboros.Core.LawsOfForm.Form;
 
-namespace Ouroboros.Tests.LawsOfForm;
+namespace Ouroboros.Core.Tests.LawsOfForm;
 
 [Trait("Category", "Unit")]
 public class FormTests
@@ -10,31 +11,31 @@ public class FormTests
     [Fact]
     public void Mark_IsMark()
     {
-        Form.Mark.IsMark().Should().BeTrue();
-        Form.Mark.IsVoid().Should().BeFalse();
-        Form.Mark.IsImaginary().Should().BeFalse();
+        LoF.Mark.IsMark().Should().BeTrue();
+        LoF.Mark.IsVoid().Should().BeFalse();
+        LoF.Mark.IsImaginary().Should().BeFalse();
     }
 
     [Fact]
     public void Void_IsVoid()
     {
-        Form.Void.IsVoid().Should().BeTrue();
-        Form.Void.IsMark().Should().BeFalse();
-        Form.Void.IsImaginary().Should().BeFalse();
+        LoF.Void.IsVoid().Should().BeTrue();
+        LoF.Void.IsMark().Should().BeFalse();
+        LoF.Void.IsImaginary().Should().BeFalse();
     }
 
     [Fact]
     public void Imaginary_IsImaginary()
     {
-        Form.Imaginary.IsImaginary().Should().BeTrue();
-        Form.Imaginary.IsMark().Should().BeFalse();
-        Form.Imaginary.IsVoid().Should().BeFalse();
+        LoF.Imaginary.IsImaginary().Should().BeTrue();
+        LoF.Imaginary.IsMark().Should().BeFalse();
+        LoF.Imaginary.IsVoid().Should().BeFalse();
     }
 
     [Fact]
     public void Cross_ReturnsMark()
     {
-        Form.Cross().IsMark().Should().BeTrue();
+        LoF.Cross().IsMark().Should().BeTrue();
     }
 
     // --- IsCertain / IsMarked ---
@@ -42,26 +43,26 @@ public class FormTests
     [Fact]
     public void IsCertain_Mark_ReturnsTrue()
     {
-        Form.Mark.IsCertain().Should().BeTrue();
+        LoF.Mark.IsCertain().Should().BeTrue();
     }
 
     [Fact]
     public void IsCertain_Void_ReturnsTrue()
     {
-        Form.Void.IsCertain().Should().BeTrue();
+        LoF.Void.IsCertain().Should().BeTrue();
     }
 
     [Fact]
     public void IsCertain_Imaginary_ReturnsFalse()
     {
-        Form.Imaginary.IsCertain().Should().BeFalse();
+        LoF.Imaginary.IsCertain().Should().BeFalse();
     }
 
     [Fact]
     public void IsMarked_IsAliasForIsMark()
     {
-        Form.Mark.IsMarked().Should().BeTrue();
-        Form.Void.IsMarked().Should().BeFalse();
+        LoF.Mark.IsMarked().Should().BeTrue();
+        LoF.Void.IsMarked().Should().BeFalse();
     }
 
     // --- Not (Negation) ---
@@ -69,34 +70,34 @@ public class FormTests
     [Fact]
     public void Not_Mark_ReturnsVoid()
     {
-        Form.Mark.Not().Should().Be(Form.Void);
+        LoF.Mark.Not().Should().Be(LoF.Void);
     }
 
     [Fact]
     public void Not_Void_ReturnsMark()
     {
-        Form.Void.Not().Should().Be(Form.Mark);
+        LoF.Void.Not().Should().Be(LoF.Mark);
     }
 
     [Fact]
     public void Not_Imaginary_ReturnsImaginary()
     {
-        Form.Imaginary.Not().Should().Be(Form.Imaginary);
+        LoF.Imaginary.Not().Should().Be(LoF.Imaginary);
     }
 
     [Fact]
     public void DoubleNegation_Cancels()
     {
-        Form.Mark.Not().Not().Should().Be(Form.Mark);
-        Form.Void.Not().Not().Should().Be(Form.Void);
+        LoF.Mark.Not().Not().Should().Be(LoF.Mark);
+        LoF.Void.Not().Not().Should().Be(LoF.Void);
     }
 
     [Fact]
     public void NegationOperator_Works()
     {
-        (!Form.Mark).Should().Be(Form.Void);
-        (!Form.Void).Should().Be(Form.Mark);
-        (!Form.Imaginary).Should().Be(Form.Imaginary);
+        (!LoF.Mark).Should().Be(LoF.Void);
+        (!LoF.Void).Should().Be(LoF.Mark);
+        (!LoF.Imaginary).Should().Be(LoF.Imaginary);
     }
 
     // --- CrossForm ---
@@ -104,14 +105,14 @@ public class FormTests
     [Fact]
     public void CrossForm_AppliesNegation()
     {
-        Form.CrossForm(Form.Void).Should().Be(Form.Mark);
-        Form.CrossForm(Form.Mark).Should().Be(Form.Void);
+        LoF.CrossForm(LoF.Void).Should().Be(LoF.Mark);
+        LoF.CrossForm(LoF.Mark).Should().Be(LoF.Void);
     }
 
     [Fact]
     public void CrossForm_DoubleCross_Cancels()
     {
-        Form.CrossForm(Form.CrossForm(Form.Void)).Should().Be(Form.Void);
+        LoF.CrossForm(LoF.CrossForm(LoF.Void)).Should().Be(LoF.Void);
     }
 
     // --- And (Conjunction) ---
@@ -119,33 +120,33 @@ public class FormTests
     [Fact]
     public void And_MarkAndMark_ReturnsMark()
     {
-        Form.Mark.And(Form.Mark).IsMark().Should().BeTrue();
+        LoF.Mark.And(LoF.Mark).IsMark().Should().BeTrue();
     }
 
     [Fact]
     public void And_MarkAndVoid_ReturnsVoid()
     {
-        Form.Mark.And(Form.Void).IsVoid().Should().BeTrue();
+        LoF.Mark.And(LoF.Void).IsVoid().Should().BeTrue();
     }
 
     [Fact]
     public void And_VoidAndMark_ReturnsVoid()
     {
-        Form.Void.And(Form.Mark).IsVoid().Should().BeTrue();
+        LoF.Void.And(LoF.Mark).IsVoid().Should().BeTrue();
     }
 
     [Fact]
     public void And_ImaginaryDominates()
     {
-        Form.Mark.And(Form.Imaginary).IsImaginary().Should().BeTrue();
-        Form.Imaginary.And(Form.Void).IsImaginary().Should().BeTrue();
+        LoF.Mark.And(LoF.Imaginary).IsImaginary().Should().BeTrue();
+        LoF.Imaginary.And(LoF.Void).IsImaginary().Should().BeTrue();
     }
 
     [Fact]
     public void AndOperator_Works()
     {
-        (Form.Mark & Form.Mark).IsMark().Should().BeTrue();
-        (Form.Mark & Form.Void).IsVoid().Should().BeTrue();
+        (LoF.Mark & LoF.Mark).IsMark().Should().BeTrue();
+        (LoF.Mark & LoF.Void).IsVoid().Should().BeTrue();
     }
 
     // --- Or (Disjunction) ---
@@ -153,33 +154,33 @@ public class FormTests
     [Fact]
     public void Or_MarkOrVoid_ReturnsMark()
     {
-        Form.Mark.Or(Form.Void).IsMark().Should().BeTrue();
+        LoF.Mark.Or(LoF.Void).IsMark().Should().BeTrue();
     }
 
     [Fact]
     public void Or_VoidOrVoid_ReturnsVoid()
     {
-        Form.Void.Or(Form.Void).IsVoid().Should().BeTrue();
+        LoF.Void.Or(LoF.Void).IsVoid().Should().BeTrue();
     }
 
     [Fact]
     public void Or_VoidOrImaginary_ReturnsImaginary()
     {
-        Form.Void.Or(Form.Imaginary).IsImaginary().Should().BeTrue();
+        LoF.Void.Or(LoF.Imaginary).IsImaginary().Should().BeTrue();
     }
 
     [Fact]
     public void Or_MarkOrImaginary_ReturnsMark()
     {
         // Mark dominates over Imaginary in Or
-        Form.Mark.Or(Form.Imaginary).IsMark().Should().BeTrue();
+        LoF.Mark.Or(LoF.Imaginary).IsMark().Should().BeTrue();
     }
 
     [Fact]
     public void OrOperator_Works()
     {
-        (Form.Mark | Form.Void).IsMark().Should().BeTrue();
-        (Form.Void | Form.Void).IsVoid().Should().BeTrue();
+        (LoF.Mark | LoF.Void).IsMark().Should().BeTrue();
+        (LoF.Void | LoF.Void).IsVoid().Should().BeTrue();
     }
 
     // --- ToBool ---
@@ -187,19 +188,19 @@ public class FormTests
     [Fact]
     public void ToBool_Mark_ReturnsTrue()
     {
-        Form.Mark.ToBool().Should().Be(true);
+        LoF.Mark.ToBool().Should().Be(true);
     }
 
     [Fact]
     public void ToBool_Void_ReturnsFalse()
     {
-        Form.Void.ToBool().Should().Be(false);
+        LoF.Void.ToBool().Should().Be(false);
     }
 
     [Fact]
     public void ToBool_Imaginary_ReturnsNull()
     {
-        Form.Imaginary.ToBool().Should().BeNull();
+        LoF.Imaginary.ToBool().Should().BeNull();
     }
 
     // --- Match (pattern matching) ---
@@ -207,7 +208,7 @@ public class FormTests
     [Fact]
     public void Match_Mark_CallsOnMark()
     {
-        var result = Form.Mark.Match(
+        var result = LoF.Mark.Match(
             onMark: () => "marked",
             onVoid: () => "void",
             onImaginary: () => "imaginary");
@@ -218,7 +219,7 @@ public class FormTests
     [Fact]
     public void Match_Void_CallsOnVoid()
     {
-        var result = Form.Void.Match(
+        var result = LoF.Void.Match(
             onMark: () => "marked",
             onVoid: () => "void",
             onImaginary: () => "imaginary");
@@ -229,7 +230,7 @@ public class FormTests
     [Fact]
     public void Match_Imaginary_CallsOnImaginary()
     {
-        var result = Form.Imaginary.Match(
+        var result = LoF.Imaginary.Match(
             onMark: () => "marked",
             onVoid: () => "void",
             onImaginary: () => "imaginary");
@@ -244,7 +245,7 @@ public class FormTests
         string captured = "";
 
         // Act
-        Form.Mark.Match(
+        LoF.Mark.Match(
             onMark: () => captured = "mark",
             onVoid: () => captured = "void",
             onImaginary: () => captured = "imaginary");
@@ -258,9 +259,9 @@ public class FormTests
     [Fact]
     public void Calling_ReturnsItself()
     {
-        Form.Mark.Calling().Should().Be(Form.Mark);
-        Form.Void.Calling().Should().Be(Form.Void);
-        Form.Imaginary.Calling().Should().Be(Form.Imaginary);
+        LoF.Mark.Calling().Should().Be(LoF.Mark);
+        LoF.Void.Calling().Should().Be(LoF.Void);
+        LoF.Imaginary.Calling().Should().Be(LoF.Imaginary);
     }
 
     // --- Eval ---
@@ -268,9 +269,9 @@ public class FormTests
     [Fact]
     public void Eval_IsIdempotent()
     {
-        Form.Mark.Eval().Should().Be(Form.Mark);
-        Form.Void.Eval().Should().Be(Form.Void);
-        Form.Imaginary.Eval().Should().Be(Form.Imaginary);
+        LoF.Mark.Eval().Should().Be(LoF.Mark);
+        LoF.Void.Eval().Should().Be(LoF.Void);
+        LoF.Imaginary.Eval().Should().Be(LoF.Imaginary);
     }
 
     // --- EvalToRecord ---
@@ -278,19 +279,19 @@ public class FormTests
     [Fact]
     public void EvalToRecord_Mark_ReturnsMarkForm()
     {
-        Form.Mark.EvalToRecord().Should().BeOfType<Form.MarkForm>();
+        LoF.Mark.EvalToRecord().Should().BeOfType<LoF.MarkForm>();
     }
 
     [Fact]
     public void EvalToRecord_Void_ReturnsVoidForm()
     {
-        Form.Void.EvalToRecord().Should().BeOfType<Form.VoidForm>();
+        LoF.Void.EvalToRecord().Should().BeOfType<LoF.VoidForm>();
     }
 
     [Fact]
     public void EvalToRecord_Imaginary_ReturnsImaginaryForm()
     {
-        Form.Imaginary.EvalToRecord().Should().BeOfType<Form.ImaginaryForm>();
+        LoF.Imaginary.EvalToRecord().Should().BeOfType<LoF.ImaginaryForm>();
     }
 
     // --- Call ---
@@ -298,15 +299,15 @@ public class FormTests
     [Fact]
     public void Call_ImaginaryDominates()
     {
-        Form.Mark.Call(Form.Imaginary).IsImaginary().Should().BeTrue();
-        Form.Imaginary.Call(Form.Void).IsImaginary().Should().BeTrue();
+        LoF.Mark.Call(LoF.Imaginary).IsImaginary().Should().BeTrue();
+        LoF.Imaginary.Call(LoF.Void).IsImaginary().Should().BeTrue();
     }
 
     [Fact]
     public void Call_RealForms_UsesOrLogic()
     {
-        Form.Mark.Call(Form.Void).IsMark().Should().BeTrue();
-        Form.Void.Call(Form.Void).IsVoid().Should().BeTrue();
+        LoF.Mark.Call(LoF.Void).IsMark().Should().BeTrue();
+        LoF.Void.Call(LoF.Void).IsVoid().Should().BeTrue();
     }
 
     // --- ReEntry / Imagine ---
@@ -314,14 +315,14 @@ public class FormTests
     [Fact]
     public void ReEntry_ReturnsImaginary()
     {
-        Form.ReEntry().IsImaginary().Should().BeTrue();
-        Form.ReEntry("self").IsImaginary().Should().BeTrue();
+        LoF.ReEntry().IsImaginary().Should().BeTrue();
+        LoF.ReEntry("self").IsImaginary().Should().BeTrue();
     }
 
     [Fact]
     public void Imagine_ReturnsImaginary()
     {
-        Form.Imagine(3.14).IsImaginary().Should().BeTrue();
+        LoF.Imagine(3.14).IsImaginary().Should().BeTrue();
     }
 
     // --- Equality ---
@@ -329,31 +330,31 @@ public class FormTests
     [Fact]
     public void Equality_SameStates_AreEqual()
     {
-        (Form.Mark == Form.Cross()).Should().BeTrue();
-        (Form.Void == Form.Void).Should().BeTrue();
-        (Form.Imaginary == Form.Imaginary).Should().BeTrue();
+        (LoF.Mark == LoF.Cross()).Should().BeTrue();
+        (LoF.Void == LoF.Void).Should().BeTrue();
+        (LoF.Imaginary == LoF.Imaginary).Should().BeTrue();
     }
 
     [Fact]
     public void Equality_DifferentStates_AreNotEqual()
     {
-        (Form.Mark != Form.Void).Should().BeTrue();
-        (Form.Mark != Form.Imaginary).Should().BeTrue();
+        (LoF.Mark != LoF.Void).Should().BeTrue();
+        (LoF.Mark != LoF.Imaginary).Should().BeTrue();
     }
 
     [Fact]
     public void Equals_WithObject_WorksCorrectly()
     {
-        object boxed = Form.Mark;
-        Form.Mark.Equals(boxed).Should().BeTrue();
-        Form.Mark.Equals("not a form").Should().BeFalse();
-        Form.Mark.Equals(null).Should().BeFalse();
+        object boxed = LoF.Mark;
+        LoF.Mark.Equals(boxed).Should().BeTrue();
+        LoF.Mark.Equals("not a form").Should().BeFalse();
+        LoF.Mark.Equals(null).Should().BeFalse();
     }
 
     [Fact]
     public void GetHashCode_EqualForms_SameHash()
     {
-        Form.Mark.GetHashCode().Should().Be(Form.Cross().GetHashCode());
+        LoF.Mark.GetHashCode().Should().Be(LoF.Cross().GetHashCode());
     }
 
     // --- ToString ---
@@ -361,8 +362,8 @@ public class FormTests
     [Fact]
     public void ToString_ReturnsSymbols()
     {
-        Form.Mark.ToString().Should().NotBeNullOrEmpty();
-        Form.Void.ToString().Should().NotBeNullOrEmpty();
-        Form.Imaginary.ToString().Should().NotBeNullOrEmpty();
+        LoF.Mark.ToString().Should().NotBeNullOrEmpty();
+        LoF.Void.ToString().Should().NotBeNullOrEmpty();
+        LoF.Imaginary.ToString().Should().NotBeNullOrEmpty();
     }
 }

@@ -1,4 +1,4 @@
-// <copyright file="GeneticPipelineExtensions.cs" company="Ouroboros">
+﻿// <copyright file="GeneticPipelineExtensions.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -65,11 +65,11 @@ public static class GeneticPipelineExtensions
         return async input =>
         {
             // First apply the base step (often identity)
-            TIn? baseOutput = await step(input);
+            TIn? baseOutput = await step(input).ConfigureAwait(false);
 
             // Then apply the evolved step
             Step<TIn, Result<TOut, string>> evolvedStep = evolutionStep.CreateEvolvedStep(initialPopulation, generations, cancellationToken);
-            return await evolvedStep(baseOutput);
+            return await evolvedStep(baseOutput).ConfigureAwait(false);
         };
     }
 
@@ -117,11 +117,11 @@ public static class GeneticPipelineExtensions
         return async input =>
         {
             // First apply the base step (often identity)
-            TIn? baseOutput = await step(input);
+            TIn? baseOutput = await step(input).ConfigureAwait(false);
 
             // Then apply the evolved step with metadata
             Step<TIn, Result<(IChromosome<TGene> BestChromosome, TOut Output), string>> evolvedStep = evolutionStep.CreateEvolvedStepWithMetadata(initialPopulation, generations, cancellationToken);
-            return await evolvedStep(baseOutput);
+            return await evolvedStep(baseOutput).ConfigureAwait(false);
         };
     }
 

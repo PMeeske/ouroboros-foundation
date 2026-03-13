@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
-namespace Ouroboros.Domain.Governance;
+﻿namespace Ouroboros.Domain.Governance;
 
 /// <summary>
 /// Defines policy violation severity levels.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum ViolationSeverity
 {
     /// <summary>

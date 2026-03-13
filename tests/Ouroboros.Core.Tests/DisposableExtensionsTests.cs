@@ -12,7 +12,7 @@ public class DisposableExtensionsTests
         public void Dispose() => Disposed = true;
     }
 
-    private class TestAsyncDisposable : IAsyncDisposable
+    private class TestAsyncDisposable : IAsyncDisposable, IDisposable
     {
         public bool Disposed { get; private set; }
         public ValueTask DisposeAsync()
@@ -20,12 +20,14 @@ public class DisposableExtensionsTests
             Disposed = true;
             return default;
         }
+
+        public void Dispose() => Disposed = true;
     }
 
     [Fact]
     public void Use_Success_ReturnsSuccessResult()
     {
-        var resource = new TestDisposable();
+        using var resource = new TestDisposable();
         var result = resource.Use(r => 42);
 
         result.IsSuccess.Should().BeTrue();
@@ -35,7 +37,7 @@ public class DisposableExtensionsTests
     [Fact]
     public void Use_Success_DisposesResource()
     {
-        var resource = new TestDisposable();
+        using var resource = new TestDisposable();
         resource.Use(r => 42);
 
         resource.Disposed.Should().BeTrue();
@@ -44,7 +46,7 @@ public class DisposableExtensionsTests
     [Fact]
     public void Use_WhenActionThrows_ReturnsFailureResult()
     {
-        var resource = new TestDisposable();
+        using var resource = new TestDisposable();
         var result = resource.Use<TestDisposable, int>(r => throw new InvalidOperationException("test error"));
 
         result.IsSuccess.Should().BeFalse();
@@ -53,7 +55,7 @@ public class DisposableExtensionsTests
     [Fact]
     public void Use_WhenActionThrows_StillDisposesResource()
     {
-        var resource = new TestDisposable();
+        using var resource = new TestDisposable();
         resource.Use<TestDisposable, int>(r => throw new InvalidOperationException("test"));
 
         resource.Disposed.Should().BeTrue();
@@ -63,25 +65,31 @@ public class DisposableExtensionsTests
     public async Task UseAsync_Success_ReturnsSuccessResult()
     {
         var resource = new TestAsyncDisposable();
-        var result = await resource.UseAsync(async r =>
+        await using (resource.ConfigureAwait(false))
         {
-            await Task.Yield();
-            return 42;
-        });
+            var result = await resource.UseAsync(async r =>
+            {
+                await Task.Yield();
+                return 42;
+            }).ConfigureAwait(false);
 
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().Be(42);
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().Be(42);
+        }
     }
 
     [Fact]
     public async Task UseAsync_Success_DisposesResource()
     {
         var resource = new TestAsyncDisposable();
-        await resource.UseAsync(async r =>
+        await using (resource.ConfigureAwait(false))
         {
-            await Task.Yield();
-            return 42;
-        });
+            await resource.UseAsync(async r =>
+            {
+                await Task.Yield();
+                return 42;
+            }).ConfigureAwait(false);
+        }
 
         resource.Disposed.Should().BeTrue();
     }
@@ -90,18 +98,24 @@ public class DisposableExtensionsTests
     public async Task UseAsync_WhenActionThrows_ReturnsFailureResult()
     {
         var resource = new TestAsyncDisposable();
-        var result = await resource.UseAsync<TestAsyncDisposable, int>(
-            r => throw new InvalidOperationException("test error"));
+        await using (resource.ConfigureAwait(false))
+        {
+            var result = await resource.UseAsync<TestAsyncDisposable, int>(
+                r => throw new InvalidOperationException("test error")).ConfigureAwait(false);
 
-        result.IsSuccess.Should().BeFalse();
+            result.IsSuccess.Should().BeFalse();
+        }
     }
 
     [Fact]
     public async Task UseAsync_WhenActionThrows_StillDisposesResource()
     {
         var resource = new TestAsyncDisposable();
-        await resource.UseAsync<TestAsyncDisposable, int>(
-            r => throw new InvalidOperationException("test"));
+        await using (resource.ConfigureAwait(false))
+        {
+            await resource.UseAsync<TestAsyncDisposable, int>(
+                r => throw new InvalidOperationException("test")).ConfigureAwait(false);
+        }
 
         resource.Disposed.Should().BeTrue();
     }

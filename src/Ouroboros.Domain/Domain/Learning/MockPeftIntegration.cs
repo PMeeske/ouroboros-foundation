@@ -1,4 +1,4 @@
-// <copyright file="MockPeftIntegration.cs" company="Ouroboros">
+﻿// <copyright file="MockPeftIntegration.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -42,7 +42,7 @@ public sealed class MockPeftIntegration : IPeftIntegration
             _logger?.LogInformation("Initializing mock adapter for model {ModelName} with rank {Rank}", modelName, config.Rank);
 
             // Simulate initialization delay
-            await Task.Delay(100, ct);
+            await Task.Delay(100, ct).ConfigureAwait(false);
 
             // Create mock adapter weights (size proportional to rank)
             int size = config.Rank * 1024; // Each rank contributes 1KB
@@ -79,7 +79,7 @@ public sealed class MockPeftIntegration : IPeftIntegration
 
             // Simulate training time (1 second per 10 examples per epoch)
             int trainingTimeMs = (examples.Count * config.Epochs * 100) / 10;
-            await Task.Delay(Math.Min(trainingTimeMs, 5000), ct); // Cap at 5 seconds
+            await Task.Delay(Math.Min(trainingTimeMs, 5000), ct).ConfigureAwait(false); // Cap at 5 seconds
 
             // Modify weights slightly to simulate training
             byte[] trainedWeights = new byte[adapterWeights.Length];
@@ -118,7 +118,7 @@ public sealed class MockPeftIntegration : IPeftIntegration
                 adapterWeights != null);
 
             // Simulate generation delay
-            await Task.Delay(200, ct);
+            await Task.Delay(200, ct).ConfigureAwait(false);
 
             // Generate mock response
             string response = adapterWeights != null
@@ -153,7 +153,7 @@ public sealed class MockPeftIntegration : IPeftIntegration
                 strategy);
 
             // Simulate merge delay
-            await Task.Delay(300, ct);
+            await Task.Delay(300, ct).ConfigureAwait(false);
 
             if (adapterWeights.Count == 0)
             {
@@ -241,7 +241,7 @@ public sealed class MockPeftIntegration : IPeftIntegration
                 DreamStage.Recognition => 200,
                 _ => 75
             };
-            await Task.Delay(delayMs, ct);
+            await Task.Delay(delayMs, ct).ConfigureAwait(false);
 
             // Modify weights based on distinction
             byte[] newWeights = new byte[currentWeights.Length];
@@ -282,7 +282,7 @@ public sealed class MockPeftIntegration : IPeftIntegration
                 dissolutionStrength);
 
             // Simulate dissolution delay
-            await Task.Delay(100, ct);
+            await Task.Delay(100, ct).ConfigureAwait(false);
 
             byte[] newWeights = new byte[currentWeights.Length];
             Array.Copy(currentWeights, newWeights, currentWeights.Length);
@@ -323,7 +323,7 @@ public sealed class MockPeftIntegration : IPeftIntegration
                 weights.Count);
 
             // Simulate merge delay
-            await Task.Delay(300, ct);
+            await Task.Delay(300, ct).ConfigureAwait(false);
 
             if (weights.Count == 0)
             {

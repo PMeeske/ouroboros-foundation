@@ -1,4 +1,4 @@
-// <copyright file="QdrantEmbodimentVectorStore.cs" company="Ouroboros">
+﻿// <copyright file="QdrantEmbodimentVectorStore.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -49,9 +49,9 @@ public sealed class QdrantEmbodimentVectorStore : IEmbodimentVectorStore
     {
         if (_initialized) return;
 
-        await EnsureCollectionAsync(_perceptionsCollection, ct);
-        await EnsureCollectionAsync(_statesCollection, ct);
-        await EnsureCollectionAsync(_affordancesCollection, ct);
+        await EnsureCollectionAsync(_perceptionsCollection, ct).ConfigureAwait(false);
+        await EnsureCollectionAsync(_statesCollection, ct).ConfigureAwait(false);
+        await EnsureCollectionAsync(_affordancesCollection, ct).ConfigureAwait(false);
 
         _initialized = true;
     }
@@ -61,7 +61,7 @@ public sealed class QdrantEmbodimentVectorStore : IEmbodimentVectorStore
     /// <inheritdoc/>
     public async Task StorePerceptionAsync(FusedPerception perception, float[] embedding, CancellationToken ct = default)
     {
-        await InitializeAsync(ct);
+        await InitializeAsync(ct).ConfigureAwait(false);
 
         var point = new PointStruct
         {
@@ -78,14 +78,14 @@ public sealed class QdrantEmbodimentVectorStore : IEmbodimentVectorStore
             },
         };
 
-        await _client.UpsertAsync(_perceptionsCollection, new[] { point }, cancellationToken: ct);
+        await _client.UpsertAsync(_perceptionsCollection, new[] { point }, cancellationToken: ct).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<RecalledPerception>> RecallPerceptionsAsync(
         float[] queryEmbedding, int limit = 5, SensorModality? modalityFilter = null, CancellationToken ct = default)
     {
-        await InitializeAsync(ct);
+        await InitializeAsync(ct).ConfigureAwait(false);
 
         Filter? filter = null;
         if (modalityFilter.HasValue)
@@ -108,7 +108,7 @@ public sealed class QdrantEmbodimentVectorStore : IEmbodimentVectorStore
 
         var results = await _client.SearchAsync(
             _perceptionsCollection, queryEmbedding, filter: filter,
-            limit: (ulong)limit, cancellationToken: ct);
+            limit: (ulong)limit, cancellationToken: ct).ConfigureAwait(false);
 
         return results.Select(r =>
         {
@@ -127,7 +127,7 @@ public sealed class QdrantEmbodimentVectorStore : IEmbodimentVectorStore
     /// <inheritdoc/>
     public async Task StoreStateSnapshotAsync(EmbodimentStateSnapshot snapshot, float[] embedding, CancellationToken ct = default)
     {
-        await InitializeAsync(ct);
+        await InitializeAsync(ct).ConfigureAwait(false);
 
         var point = new PointStruct
         {
@@ -144,17 +144,17 @@ public sealed class QdrantEmbodimentVectorStore : IEmbodimentVectorStore
             },
         };
 
-        await _client.UpsertAsync(_statesCollection, new[] { point }, cancellationToken: ct);
+        await _client.UpsertAsync(_statesCollection, new[] { point }, cancellationToken: ct).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<RecalledStateSnapshot>> RecallStatesAsync(
         float[] queryEmbedding, int limit = 5, CancellationToken ct = default)
     {
-        await InitializeAsync(ct);
+        await InitializeAsync(ct).ConfigureAwait(false);
 
         var results = await _client.SearchAsync(
-            _statesCollection, queryEmbedding, limit: (ulong)limit, cancellationToken: ct);
+            _statesCollection, queryEmbedding, limit: (ulong)limit, cancellationToken: ct).ConfigureAwait(false);
 
         return results.Select(r =>
         {
@@ -182,7 +182,7 @@ public sealed class QdrantEmbodimentVectorStore : IEmbodimentVectorStore
     /// <inheritdoc/>
     public async Task StoreAffordanceAsync(AffordanceRecord affordance, float[] embedding, CancellationToken ct = default)
     {
-        await InitializeAsync(ct);
+        await InitializeAsync(ct).ConfigureAwait(false);
 
         var point = new PointStruct
         {
@@ -197,17 +197,17 @@ public sealed class QdrantEmbodimentVectorStore : IEmbodimentVectorStore
             },
         };
 
-        await _client.UpsertAsync(_affordancesCollection, new[] { point }, cancellationToken: ct);
+        await _client.UpsertAsync(_affordancesCollection, new[] { point }, cancellationToken: ct).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
     public async Task<IReadOnlyList<ScoredAffordance>> FindAffordancesAsync(
         float[] queryEmbedding, int limit = 5, CancellationToken ct = default)
     {
-        await InitializeAsync(ct);
+        await InitializeAsync(ct).ConfigureAwait(false);
 
         var results = await _client.SearchAsync(
-            _affordancesCollection, queryEmbedding, limit: (ulong)limit, cancellationToken: ct);
+            _affordancesCollection, queryEmbedding, limit: (ulong)limit, cancellationToken: ct).ConfigureAwait(false);
 
         return results.Select(r =>
         {
@@ -226,11 +226,11 @@ public sealed class QdrantEmbodimentVectorStore : IEmbodimentVectorStore
     /// <inheritdoc/>
     public async Task<EmbodimentVectorCounts> GetCountsAsync(CancellationToken ct = default)
     {
-        await InitializeAsync(ct);
+        await InitializeAsync(ct).ConfigureAwait(false);
 
-        var pInfo = await _client.GetCollectionInfoAsync(_perceptionsCollection, ct);
-        var sInfo = await _client.GetCollectionInfoAsync(_statesCollection, ct);
-        var aInfo = await _client.GetCollectionInfoAsync(_affordancesCollection, ct);
+        var pInfo = await _client.GetCollectionInfoAsync(_perceptionsCollection, ct).ConfigureAwait(false);
+        var sInfo = await _client.GetCollectionInfoAsync(_statesCollection, ct).ConfigureAwait(false);
+        var aInfo = await _client.GetCollectionInfoAsync(_affordancesCollection, ct).ConfigureAwait(false);
 
         return new EmbodimentVectorCounts(
             (long)pInfo.PointsCount,
@@ -242,13 +242,13 @@ public sealed class QdrantEmbodimentVectorStore : IEmbodimentVectorStore
 
     private async Task EnsureCollectionAsync(string name, CancellationToken ct)
     {
-        if (await _client.CollectionExistsAsync(name, ct))
+        if (await _client.CollectionExistsAsync(name, ct).ConfigureAwait(false))
             return;
 
         await _client.CreateCollectionAsync(
             name,
             new VectorParams { Size = _vectorSize, Distance = Distance.Cosine },
-            cancellationToken: ct);
+            cancellationToken: ct).ConfigureAwait(false);
     }
 
     private static string GetPayload(ScoredPoint point, string key)

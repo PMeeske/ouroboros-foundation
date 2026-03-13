@@ -1,4 +1,4 @@
-// <copyright file="CompositeMessageFilter.cs" company="Ouroboros">
+﻿// <copyright file="CompositeMessageFilter.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -28,7 +28,7 @@ public sealed class CompositeMessageFilter : IMessageFilter
         // All filters must approve for the message to be routed
         foreach (IMessageFilter filter in _filters)
         {
-            if (!await filter.ShouldRouteAsync(message, ct))
+            if (!await filter.ShouldRouteAsync(message, ct).ConfigureAwait(false))
             {
                 return false;
             }

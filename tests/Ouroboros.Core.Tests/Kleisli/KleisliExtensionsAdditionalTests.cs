@@ -15,7 +15,7 @@ public sealed class KleisliExtensionsAdditionalTests
             return s.Length;
         });
 
-        var result = await mapped(42);
+        var result = await mapped(42).ConfigureAwait(false);
         result.Should().Be(2);
     }
 
@@ -29,7 +29,7 @@ public sealed class KleisliExtensionsAdditionalTests
         Kleisli<int, string> arrow = _ => throw new InvalidOperationException("boom");
         var safe = arrow.Catch();
 
-        var result = await safe(42);
+        var result = await safe(42).ConfigureAwait(false);
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().BeOfType<InvalidOperationException>();
     }
@@ -40,8 +40,8 @@ public sealed class KleisliExtensionsAdditionalTests
         Step<int, string> arrow = _ => throw new OperationCanceledException();
         var safe = arrow.Catch();
 
-        var act = async () => await safe(42);
-        await act.Should().ThrowAsync<OperationCanceledException>();
+        var act = async () => await safe(42).ConfigureAwait(false);
+        await act.Should().ThrowAsync<OperationCanceledException>().ConfigureAwait(false);
     }
 
     [Fact]
@@ -50,8 +50,8 @@ public sealed class KleisliExtensionsAdditionalTests
         Kleisli<int, string> arrow = _ => throw new OperationCanceledException();
         var safe = arrow.Catch();
 
-        var act = async () => await safe(42);
-        await act.Should().ThrowAsync<OperationCanceledException>();
+        var act = async () => await safe(42).ConfigureAwait(false);
+        await act.Should().ThrowAsync<OperationCanceledException>().ConfigureAwait(false);
     }
 
     #endregion
@@ -66,7 +66,7 @@ public sealed class KleisliExtensionsAdditionalTests
             Task.FromResult(Result<string, string>.Failure("error"));
 
         var tapped = arrow.Tap<int, string, string>(s => captured.Add(s));
-        var result = await tapped(42);
+        var result = await tapped(42).ConfigureAwait(false);
 
         result.IsSuccess.Should().BeFalse();
         captured.Should().BeEmpty();
@@ -82,7 +82,7 @@ public sealed class KleisliExtensionsAdditionalTests
         KleisliOption<int, string> arrow = _ => Task.FromResult(Option<string>.None());
         var mapped = arrow.Map<int, string, int>(s => s.Length);
 
-        var result = await mapped(42);
+        var result = await mapped(42).ConfigureAwait(false);
         result.HasValue.Should().BeFalse();
     }
 
@@ -98,7 +98,7 @@ public sealed class KleisliExtensionsAdditionalTests
         KleisliOption<string, int> g = s => Task.FromResult(Option<int>.Some(s.Length));
 
         var composed = f.Then(g);
-        var result = await composed(42);
+        var result = await composed(42).ConfigureAwait(false);
         result.HasValue.Should().BeFalse();
     }
 
@@ -113,7 +113,7 @@ public sealed class KleisliExtensionsAdditionalTests
             Task.FromResult(Option<string?>.Some(null));
         var resultArrow = arrow.ToResult<int, string?, string>("not found");
 
-        var result = await resultArrow(42);
+        var result = await resultArrow(42).ConfigureAwait(false);
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be("not found");
     }
@@ -128,10 +128,10 @@ public sealed class KleisliExtensionsAdditionalTests
         Kleisli<int, string> f = x => Task.FromResult(x.ToString());
         Kleisli<string, int> g = s => Task.FromResult(s.Length);
         KleisliCompose<int, string, int> composer = (first, second) =>
-            async input => await second(await first(input));
+            async input => await second(await first(input).ConfigureAwait(false)).ConfigureAwait(false);
 
         var composed = f.ComposeWith(composer, g);
-        var result = await composed(42);
+        var result = await composed(42).ConfigureAwait(false);
 
         result.Should().Be(2);
     }
@@ -149,7 +149,7 @@ public sealed class KleisliExtensionsAdditionalTests
         var partial = f.PartialCompose<int, string, int>();
         var composed = partial(g);
 
-        var result = await composed(42);
+        var result = await composed(42).ConfigureAwait(false);
         result.Should().Be(2);
     }
 
@@ -163,9 +163,9 @@ public sealed class KleisliExtensionsAdditionalTests
         Kleisli<int, string> f = x => Task.FromResult(x.ToString());
 
         var composed = f.Compose<int, string, int>(first =>
-            async input => (await first(input)).Length);
+            async input => (await first(input).ConfigureAwait(false)).Length);
 
-        var result = await composed(42);
+        var result = await composed(42).ConfigureAwait(false);
         result.Should().Be(2);
     }
 
@@ -182,7 +182,7 @@ public sealed class KleisliExtensionsAdditionalTests
             Task.FromResult(Result<int, string>.Failure("second failed"));
 
         var composed = f.Then(g);
-        var result = await composed(42);
+        var result = await composed(42).ConfigureAwait(false);
 
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Be("second failed");
@@ -199,7 +199,7 @@ public sealed class KleisliExtensionsAdditionalTests
             Task.FromResult(Result<int, string>.Success(x * 2));
         var mapped = arrow.Map<int, int, string, string>(x => x.ToString());
 
-        var result = await mapped(5);
+        var result = await mapped(5).ConfigureAwait(false);
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().Be("10");
     }

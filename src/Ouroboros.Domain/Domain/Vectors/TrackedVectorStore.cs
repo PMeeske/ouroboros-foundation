@@ -1,4 +1,4 @@
-using LangChain.Databases;
+﻿using LangChain.Databases;
 using LangChain.Databases.InMemory;
 using LangChain.DocumentLoaders;
 
@@ -23,7 +23,7 @@ public sealed class TrackedVectorStore : InMemoryVectorCollection, IVectorStore
     {
         List<Vector> list = vectors.ToList();
         _all.AddRange(list);
-        await base.AddAsync(list, cancellationToken);
+        await base.AddAsync(list, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>

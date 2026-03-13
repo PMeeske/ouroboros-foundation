@@ -1,4 +1,4 @@
-// <copyright file="QdrantVectorStore.Search.cs" company="Ouroboros">
+﻿// <copyright file="QdrantVectorStore.Search.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -25,7 +25,7 @@ public sealed partial class QdrantVectorStore
         try
         {
             // Check if collection exists
-            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
+            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken).ConfigureAwait(false);
             if (!collectionExists)
             {
                 _logger?.LogDebug("Collection {Collection} does not exist, returning empty results", _collectionName);
@@ -37,7 +37,7 @@ public sealed partial class QdrantVectorStore
                 _collectionName,
                 embedding,
                 limit: (ulong)amount,
-                cancellationToken: cancellationToken);
+                cancellationToken: cancellationToken).ConfigureAwait(false);
 
             // Convert results to documents
             List<LCDocument> documents = searchResult.Select(scored =>
@@ -90,7 +90,7 @@ public sealed partial class QdrantVectorStore
 
         try
         {
-            bool collectionExists = await _client.CollectionExistsAsync(_collectionName);
+            bool collectionExists = await _client.CollectionExistsAsync(_collectionName).ConfigureAwait(false);
             if (!collectionExists)
             {
                 return results;
@@ -103,7 +103,7 @@ public sealed partial class QdrantVectorStore
                     limit: 100,
                     offset: offset,
                     payloadSelector: new WithPayloadSelector { Enable = true },
-                    vectorsSelector: new WithVectorsSelector { Enable = true });
+                    vectorsSelector: new WithVectorsSelector { Enable = true }).ConfigureAwait(false);
 
                 foreach (RetrievedPoint? point in scrollResult.Result)
                 {
@@ -168,7 +168,7 @@ public sealed partial class QdrantVectorStore
     {
         try
         {
-            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
+            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken).ConfigureAwait(false);
             if (!collectionExists)
             {
                 return Array.Empty<LCDocument>();
@@ -182,7 +182,7 @@ public sealed partial class QdrantVectorStore
                 filter: qdrantFilter,
                 limit: (ulong)amount,
                 scoreThreshold: scoreThreshold,
-                cancellationToken: cancellationToken);
+                cancellationToken: cancellationToken).ConfigureAwait(false);
 
             return ConvertToDocuments(searchResult);
         }
@@ -203,14 +203,14 @@ public sealed partial class QdrantVectorStore
     {
         try
         {
-            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
+            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken).ConfigureAwait(false);
             if (!collectionExists)
             {
                 return 0;
             }
 
             Filter? qdrantFilter = BuildFilter(filter);
-            ulong count = await _client.CountAsync(_collectionName, filter: qdrantFilter, exact: true, cancellationToken: cancellationToken);
+            ulong count = await _client.CountAsync(_collectionName, filter: qdrantFilter, exact: true, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             _logger?.LogDebug("Count in collection {Collection}: {Count}", _collectionName, count);
             return count;
@@ -236,7 +236,7 @@ public sealed partial class QdrantVectorStore
     {
         try
         {
-            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
+            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken).ConfigureAwait(false);
             if (!collectionExists)
             {
                 return new ScrollResult(Array.Empty<LCDocument>(), null);
@@ -258,7 +258,7 @@ public sealed partial class QdrantVectorStore
                 limit: (uint)limit,
                 offset: pointOffset,
                 payloadSelector: new WithPayloadSelector { Enable = true },
-                cancellationToken: cancellationToken);
+                cancellationToken: cancellationToken).ConfigureAwait(false);
 
             List<LCDocument> documents = scrollResult.Result.Select(point =>
             {
@@ -299,7 +299,7 @@ public sealed partial class QdrantVectorStore
     {
         try
         {
-            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
+            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken).ConfigureAwait(false);
             if (!collectionExists)
             {
                 return embeddings.Select(_ => (IReadOnlyCollection<LCDocument>)Array.Empty<LCDocument>()).ToList();
@@ -313,7 +313,7 @@ public sealed partial class QdrantVectorStore
                 WithPayload = new WithPayloadSelector { Enable = true }
             }).ToList();
 
-            IReadOnlyList<BatchResult> batchResults = await _client.SearchBatchAsync(_collectionName, searches, cancellationToken: cancellationToken);
+            IReadOnlyList<BatchResult> batchResults = await _client.SearchBatchAsync(_collectionName, searches, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             List<IReadOnlyCollection<LCDocument>> results = batchResults.Select(batch =>
                 (IReadOnlyCollection<LCDocument>)ConvertToDocuments(batch.Result)).ToList();
@@ -343,7 +343,7 @@ public sealed partial class QdrantVectorStore
     {
         try
         {
-            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
+            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken).ConfigureAwait(false);
             if (!collectionExists)
             {
                 return Array.Empty<LCDocument>();
@@ -363,7 +363,7 @@ public sealed partial class QdrantVectorStore
                 negative,
                 limit: (ulong)amount,
                 payloadSelector: new WithPayloadSelector { Enable = true },
-                cancellationToken: cancellationToken);
+                cancellationToken: cancellationToken).ConfigureAwait(false);
 
             _logger?.LogDebug("Recommend returned {Count} results from collection {Collection}", results.Count, _collectionName);
             return ConvertToDocuments(results);

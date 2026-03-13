@@ -176,7 +176,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
     {
         if (_neurons.TryRemove(neuronId, out Neuron? neuron))
         {
-            await neuron.StopAsync();
+            await neuron.StopAsync().ConfigureAwait(false);
 
             foreach (string topic in neuron.SubscribedTopics)
             {
@@ -219,11 +219,11 @@ public sealed class OuroborosNeuralNetwork : IDisposable
 
         _lifetimeCts.Cancel();
 
-        await _intentionBus.StopAsync();
+        await _intentionBus.StopAsync().ConfigureAwait(false);
 
         foreach (Neuron neuron in _neurons.Values)
         {
-            await neuron.StopAsync();
+            await neuron.StopAsync().ConfigureAwait(false);
         }
     }
 
@@ -296,7 +296,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
             {
                 try
                 {
-                    await PersistMessageFunction(message, _lifetimeCts.Token);
+                    await PersistMessageFunction(message, _lifetimeCts.Token).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException) { /* Shutdown — expected */ }
                 catch (HttpRequestException ex) { System.Diagnostics.Trace.TraceWarning($"[NeuralNetwork] Persistence error: {ex.Message}"); }
@@ -306,7 +306,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
 
         // Apply message filters (if configured)
         IReadOnlyList<IMessageFilter>? filters = _filters;
-        if (filters != null && filters.Count > 0 && !await RunFiltersAsync(filters, message))
+        if (filters != null && filters.Count > 0 && !await RunFiltersAsync(filters, message).ConfigureAwait(false))
         {
             return;
         }
@@ -394,7 +394,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
 
         // Apply message filters before broadcasting (same pipeline as RouteMessageAsync)
         IReadOnlyList<IMessageFilter>? filters = _filters;
-        if (filters != null && filters.Count > 0 && !await RunFiltersAsync(filters, message))
+        if (filters != null && filters.Count > 0 && !await RunFiltersAsync(filters, message).ConfigureAwait(false))
         {
             return;
         }
@@ -446,7 +446,7 @@ public sealed class OuroborosNeuralNetwork : IDisposable
             {
                 bool allowed = task.IsCompletedSuccessfully
                     ? task.Result
-                    : await task;
+                    : await task.ConfigureAwait(false);
 
                 if (!allowed)
                 {

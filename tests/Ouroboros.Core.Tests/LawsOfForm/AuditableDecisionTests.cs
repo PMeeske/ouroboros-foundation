@@ -1,13 +1,14 @@
 using Ouroboros.Abstractions;
 using Ouroboros.Core.LawsOfForm;
+using LoF = Ouroboros.Core.LawsOfForm.Form;
 
-namespace Ouroboros.Tests.LawsOfForm;
+namespace Ouroboros.Core.Tests.LawsOfForm;
 
 [Trait("Category", "Unit")]
 public class AuditableDecisionTests
 {
-    private static Evidence MakeEvidence(string name = "test", Form? eval = null, string desc = "desc")
-        => new(name, eval ?? Form.Mark, desc);
+    private static Evidence MakeEvidence(string name = "test", LoF? eval = null, string desc = "desc")
+        => new(name, eval ?? LoF.Mark, desc);
 
     // --- Approve ---
 
@@ -18,7 +19,7 @@ public class AuditableDecisionTests
         var decision = AuditableDecision<string>.Approve("ok", "Passed checks", MakeEvidence());
 
         // Assert
-        decision.Certainty.Should().Be(Form.Mark);
+        decision.Certainty.Should().Be(LoF.Mark);
         decision.Result.IsSuccess.Should().BeTrue();
         decision.Result.Value.Should().Be("ok");
         decision.Reasoning.Should().Be("Passed checks");
@@ -46,10 +47,10 @@ public class AuditableDecisionTests
     public void Reject_CreatesVoidDecision()
     {
         // Act
-        var decision = AuditableDecision<string>.Reject("denied", "Failed checks", MakeEvidence("rule1", Form.Void));
+        var decision = AuditableDecision<string>.Reject("denied", "Failed checks", MakeEvidence("rule1", LoF.Void));
 
         // Assert
-        decision.Certainty.Should().Be(Form.Void);
+        decision.Certainty.Should().Be(LoF.Void);
         decision.Result.IsFailure.Should().BeTrue();
         decision.Result.Error.Should().Be("denied");
         decision.RequiresHumanReview.Should().BeFalse();
@@ -66,7 +67,7 @@ public class AuditableDecisionTests
         var decision = AuditableDecision<string>.Reject("reasoning", evidence);
 
         // Assert
-        decision.Certainty.Should().Be(Form.Void);
+        decision.Certainty.Should().Be(LoF.Void);
         decision.Result.IsFailure.Should().BeTrue();
     }
 
@@ -76,10 +77,10 @@ public class AuditableDecisionTests
     public void Uncertain_CreatesImaginaryDecision()
     {
         // Act
-        var decision = AuditableDecision<string>.Uncertain("unclear", "Need more info", MakeEvidence("ambig", Form.Imaginary));
+        var decision = AuditableDecision<string>.Uncertain("unclear", "Need more info", MakeEvidence("ambig", LoF.Imaginary));
 
         // Assert
-        decision.Certainty.Should().Be(Form.Imaginary);
+        decision.Certainty.Should().Be(LoF.Imaginary);
         decision.Result.IsFailure.Should().BeTrue();
         decision.RequiresHumanReview.Should().BeTrue();
         decision.ComplianceStatus.Should().Be("INCONCLUSIVE");
@@ -94,7 +95,7 @@ public class AuditableDecisionTests
         var decision = AuditableDecision<string>.Inconclusive(0.75, "Partially confident", MakeEvidence());
 
         // Assert
-        decision.Certainty.Should().Be(Form.Imaginary);
+        decision.Certainty.Should().Be(LoF.Imaginary);
         decision.ConfidencePhase.Should().Be(0.75);
         decision.RequiresHumanReview.Should().BeTrue();
         decision.ComplianceStatus.Should().Contain("75");
@@ -121,7 +122,7 @@ public class AuditableDecisionTests
         // Act
         var act = () => new AuditableDecision<string>(
             Result<string, string>.Success("ok"),
-            Form.Imaginary,
+            LoF.Imaginary,
             "test",
             new List<Evidence>(),
             confidencePhase: 1.5);
@@ -136,7 +137,7 @@ public class AuditableDecisionTests
         // Act
         var act = () => new AuditableDecision<string>(
             Result<string, string>.Success("ok"),
-            Form.Mark,
+            LoF.Mark,
             "test",
             new List<Evidence>(),
             confidencePhase: -0.1);

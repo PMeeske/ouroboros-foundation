@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
-namespace Ouroboros.Domain.Autonomous;
+﻿namespace Ouroboros.Domain.Autonomous;
 
 /// <summary>
 /// Types of neurons in the Ouroboros neural network.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum NeuronType
 {
     /// <summary>The neuron responsible for processing incoming messages and executing associated logic.</summary>

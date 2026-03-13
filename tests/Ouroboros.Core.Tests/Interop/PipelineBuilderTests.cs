@@ -45,7 +45,7 @@ public class PipelineBuilderTests
         var builder = new PipelineBuilder<string>("test")
             .AddResultStep(parseStep);
 
-        var result = await builder.ExecuteAsync("42");
+        var result = await builder.ExecuteAsync("42").ConfigureAwait(false);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().Be(42);
@@ -125,7 +125,7 @@ public class PipelineBuilderTests
             .AddStep(doubleStep)
             .Build();
 
-        var result = await (3 | pipeline);
+        var result = await (3 | pipeline).ConfigureAwait(false);
 
         result.Should().Be(6);
     }

@@ -1,4 +1,4 @@
-// <copyright file="AutonomousCoordinator.Commands.cs" company="Ouroboros">
+﻿// <copyright file="AutonomousCoordinator.Commands.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -211,7 +211,7 @@ public sealed partial class AutonomousCoordinator
             // Infer deliverable type from problem description using LLM
             _ = Task.Run(async () =>
             {
-                string deliverable = await InferDeliverableTypeAsync(problem);
+                string deliverable = await InferDeliverableTypeAsync(problem).ConfigureAwait(false);
                 _logger.LogDebug("Inferred deliverable type: {DeliverableType}", deliverable);
 
                 // Start problem-solving with YOLO + tools enabled
@@ -317,7 +317,7 @@ public sealed partial class AutonomousCoordinator
     /// </summary>
     public async Task InjectGoalAsync(string goal, IntentionPriority priority = IntentionPriority.Normal)
     {
-        await _network.BroadcastAsync("goal.add", goal, "user");
+        await _network.BroadcastAsync("goal.add", goal, "user").ConfigureAwait(false);
 
         _intentionBus.ProposeIntention(
             $"Pursue Goal: {goal[..Math.Min(50, goal.Length)]}",
@@ -342,7 +342,7 @@ public sealed partial class AutonomousCoordinator
             Topic = topic,
             Payload = payload,
         };
-        await _network.RouteMessageAsync(message);
+        await _network.RouteMessageAsync(message).ConfigureAwait(false);
     }
 
     private static string GetHelpText()

@@ -1,4 +1,4 @@
-// <copyright file="GeneticRoslynBridge.cs" company="Ouroboros">
+﻿// <copyright file="GeneticRoslynBridge.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -105,7 +105,7 @@ public sealed class CodeFixFitnessFunction : IFitnessFunction<CodeFixGene>
             return 0.0;
         }
 
-        var result = await _evaluator(activeFixes);
+        var result = await _evaluator(activeFixes).ConfigureAwait(false);
 
         // Score: compilation success is essential (0 or 0.5 base),
         // then bonus for diagnostics fixed and code quality

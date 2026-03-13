@@ -49,7 +49,7 @@ public class VoiceActuatorAdditionalTests : IDisposable
     [Fact]
     public void Constructor_NullConfig_UsesDefaultConfig()
     {
-        var actuator = new VoiceActuator(_mockTtsModel.Object, _virtualSelf);
+        using var actuator = new VoiceActuator(_mockTtsModel.Object, _virtualSelf);
         actuator.Config.Should().NotBeNull();
         actuator.Config.Voice.Should().Be("default");
     }
@@ -58,7 +58,7 @@ public class VoiceActuatorAdditionalTests : IDisposable
     public void Constructor_CustomConfig_UsesProvidedConfig()
     {
         var config = new VoiceConfig(Voice: "jenny", Speed: 1.2);
-        var actuator = new VoiceActuator(_mockTtsModel.Object, _virtualSelf, config);
+        using var actuator = new VoiceActuator(_mockTtsModel.Object, _virtualSelf, config);
         actuator.Config.Voice.Should().Be("jenny");
         actuator.Config.Speed.Should().Be(1.2);
     }
@@ -157,7 +157,7 @@ public class VoiceActuatorAdditionalTests : IDisposable
     {
         _sut.Dispose();
 
-        var result = await _sut.SpeakAsync("Hello");
+        var result = await _sut.SpeakAsync("Hello").ConfigureAwait(false);
 
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain("disposed");
@@ -166,7 +166,7 @@ public class VoiceActuatorAdditionalTests : IDisposable
     [Fact]
     public async Task SpeakAsync_EmptyText_ReturnsFailure()
     {
-        var result = await _sut.SpeakAsync("");
+        var result = await _sut.SpeakAsync("").ConfigureAwait(false);
 
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain("empty");
@@ -175,7 +175,7 @@ public class VoiceActuatorAdditionalTests : IDisposable
     [Fact]
     public async Task SpeakAsync_WhitespaceText_ReturnsFailure()
     {
-        var result = await _sut.SpeakAsync("   ");
+        var result = await _sut.SpeakAsync("   ").ConfigureAwait(false);
 
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain("empty");
@@ -193,7 +193,7 @@ public class VoiceActuatorAdditionalTests : IDisposable
         SynthesizedSpeech? received = null;
         _sut.SpeechOutput.Subscribe(s => received = s);
 
-        var result = await _sut.SpeakAsync("Hello");
+        var result = await _sut.SpeakAsync("Hello").ConfigureAwait(false);
 
         result.IsSuccess.Should().BeTrue();
         received.Should().NotBeNull();
@@ -210,7 +210,7 @@ public class VoiceActuatorAdditionalTests : IDisposable
         SynthesizedSpeech? received = null;
         _sut.SpeechOutput.Subscribe(s => received = s);
 
-        var result = await _sut.SpeakAsync("Hello");
+        var result = await _sut.SpeakAsync("Hello").ConfigureAwait(false);
 
         result.IsSuccess.Should().BeFalse();
         received.Should().BeNull();
@@ -225,7 +225,7 @@ public class VoiceActuatorAdditionalTests : IDisposable
                 It.IsAny<string>(), It.IsAny<VoiceConfig>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<SynthesizedSpeech, string>.Success(speech));
 
-        await _sut.SpeakAsync("Hi");
+        await _sut.SpeakAsync("Hi").ConfigureAwait(false);
 
         // After speaking finishes, state should be Awake
         _sut.IsSpeaking.Should().BeFalse();
@@ -243,7 +243,7 @@ public class VoiceActuatorAdditionalTests : IDisposable
             .Callback<string, VoiceConfig, CancellationToken>((_, config, _) => capturedConfig = config)
             .ReturnsAsync(Result<SynthesizedSpeech, string>.Success(speech));
 
-        await _sut.SpeakAsync("Hi", emotion: "happy");
+        await _sut.SpeakAsync("Hi", emotion: "happy").ConfigureAwait(false);
 
         capturedConfig.Should().NotBeNull();
         capturedConfig!.Style.Should().Be("happy");
@@ -261,7 +261,7 @@ public class VoiceActuatorAdditionalTests : IDisposable
             .ReturnsAsync(Result<SynthesizedSpeech, string>.Success(speech));
 
         _sut.SetStyle("sad");
-        await _sut.SpeakAsync("Hi");
+        await _sut.SpeakAsync("Hi").ConfigureAwait(false);
 
         capturedConfig.Should().NotBeNull();
         capturedConfig!.Style.Should().Be("sad");
@@ -305,7 +305,7 @@ public class VoiceActuatorAdditionalTests : IDisposable
                 It.IsAny<string>(), It.IsAny<VoiceConfig>(), It.IsAny<CancellationToken>()))
             .Returns(Observable.Empty<byte[]>());
 
-        var actuator = new VoiceActuator(_mockTtsModel.Object, _virtualSelf);
+        using var actuator = new VoiceActuator(_mockTtsModel.Object, _virtualSelf);
 
         actuator.SpeakStreaming("Hello");
 
@@ -323,7 +323,7 @@ public class VoiceActuatorAdditionalTests : IDisposable
             .Callback<string, VoiceConfig, CancellationToken>((_, config, _) => capturedConfig = config)
             .Returns(Observable.Empty<byte[]>());
 
-        var actuator = new VoiceActuator(_mockTtsModel.Object, _virtualSelf);
+        using var actuator = new VoiceActuator(_mockTtsModel.Object, _virtualSelf);
         actuator.SpeakStreaming("Hello", emotion: "excited");
 
         capturedConfig.Should().NotBeNull();
@@ -357,7 +357,7 @@ public class VoiceActuatorAdditionalTests : IDisposable
         _mockTtsModel.Setup(m => m.GetVoicesAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<IReadOnlyList<VoiceInfo>, string>.Success(voices));
 
-        var result = await _sut.GetVoicesAsync("en-US");
+        var result = await _sut.GetVoicesAsync("en-US").ConfigureAwait(false);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().HaveCount(1);

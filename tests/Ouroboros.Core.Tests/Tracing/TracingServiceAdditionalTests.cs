@@ -102,7 +102,7 @@ public class TracingServiceAdditionalTests
     public void GetTraceId_EmptyTraceId_ReturnsNone()
     {
         // Non-started activity has empty trace ID
-        var activity = new Activity("test");
+        using var activity = new Activity("test");
 
         var result = _sut.GetTraceId(activity);
         // Result depends on whether activity has a trace ID
@@ -112,7 +112,7 @@ public class TracingServiceAdditionalTests
     [Fact]
     public void GetSpanId_EmptySpanId_ReturnsNone()
     {
-        var activity = new Activity("test");
+        using var activity = new Activity("test");
 
         var result = _sut.GetSpanId(activity);
         result.Should().NotBeNull();

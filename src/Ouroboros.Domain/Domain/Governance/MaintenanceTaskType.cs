@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
-namespace Ouroboros.Domain.Governance;
+﻿namespace Ouroboros.Domain.Governance;
 
 /// <summary>
 /// Maintenance task types.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum MaintenanceTaskType
 {
     /// <summary>

@@ -1,6 +1,7 @@
 using Moq;
 using Ouroboros.Core.Hyperon;
 using Ouroboros.Core.LawsOfForm;
+using LoF = Ouroboros.Core.LawsOfForm.Form;
 
 namespace Ouroboros.Core.Tests.Hyperon;
 
@@ -30,7 +31,7 @@ public class FormMeTTaBridgeTests
 
         var result = sut.DrawDistinction("test-context");
 
-        result.Should().Be(Form.Mark);
+        result.Should().Be(LoF.Mark);
     }
 
     [Fact]
@@ -41,7 +42,7 @@ public class FormMeTTaBridgeTests
 
         sut.DrawDistinction("ctx");
 
-        sut.GetFormState("ctx").Should().Be(Form.Mark);
+        sut.GetFormState("ctx").Should().Be(LoF.Mark);
     }
 
     [Fact]
@@ -67,7 +68,7 @@ public class FormMeTTaBridgeTests
 
         receivedArgs.Should().NotBeNull();
         receivedArgs!.EventType.Should().Be(DistinctionEventType.DistinctionDrawn);
-        receivedArgs.CurrentState.Should().Be(Form.Mark);
+        receivedArgs.CurrentState.Should().Be(LoF.Mark);
     }
 
     [Fact]
@@ -79,8 +80,8 @@ public class FormMeTTaBridgeTests
 
         var result = sut.CrossDistinction("ctx");
 
-        result.Should().Be(Form.Void);
-        sut.GetFormState("ctx").Should().Be(Form.Void);
+        result.Should().Be(LoF.Void);
+        sut.GetFormState("ctx").Should().Be(LoF.Void);
     }
 
     [Fact]
@@ -91,7 +92,7 @@ public class FormMeTTaBridgeTests
 
         var result = sut.CrossDistinction("new-ctx");
 
-        result.Should().Be(Form.Mark);
+        result.Should().Be(LoF.Mark);
     }
 
     [Fact]
@@ -102,8 +103,8 @@ public class FormMeTTaBridgeTests
 
         var result = sut.CreateReEntry("ctx");
 
-        result.Should().Be(Form.Imaginary);
-        sut.GetFormState("ctx").Should().Be(Form.Imaginary);
+        result.Should().Be(LoF.Imaginary);
+        sut.GetFormState("ctx").Should().Be(LoF.Imaginary);
     }
 
     [Fact]
@@ -128,7 +129,7 @@ public class FormMeTTaBridgeTests
 
         var result = sut.EvaluateTruthValue(FormAtom.Mark);
 
-        result.Should().Be(Form.Mark);
+        result.Should().Be(LoF.Mark);
     }
 
     [Fact]
@@ -150,7 +151,7 @@ public class FormMeTTaBridgeTests
         var space = CreateMockSpace();
         using var sut = new FormMeTTaBridge(space.Object);
 
-        sut.GetFormState("nonexistent").Should().Be(Form.Void);
+        sut.GetFormState("nonexistent").Should().Be(LoF.Void);
     }
 
     [Fact]
@@ -176,7 +177,7 @@ public class FormMeTTaBridgeTests
 
         sut.ClearDistinction("ctx");
 
-        sut.GetFormState("ctx").Should().Be(Form.Void);
+        sut.GetFormState("ctx").Should().Be(LoF.Void);
     }
 
     [Fact]

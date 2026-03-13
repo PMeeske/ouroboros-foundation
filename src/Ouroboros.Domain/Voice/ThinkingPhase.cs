@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
-namespace Ouroboros.Domain.Voice;
+﻿namespace Ouroboros.Domain.Voice;
 
 /// <summary>
 /// Phases of agent thinking/reasoning.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum ThinkingPhase
 {
     /// <summary>Analyzing the user's input.</summary>

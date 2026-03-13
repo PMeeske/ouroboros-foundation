@@ -1,10 +1,8 @@
-// <copyright file="FourierVectorCompressor.cs" company="Ouroboros">
+﻿// <copyright file="FourierVectorCompressor.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 using System.Numerics;
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Domain.VectorCompression;
 
 /// <summary>
@@ -19,7 +17,6 @@ public sealed class FourierVectorCompressor
     /// <summary>
     /// Compression strategies for selecting which components to keep.
     /// </summary>
-    [ExcludeFromCodeCoverage]
     public enum CompressionStrategy
     {
         /// <summary>Keep lowest frequency components (smoothest features).</summary>

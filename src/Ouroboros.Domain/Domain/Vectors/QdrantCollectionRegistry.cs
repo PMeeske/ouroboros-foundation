@@ -1,4 +1,4 @@
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Ouroboros.Core.Configuration;
@@ -163,7 +163,7 @@ public sealed class QdrantCollectionRegistry : IQdrantCollectionRegistry
     {
         try
         {
-            IReadOnlyList<string> collections = await _client.ListCollectionsAsync(ct);
+            IReadOnlyList<string> collections = await _client.ListCollectionsAsync(ct).ConfigureAwait(false);
             int discoveredCount = 0;
 
             foreach (string collectionName in collections)

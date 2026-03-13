@@ -1,4 +1,4 @@
-// <copyright file="VoiceSideChannel.cs" company="Ouroboros">
+﻿// <copyright file="VoiceSideChannel.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -188,7 +188,7 @@ public sealed partial class VoiceSideChannel : IAsyncDisposable
         {
             try
             {
-                string llmSanitized = await SanitizeWithLlmAsync(sanitized, ct);
+                string llmSanitized = await SanitizeWithLlmAsync(sanitized, ct).ConfigureAwait(false);
                 if (!string.IsNullOrWhiteSpace(llmSanitized))
                 {
                     // Show the condensed voice version (original is preserved in system)
@@ -215,11 +215,11 @@ public sealed partial class VoiceSideChannel : IAsyncDisposable
         SpeechQueue.Instance.SetSynthesizer(async (t, p, c) =>
         {
             PersonaVoice voice = GetVoice(p);
-            await _synthesizer(t, voice, c);
+            await _synthesizer(t, voice, c).ConfigureAwait(false);
         });
 
         // Use Rx queue for proper serialization
-        await SpeechQueue.Instance.EnqueueAndWaitAsync(sanitized, personaName, ct);
+        await SpeechQueue.Instance.EnqueueAndWaitAsync(sanitized, personaName, ct).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -242,7 +242,7 @@ Text to convert:
 
 Voice-friendly version:";
 
-        return await _llmSanitizer(prompt, ct);
+        return await _llmSanitizer(prompt, ct).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -317,7 +317,7 @@ Voice-friendly version:";
 
         while (_channel.Reader.Count > 0 && DateTime.UtcNow < deadline)
         {
-            await Task.Delay(100);
+            await Task.Delay(100).ConfigureAwait(false);
         }
     }
 
@@ -325,7 +325,7 @@ Voice-friendly version:";
     {
         try
         {
-            await foreach (VoiceMessage message in _channel.Reader.ReadAllAsync(ct))
+            await foreach (VoiceMessage message in _channel.Reader.ReadAllAsync(ct).ConfigureAwait(false))
             {
                 if (!_enabled || _synthesizer == null)
                 {
@@ -336,7 +336,7 @@ Voice-friendly version:";
                 try
                 {
                     PersonaVoice voice = GetVoice(message.PersonaName);
-                    await _synthesizer(message.Text, voice, ct);
+                    await _synthesizer(message.Text, voice, ct).ConfigureAwait(false);
                     MessageSpoken?.Invoke(this, message);
                 }
                 catch (OperationCanceledException) when (ct.IsCancellationRequested)
@@ -367,7 +367,7 @@ Voice-friendly version:";
 
         try
         {
-            await _processingTask.WaitAsync(TimeSpan.FromSeconds(5));
+            await _processingTask.WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
         }
         catch (TimeoutException)
         {

@@ -1,4 +1,4 @@
-// <copyright file="QdrantCollectionAdmin.cs" company="Ouroboros">
+﻿// <copyright file="QdrantCollectionAdmin.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -92,7 +92,7 @@ public sealed partial class QdrantCollectionAdmin : IAsyncDisposable
         _collectionLinks.AddRange(GetDefaultLinksFromRegistry());
 
         // Scan existing collections
-        await RefreshCollectionCacheAsync(ct);
+        await RefreshCollectionCacheAsync(ct).ConfigureAwait(false);
 
         _initialized = true;
     }
@@ -131,7 +131,7 @@ public sealed partial class QdrantCollectionAdmin : IAsyncDisposable
     /// </summary>
     public async Task<IReadOnlyList<CollectionInfo>> GetAllCollectionsAsync(CancellationToken ct = default)
     {
-        await RefreshCollectionCacheAsync(ct);
+        await RefreshCollectionCacheAsync(ct).ConfigureAwait(false);
         return _collectionCache.Values.ToList().AsReadOnly();
     }
 
@@ -142,10 +142,10 @@ public sealed partial class QdrantCollectionAdmin : IAsyncDisposable
     {
         try
         {
-            bool exists = await _client.CollectionExistsAsync(collectionName, ct);
+            bool exists = await _client.CollectionExistsAsync(collectionName, ct).ConfigureAwait(false);
             if (!exists) return null;
 
-            Qdrant.Client.Grpc.CollectionInfo info = await _client.GetCollectionInfoAsync(collectionName, ct);
+            Qdrant.Client.Grpc.CollectionInfo info = await _client.GetCollectionInfoAsync(collectionName, ct).ConfigureAwait(false);
             ulong vectorSize = info.Config?.Params?.VectorsConfig?.Params?.Size ?? 0;
             ulong pointsCount = info.PointsCount;
             Distance distance = info.Config?.Params?.VectorsConfig?.Params?.Distance ?? Distance.Cosine;
@@ -185,13 +185,13 @@ public sealed partial class QdrantCollectionAdmin : IAsyncDisposable
     {
         try
         {
-            bool exists = await _client.CollectionExistsAsync(collectionName, ct);
+            bool exists = await _client.CollectionExistsAsync(collectionName, ct).ConfigureAwait(false);
             if (exists) return false;
 
             await _client.CreateCollectionAsync(
                 collectionName,
                 new VectorParams { Size = (ulong)vectorSize, Distance = distance },
-                cancellationToken: ct);
+                cancellationToken: ct).ConfigureAwait(false);
 
             // Update cache
             _collectionCache[collectionName] = new CollectionInfo(
@@ -218,10 +218,10 @@ public sealed partial class QdrantCollectionAdmin : IAsyncDisposable
     {
         try
         {
-            bool exists = await _client.CollectionExistsAsync(collectionName, ct);
+            bool exists = await _client.CollectionExistsAsync(collectionName, ct).ConfigureAwait(false);
             if (!exists) return false;
 
-            await _client.DeleteCollectionAsync(collectionName, cancellationToken: ct);
+            await _client.DeleteCollectionAsync(collectionName, cancellationToken: ct).ConfigureAwait(false);
             _collectionCache.Remove(collectionName);
 
             // Remove associated links
@@ -281,12 +281,12 @@ public sealed partial class QdrantCollectionAdmin : IAsyncDisposable
     {
         try
         {
-            IReadOnlyList<string> collections = await _client.ListCollectionsAsync(ct);
+            IReadOnlyList<string> collections = await _client.ListCollectionsAsync(ct).ConfigureAwait(false);
             _collectionCache.Clear();
 
             foreach (string collectionName in collections)
             {
-                CollectionInfo? info = await GetCollectionInfoAsync(collectionName, ct);
+                CollectionInfo? info = await GetCollectionInfoAsync(collectionName, ct).ConfigureAwait(false);
                 if (info != null)
                 {
                     _collectionCache[collectionName] = info;

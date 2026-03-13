@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
-namespace Ouroboros.Domain.Voice;
+﻿namespace Ouroboros.Domain.Voice;
 
 /// <summary>
 /// Types of agent response content.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum ResponseType
 {
     /// <summary>Direct answer to user's question.</summary>

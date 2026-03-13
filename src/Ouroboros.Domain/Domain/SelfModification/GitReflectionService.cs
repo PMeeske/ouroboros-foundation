@@ -1,4 +1,4 @@
-// <copyright file="GitReflectionService.cs" company="Ouroboros">
+﻿// <copyright file="GitReflectionService.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -104,7 +104,7 @@ public sealed partial class GitReflectionService : IDisposable
         string[] args,
         CancellationToken ct = default)
     {
-        await _gitLock.WaitAsync(ct);
+        await _gitLock.WaitAsync(ct).ConfigureAwait(false);
         try
         {
             ProcessStartInfo psi = new()
@@ -129,9 +129,9 @@ public sealed partial class GitReflectionService : IDisposable
                 return (false, "", "Failed to start git process");
             }
 
-            string output = await process.StandardOutput.ReadToEndAsync(ct);
-            string error = await process.StandardError.ReadToEndAsync(ct);
-            await process.WaitForExitAsync(ct);
+            string output = await process.StandardOutput.ReadToEndAsync(ct).ConfigureAwait(false);
+            string error = await process.StandardError.ReadToEndAsync(ct).ConfigureAwait(false);
+            await process.WaitForExitAsync(ct).ConfigureAwait(false);
 
             return (process.ExitCode == 0, output.Trim(), error.Trim());
         }

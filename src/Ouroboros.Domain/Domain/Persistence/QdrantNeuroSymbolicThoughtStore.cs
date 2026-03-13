@@ -1,4 +1,4 @@
-// <copyright file="QdrantNeuroSymbolicThoughtStore.cs" company="Ouroboros">
+﻿// <copyright file="QdrantNeuroSymbolicThoughtStore.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -65,30 +65,30 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
         try
         {
             // Create thoughts collection
-            if (!await _client.CollectionExistsAsync(_thoughtsCollection, ct))
+            if (!await _client.CollectionExistsAsync(_thoughtsCollection, ct).ConfigureAwait(false))
             {
                 await _client.CreateCollectionAsync(
                     _thoughtsCollection,
                     new VectorParams { Size = (ulong)_vectorSize, Distance = Distance.Cosine },
-                    cancellationToken: ct);
+                    cancellationToken: ct).ConfigureAwait(false);
             }
 
             // Create relations collection
-            if (!await _client.CollectionExistsAsync(_relationsCollection, ct))
+            if (!await _client.CollectionExistsAsync(_relationsCollection, ct).ConfigureAwait(false))
             {
                 await _client.CreateCollectionAsync(
                     _relationsCollection,
                     new VectorParams { Size = (ulong)_vectorSize, Distance = Distance.Cosine },
-                    cancellationToken: ct);
+                    cancellationToken: ct).ConfigureAwait(false);
             }
 
             // Create results collection
-            if (!await _client.CollectionExistsAsync(_resultsCollection, ct))
+            if (!await _client.CollectionExistsAsync(_resultsCollection, ct).ConfigureAwait(false))
             {
                 await _client.CreateCollectionAsync(
                     _resultsCollection,
                     new VectorParams { Size = (ulong)_vectorSize, Distance = Distance.Cosine },
-                    cancellationToken: ct);
+                    cancellationToken: ct).ConfigureAwait(false);
             }
 
             _initialized = true;
@@ -112,23 +112,23 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
     /// <inheritdoc/>
     public async Task SaveThoughtAsync(string sessionId, PersistedThought thought, CancellationToken ct = default)
     {
-        await EnsureInitializedAsync(ct);
+        await EnsureInitializedAsync(ct).ConfigureAwait(false);
 
-        float[] embedding = await GenerateEmbeddingAsync(thought.Content, ct);
+        float[] embedding = await GenerateEmbeddingAsync(thought.Content, ct).ConfigureAwait(false);
         PointStruct point = CreateThoughtPoint(sessionId, thought, embedding);
 
-        await _client.UpsertAsync(_thoughtsCollection, new[] { point }, cancellationToken: ct);
+        await _client.UpsertAsync(_thoughtsCollection, new[] { point }, cancellationToken: ct).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
     public async Task SaveThoughtsAsync(string sessionId, IEnumerable<PersistedThought> thoughts, CancellationToken ct = default)
     {
-        await EnsureInitializedAsync(ct);
+        await EnsureInitializedAsync(ct).ConfigureAwait(false);
 
         List<PointStruct> points = new List<PointStruct>();
         foreach (PersistedThought thought in thoughts)
         {
-            float[] embedding = await GenerateEmbeddingAsync(thought.Content, ct);
+            float[] embedding = await GenerateEmbeddingAsync(thought.Content, ct).ConfigureAwait(false);
             points.Add(CreateThoughtPoint(sessionId, thought, embedding));
         }
 
@@ -139,7 +139,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
             for (int i = 0; i < points.Count; i += batchSize)
             {
                 List<PointStruct> batch = points.Skip(i).Take(batchSize).ToList();
-                await _client.UpsertAsync(_thoughtsCollection, batch, cancellationToken: ct);
+                await _client.UpsertAsync(_thoughtsCollection, batch, cancellationToken: ct).ConfigureAwait(false);
             }
         }
     }
@@ -149,14 +149,14 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
     /// <inheritdoc/>
     public async Task ClearSessionAsync(string sessionId, CancellationToken ct = default)
     {
-        await EnsureInitializedAsync(ct);
+        await EnsureInitializedAsync(ct).ConfigureAwait(false);
 
         Filter filter = CreateSessionFilter(sessionId);
 
         // Delete from all collections
-        await _client.DeleteAsync(_thoughtsCollection, filter, cancellationToken: ct);
-        await _client.DeleteAsync(_relationsCollection, filter, cancellationToken: ct);
-        await _client.DeleteAsync(_resultsCollection, filter, cancellationToken: ct);
+        await _client.DeleteAsync(_thoughtsCollection, filter, cancellationToken: ct).ConfigureAwait(false);
+        await _client.DeleteAsync(_relationsCollection, filter, cancellationToken: ct).ConfigureAwait(false);
+        await _client.DeleteAsync(_resultsCollection, filter, cancellationToken: ct).ConfigureAwait(false);
     }
 
     // Statistics and listing methods are in QdrantNeuroSymbolicThoughtStore.Query.cs
@@ -178,17 +178,17 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
         bool autoInferRelations = true,
         CancellationToken ct = default)
     {
-        await SaveThoughtAsync(sessionId, thought, ct);
+        await SaveThoughtAsync(sessionId, thought, ct).ConfigureAwait(false);
 
         if (autoInferRelations && _embeddingFunc != null)
         {
             // Find semantically similar recent thoughts
-            IReadOnlyList<PersistedThought> recent = await GetRecentThoughtsAsync(sessionId, 10, ct);
-            float[] thoughtEmbedding = await _embeddingFunc(thought.Content);
+            IReadOnlyList<PersistedThought> recent = await GetRecentThoughtsAsync(sessionId, 10, ct).ConfigureAwait(false);
+            float[] thoughtEmbedding = await _embeddingFunc(thought.Content).ConfigureAwait(false);
 
             foreach (PersistedThought? recentThought in recent.Where(r => r.Id != thought.Id))
             {
-                float[] recentEmbedding = await _embeddingFunc(recentThought.Content);
+                float[] recentEmbedding = await _embeddingFunc(recentThought.Content).ConfigureAwait(false);
                 double similarity = CosineSimilarity(thoughtEmbedding, recentEmbedding);
 
                 if (similarity > 0.7) // High similarity threshold
@@ -203,7 +203,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
                         similarity,
                         DateTime.UtcNow);
 
-                    await SaveRelationAsync(sessionId, relation, ct);
+                    await SaveRelationAsync(sessionId, relation, ct).ConfigureAwait(false);
                 }
             }
         }
@@ -214,10 +214,10 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
     /// </summary>
     public async Task SaveRelationAsync(string sessionId, ThoughtRelation relation, CancellationToken ct = default)
     {
-        await EnsureInitializedAsync(ct);
+        await EnsureInitializedAsync(ct).ConfigureAwait(false);
 
         string text = $"{relation.RelationType}: {relation.SourceThoughtId} -> {relation.TargetThoughtId}";
-        float[] embedding = await GenerateEmbeddingAsync(text, ct);
+        float[] embedding = await GenerateEmbeddingAsync(text, ct).ConfigureAwait(false);
 
         Dictionary<string, Value> payload = new Dictionary<string, Value>
         {
@@ -242,7 +242,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
             Payload = { payload }
         };
 
-        await _client.UpsertAsync(_relationsCollection, new[] { point }, cancellationToken: ct);
+        await _client.UpsertAsync(_relationsCollection, new[] { point }, cancellationToken: ct).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -250,9 +250,9 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
     /// </summary>
     public async Task SaveResultAsync(string sessionId, ThoughtResult result, CancellationToken ct = default)
     {
-        await EnsureInitializedAsync(ct);
+        await EnsureInitializedAsync(ct).ConfigureAwait(false);
 
-        float[] embedding = await GenerateEmbeddingAsync(result.Content, ct);
+        float[] embedding = await GenerateEmbeddingAsync(result.Content, ct).ConfigureAwait(false);
 
         Dictionary<string, Value> payload = new Dictionary<string, Value>
         {
@@ -283,7 +283,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
             Payload = { payload }
         };
 
-        await _client.UpsertAsync(_resultsCollection, new[] { point }, cancellationToken: ct);
+        await _client.UpsertAsync(_resultsCollection, new[] { point }, cancellationToken: ct).ConfigureAwait(false);
 
         // Create relation from thought to result
         ThoughtRelation relation = new ThoughtRelation(
@@ -294,7 +294,7 @@ public sealed partial class QdrantNeuroSymbolicThoughtStore : IThoughtStore, IAs
             result.Confidence,
             DateTime.UtcNow);
 
-        await SaveRelationAsync(sessionId, relation, ct);
+        await SaveRelationAsync(sessionId, relation, ct).ConfigureAwait(false);
     }
 
     // Query extension methods are in QdrantNeuroSymbolicThoughtStore.Query.cs

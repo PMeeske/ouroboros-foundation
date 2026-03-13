@@ -1,4 +1,4 @@
-// <copyright file="FileThoughtStore.cs" company="Ouroboros">
+﻿// <copyright file="FileThoughtStore.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -35,25 +35,25 @@ public class FileThoughtStore : IThoughtStore
     /// <inheritdoc/>
     public async Task SaveThoughtAsync(string sessionId, PersistedThought thought, CancellationToken ct = default)
     {
-        await SaveThoughtsAsync(sessionId, new[] { thought }, ct);
+        await SaveThoughtsAsync(sessionId, new[] { thought }, ct).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
     public async Task SaveThoughtsAsync(string sessionId, IEnumerable<PersistedThought> thoughts, CancellationToken ct = default)
     {
         SemaphoreSlim sessionLock = GetSessionLock(sessionId);
-        await sessionLock.WaitAsync(ct);
+        await sessionLock.WaitAsync(ct).ConfigureAwait(false);
         try
         {
             string filePath = GetSessionFilePath(sessionId);
-            List<PersistedThought> existingThoughts = await LoadThoughtsFromFileAsync(filePath, ct);
+            List<PersistedThought> existingThoughts = await LoadThoughtsFromFileAsync(filePath, ct).ConfigureAwait(false);
 
             foreach (PersistedThought thought in thoughts)
             {
                 existingThoughts.Add(thought);
             }
 
-            await SaveThoughtsToFileAsync(filePath, existingThoughts, ct);
+            await SaveThoughtsToFileAsync(filePath, existingThoughts, ct).ConfigureAwait(false);
         }
         finally
         {
@@ -65,7 +65,7 @@ public class FileThoughtStore : IThoughtStore
     public async Task<IReadOnlyList<PersistedThought>> GetThoughtsAsync(string sessionId, CancellationToken ct = default)
     {
         string filePath = GetSessionFilePath(sessionId);
-        return await LoadThoughtsFromFileAsync(filePath, ct);
+        return await LoadThoughtsFromFileAsync(filePath, ct).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -75,7 +75,7 @@ public class FileThoughtStore : IThoughtStore
         DateTime to,
         CancellationToken ct = default)
     {
-        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct);
+        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct).ConfigureAwait(false);
         return thoughts.Where(t => t.Timestamp >= from && t.Timestamp <= to).ToList();
     }
 
@@ -86,7 +86,7 @@ public class FileThoughtStore : IThoughtStore
         int limit = 100,
         CancellationToken ct = default)
     {
-        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct);
+        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct).ConfigureAwait(false);
         return thoughts
             .Where(t => t.Type.Equals(thoughtType, StringComparison.OrdinalIgnoreCase))
             .Take(limit)
@@ -100,7 +100,7 @@ public class FileThoughtStore : IThoughtStore
         int limit = 20,
         CancellationToken ct = default)
     {
-        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct);
+        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct).ConfigureAwait(false);
         string queryLower = query.ToLowerInvariant();
 
         return thoughts
@@ -118,7 +118,7 @@ public class FileThoughtStore : IThoughtStore
         int count = 10,
         CancellationToken ct = default)
     {
-        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct);
+        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct).ConfigureAwait(false);
         return thoughts
             .OrderByDescending(t => t.Timestamp)
             .Take(count)
@@ -131,7 +131,7 @@ public class FileThoughtStore : IThoughtStore
         Guid parentThoughtId,
         CancellationToken ct = default)
     {
-        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct);
+        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct).ConfigureAwait(false);
         List<PersistedThought> result = new List<PersistedThought>();
 
         // Find direct children
@@ -141,7 +141,7 @@ public class FileThoughtStore : IThoughtStore
         // Recursively find grandchildren
         foreach (PersistedThought? child in children)
         {
-            IReadOnlyList<PersistedThought> grandchildren = await GetChainedThoughtsAsync(sessionId, child.Id, ct);
+            IReadOnlyList<PersistedThought> grandchildren = await GetChainedThoughtsAsync(sessionId, child.Id, ct).ConfigureAwait(false);
             result.AddRange(grandchildren);
         }
 
@@ -152,7 +152,7 @@ public class FileThoughtStore : IThoughtStore
     public async Task ClearSessionAsync(string sessionId, CancellationToken ct = default)
     {
         SemaphoreSlim sessionLock = GetSessionLock(sessionId);
-        await sessionLock.WaitAsync(ct);
+        await sessionLock.WaitAsync(ct).ConfigureAwait(false);
         try
         {
             string filePath = GetSessionFilePath(sessionId);
@@ -170,7 +170,7 @@ public class FileThoughtStore : IThoughtStore
     /// <inheritdoc/>
     public async Task<ThoughtStatistics> GetStatisticsAsync(string sessionId, CancellationToken ct = default)
     {
-        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct);
+        IReadOnlyList<PersistedThought> thoughts = await GetThoughtsAsync(sessionId, ct).ConfigureAwait(false);
 
         if (!thoughts.Any())
         {
@@ -225,7 +225,7 @@ public class FileThoughtStore : IThoughtStore
 
         try
         {
-            string json = await File.ReadAllTextAsync(filePath, ct);
+            string json = await File.ReadAllTextAsync(filePath, ct).ConfigureAwait(false);
             return JsonSerializer.Deserialize<List<PersistedThought>>(json, SharedJsonOptions) ?? new List<PersistedThought>();
         }
         catch (JsonException)
@@ -238,7 +238,7 @@ public class FileThoughtStore : IThoughtStore
     private static async Task SaveThoughtsToFileAsync(string filePath, List<PersistedThought> thoughts, CancellationToken ct)
     {
         string json = JsonSerializer.Serialize(thoughts, SharedJsonOptions);
-        await File.WriteAllTextAsync(filePath, json, ct);
+        await File.WriteAllTextAsync(filePath, json, ct).ConfigureAwait(false);
     }
 
     private static double CalculateSearchScore(PersistedThought thought, string query)

@@ -1,4 +1,4 @@
-// <copyright file="BenchmarkSuite.cs" company="Ouroboros">
+﻿// <copyright file="BenchmarkSuite.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -46,7 +46,7 @@ public sealed partial class BenchmarkSuite : IBenchmarkSuite
                 Stopwatch taskStopwatch = Stopwatch.StartNew();
 
                 // Simulate ARC task execution (placeholder implementation)
-                (bool success, double score, string? error, string difficulty, string patternType) taskResult = await ExecuteARCTaskAsync($"arc-task-{i}", ct);
+                (bool success, double score, string? error, string difficulty, string patternType) taskResult = await ExecuteARCTaskAsync($"arc-task-{i}", ct).ConfigureAwait(false);
                 taskStopwatch.Stop();
 
                 results.Add(new TaskResult(
@@ -130,7 +130,7 @@ public sealed partial class BenchmarkSuite : IBenchmarkSuite
                 Stopwatch subjectStopwatch = Stopwatch.StartNew();
 
                 // Execute MMLU tasks for this subject
-                (bool success, double score, string? error, int questionCount) subjectResult = await ExecuteMMLUSubjectAsync(subject, ct);
+                (bool success, double score, string? error, int questionCount) subjectResult = await ExecuteMMLUSubjectAsync(subject, ct).ConfigureAwait(false);
                 subjectStopwatch.Stop();
 
                 results.Add(new TaskResult(
@@ -206,7 +206,7 @@ public sealed partial class BenchmarkSuite : IBenchmarkSuite
                 Stopwatch sequenceStopwatch = Stopwatch.StartNew();
 
                 // Execute continual learning sequence
-                (bool success, double retentionScore, string? error, double initialAccuracy, double finalAccuracy) sequenceResult = await ExecuteContinualLearningSequenceAsync(sequence, ct);
+                (bool success, double retentionScore, string? error, double initialAccuracy, double finalAccuracy) sequenceResult = await ExecuteContinualLearningSequenceAsync(sequence, ct).ConfigureAwait(false);
                 sequenceStopwatch.Stop();
 
                 results.Add(new TaskResult(
@@ -269,7 +269,7 @@ public sealed partial class BenchmarkSuite : IBenchmarkSuite
             Dictionary<string, double> subScores = new Dictionary<string, double>();
 
             // Execute dimension-specific tasks
-            (List<TaskResult> tasks, string? error) dimensionResult = await ExecuteCognitiveDimensionAsync(dimension, ct);
+            (List<TaskResult> tasks, string? error) dimensionResult = await ExecuteCognitiveDimensionAsync(dimension, ct).ConfigureAwait(false);
             stopwatch.Stop();
 
             foreach (TaskResult task in dimensionResult.tasks)
@@ -321,7 +321,7 @@ public sealed partial class BenchmarkSuite : IBenchmarkSuite
             Dictionary<string, BenchmarkReport> benchmarkResults = new Dictionary<string, BenchmarkReport>();
 
             // Run ARC benchmark
-            Result<BenchmarkReport, string> arcResult = await this.RunARCBenchmarkAsync(50, ct);
+            Result<BenchmarkReport, string> arcResult = await this.RunARCBenchmarkAsync(50, ct).ConfigureAwait(false);
             if (arcResult.IsSuccess)
             {
                 benchmarkResults["ARC-AGI-2"] = arcResult.Value;
@@ -329,7 +329,7 @@ public sealed partial class BenchmarkSuite : IBenchmarkSuite
 
             // Run MMLU benchmark with sample subjects
             List<string> mMLUSubjects = new List<string> { "mathematics", "physics", "computer_science", "history" };
-            Result<BenchmarkReport, string> mMLUResult = await this.RunMMLUBenchmarkAsync(mMLUSubjects, ct);
+            Result<BenchmarkReport, string> mMLUResult = await this.RunMMLUBenchmarkAsync(mMLUSubjects, ct).ConfigureAwait(false);
             if (mMLUResult.IsSuccess)
             {
                 benchmarkResults["MMLU"] = mMLUResult.Value;
@@ -343,7 +343,7 @@ public sealed partial class BenchmarkSuite : IBenchmarkSuite
                     return Result<ComprehensiveReport, string>.Failure("Full evaluation cancelled");
                 }
 
-                Result<BenchmarkReport, string> cognitiveResult = await this.RunCognitiveBenchmarkAsync(dimension, ct);
+                Result<BenchmarkReport, string> cognitiveResult = await this.RunCognitiveBenchmarkAsync(dimension, ct).ConfigureAwait(false);
                 if (cognitiveResult.IsSuccess)
                 {
                     benchmarkResults[$"Cognitive-{dimension}"] = cognitiveResult.Value;

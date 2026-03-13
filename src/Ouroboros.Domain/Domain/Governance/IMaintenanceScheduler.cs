@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
-namespace Ouroboros.Domain.Governance;
+﻿namespace Ouroboros.Domain.Governance;
 
 /// <summary>
 /// Interface for maintenance scheduler.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IMaintenanceScheduler
 {
     /// <summary>

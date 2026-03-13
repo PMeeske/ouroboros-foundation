@@ -67,7 +67,7 @@ public class OllamaHealthCheckProviderTests
         using var provider = new OllamaHealthCheckProvider("http://localhost:59999", 1);
 
         // Act
-        var result = await provider.CheckHealthAsync();
+        var result = await provider.CheckHealthAsync().ConfigureAwait(false);
 
         // Assert
         result.Status.Should().Be(HealthStatus.Unhealthy);
@@ -84,7 +84,7 @@ public class OllamaHealthCheckProviderTests
         cts.Cancel();
 
         // Act
-        var result = await provider.CheckHealthAsync(cts.Token);
+        var result = await provider.CheckHealthAsync(cts.Token).ConfigureAwait(false);
 
         // Assert
         result.Status.Should().Be(HealthStatus.Unhealthy);
@@ -98,7 +98,7 @@ public class OllamaHealthCheckProviderTests
     public void Dispose_CalledTwice_DoesNotThrow()
     {
         // Arrange
-        var provider = new OllamaHealthCheckProvider("http://localhost:11434");
+        using var provider = new OllamaHealthCheckProvider("http://localhost:11434");
 
         // Act & Assert
         var act = () =>

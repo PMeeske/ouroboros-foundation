@@ -1,5 +1,6 @@
 using Ouroboros.Core.SpencerBrown;
 using Ouroboros.Core.Steps;
+using SpBr = Ouroboros.Core.SpencerBrown.LawsOfForm;
 
 namespace Ouroboros.Core.Tests.Form;
 
@@ -9,7 +10,7 @@ public class LawsOfFormTests
     [Fact]
     public void Mark_CreatesMarkedForm()
     {
-        var result = LawsOfForm.Mark(42);
+        var result = SpBr.Mark(42);
 
         result.IsMarked.Should().BeTrue();
         result.Value.Should().Be(42);
@@ -18,7 +19,7 @@ public class LawsOfFormTests
     [Fact]
     public void Void_CreatesUnmarkedForm()
     {
-        var result = LawsOfForm.Void<int>();
+        var result = SpBr.Void<int>();
 
         result.IsVoid.Should().BeTrue();
         result.IsMarked.Should().BeFalse();
@@ -27,9 +28,9 @@ public class LawsOfFormTests
     [Fact]
     public void Cross_MarkedForm_IncrementsDepth()
     {
-        var form = LawsOfForm.Mark(1);
+        var form = SpBr.Mark(1);
 
-        var result = LawsOfForm.Cross(form);
+        var result = SpBr.Cross(form);
 
         result.IsMarked.Should().BeTrue();
         result.Depth.Should().BeGreaterThan(form.Depth);
@@ -38,9 +39,9 @@ public class LawsOfFormTests
     [Fact]
     public void Cross_VoidForm_CreatesMark()
     {
-        var form = LawsOfForm.Void<int>();
+        var form = SpBr.Void<int>();
 
-        var result = LawsOfForm.Cross(form);
+        var result = SpBr.Cross(form);
 
         result.IsMarked.Should().BeTrue();
     }
@@ -48,10 +49,10 @@ public class LawsOfFormTests
     [Fact]
     public void Call_MarkedForm_CondensesToDepthOne()
     {
-        var form = LawsOfForm.Mark(5);
-        var crossed = LawsOfForm.Cross(form);
+        var form = SpBr.Mark(5);
+        var crossed = SpBr.Cross(form);
 
-        var result = LawsOfForm.Call(crossed);
+        var result = SpBr.Call(crossed);
 
         result.IsMarked.Should().BeTrue();
         result.Depth.Should().Be(1);
@@ -60,9 +61,9 @@ public class LawsOfFormTests
     [Fact]
     public void Call_VoidForm_RemainsVoid()
     {
-        var form = LawsOfForm.Void<int>();
+        var form = SpBr.Void<int>();
 
-        var result = LawsOfForm.Call(form);
+        var result = SpBr.Call(form);
 
         result.IsVoid.Should().BeTrue();
     }
@@ -70,10 +71,10 @@ public class LawsOfFormTests
     [Fact]
     public void Recross_DepthTwo_ReducesByTwo()
     {
-        var form = LawsOfForm.Mark(1);
-        var crossed = LawsOfForm.Cross(LawsOfForm.Cross(form));
+        var form = SpBr.Mark(1);
+        var crossed = SpBr.Cross(SpBr.Cross(form));
 
-        var result = LawsOfForm.Recross(crossed);
+        var result = SpBr.Recross(crossed);
 
         result.Depth.Should().Be(crossed.Depth - 2);
     }
@@ -81,9 +82,9 @@ public class LawsOfFormTests
     [Fact]
     public void Recross_DepthOne_ReturnsVoid()
     {
-        var form = LawsOfForm.Mark(1);
+        var form = SpBr.Mark(1);
 
-        var result = LawsOfForm.Recross(form);
+        var result = SpBr.Recross(form);
 
         result.IsVoid.Should().BeTrue();
     }
@@ -91,7 +92,7 @@ public class LawsOfFormTests
     [Fact]
     public async Task MarkArrow_MarksInput()
     {
-        var arrow = LawsOfForm.MarkArrow<int>();
+        var arrow = SpBr.MarkArrow<int>();
 
         var result = await arrow(42);
 
@@ -102,7 +103,7 @@ public class LawsOfFormTests
     [Fact]
     public async Task CrossArrow_CrossesInput()
     {
-        var arrow = LawsOfForm.CrossArrow<int>();
+        var arrow = SpBr.CrossArrow<int>();
         var form = Form<int>.Mark(1);
 
         var result = await arrow(form);
@@ -117,7 +118,7 @@ public class LawsOfFormTests
         var a = Form<int>.Mark(1);
         var b = Form<string>.Mark("hello");
 
-        var result = LawsOfForm.Product(a, b);
+        var result = SpBr.Product(a, b);
 
         result.IsMarked.Should().BeTrue();
         result.Value.Should().Be((1, "hello"));
@@ -129,7 +130,7 @@ public class LawsOfFormTests
         var a = Form<int>.Mark(1);
         var b = Form<string>.Void();
 
-        var result = LawsOfForm.Product(a, b);
+        var result = SpBr.Product(a, b);
 
         result.IsVoid.Should().BeTrue();
     }
@@ -140,7 +141,7 @@ public class LawsOfFormTests
         var a = Form<int>.Void();
         var b = Form<string>.Void();
 
-        var result = LawsOfForm.Product(a, b);
+        var result = SpBr.Product(a, b);
 
         result.IsVoid.Should().BeTrue();
     }
@@ -151,7 +152,7 @@ public class LawsOfFormTests
         Step<int, Form<int>> step1 = input => Task.FromResult(Form<int>.Mark(input));
         Step<int, Form<string>> step2 = input => Task.FromResult(Form<string>.Mark(input.ToString()));
 
-        var arrow = LawsOfForm.CrossProduct(step1, step2);
+        var arrow = SpBr.CrossProduct(step1, step2);
         var result = await arrow(42);
 
         result.IsMarked.Should().BeTrue();
@@ -160,7 +161,7 @@ public class LawsOfFormTests
     [Fact]
     public void ReEntry_GeneratesFromSeed()
     {
-        var result = LawsOfForm.ReEntry<int>(form =>
+        var result = SpBr.ReEntry<int>(form =>
         {
             if (form.IsVoid)
                 return Form<int>.Mark(1);
@@ -181,7 +182,7 @@ public class LawsOfFormTests
             return Task.FromResult(form);
         };
 
-        var arrow = LawsOfForm.ReEntryArrow<int>(3, step);
+        var arrow = SpBr.ReEntryArrow<int>(3, step);
         await arrow(Form<int>.Mark(1));
 
         callCount.Should().Be(3);

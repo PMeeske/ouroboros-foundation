@@ -1,4 +1,5 @@
 using Ouroboros.Core.LawsOfForm;
+using LoF = Ouroboros.Core.LawsOfForm.Form;
 using Ouroboros.Core.Steps;
 
 namespace Ouroboros.Core.Tests.LawsOfForm;
@@ -9,7 +10,7 @@ public class DistinctionArrowTests
     [Fact]
     public async Task Gate_MarkedPredicate_ReturnsInput()
     {
-        var gate = DistinctionArrow.Gate<string>(_ => Form.Mark);
+        var gate = DistinctionArrow.Gate<string>(_ => LoF.Mark);
 
         var result = await gate("hello");
 
@@ -19,7 +20,7 @@ public class DistinctionArrowTests
     [Fact]
     public async Task Gate_VoidPredicate_ReturnsDefault()
     {
-        var gate = DistinctionArrow.Gate<string>(_ => Form.Void);
+        var gate = DistinctionArrow.Gate<string>(_ => LoF.Void);
 
         var result = await gate("hello");
 
@@ -30,7 +31,7 @@ public class DistinctionArrowTests
     public async Task Branch_MarkedPredicate_CallsOnMarked()
     {
         var branch = DistinctionArrow.Branch<string, int>(
-            _ => Form.Mark,
+            _ => LoF.Mark,
             s => s.Length,
             _ => -1);
 
@@ -43,7 +44,7 @@ public class DistinctionArrowTests
     public async Task Branch_VoidPredicate_CallsOnVoid()
     {
         var branch = DistinctionArrow.Branch<string, int>(
-            _ => Form.Void,
+            _ => LoF.Void,
             s => s.Length,
             _ => -1);
 
@@ -56,7 +57,7 @@ public class DistinctionArrowTests
     public async Task Branch_NullInput_CallsOnVoid()
     {
         var branch = DistinctionArrow.Branch<string, int>(
-            _ => Form.Mark,
+            _ => LoF.Mark,
             _ => 1,
             _ => -1);
 
@@ -69,8 +70,8 @@ public class DistinctionArrowTests
     public async Task AllMarked_AllTrue_ReturnsInput()
     {
         var arrow = DistinctionArrow.AllMarked<string>(
-            _ => Form.Mark,
-            _ => Form.Mark);
+            _ => LoF.Mark,
+            _ => LoF.Mark);
 
         var result = await arrow("test");
 
@@ -81,8 +82,8 @@ public class DistinctionArrowTests
     public async Task AllMarked_OneFails_ReturnsDefault()
     {
         var arrow = DistinctionArrow.AllMarked<string>(
-            _ => Form.Mark,
-            _ => Form.Void);
+            _ => LoF.Mark,
+            _ => LoF.Void);
 
         var result = await arrow("test");
 
@@ -93,8 +94,8 @@ public class DistinctionArrowTests
     public async Task AnyMarked_OneTrue_ReturnsInput()
     {
         var arrow = DistinctionArrow.AnyMarked<string>(
-            _ => Form.Void,
-            _ => Form.Mark);
+            _ => LoF.Void,
+            _ => LoF.Mark);
 
         var result = await arrow("test");
 
@@ -105,8 +106,8 @@ public class DistinctionArrowTests
     public async Task AnyMarked_NoneTrue_ReturnsDefault()
     {
         var arrow = DistinctionArrow.AnyMarked<string>(
-            _ => Form.Void,
-            _ => Form.Void);
+            _ => LoF.Void,
+            _ => LoF.Void);
 
         var result = await arrow("test");
 
@@ -117,7 +118,7 @@ public class DistinctionArrowTests
     public async Task Evaluate_ExtractsAndCombines()
     {
         var arrow = DistinctionArrow.Evaluate<string>(
-            _ => Form.Mark,
+            _ => LoF.Mark,
             (input, form) => $"{input}:{form}");
 
         var result = await arrow("test");
@@ -130,12 +131,12 @@ public class DistinctionArrowTests
     {
         // Self-reference that immediately reaches a fixed point (always returns Void)
         var arrow = DistinctionArrow.ReEntry<string>(
-            (_, _) => Form.Void,
+            (_, _) => LoF.Void,
             maxDepth: 10);
 
         var result = await arrow("test");
 
-        result.Should().Be(Form.Void);
+        result.Should().Be(LoF.Void);
     }
 
     [Fact]
@@ -147,7 +148,7 @@ public class DistinctionArrowTests
             {
                 callCount++;
                 // Always alternate to prevent fixed point
-                return callCount % 2 == 0 ? Form.Void : Form.Mark;
+                return callCount % 2 == 0 ? LoF.Void : LoF.Mark;
             },
             maxDepth: 5);
 
@@ -163,7 +164,7 @@ public class DistinctionArrowTests
 
         var result = lifted(5);
 
-        result.Should().Be(Form.Mark);
+        result.Should().Be(LoF.Mark);
     }
 
     [Fact]
@@ -173,6 +174,6 @@ public class DistinctionArrowTests
 
         var result = lifted(-1);
 
-        result.Should().Be(Form.Void);
+        result.Should().Be(LoF.Void);
     }
 }

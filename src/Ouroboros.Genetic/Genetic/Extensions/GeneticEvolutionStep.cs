@@ -1,4 +1,4 @@
-// <copyright file="GeneticEvolutionStep.cs" company="Ouroboros">
+﻿// <copyright file="GeneticEvolutionStep.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -34,7 +34,7 @@ public static class GeneticEvolutionStep
             }
 
             // Evolve the population
-            Result<EvolutionPopulation<TChromosome>> evolutionResult = await engine.EvolveAsync(initialPopulation, generations);
+            Result<EvolutionPopulation<TChromosome>> evolutionResult = await engine.EvolveAsync(initialPopulation, generations).ConfigureAwait(false);
 
             if (evolutionResult.IsFailure)
             {
@@ -72,7 +72,7 @@ public static class GeneticEvolutionStep
                 return Result<EvolutionPopulation<TChromosome>>.Failure("Initial population cannot be null");
             }
 
-            return await engine.EvolveAsync(initialPopulation, generations);
+            return await engine.EvolveAsync(initialPopulation, generations).ConfigureAwait(false);
         };
     }
 
@@ -101,7 +101,7 @@ public static class GeneticEvolutionStep
             }
 
             // Evolve
-            Result<EvolutionPopulation<TChromosome>> evolutionResult = await engine.EvolveAsync(populationResult.Value, generations);
+            Result<EvolutionPopulation<TChromosome>> evolutionResult = await engine.EvolveAsync(populationResult.Value, generations).ConfigureAwait(false);
             if (evolutionResult.IsFailure)
             {
                 return Result<TChromosome>.Failure(evolutionResult.Error);

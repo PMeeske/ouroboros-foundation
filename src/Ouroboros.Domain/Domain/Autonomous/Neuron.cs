@@ -76,7 +76,7 @@ public abstract class Neuron : IDisposable
         _isActive = false;
         _messageChannel.Writer.TryComplete();
         _cts.Cancel();
-        if (_processingTask != null) await _processingTask;
+        if (_processingTask != null) await _processingTask.ConfigureAwait(false);
         OnStopped();
     }
 
@@ -180,14 +180,14 @@ public abstract class Neuron : IDisposable
             {
                 try
                 {
-                    await Task.Delay(1000, _cts.Token);
-                    await OnTickAsync(_cts.Token);
+                    await Task.Delay(1000, _cts.Token).ConfigureAwait(false);
+                    await OnTickAsync(_cts.Token).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {
                     break;
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ex is not OperationCanceledException)
                 {
                     System.Diagnostics.Trace.TraceWarning($"[{Id}] Error in tick loop: {ex.Message}");
                 }
@@ -197,11 +197,11 @@ public abstract class Neuron : IDisposable
         // Event-driven message processing loop (no polling)
         try
         {
-            await foreach (NeuronMessage message in _messageChannel.Reader.ReadAllAsync(_cts.Token))
+            await foreach (NeuronMessage message in _messageChannel.Reader.ReadAllAsync(_cts.Token).ConfigureAwait(false))
             {
                 try
                 {
-                    await ProcessMessageAsync(message, _cts.Token);
+                    await ProcessMessageAsync(message, _cts.Token).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {
@@ -218,7 +218,7 @@ public abstract class Neuron : IDisposable
             // Expected during shutdown
         }
 
-        await tickTask;
+        await tickTask.ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

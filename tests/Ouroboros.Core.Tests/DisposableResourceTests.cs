@@ -5,9 +5,9 @@ public class DisposableResourceTests
 {
     private sealed class TestDisposableResource : DisposableResource
     {
-        public bool ManagedReleased { get; private set; }
-        public bool UnmanagedReleased { get; private set; }
-        public bool AsyncManagedReleased { get; private set; }
+        public bool ManagedReleased { get; set; }
+        public bool UnmanagedReleased { get; set; }
+        public bool AsyncManagedReleased { get; set; }
 
         public new bool IsDisposed => base.IsDisposed;
 
@@ -59,7 +59,7 @@ public class DisposableResourceTests
     {
         var sut = new TestDisposableResource();
 
-        await sut.DisposeAsync();
+        await sut.DisposeAsync().ConfigureAwait(false);
 
         sut.AsyncManagedReleased.Should().BeTrue();
         sut.ManagedReleased.Should().BeTrue();
@@ -72,9 +72,9 @@ public class DisposableResourceTests
     {
         var sut = new TestDisposableResource();
 
-        await sut.DisposeAsync();
+        await sut.DisposeAsync().ConfigureAwait(false);
         sut.AsyncManagedReleased = false;
-        await sut.DisposeAsync();
+        await sut.DisposeAsync().ConfigureAwait(false);
 
         sut.AsyncManagedReleased.Should().BeFalse();
     }
@@ -82,7 +82,7 @@ public class DisposableResourceTests
     [Fact]
     public void ThrowIfDisposed_BeforeDispose_DoesNotThrow()
     {
-        var sut = new TestDisposableResource();
+        using var sut = new TestDisposableResource();
 
         var act = () => sut.CallThrowIfDisposed();
 
@@ -103,7 +103,7 @@ public class DisposableResourceTests
     [Fact]
     public void IsDisposed_InitiallyFalse()
     {
-        var sut = new TestDisposableResource();
+        using var sut = new TestDisposableResource();
 
         sut.IsDisposed.Should().BeFalse();
     }

@@ -1,3 +1,4 @@
+using System.Text;
 using Ouroboros.Core.Performance;
 
 namespace Ouroboros.Core.Tests.Performance;

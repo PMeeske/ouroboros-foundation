@@ -1,4 +1,4 @@
-// <copyright file="QdrantDistinctionMetadataStorage.cs" company="Ouroboros">
+﻿// <copyright file="QdrantDistinctionMetadataStorage.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -53,7 +53,7 @@ public sealed class QdrantDistinctionMetadataStorage
     {
         try
         {
-            await EnsureCollectionExistsAsync(weights.Embedding.Length, ct);
+            await EnsureCollectionExistsAsync(weights.Embedding.Length, ct).ConfigureAwait(false);
 
             ulong pointId = BitConverter.ToUInt64(weights.Id.Value.ToByteArray(), 0);
 
@@ -76,7 +76,7 @@ public sealed class QdrantDistinctionMetadataStorage
                 Payload = { payload }
             };
 
-            await _client.UpsertAsync(_collectionName, new[] { point }, cancellationToken: ct);
+            await _client.UpsertAsync(_collectionName, new[] { point }, cancellationToken: ct).ConfigureAwait(false);
 
             _logger.LogInformation("Stored metadata for distinction {Id}", weights.Id);
             return Result<Unit, string>.Success(Unit.Value);
@@ -115,7 +115,7 @@ public sealed class QdrantDistinctionMetadataStorage
             // For now, we'll return an empty list as this requires additional infrastructure
             _logger.LogWarning("Semantic search not yet implemented - requires embedding model");
             return await Task.FromResult(Result<IReadOnlyList<DistinctionMetadata>, string>.Success(
-                (IReadOnlyList<DistinctionMetadata>)Array.Empty<DistinctionMetadata>()));
+                (IReadOnlyList<DistinctionMetadata>)Array.Empty<DistinctionMetadata>())).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
@@ -152,7 +152,7 @@ public sealed class QdrantDistinctionMetadataStorage
             await _client.DeleteAsync(
                 _collectionName,
                 new[] { new PointId { Num = pointId } },
-                cancellationToken: ct);
+                cancellationToken: ct).ConfigureAwait(false);
 
             _logger.LogInformation("Marked distinction {Id} as dissolved (deleted from Qdrant)", id);
             return Result<Unit, string>.Success(Unit.Value);
@@ -191,7 +191,7 @@ public sealed class QdrantDistinctionMetadataStorage
                 _collectionName,
                 new[] { new PointId { Num = pointId } },
                 withPayload: true,
-                cancellationToken: ct);
+                cancellationToken: ct).ConfigureAwait(false);
 
             if (points.Count == 0)
             {
@@ -224,14 +224,14 @@ public sealed class QdrantDistinctionMetadataStorage
     {
         try
         {
-            bool exists = await _client.CollectionExistsAsync(_collectionName, ct);
+            bool exists = await _client.CollectionExistsAsync(_collectionName, ct).ConfigureAwait(false);
 
             if (!exists)
             {
                 await _client.CreateCollectionAsync(
                     _collectionName,
                     new VectorParams { Size = (ulong)vectorDimension, Distance = Distance.Cosine },
-                    cancellationToken: ct);
+                    cancellationToken: ct).ConfigureAwait(false);
 
                 _logger.LogInformation("Created collection {Collection} with dimension {Dimension}",
                     _collectionName, vectorDimension);

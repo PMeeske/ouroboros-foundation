@@ -1,15 +1,12 @@
-// <copyright file="Priority.cs" company="Ouroboros">
+﻿// <copyright file="Priority.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
-
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.MultiAgent;
 
 /// <summary>
 /// Priority levels for task assignments.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum Priority
 {
     /// <summary>

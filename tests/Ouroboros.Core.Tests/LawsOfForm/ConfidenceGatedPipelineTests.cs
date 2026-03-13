@@ -1,5 +1,6 @@
 using Ouroboros.Abstractions.Monads;
 using Ouroboros.Core.LawsOfForm;
+using LoF = Ouroboros.Core.LawsOfForm.Form;
 using Ouroboros.Core.Steps;
 
 namespace Ouroboros.Core.Tests.LawsOfForm;
@@ -138,8 +139,8 @@ public class ConfidenceGatedPipelineTests
     public void CombineOpinions_MarksOnly_ReturnsMark()
     {
         var result = ConfidenceGatedPipeline.CombineOpinions(
-            (Form.Mark, 1.0),
-            (Form.Mark, 1.0));
+            (LoF.Mark, 1.0),
+            (LoF.Mark, 1.0));
 
         result.IsMark().Should().BeTrue();
     }

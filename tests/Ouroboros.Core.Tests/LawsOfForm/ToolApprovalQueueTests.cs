@@ -1,4 +1,5 @@
 using Ouroboros.Core.LawsOfForm;
+using LoF = Ouroboros.Core.LawsOfForm.Form;
 
 namespace Ouroboros.Core.Tests.LawsOfForm;
 
@@ -50,7 +51,7 @@ public class ToolApprovalQueueTests
 
         var result = await sut.Resolve(queueId, true, "Looks good");
 
-        result.Certainty.Should().Be(Form.Mark);
+        result.Certainty.Should().Be(LoF.Mark);
         result.Result.IsSuccess.Should().BeTrue();
         sut.PendingCount.Should().Be(0);
     }
@@ -63,7 +64,7 @@ public class ToolApprovalQueueTests
 
         var result = await sut.Resolve(queueId, false, "Too risky");
 
-        result.Certainty.Should().Be(Form.Void);
+        result.Certainty.Should().Be(LoF.Void);
         result.Result.IsSuccess.Should().BeFalse();
     }
 

@@ -1,4 +1,4 @@
-// <copyright file="QdrantVectorStore.Admin.cs" company="Ouroboros">
+﻿// <copyright file="QdrantVectorStore.Admin.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -30,7 +30,7 @@ public sealed partial class QdrantVectorStore
         try
         {
             // Ensure collection exists
-            await EnsureCollectionExistsAsync(vectorList[0], cancellationToken);
+            await EnsureCollectionExistsAsync(vectorList[0], cancellationToken).ConfigureAwait(false);
 
             // Convert vectors to Qdrant points
             List<PointStruct> points = vectorList.Select(v => new PointStruct
@@ -61,7 +61,7 @@ public sealed partial class QdrantVectorStore
             for (int i = 0; i < points.Count; i += batchSize)
             {
                 List<PointStruct> batch = points.Skip(i).Take(batchSize).ToList();
-                await _client.UpsertAsync(_collectionName, batch, cancellationToken: cancellationToken);
+                await _client.UpsertAsync(_collectionName, batch, cancellationToken: cancellationToken).ConfigureAwait(false);
                 _logger?.LogDebug("Upserted batch of {Count} vectors to collection {Collection}", batch.Count, _collectionName);
             }
 
@@ -86,10 +86,10 @@ public sealed partial class QdrantVectorStore
     {
         try
         {
-            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
+            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken).ConfigureAwait(false);
             if (collectionExists)
             {
-                await _client.DeleteCollectionAsync(_collectionName, cancellationToken: cancellationToken);
+                await _client.DeleteCollectionAsync(_collectionName, cancellationToken: cancellationToken).ConfigureAwait(false);
                 _logger?.LogInformation("Deleted Qdrant collection {Collection}", _collectionName);
             }
             else
@@ -118,7 +118,7 @@ public sealed partial class QdrantVectorStore
                 ? new PointId { Uuid = guid.ToString() }
                 : new PointId { Num = ulong.Parse(id) }).ToList();
 
-            await _client.DeleteAsync(_collectionName, pointIds, cancellationToken: cancellationToken);
+            await _client.DeleteAsync(_collectionName, pointIds, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             _logger?.LogInformation("Deleted {Count} vectors by ID from collection {Collection}", pointIds.Count, _collectionName);
         }
@@ -145,7 +145,7 @@ public sealed partial class QdrantVectorStore
                 throw new ArgumentException("Filter cannot be empty for delete operation", nameof(filter));
             }
 
-            await _client.DeleteAsync(_collectionName, qdrantFilter, cancellationToken: cancellationToken);
+            await _client.DeleteAsync(_collectionName, qdrantFilter, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             _logger?.LogInformation("Deleted vectors by filter from collection {Collection}", _collectionName);
         }
@@ -166,14 +166,14 @@ public sealed partial class QdrantVectorStore
     {
         try
         {
-            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
+            bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken).ConfigureAwait(false);
             if (!collectionExists)
             {
                 return new VectorStoreInfo(_collectionName, 0, 0, "NotFound");
             }
 
-            Qdrant.Client.Grpc.CollectionInfo info = await _client.GetCollectionInfoAsync(_collectionName, cancellationToken);
-            ulong count = await _client.CountAsync(_collectionName, exact: true, cancellationToken: cancellationToken);
+            Qdrant.Client.Grpc.CollectionInfo info = await _client.GetCollectionInfoAsync(_collectionName, cancellationToken).ConfigureAwait(false);
+            ulong count = await _client.CountAsync(_collectionName, exact: true, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             ulong vectorDim = info.Config?.Params?.VectorsConfig?.Params?.Size ?? 0;
             string status = info.Status.ToString();
@@ -208,7 +208,7 @@ public sealed partial class QdrantVectorStore
     /// </summary>
     private async Task EnsureCollectionExistsAsync(LCVector sampleVector, CancellationToken cancellationToken)
     {
-        bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken);
+        bool collectionExists = await _client.CollectionExistsAsync(_collectionName, cancellationToken).ConfigureAwait(false);
         if (!collectionExists)
         {
             int vectorSize = sampleVector.Embedding?.Length ?? 0;
@@ -226,7 +226,7 @@ public sealed partial class QdrantVectorStore
                     Size = (ulong)vectorSize,
                     Distance = Distance.Cosine
                 },
-                cancellationToken: cancellationToken);
+                cancellationToken: cancellationToken).ConfigureAwait(false);
 
             _logger?.LogInformation("Created Qdrant collection {Collection}", _collectionName);
         }
@@ -242,6 +242,6 @@ public sealed partial class QdrantVectorStore
             _client.Dispose();
         }
 
-        await Task.CompletedTask;
+        await Task.CompletedTask.ConfigureAwait(false);
     }
 }

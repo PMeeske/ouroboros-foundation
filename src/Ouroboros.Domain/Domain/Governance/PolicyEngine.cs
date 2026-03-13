@@ -1,4 +1,4 @@
-// <copyright file="PolicyEngine.cs" company="Ouroboros">
+﻿// <copyright file="PolicyEngine.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -127,7 +127,7 @@ public sealed class PolicyEngine : IPolicyEngine
                 return Result<IReadOnlyList<PolicyEvaluationResult>>.Failure("Evaluation cancelled");
             }
 
-            Result<PolicyEvaluationResult> result = await EvaluatePolicyAsync(policy, context, ct);
+            Result<PolicyEvaluationResult> result = await EvaluatePolicyAsync(policy, context, ct).ConfigureAwait(false);
             if (result.IsSuccess)
             {
                 results.Add(result.Value);
@@ -224,7 +224,7 @@ public sealed class PolicyEngine : IPolicyEngine
         object context,
         CancellationToken ct = default)
     {
-        Result<PolicyEvaluationResult> evaluationResult = await EvaluatePolicyAsync(policy, context, ct);
+        Result<PolicyEvaluationResult> evaluationResult = await EvaluatePolicyAsync(policy, context, ct).ConfigureAwait(false);
         
         if (!evaluationResult.IsSuccess)
         {
@@ -252,7 +252,7 @@ public sealed class PolicyEngine : IPolicyEngine
         object context,
         CancellationToken ct = default)
     {
-        Result<IReadOnlyList<PolicyEvaluationResult>> evaluationsResult = await EvaluatePoliciesAsync(context, ct);
+        Result<IReadOnlyList<PolicyEvaluationResult>> evaluationsResult = await EvaluatePoliciesAsync(context, ct).ConfigureAwait(false);
         
         if (!evaluationsResult.IsSuccess)
         {

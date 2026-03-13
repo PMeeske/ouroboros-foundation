@@ -1,4 +1,4 @@
-// <copyright file="AdapterLearningEngine.cs" company="Ouroboros">
+﻿// <copyright file="AdapterLearningEngine.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -67,7 +67,7 @@ public sealed class AdapterLearningEngine : IAdapterLearningEngine
             }
 
             // Initialize adapter with PEFT
-            Result<byte[], string> weightsResult = await _peft.InitializeAdapterAsync(_baseModelName, config, ct);
+            Result<byte[], string> weightsResult = await _peft.InitializeAdapterAsync(_baseModelName, config, ct).ConfigureAwait(false);
             if (weightsResult.IsFailure)
             {
                 return Result<AdapterId, string>.Failure($"Failed to initialize adapter: {weightsResult.Error}");
@@ -76,7 +76,7 @@ public sealed class AdapterLearningEngine : IAdapterLearningEngine
             byte[] weights = weightsResult.Value;
 
             // Validate adapter size
-            Result<long, string> sizeResult = await _peft.ValidateAdapterAsync(weights, ct);
+            Result<long, string> sizeResult = await _peft.ValidateAdapterAsync(weights, ct).ConfigureAwait(false);
             if (sizeResult.IsFailure)
             {
                 return Result<AdapterId, string>.Failure($"Failed to validate adapter: {sizeResult.Error}");
@@ -92,7 +92,7 @@ public sealed class AdapterLearningEngine : IAdapterLearningEngine
             AdapterId adapterId = AdapterId.NewId();
 
             // Store weights in blob storage
-            Result<string, string> blobPathResult = await _blobStorage.StoreWeightsAsync(adapterId, weights, ct);
+            Result<string, string> blobPathResult = await _blobStorage.StoreWeightsAsync(adapterId, weights, ct).ConfigureAwait(false);
             if (blobPathResult.IsFailure)
             {
                 return Result<AdapterId, string>.Failure($"Failed to store adapter weights: {blobPathResult.Error}");
@@ -100,11 +100,11 @@ public sealed class AdapterLearningEngine : IAdapterLearningEngine
 
             // Create and store metadata
             AdapterMetadata metadata = AdapterMetadata.Create(adapterId, taskName, config, blobPathResult.Value);
-            Result<Unit, string> storeResult = await _storage.StoreMetadataAsync(metadata, ct);
+            Result<Unit, string> storeResult = await _storage.StoreMetadataAsync(metadata, ct).ConfigureAwait(false);
             if (storeResult.IsFailure)
             {
                 // Clean up blob storage on metadata storage failure
-                await _blobStorage.DeleteWeightsAsync(blobPathResult.Value, ct);
+                await _blobStorage.DeleteWeightsAsync(blobPathResult.Value, ct).ConfigureAwait(false);
                 return Result<AdapterId, string>.Failure($"Failed to store adapter metadata: {storeResult.Error}");
             }
 
@@ -157,7 +157,7 @@ public sealed class AdapterLearningEngine : IAdapterLearningEngine
             }
 
             // Retrieve adapter metadata
-            Result<AdapterMetadata, string> metadataResult = await _storage.GetMetadataAsync(adapterId, ct);
+            Result<AdapterMetadata, string> metadataResult = await _storage.GetMetadataAsync(adapterId, ct).ConfigureAwait(false);
             if (metadataResult.IsFailure)
             {
                 return Result<Unit, string>.Failure($"Adapter not found: {metadataResult.Error}");
@@ -166,21 +166,21 @@ public sealed class AdapterLearningEngine : IAdapterLearningEngine
             AdapterMetadata metadata = metadataResult.Value;
 
             // Retrieve adapter weights
-            Result<byte[], string> weightsResult = await _blobStorage.GetWeightsAsync(metadata.BlobStoragePath, ct);
+            Result<byte[], string> weightsResult = await _blobStorage.GetWeightsAsync(metadata.BlobStoragePath, ct).ConfigureAwait(false);
             if (weightsResult.IsFailure)
             {
                 return Result<Unit, string>.Failure($"Failed to retrieve adapter weights: {weightsResult.Error}");
             }
 
             // Train adapter
-            Result<byte[], string> trainedWeightsResult = await _peft.TrainAdapterAsync(_baseModelName, weightsResult.Value, examples, config, ct);
+            Result<byte[], string> trainedWeightsResult = await _peft.TrainAdapterAsync(_baseModelName, weightsResult.Value, examples, config, ct).ConfigureAwait(false);
             if (trainedWeightsResult.IsFailure)
             {
                 return Result<Unit, string>.Failure($"Training failed: {trainedWeightsResult.Error}");
             }
 
             // Validate trained adapter size
-            Result<long, string> sizeResult = await _peft.ValidateAdapterAsync(trainedWeightsResult.Value, ct);
+            Result<long, string> sizeResult = await _peft.ValidateAdapterAsync(trainedWeightsResult.Value, ct).ConfigureAwait(false);
             if (sizeResult.IsFailure)
             {
                 return Result<Unit, string>.Failure($"Failed to validate trained adapter: {sizeResult.Error}");
@@ -193,7 +193,7 @@ public sealed class AdapterLearningEngine : IAdapterLearningEngine
             }
 
             // Store updated weights
-            Result<string, string> storeWeightsResult = await _blobStorage.StoreWeightsAsync(adapterId, trainedWeightsResult.Value, ct);
+            Result<string, string> storeWeightsResult = await _blobStorage.StoreWeightsAsync(adapterId, trainedWeightsResult.Value, ct).ConfigureAwait(false);
             if (storeWeightsResult.IsFailure)
             {
                 return Result<Unit, string>.Failure($"Failed to store trained weights: {storeWeightsResult.Error}");
@@ -201,7 +201,7 @@ public sealed class AdapterLearningEngine : IAdapterLearningEngine
 
             // Update metadata
             AdapterMetadata updatedMetadata = metadata.WithTraining(examples.Count);
-            Result<Unit, string> updateMetadataResult = await _storage.UpdateMetadataAsync(updatedMetadata, ct);
+            Result<Unit, string> updateMetadataResult = await _storage.UpdateMetadataAsync(updatedMetadata, ct).ConfigureAwait(false);
             if (updateMetadataResult.IsFailure)
             {
                 _logger?.LogWarning("Failed to update metadata after training: {Error}", updateMetadataResult.Error);
@@ -242,13 +242,13 @@ public sealed class AdapterLearningEngine : IAdapterLearningEngine
             List<byte[]> weightsList = new List<byte[]>();
             foreach (AdapterId adapterId in adapters)
             {
-                Result<AdapterMetadata, string> metadataResult = await _storage.GetMetadataAsync(adapterId, ct);
+                Result<AdapterMetadata, string> metadataResult = await _storage.GetMetadataAsync(adapterId, ct).ConfigureAwait(false);
                 if (metadataResult.IsFailure)
                 {
                     return Result<Unit, string>.Failure($"Adapter {adapterId} not found: {metadataResult.Error}");
                 }
 
-                Result<byte[], string> weightsResult = await _blobStorage.GetWeightsAsync(metadataResult.Value.BlobStoragePath, ct);
+                Result<byte[], string> weightsResult = await _blobStorage.GetWeightsAsync(metadataResult.Value.BlobStoragePath, ct).ConfigureAwait(false);
                 if (weightsResult.IsFailure)
                 {
                     return Result<Unit, string>.Failure($"Failed to retrieve weights for adapter {adapterId}: {weightsResult.Error}");
@@ -258,7 +258,7 @@ public sealed class AdapterLearningEngine : IAdapterLearningEngine
             }
 
             // Merge adapters
-            Result<byte[], string> mergedWeightsResult = await _peft.MergeAdaptersAsync(_baseModelName, weightsList, strategy, ct);
+            Result<byte[], string> mergedWeightsResult = await _peft.MergeAdaptersAsync(_baseModelName, weightsList, strategy, ct).ConfigureAwait(false);
             if (mergedWeightsResult.IsFailure)
             {
                 return Result<Unit, string>.Failure($"Merge failed: {mergedWeightsResult.Error}");
@@ -266,7 +266,7 @@ public sealed class AdapterLearningEngine : IAdapterLearningEngine
 
             // Store merged adapter
             AdapterId mergedId = AdapterId.NewId();
-            Result<string, string> storeResult = await _blobStorage.StoreWeightsAsync(mergedId, mergedWeightsResult.Value, ct);
+            Result<string, string> storeResult = await _blobStorage.StoreWeightsAsync(mergedId, mergedWeightsResult.Value, ct).ConfigureAwait(false);
             if (storeResult.IsFailure)
             {
                 return Result<Unit, string>.Failure($"Failed to store merged adapter: {storeResult.Error}");
@@ -278,7 +278,7 @@ public sealed class AdapterLearningEngine : IAdapterLearningEngine
                 $"merged_{strategy}",
                 AdapterConfig.Default(),
                 storeResult.Value);
-            await _storage.StoreMetadataAsync(mergedMetadata, ct);
+            await _storage.StoreMetadataAsync(mergedMetadata, ct).ConfigureAwait(false);
 
             _logger?.LogInformation("Successfully merged adapters into {MergedId}", mergedId);
             return Result<Unit, string>.Success(Unit.Value);
@@ -315,13 +315,13 @@ public sealed class AdapterLearningEngine : IAdapterLearningEngine
             if (adapterId != null)
             {
                 // Retrieve adapter weights
-                Result<AdapterMetadata, string> metadataResult = await _storage.GetMetadataAsync(adapterId, ct);
+                Result<AdapterMetadata, string> metadataResult = await _storage.GetMetadataAsync(adapterId, ct).ConfigureAwait(false);
                 if (metadataResult.IsFailure)
                 {
                     return Result<string, string>.Failure($"Adapter not found: {metadataResult.Error}");
                 }
 
-                Result<byte[], string> weightsResult = await _blobStorage.GetWeightsAsync(metadataResult.Value.BlobStoragePath, ct);
+                Result<byte[], string> weightsResult = await _blobStorage.GetWeightsAsync(metadataResult.Value.BlobStoragePath, ct).ConfigureAwait(false);
                 if (weightsResult.IsFailure)
                 {
                     return Result<string, string>.Failure($"Failed to retrieve adapter weights: {weightsResult.Error}");
@@ -331,7 +331,7 @@ public sealed class AdapterLearningEngine : IAdapterLearningEngine
             }
 
             // Generate text
-            Result<string, string> generateResult = await _peft.GenerateAsync(_baseModelName, weights, prompt, ct);
+            Result<string, string> generateResult = await _peft.GenerateAsync(_baseModelName, weights, prompt, ct).ConfigureAwait(false);
             if (generateResult.IsFailure)
             {
                 return Result<string, string>.Failure($"Generation failed: {generateResult.Error}");
@@ -387,7 +387,7 @@ public sealed class AdapterLearningEngine : IAdapterLearningEngine
 
             // Train with single example using incremental update
             TrainingConfig trainingConfig = TrainingConfig.Default() with { IncrementalUpdate = true, Epochs = 1 };
-            return await this.TrainAdapterAsync(adapterId, new List<TrainingExample> { trainingExample }, trainingConfig, ct);
+            return await this.TrainAdapterAsync(adapterId, new List<TrainingExample> { trainingExample }, trainingConfig, ct).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {

@@ -1,5 +1,6 @@
 using Ouroboros.Core.Hyperon;
 using Ouroboros.Core.LawsOfForm;
+using LoF = Ouroboros.Core.LawsOfForm.Form;
 
 namespace Ouroboros.Core.Tests.Hyperon;
 
@@ -11,7 +12,7 @@ public class FormAtomTests
     {
         var sut = FormAtom.Mark;
 
-        sut.Form.Should().Be(Form.Mark);
+        sut.Form.Should().Be(LoF.Mark);
     }
 
     [Fact]
@@ -19,7 +20,7 @@ public class FormAtomTests
     {
         var sut = FormAtom.Void;
 
-        sut.Form.Should().Be(Form.Void);
+        sut.Form.Should().Be(LoF.Void);
     }
 
     [Fact]
@@ -27,7 +28,7 @@ public class FormAtomTests
     {
         var sut = FormAtom.Imaginary;
 
-        sut.Form.Should().Be(Form.Imaginary);
+        sut.Form.Should().Be(LoF.Imaginary);
     }
 
     [Fact]
@@ -61,7 +62,7 @@ public class FormAtomTests
     {
         var result = FormAtom.Mark.Cross();
 
-        result.Form.Should().Be(Form.Void);
+        result.Form.Should().Be(LoF.Void);
     }
 
     [Fact]
@@ -69,7 +70,7 @@ public class FormAtomTests
     {
         var result = FormAtom.Void.Cross();
 
-        result.Form.Should().Be(Form.Mark);
+        result.Form.Should().Be(LoF.Mark);
     }
 
     [Fact]
@@ -85,7 +86,7 @@ public class FormAtomTests
     {
         var result = FormAtom.Mark.And(FormAtom.Mark);
 
-        result.Form.Should().Be(Form.Mark);
+        result.Form.Should().Be(LoF.Mark);
     }
 
     [Fact]
@@ -93,7 +94,7 @@ public class FormAtomTests
     {
         var result = FormAtom.Mark.And(FormAtom.Void);
 
-        result.Form.Should().Be(Form.Void);
+        result.Form.Should().Be(LoF.Void);
     }
 
     [Fact]
@@ -101,7 +102,7 @@ public class FormAtomTests
     {
         var result = FormAtom.Mark.Or(FormAtom.Void);
 
-        result.Form.Should().Be(Form.Mark);
+        result.Form.Should().Be(LoF.Mark);
     }
 
     [Fact]
@@ -109,7 +110,7 @@ public class FormAtomTests
     {
         var result = FormAtom.Void.Or(FormAtom.Void);
 
-        result.Form.Should().Be(Form.Void);
+        result.Form.Should().Be(LoF.Void);
     }
 
     [Fact]
@@ -123,8 +124,8 @@ public class FormAtomTests
     [Fact]
     public void RecordEquality_SameForm_AreEqual()
     {
-        var a = new FormAtom(Form.Mark);
-        var b = new FormAtom(Form.Mark);
+        var a = new FormAtom(LoF.Mark);
+        var b = new FormAtom(LoF.Mark);
 
         a.Should().Be(b);
     }

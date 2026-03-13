@@ -1,4 +1,4 @@
-// <copyright file="Population.cs" company="Ouroboros">
+﻿// <copyright file="Population.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -78,7 +78,7 @@ public sealed class Population<TGene>
         
         foreach (IChromosome<TGene> chromosome in this.chromosomes)
         {
-            double fitness = await fitnessFunction.EvaluateAsync(chromosome, cancellationToken);
+            double fitness = await fitnessFunction.EvaluateAsync(chromosome, cancellationToken).ConfigureAwait(false);
             evaluatedChromosomes.Add(chromosome.WithFitness(fitness));
         }
         

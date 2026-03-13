@@ -1,4 +1,4 @@
-// <copyright file="FileSystemBlobStorage.cs" company="Ouroboros">
+﻿// <copyright file="FileSystemBlobStorage.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -55,7 +55,7 @@ public sealed class FileSystemBlobStorage : IAdapterBlobStorage
 
             _logger?.LogInformation("Storing adapter weights to {FilePath}", filePath);
 
-            await File.WriteAllBytesAsync(filePath, weights, ct);
+            await File.WriteAllBytesAsync(filePath, weights, ct).ConfigureAwait(false);
 
             return Result<string, string>.Success(filePath);
         }
@@ -88,7 +88,7 @@ public sealed class FileSystemBlobStorage : IAdapterBlobStorage
 
             _logger?.LogInformation("Retrieving adapter weights from {Path}", path);
 
-            byte[] weights = await File.ReadAllBytesAsync(path, ct);
+            byte[] weights = await File.ReadAllBytesAsync(path, ct).ConfigureAwait(false);
 
             return Result<byte[], string>.Success(weights);
         }
@@ -122,7 +122,7 @@ public sealed class FileSystemBlobStorage : IAdapterBlobStorage
 
             _logger?.LogInformation("Deleting adapter weights from {Path}", path);
 
-            await Task.Run(() => File.Delete(path), ct);
+            await Task.Run(() => File.Delete(path), ct).ConfigureAwait(false);
 
             return Result<Unit, string>.Success(Unit.Value);
         }
@@ -154,7 +154,7 @@ public sealed class FileSystemBlobStorage : IAdapterBlobStorage
             }
 
             FileInfo fileInfo = new FileInfo(path);
-            long size = await Task.Run(() => fileInfo.Length, ct);
+            long size = await Task.Run(() => fileInfo.Length, ct).ConfigureAwait(false);
 
             return Result<long, string>.Success(size);
         }

@@ -55,7 +55,7 @@ public sealed class SymbolicNeuron : Neuron
                     // Also add to real MeTTa engine if available
                     if (MeTTaAddFactFunction != null)
                     {
-                        await MeTTaAddFactFunction(fact, ct);
+                        await MeTTaAddFactFunction(fact, ct).ConfigureAwait(false);
                     }
 
                     SendMessage("metta.fact_added", new { Fact = fact, TotalFacts = _facts.Count });
@@ -71,7 +71,7 @@ public sealed class SymbolicNeuron : Neuron
                     // Also add to real MeTTa engine if available
                     if (MeTTaAddFactFunction != null)
                     {
-                        await MeTTaAddFactFunction(rule, ct);
+                        await MeTTaAddFactFunction(rule, ct).ConfigureAwait(false);
                     }
                 }
 
@@ -80,14 +80,14 @@ public sealed class SymbolicNeuron : Neuron
             case "metta.query":
                 // Execute symbolic query
                 string query = message.Payload?.ToString() ?? "";
-                string result = await ExecuteSymbolicQueryAsync(query, ct);
+                string result = await ExecuteSymbolicQueryAsync(query, ct).ConfigureAwait(false);
                 SendResponse(message, new { Query = query, Result = result });
                 break;
 
             case "reasoning.request":
                 // Request symbolic reasoning support
                 string context = message.Payload?.ToString() ?? "";
-                object reasoning = await PerformSymbolicReasoningAsync(context, ct);
+                object reasoning = await PerformSymbolicReasoningAsync(context, ct).ConfigureAwait(false);
                 SendResponse(message, reasoning);
                 break;
 
@@ -96,7 +96,7 @@ public sealed class SymbolicNeuron : Neuron
                 dynamic? verifyPayload = message.Payload as dynamic;
                 dynamic branchName = verifyPayload?.BranchName?.ToString() ?? "main";
                 dynamic constraint = verifyPayload?.Constraint?.ToString() ?? "acyclic";
-                dynamic verifyResult = await VerifyDagConstraintAsync(branchName, constraint, ct);
+                dynamic verifyResult = await VerifyDagConstraintAsync(branchName, constraint, ct).ConfigureAwait(false);
                 SendResponse(message, new { BranchName = branchName, Constraint = constraint, IsValid = verifyResult });
                 break;
 
@@ -110,7 +110,7 @@ public sealed class SymbolicNeuron : Neuron
                         _facts.Add(dagFact);
                         if (MeTTaAddFactFunction != null)
                         {
-                            await MeTTaAddFactFunction(dagFact, ct);
+                            await MeTTaAddFactFunction(dagFact, ct).ConfigureAwait(false);
                         }
                     }
                 }
@@ -130,7 +130,7 @@ public sealed class SymbolicNeuron : Neuron
         {
             try
             {
-                return await MeTTaQueryFunction(query, ct);
+                return await MeTTaQueryFunction(query, ct).ConfigureAwait(false);
             }
             catch (OperationCanceledException) { throw; }
             catch (InvalidOperationException ex)
@@ -164,7 +164,7 @@ public sealed class SymbolicNeuron : Neuron
             {
                 // Query for relevant facts about the context
                 string relevantQuery = $"!(match &self ($rel \"{context}\" $obj) ($rel $obj))";
-                mettaResult = await MeTTaQueryFunction(relevantQuery, ct);
+                mettaResult = await MeTTaQueryFunction(relevantQuery, ct).ConfigureAwait(false);
             }
             catch (OperationCanceledException) { throw; }
             catch (InvalidOperationException)
@@ -204,7 +204,7 @@ public sealed class SymbolicNeuron : Neuron
                 _ => $"!(CheckConstraint \"{constraint}\" (Branch \"{branchName}\"))"
             };
 
-            string result = await MeTTaQueryFunction(query, ct);
+            string result = await MeTTaQueryFunction(query, ct).ConfigureAwait(false);
 
             // Empty or true-like result means constraint is satisfied
             return string.IsNullOrWhiteSpace(result) ||

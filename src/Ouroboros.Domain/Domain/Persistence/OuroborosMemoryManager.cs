@@ -1,4 +1,4 @@
-// <copyright file="OuroborosMemoryManager.cs" company="Ouroboros">
+﻿// <copyright file="OuroborosMemoryManager.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -62,19 +62,19 @@ public sealed class OuroborosMemoryManager : IAsyncDisposable
     {
         if (_initialized) return;
 
-        await _admin.InitializeAsync(ct);
+        await _admin.InitializeAsync(ct).ConfigureAwait(false);
 
         // Ensure all memory layer collections exist
         foreach (MemoryLayerMapping mapping in _layerMappings.Values)
         {
             foreach (string collection in mapping.Collections)
             {
-                CollectionInfo? info = await _admin.GetCollectionInfoAsync(collection, ct);
+                CollectionInfo? info = await _admin.GetCollectionInfoAsync(collection, ct).ConfigureAwait(false);
                 if (info == null)
                 {
                     // Create missing collection
                     QdrantCollectionAdmin.KnownCollections.TryGetValue(collection, out string? purpose);
-                    await _admin.CreateCollectionAsync(collection, purpose: purpose ?? mapping.Description, ct: ct);
+                    await _admin.CreateCollectionAsync(collection, purpose: purpose ?? mapping.Description, ct: ct).ConfigureAwait(false);
                 }
             }
         }
@@ -89,16 +89,16 @@ public sealed class OuroborosMemoryManager : IAsyncDisposable
         bool autoHeal = false,
         CancellationToken ct = default)
     {
-        IReadOnlyList<CollectionHealthReport> healthReports = await _admin.HealthCheckAsync(ct: ct);
+        IReadOnlyList<CollectionHealthReport> healthReports = await _admin.HealthCheckAsync(ct: ct).ConfigureAwait(false);
         List<CollectionHealthReport> unhealthyCollections = healthReports.Where(r => !r.IsHealthy).ToList();
         List<string> healedCollections = new List<string>();
 
         if (autoHeal && unhealthyCollections.Any())
         {
-            healedCollections = (await _admin.AutoHealDimensionMismatchesAsync(ct: ct)).ToList();
+            healedCollections = (await _admin.AutoHealDimensionMismatchesAsync(ct: ct).ConfigureAwait(false)).ToList();
         }
 
-        MemoryStatistics stats = await _admin.GetMemoryStatisticsAsync(ct);
+        MemoryStatistics stats = await _admin.GetMemoryStatisticsAsync(ct).ConfigureAwait(false);
 
         return new MemoryHealthReport(
             healthReports.Count(r => r.IsHealthy),
@@ -138,7 +138,7 @@ public sealed class OuroborosMemoryManager : IAsyncDisposable
     /// </summary>
     public async Task<string> GetMemoryMapAsync(CancellationToken ct = default)
     {
-        return await _admin.GenerateMemoryMapAsync(ct);
+        return await _admin.GenerateMemoryMapAsync(ct).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -146,7 +146,7 @@ public sealed class OuroborosMemoryManager : IAsyncDisposable
     /// </summary>
     public async Task<long> GetTotalMemoryVectorsAsync(CancellationToken ct = default)
     {
-        MemoryStatistics stats = await _admin.GetMemoryStatisticsAsync(ct);
+        MemoryStatistics stats = await _admin.GetMemoryStatisticsAsync(ct).ConfigureAwait(false);
         return stats.TotalVectors;
     }
 
@@ -160,7 +160,7 @@ public sealed class OuroborosMemoryManager : IAsyncDisposable
 
         foreach (string collection in collections)
         {
-            CollectionInfo? info = await _admin.GetCollectionInfoAsync(collection, ct);
+            CollectionInfo? info = await _admin.GetCollectionInfoAsync(collection, ct).ConfigureAwait(false);
             if (info != null)
             {
                 total += (long)info.PointsCount;
@@ -185,12 +185,12 @@ public sealed class OuroborosMemoryManager : IAsyncDisposable
 
         foreach (string collection in collections)
         {
-            bool deleted = await _admin.DeleteCollectionAsync(collection, ct);
+            bool deleted = await _admin.DeleteCollectionAsync(collection, ct).ConfigureAwait(false);
             if (deleted)
             {
                 // Recreate empty collection
                 QdrantCollectionAdmin.KnownCollections.TryGetValue(collection, out string? purpose);
-                await _admin.CreateCollectionAsync(collection, purpose: purpose, ct: ct);
+                await _admin.CreateCollectionAsync(collection, purpose: purpose, ct: ct).ConfigureAwait(false);
             }
             else
             {
@@ -206,14 +206,14 @@ public sealed class OuroborosMemoryManager : IAsyncDisposable
     /// </summary>
     public async Task<MemorySnapshot> CreateSnapshotAsync(CancellationToken ct = default)
     {
-        IReadOnlyList<CollectionInfo> collections = await _admin.GetAllCollectionsAsync(ct);
-        MemoryStatistics stats = await _admin.GetMemoryStatisticsAsync(ct);
+        IReadOnlyList<CollectionInfo> collections = await _admin.GetAllCollectionsAsync(ct).ConfigureAwait(false);
+        MemoryStatistics stats = await _admin.GetMemoryStatisticsAsync(ct).ConfigureAwait(false);
         IReadOnlyList<CollectionLink> links = _admin.CollectionLinks;
 
         Dictionary<MemoryLayer, long> layerStats = new Dictionary<MemoryLayer, long>();
         foreach (MemoryLayer layer in Enum.GetValues<MemoryLayer>())
         {
-            layerStats[layer] = await GetLayerVectorCountAsync(layer, ct);
+            layerStats[layer] = await GetLayerVectorCountAsync(layer, ct).ConfigureAwait(false);
         }
 
         return new MemorySnapshot(
@@ -243,6 +243,6 @@ public sealed class OuroborosMemoryManager : IAsyncDisposable
     /// <inheritdoc/>
     public async ValueTask DisposeAsync()
     {
-        await _admin.DisposeAsync();
+        await _admin.DisposeAsync().ConfigureAwait(false);
     }
 }

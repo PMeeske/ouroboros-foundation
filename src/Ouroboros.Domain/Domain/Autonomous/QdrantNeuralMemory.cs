@@ -1,4 +1,4 @@
-// <copyright file="QdrantNeuralMemory.cs" company="Ouroboros">
+﻿// <copyright file="QdrantNeuralMemory.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -67,9 +67,9 @@ public sealed partial class QdrantNeuralMemory : IDisposable
     public async Task InitializeAsync(int vectorSize = 0, CancellationToken ct = default)
     {
         int size = vectorSize > 0 ? vectorSize : _defaultVectorSize;
-        await EnsureCollectionWithMigrationAsync(_neuronMessagesCollection, size, ct);
-        await EnsureCollectionWithMigrationAsync(_intentionsCollection, size, ct);
-        await EnsureCollectionWithMigrationAsync(_memoriesCollection, size, ct);
+        await EnsureCollectionWithMigrationAsync(_neuronMessagesCollection, size, ct).ConfigureAwait(false);
+        await EnsureCollectionWithMigrationAsync(_intentionsCollection, size, ct).ConfigureAwait(false);
+        await EnsureCollectionWithMigrationAsync(_memoriesCollection, size, ct).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -81,20 +81,20 @@ public sealed partial class QdrantNeuralMemory : IDisposable
 
         try
         {
-            bool exists = await _client.CollectionExistsAsync(collectionName, ct);
+            bool exists = await _client.CollectionExistsAsync(collectionName, ct).ConfigureAwait(false);
 
             if (!exists)
             {
                 await _client.CreateCollectionAsync(
                     collectionName,
                     new VectorParams { Size = (ulong)vectorSize, Distance = Distance.Cosine },
-                    cancellationToken: ct);
+                    cancellationToken: ct).ConfigureAwait(false);
                 _initializedCollections[collectionName] = true;
                 return;
             }
 
             // Check dimension
-            CollectionInfo info = await _client.GetCollectionInfoAsync(collectionName, ct);
+            CollectionInfo info = await _client.GetCollectionInfoAsync(collectionName, ct).ConfigureAwait(false);
             int currentSize = (int)(info.Config?.Params?.VectorsConfig?.Params?.Size ?? 0);
 
             if (currentSize == vectorSize)
@@ -106,30 +106,30 @@ public sealed partial class QdrantNeuralMemory : IDisposable
             // Dimension mismatch - need to migrate
             _logger.LogWarning("Qdrant: {CollectionName} dimension mismatch ({CurrentSize} -> {VectorSize})", collectionName, currentSize, vectorSize);
 
-            ulong pointCount = await _client.CountAsync(collectionName, exact: true, cancellationToken: ct);
+            ulong pointCount = await _client.CountAsync(collectionName, exact: true, cancellationToken: ct).ConfigureAwait(false);
 
             if (pointCount == 0)
             {
                 _logger.LogInformation("Recreating empty collection {CollectionName}", collectionName);
-                await _client.DeleteCollectionAsync(collectionName, cancellationToken: ct);
+                await _client.DeleteCollectionAsync(collectionName, cancellationToken: ct).ConfigureAwait(false);
                 await _client.CreateCollectionAsync(
                     collectionName,
                     new VectorParams { Size = (ulong)vectorSize, Distance = Distance.Cosine },
-                    cancellationToken: ct);
+                    cancellationToken: ct).ConfigureAwait(false);
             }
             else if (EmbedFunction != null)
             {
                 _logger.LogInformation("Migrating {PointCount} points with new embeddings in {CollectionName}", pointCount, collectionName);
-                await MigrateCollectionAsync(collectionName, vectorSize, ct);
+                await MigrateCollectionAsync(collectionName, vectorSize, ct).ConfigureAwait(false);
             }
             else
             {
                 _logger.LogWarning("Cannot re-embed {PointCount} points (no embedding function), data in {CollectionName} will be reset", pointCount, collectionName);
-                await _client.DeleteCollectionAsync(collectionName, cancellationToken: ct);
+                await _client.DeleteCollectionAsync(collectionName, cancellationToken: ct).ConfigureAwait(false);
                 await _client.CreateCollectionAsync(
                     collectionName,
                     new VectorParams { Size = (ulong)vectorSize, Distance = Distance.Cosine },
-                    cancellationToken: ct);
+                    cancellationToken: ct).ConfigureAwait(false);
             }
 
             _initializedCollections[collectionName] = true;
@@ -156,17 +156,17 @@ public sealed partial class QdrantNeuralMemory : IDisposable
         try
         {
             // 1. Scroll through all points and extract payloads
-            List<(string Id, Dictionary<string, string> Payload)> allPayloads = await ScrollAllPayloadsAsync(collectionName, ct);
+            List<(string Id, Dictionary<string, string> Payload)> allPayloads = await ScrollAllPayloadsAsync(collectionName, ct).ConfigureAwait(false);
             _logger.LogInformation("Retrieved {PayloadCount} payloads for migration", allPayloads.Count);
 
             // 2. Delete old collection
-            await _client.DeleteCollectionAsync(collectionName, cancellationToken: ct);
+            await _client.DeleteCollectionAsync(collectionName, cancellationToken: ct).ConfigureAwait(false);
 
             // 3. Create new collection with correct dimension
             await _client.CreateCollectionAsync(
                 collectionName,
                 new VectorParams { Size = (ulong)newVectorSize, Distance = Distance.Cosine },
-                cancellationToken: ct);
+                cancellationToken: ct).ConfigureAwait(false);
 
             // 4. Re-embed and insert each point
             int migrated = 0;
@@ -182,7 +182,7 @@ public sealed partial class QdrantNeuralMemory : IDisposable
                         continue;
                     }
 
-                    float[] newEmbedding = await EmbedFunction!(searchText, ct);
+                    float[] newEmbedding = await EmbedFunction!(searchText, ct).ConfigureAwait(false);
                     if (newEmbedding == null || newEmbedding.Length != newVectorSize)
                     {
                         failed++;
@@ -199,7 +199,7 @@ public sealed partial class QdrantNeuralMemory : IDisposable
                         point.Payload[key] = value?.ToString() ?? string.Empty;
                     }
 
-                    await _client.UpsertAsync(collectionName, new[] { point }, cancellationToken: ct);
+                    await _client.UpsertAsync(collectionName, new[] { point }, cancellationToken: ct).ConfigureAwait(false);
                     migrated++;
                 }
                 catch (Grpc.Core.RpcException)
@@ -220,7 +220,7 @@ public sealed partial class QdrantNeuralMemory : IDisposable
             await _client.CreateCollectionAsync(
                 collectionName,
                 new VectorParams { Size = (ulong)newVectorSize, Distance = Distance.Cosine },
-                cancellationToken: ct);
+                cancellationToken: ct).ConfigureAwait(false);
         }
         catch (HttpRequestException ex)
         {
@@ -228,7 +228,7 @@ public sealed partial class QdrantNeuralMemory : IDisposable
             await _client.CreateCollectionAsync(
                 collectionName,
                 new VectorParams { Size = (ulong)newVectorSize, Distance = Distance.Cosine },
-                cancellationToken: ct);
+                cancellationToken: ct).ConfigureAwait(false);
         }
     }
 
@@ -261,7 +261,7 @@ public sealed partial class QdrantNeuralMemory : IDisposable
                     limit: 100,
                     offset: offset,
                     payloadSelector: new WithPayloadSelector { Enable = true },
-                    cancellationToken: ct);
+                    cancellationToken: ct).ConfigureAwait(false);
 
                 foreach (RetrievedPoint? point in scrollResult.Result)
                 {
@@ -296,7 +296,7 @@ public sealed partial class QdrantNeuralMemory : IDisposable
         string content = JsonSerializer.Serialize(message.Payload);
         string searchText = $"{message.Topic} {content}";
 
-        float[]? embedding = await GetEmbeddingAsync(searchText, ct);
+        float[]? embedding = await GetEmbeddingAsync(searchText, ct).ConfigureAwait(false);
         if (embedding == null) return;
 
         PointStruct point = new PointStruct
@@ -315,7 +315,7 @@ public sealed partial class QdrantNeuralMemory : IDisposable
             }
         };
 
-        await _client.UpsertAsync(_neuronMessagesCollection, new[] { point }, cancellationToken: ct);
+        await _client.UpsertAsync(_neuronMessagesCollection, new[] { point }, cancellationToken: ct).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -325,7 +325,7 @@ public sealed partial class QdrantNeuralMemory : IDisposable
     {
         string searchText = $"{intention.Title} {intention.Description} {intention.Rationale}";
 
-        float[]? embedding = await GetEmbeddingAsync(searchText, ct);
+        float[]? embedding = await GetEmbeddingAsync(searchText, ct).ConfigureAwait(false);
         if (embedding == null) return;
 
         PointStruct point = new PointStruct
@@ -346,7 +346,7 @@ public sealed partial class QdrantNeuralMemory : IDisposable
             }
         };
 
-        await _client.UpsertAsync(_intentionsCollection, new[] { point }, cancellationToken: ct);
+        await _client.UpsertAsync(_intentionsCollection, new[] { point }, cancellationToken: ct).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -368,13 +368,13 @@ public sealed partial class QdrantNeuralMemory : IDisposable
             }
         };
 
-        await _client.UpsertAsync(_memoriesCollection, new[] { point }, cancellationToken: ct);
+        await _client.UpsertAsync(_memoriesCollection, new[] { point }, cancellationToken: ct).ConfigureAwait(false);
     }
 
     private async Task<float[]?> GetEmbeddingAsync(string text, CancellationToken ct)
     {
         if (EmbedFunction == null) return null;
-        return await EmbedFunction(text, ct);
+        return await EmbedFunction(text, ct).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>

@@ -1,4 +1,4 @@
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using OllamaSharp;
@@ -15,21 +15,17 @@ namespace Ouroboros.Roslynator.Pipeline.Steps;
 /// </summary>
 public static class OllamaSteps
 {
-    private static readonly OllamaApiClient _ollama = CreateClient();
+    private static readonly HttpClient _httpClient = new HttpClient
+    {
+        Timeout = TimeSpan.FromMinutes(2),
+        BaseAddress = new Uri(
+            Environment.GetEnvironmentVariable("OLLAMA_ENDPOINT")
+            ?? DefaultEndpoints.Ollama),
+    };
+
+    private static readonly OllamaApiClient _ollama = new OllamaApiClient(_httpClient);
 
     private static string Model => Environment.GetEnvironmentVariable("OLLAMA_MODEL") ?? "codellama";
-
-    private static OllamaApiClient CreateClient()
-    {
-        var http = new HttpClient
-        {
-            Timeout = TimeSpan.FromMinutes(2),
-            BaseAddress = new Uri(
-                Environment.GetEnvironmentVariable("OLLAMA_ENDPOINT")
-                ?? DefaultEndpoints.Ollama),
-        };
-        return new OllamaApiClient(http);
-    }
 
     /// <summary>
     /// Main Ollama step. Returns the same state if no change is made or on failure.

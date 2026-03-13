@@ -1,18 +1,15 @@
-// <copyright file="IPolicy.cs" company="Ouroboros">
+﻿// <copyright file="IPolicy.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
 using Ouroboros.Abstractions;
 using Ouroboros.Domain.Environment;
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Domain.Reinforcement;
 
 /// <summary>
 /// Interface for reinforcement learning policies.
 /// Selects actions based on environment state.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IPolicy
 {
     /// <summary>

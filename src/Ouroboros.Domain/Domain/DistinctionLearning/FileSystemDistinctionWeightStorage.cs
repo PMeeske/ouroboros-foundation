@@ -1,4 +1,4 @@
-// <copyright file="FileSystemDistinctionWeightStorage.cs" company="Ouroboros">
+﻿// <copyright file="FileSystemDistinctionWeightStorage.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -49,11 +49,11 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
         try
         {
             string filePath = Path.Combine(_config.StoragePath, $"{id}.weights");
-            await File.WriteAllBytesAsync(filePath, weights, ct);
+            await File.WriteAllBytesAsync(filePath, weights, ct).ConfigureAwait(false);
 
             // Update metadata with actual file path
             DistinctionWeightMetadata updatedMetadata = metadata with { Path = filePath };
-            await UpdateMetadataAsync(updatedMetadata, ct);
+            await UpdateMetadataAsync(updatedMetadata, ct).ConfigureAwait(false);
 
             _logger?.LogDebug("Stored weights {Id} at {Path}", id, filePath);
             return Result<string, string>.Success(filePath);
@@ -89,7 +89,7 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
                 return Result<byte[], string>.Failure($"Weights file not found: {id}");
             }
 
-            byte[] weights = await File.ReadAllBytesAsync(filePath, ct);
+            byte[] weights = await File.ReadAllBytesAsync(filePath, ct).ConfigureAwait(false);
             return Result<byte[], string>.Success(weights);
         }
         catch (OperationCanceledException)
@@ -121,7 +121,7 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
                 return Result<List<DistinctionWeightMetadata>, string>.Success(new List<DistinctionWeightMetadata>());
             }
 
-            string json = await File.ReadAllTextAsync(_metadataPath, ct);
+            string json = await File.ReadAllTextAsync(_metadataPath, ct).ConfigureAwait(false);
             List<DistinctionWeightMetadata> metadata = JsonSerializer.Deserialize<List<DistinctionWeightMetadata>>(json)
                 ?? new List<DistinctionWeightMetadata>();
 
@@ -165,14 +165,14 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
             }
 
             // Update metadata
-            Result<List<DistinctionWeightMetadata>, string> listResult = await ListWeightsAsync(ct);
+            Result<List<DistinctionWeightMetadata>, string> listResult = await ListWeightsAsync(ct).ConfigureAwait(false);
             if (listResult.IsSuccess)
             {
                 List<DistinctionWeightMetadata> allMetadata = listResult.Value;
                 List<DistinctionWeightMetadata> updated = allMetadata.Select(m =>
                     m.Path == path ? m with { IsDissolved = true, Path = dissolvedPath } : m).ToList();
 
-                await SaveMetadataAsync(updated, ct);
+                await SaveMetadataAsync(updated, ct).ConfigureAwait(false);
             }
 
             _logger?.LogDebug("Dissolved weights at {Path}", path);
@@ -219,7 +219,7 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
 
     private async Task UpdateMetadataAsync(DistinctionWeightMetadata metadata, CancellationToken ct)
     {
-        Result<List<DistinctionWeightMetadata>, string> listResult = await ListWeightsAsync(ct);
+        Result<List<DistinctionWeightMetadata>, string> listResult = await ListWeightsAsync(ct).ConfigureAwait(false);
         List<DistinctionWeightMetadata> allMetadata = listResult.IsSuccess ? listResult.Value : new List<DistinctionWeightMetadata>();
 
         // Add or update metadata
@@ -233,12 +233,12 @@ public sealed class FileSystemDistinctionWeightStorage : IDistinctionWeightStora
             allMetadata.Add(metadata);
         }
 
-        await SaveMetadataAsync(allMetadata, ct);
+        await SaveMetadataAsync(allMetadata, ct).ConfigureAwait(false);
     }
 
     private async Task SaveMetadataAsync(List<DistinctionWeightMetadata> metadata, CancellationToken ct)
     {
         string json = JsonSerializer.Serialize(metadata, SharedJsonOptions);
-        await File.WriteAllTextAsync(_metadataPath, json, ct);
+        await File.WriteAllTextAsync(_metadataPath, json, ct).ConfigureAwait(false);
     }
 }

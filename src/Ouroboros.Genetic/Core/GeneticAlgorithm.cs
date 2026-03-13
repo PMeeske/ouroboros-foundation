@@ -1,4 +1,4 @@
-// <copyright file="GeneticAlgorithm.cs" company="Ouroboros">
+﻿// <copyright file="GeneticAlgorithm.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -84,11 +84,11 @@ public sealed class GeneticAlgorithm<TGene> : IGeneticAlgorithm<TGene>
             Population<TGene> population = new Population<TGene>(initialPopulation);
             
             // Evaluate initial population
-            population = await population.EvaluateAsync(FitnessFunction, cancellationToken);
+            population = await population.EvaluateAsync(FitnessFunction, cancellationToken).ConfigureAwait(false);
 
             for (int generation = 0; generation < generations; generation++)
             {
-                population = await EvolveGenerationAsync(population, cancellationToken);
+                population = await EvolveGenerationAsync(population, cancellationToken).ConfigureAwait(false);
             }
 
             return Result<IChromosome<TGene>, string>.Success(population.BestChromosome);
@@ -143,6 +143,6 @@ public sealed class GeneticAlgorithm<TGene> : IGeneticAlgorithm<TGene>
         }
 
         Population<TGene> newPopulation = new Population<TGene>(newChromosomes);
-        return await newPopulation.EvaluateAsync(FitnessFunction, cancellationToken);
+        return await newPopulation.EvaluateAsync(FitnessFunction, cancellationToken).ConfigureAwait(false);
     }
 }

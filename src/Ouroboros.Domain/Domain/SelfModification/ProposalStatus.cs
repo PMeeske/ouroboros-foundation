@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
-namespace Ouroboros.Domain.SelfModification;
+﻿namespace Ouroboros.Domain.SelfModification;
 
 /// <summary>
 /// Status of a change proposal.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum ProposalStatus
 {
     /// <summary>Awaiting review.</summary>

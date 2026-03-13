@@ -1,5 +1,6 @@
 using Moq;
 using Ouroboros.Core.LawsOfForm;
+using LoF = Ouroboros.Core.LawsOfForm.Form;
 using Ouroboros.Providers.Random;
 
 namespace Ouroboros.Core.Tests.LawsOfForm;
@@ -16,7 +17,7 @@ public class DreamTests
 
         var result = sut.Observe();
 
-        result.Should().Be(Form.Void);
+        result.Should().Be(LoF.Void);
     }
 
     [Fact]
@@ -28,7 +29,7 @@ public class DreamTests
 
         var result = sut.Observe();
 
-        result.Should().Be(Form.Mark);
+        result.Should().Be(LoF.Mark);
     }
 
     [Fact]
@@ -53,7 +54,7 @@ public class DreamTests
 
         var result = sut.ObserveWithBias(0.9);
 
-        result.Should().Be(Form.Mark);
+        result.Should().Be(LoF.Mark);
     }
 
     [Fact]
@@ -66,7 +67,7 @@ public class DreamTests
 
         var result = sut.ObserveWithBias(0.5);
 
-        result.Should().Be(Form.Void);
+        result.Should().Be(LoF.Void);
     }
 
     [Fact]

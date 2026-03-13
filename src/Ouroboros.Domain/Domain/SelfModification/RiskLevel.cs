@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
-namespace Ouroboros.Domain.SelfModification;
+﻿namespace Ouroboros.Domain.SelfModification;
 
 /// <summary>
 /// Risk level of a proposed change.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum RiskLevel
 {
     /// <summary>Low risk - documentation, comments, formatting.</summary>

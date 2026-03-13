@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
-namespace Ouroboros.Domain.Voice;
+﻿namespace Ouroboros.Domain.Voice;
 
 /// <summary>
 /// Agent presence states for the embodiment state machine.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum AgentPresenceState
 {
     /// <summary>Waiting for input, ready to listen.</summary>

@@ -1,4 +1,4 @@
-// <copyright file="VectorCompressionService.cs" company="Ouroboros">
+﻿// <copyright file="VectorCompressionService.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -262,7 +262,7 @@ public static class VectorCompressionService
 
             // Process in parallel for efficiency
             List<Task<Result<(byte[] CompressedData, VectorCompressionEvent Event)>>> compressionTasks = vectorList.Select(v => Task.Run(() => Compress(v, config, method))).ToList();
-            Result<(byte[] CompressedData, VectorCompressionEvent Event)>[] results = await Task.WhenAll(compressionTasks);
+            Result<(byte[] CompressedData, VectorCompressionEvent Event)>[] results = await Task.WhenAll(compressionTasks).ConfigureAwait(false);
 
             foreach (Result<(byte[] CompressedData, VectorCompressionEvent Event)> result in results)
             {

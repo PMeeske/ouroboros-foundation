@@ -27,8 +27,8 @@ public class PipelinePropertyTests
         Pipeline<int, int> pipeline = Pipeline.Lift<int, int>(x => x * 2 + 5);
         Func<int, int> identity = x => x;
 
-        var originalResult = await pipeline.RunAsync(input);
-        var mappedResult = await pipeline.Map(identity).RunAsync(input);
+        var originalResult = await pipeline.RunAsync(input).ConfigureAwait(false);
+        var mappedResult = await pipeline.Map(identity).RunAsync(input).ConfigureAwait(false);
 
         return (originalResult == mappedResult);
     }
@@ -47,8 +47,8 @@ public class PipelinePropertyTests
         Func<int, int> f = x => x + 10;
         Func<int, int> g = x => x * 3;
 
-        var composedMaps = await pipeline.Map(f).Map(g).RunAsync(input);
-        var singleMap = await pipeline.Map(x => g(f(x))).RunAsync(input);
+        var composedMaps = await pipeline.Map(f).Map(g).RunAsync(input).ConfigureAwait(false);
+        var singleMap = await pipeline.Map(x => g(f(x))).RunAsync(input).ConfigureAwait(false);
 
         return (composedMaps == singleMap);
     }
@@ -70,11 +70,11 @@ public class PipelinePropertyTests
         Step<int, int> g = x => Task.FromResult(x * 3);
 
         // Left associative: (pipeline.Then(f)).Then(g)
-        var leftAssoc = await pipeline.Then(f).Then(g).RunAsync(input);
+        var leftAssoc = await pipeline.Then(f).Then(g).RunAsync(input).ConfigureAwait(false);
         
         // Right associative: pipeline.Then(f composed with g)
-        Step<int, int> fThenG = async x => await g(await f(x));
-        var rightAssoc = await pipeline.Then(fThenG).RunAsync(input);
+        Step<int, int> fThenG = async x => await g(await f(x).ConfigureAwait(false)).ConfigureAwait(false);
+        var rightAssoc = await pipeline.Then(fThenG).RunAsync(input).ConfigureAwait(false);
 
         return (leftAssoc == rightAssoc);
     }
@@ -92,11 +92,11 @@ public class PipelinePropertyTests
         Func<int, Step<int, int>> f = x => async _ => x * 3 + 7;
 
         Pipeline<int, int> pipeline = Pipeline.Pure<int>();
-        var boundResult = await pipeline.Bind(f).RunAsync(input);
+        var boundResult = await pipeline.Bind(f).RunAsync(input).ConfigureAwait(false);
 
         // f(input)(input) - call the kleisli arrow with input
         Step<int, int> fStep = f(input);
-        var directResult = await fStep(input);
+        var directResult = await fStep(input).ConfigureAwait(false);
 
         return (boundResult == directResult);
     }
@@ -113,8 +113,8 @@ public class PipelinePropertyTests
         // m >>= return ≡ m
         Pipeline<int, int> pipeline = Pipeline.Lift<int, int>(x => x * 2 + 5);
 
-        var originalResult = await pipeline.RunAsync(input);
-        var boundResult = await pipeline.Bind(x => (Step<int, int>)(async _ => x)).RunAsync(input);
+        var originalResult = await pipeline.RunAsync(input).ConfigureAwait(false);
+        var boundResult = await pipeline.Bind(x => (Step<int, int>)(async _ => x)).RunAsync(input).ConfigureAwait(false);
 
         return (originalResult == boundResult);
     }
@@ -134,11 +134,11 @@ public class PipelinePropertyTests
         Step<int, int> g = x => Task.FromResult(x + 10);
         Step<int, int> h = x => Task.FromResult(x - 5);
 
-        var leftAssoc = await pipeline.Then(f).Then(g).Then(h).RunAsync(input);
+        var leftAssoc = await pipeline.Then(f).Then(g).Then(h).RunAsync(input).ConfigureAwait(false);
 
         // For right associativity, we need to compose g and h first
-        Step<int, int> gThenH = async x => await h(await g(x));
-        var rightAssoc = await pipeline.Then(f).Then(gThenH).RunAsync(input);
+        Step<int, int> gThenH = async x => await h(await g(x).ConfigureAwait(false)).ConfigureAwait(false);
+        var rightAssoc = await pipeline.Then(f).Then(gThenH).RunAsync(input).ConfigureAwait(false);
 
         return (leftAssoc == rightAssoc);
     }
@@ -156,8 +156,8 @@ public class PipelinePropertyTests
         Pipeline<int, int> pipeline = Pipeline.Lift<int, int>(x => x * 2 + 5);
         Func<int, Task<int>> asyncIdentity = x => Task.FromResult(x);
 
-        var originalResult = await pipeline.RunAsync(input);
-        var mappedResult = await pipeline.MapAsync(asyncIdentity).RunAsync(input);
+        var originalResult = await pipeline.RunAsync(input).ConfigureAwait(false);
+        var mappedResult = await pipeline.MapAsync(asyncIdentity).RunAsync(input).ConfigureAwait(false);
 
         return (originalResult == mappedResult);
     }
@@ -174,8 +174,8 @@ public class PipelinePropertyTests
         // Pure<T>().Map(f) should be equivalent to Lift(f)
         Func<int, int> f = x => x * 3 + 7;
 
-        var pureThenMap = await Pipeline.Pure<int>().Map(f).RunAsync(input);
-        var liftedFunction = await Pipeline.Lift(f).RunAsync(input);
+        var pureThenMap = await Pipeline.Pure<int>().Map(f).RunAsync(input).ConfigureAwait(false);
+        var liftedFunction = await Pipeline.Lift(f).RunAsync(input).ConfigureAwait(false);
 
         return (pureThenMap == liftedFunction);
     }
@@ -193,9 +193,9 @@ public class PipelinePropertyTests
         Pipeline<int, int> pipeline = Pipeline.Lift<int, int>(x => x * 2);
         Func<int, int> f = x => x + 10;
 
-        var mappedResult = await pipeline.Map(f).RunAsync(input);
+        var mappedResult = await pipeline.Map(f).RunAsync(input).ConfigureAwait(false);
         Step<int, int> stepF = x => Task.FromResult(f(x));
-        var thenResult = await pipeline.Then(stepF).RunAsync(input);
+        var thenResult = await pipeline.Then(stepF).RunAsync(input).ConfigureAwait(false);
 
         return (mappedResult == thenResult);
     }

@@ -1,13 +1,10 @@
-using LangChain.Databases;
+﻿using LangChain.Databases;
 using LangChain.DocumentLoaders;
-using System.Diagnostics.CodeAnalysis;
-
 namespace Ouroboros.Domain.Vectors;
 
 /// <summary>
 /// Defines the contract for a vector store that can store and retrieve vectors with similarity search capabilities.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public interface IVectorStore
 {
     /// <summary>

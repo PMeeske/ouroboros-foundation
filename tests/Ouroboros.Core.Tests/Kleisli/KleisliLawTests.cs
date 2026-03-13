@@ -59,8 +59,8 @@ public class KleisliLawTests
         var composed = Arrow.Identity<int>().Then(f);
 
         // Act
-        int composedResult = await composed(7);
-        int directResult = await f(7);
+        int composedResult = await composed(7).ConfigureAwait(false);
+        int directResult = await f(7).ConfigureAwait(false);
 
         // Assert
         composedResult.Should().Be(directResult);
@@ -75,8 +75,8 @@ public class KleisliLawTests
         Step<int, int> f = x => Task.FromResult(x * 2 + 3);
         var composed = Arrow.Identity<int>().Then(f);
 
-        int composedResult = await composed(input);
-        int directResult = await f(input);
+        int composedResult = await composed(input).ConfigureAwait(false);
+        int directResult = await f(input).ConfigureAwait(false);
 
         return composedResult == directResult;
     }
@@ -92,8 +92,8 @@ public class KleisliLawTests
         var composed = Arrow.Identity<int>().Then(f);
 
         // Act
-        string composedResult = await composed(42);
-        string directResult = await f(42);
+        string composedResult = await composed(42).ConfigureAwait(false);
+        string directResult = await f(42).ConfigureAwait(false);
 
         // Assert
         composedResult.Should().Be(directResult);
@@ -116,8 +116,8 @@ public class KleisliLawTests
         var composed = f.Then(Arrow.Identity<int>());
 
         // Act
-        int composedResult = await composed(5);
-        int directResult = await f(5);
+        int composedResult = await composed(5).ConfigureAwait(false);
+        int directResult = await f(5).ConfigureAwait(false);
 
         // Assert
         composedResult.Should().Be(directResult);
@@ -132,8 +132,8 @@ public class KleisliLawTests
         Step<int, int> f = x => Task.FromResult(x * 3 - 1);
         var composed = f.Then(Arrow.Identity<int>());
 
-        int composedResult = await composed(input);
-        int directResult = await f(input);
+        int composedResult = await composed(input).ConfigureAwait(false);
+        int directResult = await f(input).ConfigureAwait(false);
 
         return composedResult == directResult;
     }
@@ -149,8 +149,8 @@ public class KleisliLawTests
         var composed = f.Then(Arrow.Identity<string>());
 
         // Act
-        string composedResult = await composed(99);
-        string directResult = await f(99);
+        string composedResult = await composed(99).ConfigureAwait(false);
+        string directResult = await f(99).ConfigureAwait(false);
 
         // Assert
         composedResult.Should().Be(directResult);
@@ -177,8 +177,8 @@ public class KleisliLawTests
         var rightGrouped = f.Then(g.Then(h));
 
         // Act
-        int leftResult = await leftGrouped(10);
-        int rightResult = await rightGrouped(10);
+        int leftResult = await leftGrouped(10).ConfigureAwait(false);
+        int rightResult = await rightGrouped(10).ConfigureAwait(false);
 
         // Assert
         leftResult.Should().Be(rightResult);
@@ -197,8 +197,8 @@ public class KleisliLawTests
         var leftGrouped = f.Then(g).Then(h);
         var rightGrouped = f.Then(g.Then(h));
 
-        int leftResult = await leftGrouped(input);
-        int rightResult = await rightGrouped(input);
+        int leftResult = await leftGrouped(input).ConfigureAwait(false);
+        int rightResult = await rightGrouped(input).ConfigureAwait(false);
 
         return leftResult == rightResult;
     }
@@ -218,8 +218,8 @@ public class KleisliLawTests
         var rightGrouped = f.Then(g.Then(h));
 
         // Act
-        bool leftResult = await leftGrouped(42);
-        bool rightResult = await rightGrouped(42);
+        bool leftResult = await leftGrouped(42).ConfigureAwait(false);
+        bool rightResult = await rightGrouped(42).ConfigureAwait(false);
 
         // Assert
         leftResult.Should().Be(rightResult);
@@ -251,8 +251,8 @@ public class KleisliLawTests
         var composed = identity.Then(f);
 
         // Act
-        Result<int, string> composedResult = await composed(7);
-        Result<int, string> directResult = await f(7);
+        Result<int, string> composedResult = await composed(7).ConfigureAwait(false);
+        Result<int, string> directResult = await f(7).ConfigureAwait(false);
 
         // Assert
         composedResult.IsSuccess.Should().Be(directResult.IsSuccess);
@@ -271,8 +271,8 @@ public class KleisliLawTests
         KleisliResult<int, int, string> f =
             x => Task.FromResult(Result<int, string>.Success(x * 2 + 5));
 
-        Result<int, string> composedResult = await identity.Then(f)(input);
-        Result<int, string> directResult = await f(input);
+        Result<int, string> composedResult = await identity.Then(f)(input).ConfigureAwait(false);
+        Result<int, string> directResult = await f(input).ConfigureAwait(false);
 
         return composedResult.IsSuccess == directResult.IsSuccess
                && composedResult.Value == directResult.Value;
@@ -295,12 +295,12 @@ public class KleisliLawTests
                 : Result<int, string>.Failure("negative"));
 
         // Act  — positive input
-        Result<int, string> composedPos = await identity.Then(f)(5);
-        Result<int, string> directPos = await f(5);
+        Result<int, string> composedPos = await identity.Then(f)(5).ConfigureAwait(false);
+        Result<int, string> directPos = await f(5).ConfigureAwait(false);
 
         // Act  — negative input
-        Result<int, string> composedNeg = await identity.Then(f)(-3);
-        Result<int, string> directNeg = await f(-3);
+        Result<int, string> composedNeg = await identity.Then(f)(-3).ConfigureAwait(false);
+        Result<int, string> directNeg = await f(-3).ConfigureAwait(false);
 
         // Assert
         composedPos.IsSuccess.Should().Be(directPos.IsSuccess);
@@ -332,8 +332,8 @@ public class KleisliLawTests
         var composed = f.Then(identity);
 
         // Act
-        Result<int, string> composedResult = await composed(4);
-        Result<int, string> directResult = await f(4);
+        Result<int, string> composedResult = await composed(4).ConfigureAwait(false);
+        Result<int, string> directResult = await f(4).ConfigureAwait(false);
 
         // Assert
         composedResult.IsSuccess.Should().Be(directResult.IsSuccess);
@@ -352,8 +352,8 @@ public class KleisliLawTests
         KleisliResult<int, int, string> identity =
             x => Task.FromResult(Result<int, string>.Success(x));
 
-        Result<int, string> composedResult = await f.Then(identity)(input);
-        Result<int, string> directResult = await f(input);
+        Result<int, string> composedResult = await f.Then(identity)(input).ConfigureAwait(false);
+        Result<int, string> directResult = await f(input).ConfigureAwait(false);
 
         return composedResult.IsSuccess == directResult.IsSuccess
                && composedResult.Value == directResult.Value;
@@ -376,12 +376,12 @@ public class KleisliLawTests
             x => Task.FromResult(Result<int, string>.Success(x));
 
         // Act  — positive input
-        Result<int, string> composedPos = await f.Then(identity)(5);
-        Result<int, string> directPos = await f(5);
+        Result<int, string> composedPos = await f.Then(identity)(5).ConfigureAwait(false);
+        Result<int, string> directPos = await f(5).ConfigureAwait(false);
 
         // Act  — negative input
-        Result<int, string> composedNeg = await f.Then(identity)(-1);
-        Result<int, string> directNeg = await f(-1);
+        Result<int, string> composedNeg = await f.Then(identity)(-1).ConfigureAwait(false);
+        Result<int, string> directNeg = await f(-1).ConfigureAwait(false);
 
         // Assert
         composedPos.IsSuccess.Should().Be(directPos.IsSuccess);
@@ -415,8 +415,8 @@ public class KleisliLawTests
         var rightGrouped = f.Then(g.Then(h));
 
         // Act
-        Result<int, string> leftResult = await leftGrouped(3);
-        Result<int, string> rightResult = await rightGrouped(3);
+        Result<int, string> leftResult = await leftGrouped(3).ConfigureAwait(false);
+        Result<int, string> rightResult = await rightGrouped(3).ConfigureAwait(false);
 
         // Assert
         leftResult.IsSuccess.Should().Be(rightResult.IsSuccess);
@@ -436,8 +436,8 @@ public class KleisliLawTests
         KleisliResult<int, int, string> h =
             x => Task.FromResult(Result<int, string>.Success(x - 5));
 
-        Result<int, string> leftResult = await f.Then(g).Then(h)(input);
-        Result<int, string> rightResult = await f.Then(g.Then(h))(input);
+        Result<int, string> leftResult = await f.Then(g).Then(h)(input).ConfigureAwait(false);
+        Result<int, string> rightResult = await f.Then(g.Then(h))(input).ConfigureAwait(false);
 
         return leftResult.IsSuccess == rightResult.IsSuccess
                && leftResult.Value == rightResult.Value;
@@ -472,8 +472,8 @@ public class KleisliLawTests
         // Test several representative inputs
         foreach (int input in new[] { 0, 5, -1, 50, 99 })
         {
-            Result<int, string> leftResult = await leftGrouped(input);
-            Result<int, string> rightResult = await rightGrouped(input);
+            Result<int, string> leftResult = await leftGrouped(input).ConfigureAwait(false);
+            Result<int, string> rightResult = await rightGrouped(input).ConfigureAwait(false);
 
             leftResult.IsSuccess.Should().Be(rightResult.IsSuccess,
                 $"associativity violated for input {input}");
@@ -517,8 +517,8 @@ public class KleisliLawTests
         var composed = identity.Then(f);
 
         // Act
-        Option<int> composedResult = await composed(7);
-        Option<int> directResult = await f(7);
+        Option<int> composedResult = await composed(7).ConfigureAwait(false);
+        Option<int> directResult = await f(7).ConfigureAwait(false);
 
         // Assert
         composedResult.HasValue.Should().Be(directResult.HasValue);
@@ -537,8 +537,8 @@ public class KleisliLawTests
         KleisliOption<int, int> f =
             x => Task.FromResult(Option<int>.Some(x * 2 + 1));
 
-        Option<int> composedResult = await identity.Then(f)(input);
-        Option<int> directResult = await f(input);
+        Option<int> composedResult = await identity.Then(f)(input).ConfigureAwait(false);
+        Option<int> directResult = await f(input).ConfigureAwait(false);
 
         return composedResult.HasValue == directResult.HasValue
                && (!composedResult.HasValue || composedResult.Value!.Equals(directResult.Value));
@@ -561,12 +561,12 @@ public class KleisliLawTests
                 : Option<int>.None());
 
         // Act  — positive input
-        Option<int> composedPos = await identity.Then(f)(5);
-        Option<int> directPos = await f(5);
+        Option<int> composedPos = await identity.Then(f)(5).ConfigureAwait(false);
+        Option<int> directPos = await f(5).ConfigureAwait(false);
 
         // Act  — non-positive input
-        Option<int> composedNeg = await identity.Then(f)(-3);
-        Option<int> directNeg = await f(-3);
+        Option<int> composedNeg = await identity.Then(f)(-3).ConfigureAwait(false);
+        Option<int> directNeg = await f(-3).ConfigureAwait(false);
 
         // Assert
         composedPos.HasValue.Should().Be(directPos.HasValue);
@@ -598,8 +598,8 @@ public class KleisliLawTests
         var composed = f.Then(identity);
 
         // Act
-        Option<int> composedResult = await composed(4);
-        Option<int> directResult = await f(4);
+        Option<int> composedResult = await composed(4).ConfigureAwait(false);
+        Option<int> directResult = await f(4).ConfigureAwait(false);
 
         // Assert
         composedResult.HasValue.Should().Be(directResult.HasValue);
@@ -618,8 +618,8 @@ public class KleisliLawTests
         KleisliOption<int, int> identity =
             x => Task.FromResult(Option<int>.Some(x));
 
-        Option<int> composedResult = await f.Then(identity)(input);
-        Option<int> directResult = await f(input);
+        Option<int> composedResult = await f.Then(identity)(input).ConfigureAwait(false);
+        Option<int> directResult = await f(input).ConfigureAwait(false);
 
         return composedResult.HasValue == directResult.HasValue
                && (!composedResult.HasValue || composedResult.Value!.Equals(directResult.Value));
@@ -642,12 +642,12 @@ public class KleisliLawTests
             x => Task.FromResult(Option<int>.Some(x));
 
         // Act  — positive input
-        Option<int> composedPos = await f.Then(identity)(5);
-        Option<int> directPos = await f(5);
+        Option<int> composedPos = await f.Then(identity)(5).ConfigureAwait(false);
+        Option<int> directPos = await f(5).ConfigureAwait(false);
 
         // Act  — non-positive input
-        Option<int> composedNeg = await f.Then(identity)(-1);
-        Option<int> directNeg = await f(-1);
+        Option<int> composedNeg = await f.Then(identity)(-1).ConfigureAwait(false);
+        Option<int> directNeg = await f(-1).ConfigureAwait(false);
 
         // Assert
         composedPos.HasValue.Should().Be(directPos.HasValue);
@@ -681,8 +681,8 @@ public class KleisliLawTests
         var rightGrouped = f.Then(g.Then(h));
 
         // Act
-        Option<int> leftResult = await leftGrouped(3);
-        Option<int> rightResult = await rightGrouped(3);
+        Option<int> leftResult = await leftGrouped(3).ConfigureAwait(false);
+        Option<int> rightResult = await rightGrouped(3).ConfigureAwait(false);
 
         // Assert
         leftResult.HasValue.Should().Be(rightResult.HasValue);
@@ -702,8 +702,8 @@ public class KleisliLawTests
         KleisliOption<int, int> h =
             x => Task.FromResult(Option<int>.Some(x - 5));
 
-        Option<int> leftResult = await f.Then(g).Then(h)(input);
-        Option<int> rightResult = await f.Then(g.Then(h))(input);
+        Option<int> leftResult = await f.Then(g).Then(h)(input).ConfigureAwait(false);
+        Option<int> rightResult = await f.Then(g.Then(h))(input).ConfigureAwait(false);
 
         return leftResult.HasValue == rightResult.HasValue
                && (!leftResult.HasValue || leftResult.Value!.Equals(rightResult.Value));
@@ -738,8 +738,8 @@ public class KleisliLawTests
         // Test several representative inputs
         foreach (int input in new[] { 0, 5, -1, 50, 99 })
         {
-            Option<int> leftResult = await leftGrouped(input);
-            Option<int> rightResult = await rightGrouped(input);
+            Option<int> leftResult = await leftGrouped(input).ConfigureAwait(false);
+            Option<int> rightResult = await rightGrouped(input).ConfigureAwait(false);
 
             leftResult.HasValue.Should().Be(rightResult.HasValue,
                 $"associativity violated for input {input}");

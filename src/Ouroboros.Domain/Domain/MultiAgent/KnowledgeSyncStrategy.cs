@@ -1,15 +1,12 @@
-// <copyright file="KnowledgeSyncStrategy.cs" company="Ouroboros">
+﻿// <copyright file="KnowledgeSyncStrategy.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
-
-using System.Diagnostics.CodeAnalysis;
 
 namespace Ouroboros.Domain.MultiAgent;
 
 /// <summary>
 /// Strategy for synchronizing knowledge between agents.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum KnowledgeSyncStrategy
 {
     /// <summary>

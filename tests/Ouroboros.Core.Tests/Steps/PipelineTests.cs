@@ -19,7 +19,7 @@ public sealed class PipelineTests
         Step<int, int> step = x => Task.FromResult(x + 1);
         var pipeline = new Pipeline<int, int>(step);
 
-        var result = await pipeline.RunAsync(5);
+        var result = await pipeline.RunAsync(5).ConfigureAwait(false);
         result.Should().Be(6);
     }
 
@@ -33,7 +33,7 @@ public sealed class PipelineTests
         var pipeline = Pipeline.Lift<int, string>(x => x.ToString());
         var composed = pipeline.Then<int>(s => Task.FromResult(s.Length));
 
-        var result = await composed.RunAsync(42);
+        var result = await composed.RunAsync(42).ConfigureAwait(false);
         result.Should().Be(2); // "42".Length
     }
 
@@ -57,7 +57,7 @@ public sealed class PipelineTests
         var pipeline = Pipeline.Lift<int, int>(x => x * 2);
         var mapped = pipeline.Map(x => x.ToString());
 
-        var result = await mapped.RunAsync(5);
+        var result = await mapped.RunAsync(5).ConfigureAwait(false);
         result.Should().Be("10");
     }
 
@@ -85,7 +85,7 @@ public sealed class PipelineTests
             return x.ToString();
         });
 
-        var result = await mapped.RunAsync(5);
+        var result = await mapped.RunAsync(5).ConfigureAwait(false);
         result.Should().Be("10");
     }
 
@@ -110,7 +110,7 @@ public sealed class PipelineTests
         var bound = pipeline.Bind<string>(mid =>
             x => Task.FromResult($"{x}->{mid}"));
 
-        var result = await bound.RunAsync(10);
+        var result = await bound.RunAsync(10).ConfigureAwait(false);
         // mid = 10+1 = 11, then nextStep is called with mid=11 as input
         result.Should().Be("11->11");
     }
@@ -136,7 +136,7 @@ public sealed class PipelineTests
         var pipeline = Pipeline.Lift<int, int>(x => x * 2);
         var tapped = pipeline.Tap(x => captured = x);
 
-        var result = await tapped.RunAsync(5);
+        var result = await tapped.RunAsync(5).ConfigureAwait(false);
         result.Should().Be(10);
         captured.Should().Be(10);
     }
@@ -166,7 +166,7 @@ public sealed class PipelineTests
             captured = x;
         });
 
-        var result = await tapped.RunAsync(5);
+        var result = await tapped.RunAsync(5).ConfigureAwait(false);
         result.Should().Be(10);
         captured.Should().Be(10);
     }
@@ -191,7 +191,7 @@ public sealed class PipelineTests
         var pipeline = Pipeline.Lift<int, int>(x => x * 2);
         var safe = pipeline.TryCatch();
 
-        var result = await safe.RunAsync(5);
+        var result = await safe.RunAsync(5).ConfigureAwait(false);
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().Be(10);
     }
@@ -202,7 +202,7 @@ public sealed class PipelineTests
         var pipeline = Pipeline.From<int, int>(_ => throw new InvalidOperationException("boom"));
         var safe = pipeline.TryCatch();
 
-        var result = await safe.RunAsync(5);
+        var result = await safe.RunAsync(5).ConfigureAwait(false);
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().BeOfType<InvalidOperationException>();
     }
@@ -213,8 +213,8 @@ public sealed class PipelineTests
         var pipeline = Pipeline.From<int, int>(_ => throw new OperationCanceledException());
         var safe = pipeline.TryCatch();
 
-        var act = async () => await safe.RunAsync(5);
-        await act.Should().ThrowAsync<OperationCanceledException>();
+        var act = async () => await safe.RunAsync(5).ConfigureAwait(false);
+        await act.Should().ThrowAsync<OperationCanceledException>().ConfigureAwait(false);
     }
 
     #endregion
@@ -227,7 +227,7 @@ public sealed class PipelineTests
         var pipeline = Pipeline.Lift<int, int>(x => x + 1);
         var step = pipeline.ToStep();
 
-        var result = await step(5);
+        var result = await step(5).ConfigureAwait(false);
         result.Should().Be(6);
     }
 
@@ -241,7 +241,7 @@ public sealed class PipelineTests
         var pipeline = Pipeline.Lift<int, int>(x => x * 3);
         Step<int, int> step = pipeline;
 
-        var result = await step(4);
+        var result = await step(4).ConfigureAwait(false);
         result.Should().Be(12);
     }
 
@@ -251,7 +251,7 @@ public sealed class PipelineTests
         Step<int, int> step = x => Task.FromResult(x * 3);
         Pipeline<int, int> pipeline = step;
 
-        var result = await pipeline.RunAsync(4);
+        var result = await pipeline.RunAsync(4).ConfigureAwait(false);
         result.Should().Be(12);
     }
 
@@ -266,7 +266,7 @@ public sealed class PipelineTests
         Step<int, int> next = x => Task.FromResult(x * 2);
 
         var composed = pipeline | next;
-        var result = await composed.RunAsync(4);
+        var result = await composed.RunAsync(4).ConfigureAwait(false);
 
         result.Should().Be(10); // (4 + 1) * 2
     }
@@ -280,7 +280,7 @@ public sealed class PipelineTests
     {
         var pipeline = Pipeline.Pure<int>();
 
-        var result = await pipeline.RunAsync(42);
+        var result = await pipeline.RunAsync(42).ConfigureAwait(false);
         result.Should().Be(42);
     }
 
@@ -290,7 +290,7 @@ public sealed class PipelineTests
         Step<int, string> step = x => Task.FromResult(x.ToString());
         var pipeline = Pipeline.From(step);
 
-        var result = await pipeline.RunAsync(42);
+        var result = await pipeline.RunAsync(42).ConfigureAwait(false);
         result.Should().Be("42");
     }
 
@@ -299,7 +299,7 @@ public sealed class PipelineTests
     {
         var pipeline = Pipeline.Lift<int, string>(x => x.ToString());
 
-        var result = await pipeline.RunAsync(42);
+        var result = await pipeline.RunAsync(42).ConfigureAwait(false);
         result.Should().Be("42");
     }
 
@@ -320,7 +320,7 @@ public sealed class PipelineTests
             return x.ToString();
         });
 
-        var result = await pipeline.RunAsync(42);
+        var result = await pipeline.RunAsync(42).ConfigureAwait(false);
         result.Should().Be("42");
     }
 
@@ -337,8 +337,8 @@ public sealed class PipelineTests
     {
         var pipeline = Pipeline.Constant<int, string>("hello");
 
-        var result1 = await pipeline.RunAsync(1);
-        var result2 = await pipeline.RunAsync(999);
+        var result1 = await pipeline.RunAsync(1).ConfigureAwait(false);
+        var result2 = await pipeline.RunAsync(999).ConfigureAwait(false);
         result1.Should().Be("hello");
         result2.Should().Be("hello");
     }
@@ -355,7 +355,7 @@ public sealed class PipelineTests
         var p3 = Pipeline.Lift<int, int>(x => x * x);
 
         var parallel = Pipeline.Parallel(p1, p2, p3);
-        var results = await parallel.RunAsync(5);
+        var results = await parallel.RunAsync(5).ConfigureAwait(false);
 
         results.Should().HaveCount(3);
         results.Should().Contain(6);   // 5 + 1
@@ -367,7 +367,7 @@ public sealed class PipelineTests
     public async Task Parallel_EmptyArray_ReturnsEmpty()
     {
         var parallel = Pipeline.Parallel<int, int>();
-        var results = await parallel.RunAsync(5);
+        var results = await parallel.RunAsync(5).ConfigureAwait(false);
 
         results.Should().BeEmpty();
     }
@@ -382,12 +382,12 @@ public sealed class PipelineTests
         var fast = Pipeline.Lift<int, int>(x => x + 1);
         var slow = Pipeline.LiftAsync<int, int>(async x =>
         {
-            await Task.Delay(500);
+            await Task.Delay(500).ConfigureAwait(false);
             return x * 2;
         });
 
         var raced = Pipeline.Race(fast, slow);
-        var result = await raced.RunAsync(5);
+        var result = await raced.RunAsync(5).ConfigureAwait(false);
 
         // Fast pipeline should win
         result.Should().Be(6);
@@ -404,7 +404,7 @@ public sealed class PipelineTests
             .Map(x => x * 2)
             .Then<string>(x => Task.FromResult(x.ToString()));
 
-        var result = await pipeline.RunAsync(4);
+        var result = await pipeline.RunAsync(4).ConfigureAwait(false);
         result.Should().Be("10"); // (4+1)*2 = 10
     }
 

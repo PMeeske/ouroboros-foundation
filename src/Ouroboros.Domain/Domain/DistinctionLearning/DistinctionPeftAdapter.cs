@@ -1,4 +1,4 @@
-// <copyright file="DistinctionPeftAdapter.cs" company="Ouroboros">
+﻿// <copyright file="DistinctionPeftAdapter.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -69,7 +69,7 @@ public sealed class DistinctionPeftAdapter
                 TargetModules: "q_proj,v_proj");
 
             // Initialize adapter
-            Result<byte[], string> initResult = await _peft.InitializeAdapterAsync(modelName, config, ct);
+            Result<byte[], string> initResult = await _peft.InitializeAdapterAsync(modelName, config, ct).ConfigureAwait(false);
             if (initResult.IsFailure)
             {
                 return Result<Unit, string>.Failure($"Failed to initialize adapter: {initResult.Error}");
@@ -85,7 +85,7 @@ public sealed class DistinctionPeftAdapter
                 initResult.Value,
                 examples,
                 trainingConfig,
-                ct);
+                ct).ConfigureAwait(false);
 
             if (trainResult.IsFailure)
             {
@@ -107,7 +107,7 @@ public sealed class DistinctionPeftAdapter
                 distinctionId,
                 trainResult.Value,
                 metadata,
-                ct);
+                ct).ConfigureAwait(false);
 
             if (storeResult.IsFailure)
             {

@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
-namespace Ouroboros.Domain.Governance;
+﻿namespace Ouroboros.Domain.Governance;
 
 /// <summary>
 /// Defines actions that can be taken by policies.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum PolicyAction
 {
     /// <summary>

@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Ouroboros.Core.Hyperon;
 using Ouroboros.Core.LawsOfForm;
+using LoF = Ouroboros.Core.LawsOfForm.Form;
 
 namespace Ouroboros.Core.Tests.Hyperon;
 
@@ -65,7 +66,7 @@ public class FormExpressionTests
 
         var result = sut.Evaluate();
 
-        result.Form.Should().Be(Form.Void);
+        result.Form.Should().Be(LoF.Void);
     }
 
     [Fact]
@@ -75,7 +76,7 @@ public class FormExpressionTests
 
         var result = sut.Evaluate();
 
-        result.Form.Should().Be(Form.Mark);
+        result.Form.Should().Be(LoF.Mark);
     }
 
     [Fact]
@@ -86,7 +87,7 @@ public class FormExpressionTests
 
         var result = sut.Evaluate();
 
-        result.Form.Should().Be(Form.Mark);
+        result.Form.Should().Be(LoF.Mark);
     }
 
     [Fact]
@@ -106,7 +107,7 @@ public class FormExpressionTests
 
         var result = sut.Evaluate();
 
-        result.Form.Should().Be(Form.Void);
+        result.Form.Should().Be(LoF.Void);
     }
 
     [Fact]
@@ -116,7 +117,7 @@ public class FormExpressionTests
 
         var result = sut.Evaluate();
 
-        result.Form.Should().Be(Form.Imaginary);
+        result.Form.Should().Be(LoF.Imaginary);
     }
 
     [Fact]
@@ -126,7 +127,7 @@ public class FormExpressionTests
 
         var result = sut.Evaluate();
 
-        result.Form.Should().Be(Form.Void);
+        result.Form.Should().Be(LoF.Void);
     }
 
     [Fact]
@@ -136,7 +137,7 @@ public class FormExpressionTests
 
         var result = sut.Evaluate();
 
-        result.Form.Should().Be(Form.Void);
+        result.Form.Should().Be(LoF.Void);
     }
 
     [Fact]
@@ -146,7 +147,7 @@ public class FormExpressionTests
 
         var result = sut.Evaluate();
 
-        result.Form.Should().Be(Form.Mark);
+        result.Form.Should().Be(LoF.Mark);
     }
 
     [Fact]
@@ -158,7 +159,7 @@ public class FormExpressionTests
 
         var result = sut.Evaluate();
 
-        result.Form.Should().Be(Form.Mark);
+        result.Form.Should().Be(LoF.Mark);
     }
 
     [Fact]

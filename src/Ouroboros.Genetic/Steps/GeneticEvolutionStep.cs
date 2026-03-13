@@ -1,4 +1,4 @@
-// <copyright file="GeneticEvolutionStep.cs" company="Ouroboros">
+﻿// <copyright file="GeneticEvolutionStep.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -53,7 +53,7 @@ public sealed class GeneticEvolutionStep<TIn, TOut, TGene>
         return async input =>
         {
             // Evolve to find the best configuration
-            Result<IChromosome<TGene>, string> evolutionResult = await this.algorithm.EvolveAsync(initialPopulation, generations, cancellationToken);
+            Result<IChromosome<TGene>, string> evolutionResult = await this.algorithm.EvolveAsync(initialPopulation, generations, cancellationToken).ConfigureAwait(false);
             
             if (evolutionResult.IsFailure)
             {
@@ -74,7 +74,7 @@ public sealed class GeneticEvolutionStep<TIn, TOut, TGene>
             
             try
             {
-                TOut? output = await optimizedStep(input);
+                TOut? output = await optimizedStep(input).ConfigureAwait(false);
                 return Result<TOut, string>.Success(output);
             }
             catch (OperationCanceledException) { throw; }
@@ -100,7 +100,7 @@ public sealed class GeneticEvolutionStep<TIn, TOut, TGene>
         return async input =>
         {
             // Evolve to find the best configuration
-            Result<IChromosome<TGene>, string> evolutionResult = await this.algorithm.EvolveAsync(initialPopulation, generations, cancellationToken);
+            Result<IChromosome<TGene>, string> evolutionResult = await this.algorithm.EvolveAsync(initialPopulation, generations, cancellationToken).ConfigureAwait(false);
 
             if (evolutionResult.IsFailure)
             {
@@ -121,7 +121,7 @@ public sealed class GeneticEvolutionStep<TIn, TOut, TGene>
 
             try
             {
-                TOut? output = await optimizedStep(input);
+                TOut? output = await optimizedStep(input).ConfigureAwait(false);
                 return Result<(IChromosome<TGene>, TOut), string>.Success((bestChromosome, output));
             }
             catch (OperationCanceledException) { throw; }

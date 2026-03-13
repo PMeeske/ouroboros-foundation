@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
-namespace Ouroboros.Domain.Voice;
+﻿namespace Ouroboros.Domain.Voice;
 
 /// <summary>
 /// Categories of errors in the voice stream.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum ErrorCategory
 {
     /// <summary>Unknown error.</summary>

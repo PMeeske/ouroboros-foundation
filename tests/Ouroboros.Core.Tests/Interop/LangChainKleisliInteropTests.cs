@@ -21,7 +21,7 @@ public class LangChainKleisliInteropTests
         var pipeNode = upper.ToCompatNode("upper");
         var builder = new PipelineBuilder<string, string>("test", pipeNode);
 
-        var result = await builder.Then(length).ExecuteAsync("hello");
+        var result = await builder.Then(length).ExecuteAsync("hello").ConfigureAwait(false);
 
         result.Should().Be(5);
     }
@@ -34,7 +34,7 @@ public class LangChainKleisliInteropTests
         var pipeNode = doubleStep.ToCompatNode("double");
         var builder = new PipelineBuilder<int, int>("test", pipeNode);
 
-        var result = await builder.Then((int i) => $"result={i}").ExecuteAsync(5);
+        var result = await builder.Then((int i) => $"result={i}").ExecuteAsync(5).ConfigureAwait(false);
 
         result.Should().Be("result=10");
     }
@@ -49,7 +49,7 @@ public class LangChainKleisliInteropTests
 
         var built = builder.Build();
 
-        var result = await (42 | built);
+        var result = await (42 | built).ConfigureAwait(false);
         result.Should().Be("42");
     }
 
@@ -61,7 +61,7 @@ public class LangChainKleisliInteropTests
         var pipeNode = length.ToCompatNode("length");
         var builder = new PipelineBuilder<string, int>("test", pipeNode);
 
-        var result = await builder.ExecuteAsync("hello world");
+        var result = await builder.ExecuteAsync("hello world").ConfigureAwait(false);
 
         result.Should().Be(11);
     }
@@ -131,7 +131,7 @@ public class LangChainKleisliInteropTests
         var pipeNode = triple.ToCompatNode("triple");
         var pipeline = new PipelineBuilder<int, int>("test", pipeNode).Build();
 
-        var result = await (7 | pipeline);
+        var result = await (7 | pipeline).ConfigureAwait(false);
 
         result.Should().Be(21);
     }
@@ -144,7 +144,7 @@ public class LangChainKleisliInteropTests
         var pipeNode = identity.ToCompatNode("id");
         var builder = new PipelineBuilder<string, string>("test", pipeNode);
 
-        var result = await builder.ExecuteAsync("unchanged");
+        var result = await builder.ExecuteAsync("unchanged").ConfigureAwait(false);
 
         result.Should().Be("unchanged");
     }

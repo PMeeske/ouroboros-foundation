@@ -1,4 +1,4 @@
-// <copyright file="GitReflectionService.Proposals.cs" company="Ouroboros">
+﻿// <copyright file="GitReflectionService.Proposals.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -27,7 +27,7 @@ public sealed partial class GitReflectionService
         string[] args = checkout
             ? ["checkout", "-b", fullName]
             : ["branch", fullName];
-        (bool success, _, string error) = await ExecuteGitAsync(args, ct);
+        (bool success, _, string error) = await ExecuteGitAsync(args, ct).ConfigureAwait(false);
 
         return new GitOperationResult(
             success,
@@ -45,7 +45,7 @@ public sealed partial class GitReflectionService
         List<string> staged = new();
         foreach (string file in files)
         {
-            (bool success, _, _) = await ExecuteGitAsync(["add", "--", file], ct);
+            (bool success, _, _) = await ExecuteGitAsync(["add", "--", file], ct).ConfigureAwait(false);
             if (success)
             {
                 staged.Add(file);
@@ -68,7 +68,7 @@ public sealed partial class GitReflectionService
         // Add Ouroboros signature to commit message
         string fullMessage = $"[Ouroboros Self-Modification] {message}";
 
-        (bool success, string output, string error) = await ExecuteGitAsync(["commit", "-m", fullMessage], ct);
+        (bool success, string output, string error) = await ExecuteGitAsync(["commit", "-m", fullMessage], ct).ConfigureAwait(false);
 
         // Extract commit hash
         string? hash = null;
@@ -188,7 +188,7 @@ public sealed partial class GitReflectionService
         try
         {
             // Read current content
-            string content = await File.ReadAllTextAsync(fullPath, ct);
+            string content = await File.ReadAllTextAsync(fullPath, ct).ConfigureAwait(false);
 
             // Verify the old code exists
             if (!content.Contains(proposal.OldCode))
@@ -203,11 +203,11 @@ public sealed partial class GitReflectionService
 
             // Create backup
             string backupPath = fullPath + $".backup.{DateTime.Now:yyyyMMdd_HHmmss}";
-            await File.WriteAllTextAsync(backupPath, content, ct);
+            await File.WriteAllTextAsync(backupPath, content, ct).ConfigureAwait(false);
 
             // Apply change
             string newContent = content.Replace(proposal.OldCode, proposal.NewCode);
-            await File.WriteAllTextAsync(fullPath, newContent, ct);
+            await File.WriteAllTextAsync(fullPath, newContent, ct).ConfigureAwait(false);
 
             // Update proposal status
             int index = _proposals.FindIndex(p => p.Id == proposalId);
@@ -219,8 +219,8 @@ public sealed partial class GitReflectionService
             // Auto-commit if requested
             if (autoCommit)
             {
-                await StageFilesAsync(new[] { proposal.FilePath }, ct);
-                await CommitAsync($"{proposal.Category}: {proposal.Description}", ct);
+                await StageFilesAsync(new[] { proposal.FilePath }, ct).ConfigureAwait(false);
+                await CommitAsync($"{proposal.Category}: {proposal.Description}", ct).ConfigureAwait(false);
             }
 
             return new GitOperationResult(
@@ -291,10 +291,10 @@ public sealed partial class GitReflectionService
 
         // Create branch for the change
         string branchName = $"{category.ToString().ToLowerInvariant()}-{proposal.Id}";
-        _ = await CreateBranchAsync(branchName, ct: ct);
+        _ = await CreateBranchAsync(branchName, ct: ct).ConfigureAwait(false);
 
         // Apply the change
-        GitOperationResult applyResult = await ApplyProposalAsync(proposal.Id, autoCommit: true, ct: ct);
+        GitOperationResult applyResult = await ApplyProposalAsync(proposal.Id, autoCommit: true, ct: ct).ConfigureAwait(false);
 
         return applyResult;
     }

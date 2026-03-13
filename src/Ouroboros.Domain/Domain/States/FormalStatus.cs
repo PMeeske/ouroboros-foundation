@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
-namespace Ouroboros.Domain.States;
+﻿namespace Ouroboros.Domain.States;
 
 /// <summary>
 /// Overall formal status of the operating cost statement audit.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum FormalStatus
 {
     /// <summary>All required fields are present and properly documented.</summary>

@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
-namespace Ouroboros.Domain.Autonomous;
+﻿namespace Ouroboros.Domain.Autonomous;
 
 /// <summary>
 /// Priority levels for autonomous intentions.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum IntentionPriority
 {
     /// <summary>Background tasks that can wait.</summary>

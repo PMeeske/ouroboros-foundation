@@ -108,7 +108,7 @@ public sealed partial class UserPersonaNeuron : Neuron
     {
         _logger.LogDebug("StartTrainingDirectAsync called");
         _config = config;
-        await StartTrainingAsync(config, CancellationToken.None);
+        await StartTrainingAsync(config, CancellationToken.None).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -166,7 +166,7 @@ public sealed partial class UserPersonaNeuron : Neuron
         switch (message.Topic)
         {
             case "training.start":
-                await StartTrainingAsync(message.Payload, ct);
+                await StartTrainingAsync(message.Payload, ct).ConfigureAwait(false);
                 break;
 
             case "training.stop":
@@ -192,13 +192,13 @@ public sealed partial class UserPersonaNeuron : Neuron
                 break;
 
             case "response.generated":
-                await HandleSystemResponseAsync(message.Payload?.ToString() ?? "", ct);
+                await HandleSystemResponseAsync(message.Payload?.ToString() ?? "", ct).ConfigureAwait(false);
                 break;
 
             case "system.tick":
                 if (_isTrainingActive)
                 {
-                    await TickTrainingAsync(ct);
+                    await TickTrainingAsync(ct).ConfigureAwait(false);
                 }
 
                 break;
@@ -214,7 +214,7 @@ public sealed partial class UserPersonaNeuron : Neuron
         double elapsed = (DateTime.UtcNow - _lastMessageTime).TotalSeconds;
         if (elapsed >= _config.MessageIntervalSeconds && _pendingQuestions.Count == 0)
         {
-            await GenerateNextMessageAsync(ct);
+            await GenerateNextMessageAsync(ct).ConfigureAwait(false);
         }
 
         // Send pending question
@@ -263,7 +263,7 @@ public sealed partial class UserPersonaNeuron : Neuron
             {
                 string lastUserMsg = _conversationHistory.LastOrDefault(m => m.StartsWith("User:"))
                     ?.Replace("User: ", "") ?? "";
-                satisfaction = await EvaluateFunction(lastUserMsg, response, ct);
+                satisfaction = await EvaluateFunction(lastUserMsg, response, ct).ConfigureAwait(false);
             }
             catch (OperationCanceledException) { throw; }
             catch (HttpRequestException)
@@ -332,6 +332,6 @@ public sealed partial class UserPersonaNeuron : Neuron
             });
         }
 
-        await Task.CompletedTask;
+        await Task.CompletedTask.ConfigureAwait(false);
     }
 }

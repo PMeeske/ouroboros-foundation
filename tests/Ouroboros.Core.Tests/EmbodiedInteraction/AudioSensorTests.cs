@@ -59,7 +59,7 @@ public class AudioSensorTests : IDisposable
     [Fact]
     public async Task StartListeningAsync_WhenNotListening_ReturnsSuccess()
     {
-        var result = await _sut.StartListeningAsync();
+        var result = await _sut.StartListeningAsync().ConfigureAwait(false);
 
         result.IsSuccess.Should().BeTrue();
         _sut.IsListening.Should().BeTrue();
@@ -68,9 +68,9 @@ public class AudioSensorTests : IDisposable
     [Fact]
     public async Task StartListeningAsync_WhenAlreadyListening_ReturnsFailure()
     {
-        await _sut.StartListeningAsync();
+        await _sut.StartListeningAsync().ConfigureAwait(false);
 
-        var result = await _sut.StartListeningAsync();
+        var result = await _sut.StartListeningAsync().ConfigureAwait(false);
 
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Contain("Already listening");
@@ -81,7 +81,7 @@ public class AudioSensorTests : IDisposable
     {
         _sut.Dispose();
 
-        var result = await _sut.StartListeningAsync();
+        var result = await _sut.StartListeningAsync().ConfigureAwait(false);
 
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Contain("disposed");
@@ -90,7 +90,7 @@ public class AudioSensorTests : IDisposable
     [Fact]
     public async Task StopListeningAsync_WhenNotListening_ReturnsSuccess()
     {
-        var result = await _sut.StopListeningAsync();
+        var result = await _sut.StopListeningAsync().ConfigureAwait(false);
 
         result.IsSuccess.Should().BeTrue();
     }
@@ -98,9 +98,9 @@ public class AudioSensorTests : IDisposable
     [Fact]
     public async Task StopListeningAsync_WhenListening_ReturnsSuccess()
     {
-        await _sut.StartListeningAsync();
+        await _sut.StartListeningAsync().ConfigureAwait(false);
 
-        var result = await _sut.StopListeningAsync();
+        var result = await _sut.StopListeningAsync().ConfigureAwait(false);
 
         result.IsSuccess.Should().BeTrue();
         _sut.IsListening.Should().BeFalse();
@@ -109,7 +109,7 @@ public class AudioSensorTests : IDisposable
     [Fact]
     public async Task ProcessAudioChunkAsync_WhenNotListening_ReturnsFailure()
     {
-        var result = await _sut.ProcessAudioChunkAsync(new byte[] { 1, 2, 3 });
+        var result = await _sut.ProcessAudioChunkAsync(new byte[] { 1, 2, 3 }).ConfigureAwait(false);
 
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Contain("Not listening");
@@ -118,9 +118,9 @@ public class AudioSensorTests : IDisposable
     [Fact]
     public async Task ProcessAudioChunkAsync_WhenListening_ReturnsSuccess()
     {
-        await _sut.StartListeningAsync();
+        await _sut.StartListeningAsync().ConfigureAwait(false);
 
-        var result = await _sut.ProcessAudioChunkAsync(new byte[] { 1, 2, 3 });
+        var result = await _sut.ProcessAudioChunkAsync(new byte[] { 1, 2, 3 }).ConfigureAwait(false);
 
         result.IsSuccess.Should().BeTrue();
     }
@@ -130,7 +130,7 @@ public class AudioSensorTests : IDisposable
     {
         _sut.Dispose();
 
-        var result = await _sut.ProcessAudioChunkAsync(new byte[] { 1, 2, 3 });
+        var result = await _sut.ProcessAudioChunkAsync(new byte[] { 1, 2, 3 }).ConfigureAwait(false);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -138,11 +138,11 @@ public class AudioSensorTests : IDisposable
     [Fact]
     public async Task ProcessAudioChunkAsync_EmitsAudioChunk()
     {
-        await _sut.StartListeningAsync();
+        await _sut.StartListeningAsync().ConfigureAwait(false);
         AudioChunk? received = null;
         _sut.AudioChunks.Subscribe(c => received = c);
 
-        await _sut.ProcessAudioChunkAsync(new byte[] { 1, 2, 3 });
+        await _sut.ProcessAudioChunkAsync(new byte[] { 1, 2, 3 }).ConfigureAwait(false);
 
         received.Should().NotBeNull();
         received!.Data.Should().BeEquivalentTo(new byte[] { 1, 2, 3 });
@@ -161,7 +161,7 @@ public class AudioSensorTests : IDisposable
         TranscriptionResult? received = null;
         _sut.Transcriptions.Subscribe(t => received = t);
 
-        var result = await _sut.TranscribeFileAsync("test.wav");
+        var result = await _sut.TranscribeFileAsync("test.wav").ConfigureAwait(false);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Text.Should().Be("hello world");
@@ -175,7 +175,7 @@ public class AudioSensorTests : IDisposable
             .Setup(m => m.TranscribeAsync(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<TranscriptionResult, string>.Failure("file not found"));
 
-        var result = await _sut.TranscribeFileAsync("missing.wav");
+        var result = await _sut.TranscribeFileAsync("missing.wav").ConfigureAwait(false);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -185,7 +185,7 @@ public class AudioSensorTests : IDisposable
     {
         _sut.Dispose();
 
-        var result = await _sut.TranscribeFileAsync("test.wav");
+        var result = await _sut.TranscribeFileAsync("test.wav").ConfigureAwait(false);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -194,14 +194,16 @@ public class AudioSensorTests : IDisposable
     public async Task StartListeningAsync_WithStreaming_CreatesSession()
     {
         var mockSession = new Mock<IStreamingTranscription>();
-        mockSession.Setup(s => s.Results).Returns(new Subject<TranscriptionResult>().AsObservable());
-        mockSession.Setup(s => s.VoiceActivity).Returns(new Subject<VoiceActivity>().AsObservable());
+        using var resultsSubject = new Subject<TranscriptionResult>();
+        using var voiceSubject = new Subject<VoiceActivity>();
+        mockSession.Setup(s => s.Results).Returns(resultsSubject.AsObservable());
+        mockSession.Setup(s => s.VoiceActivity).Returns(voiceSubject.AsObservable());
 
         _mockSttModel.Setup(m => m.SupportsStreaming).Returns(true);
         _mockSttModel.Setup(m => m.CreateStreamingSession(It.IsAny<string?>()))
             .Returns(mockSession.Object);
 
-        var result = await _sut.StartListeningAsync();
+        var result = await _sut.StartListeningAsync().ConfigureAwait(false);
 
         result.IsSuccess.Should().BeTrue();
         _mockSttModel.Verify(m => m.CreateStreamingSession(It.IsAny<string?>()), Times.Once);

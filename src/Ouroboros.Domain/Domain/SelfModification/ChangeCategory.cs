@@ -1,11 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
-
-namespace Ouroboros.Domain.SelfModification;
+﻿namespace Ouroboros.Domain.SelfModification;
 
 /// <summary>
 /// Category of code change.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public enum ChangeCategory
 {
     /// <summary>Bug fix.</summary>

@@ -29,7 +29,7 @@ public sealed class IStepTests
     {
         IStep<int, string> step = new SuccessStep();
 
-        var result = await step.ExecuteAsync(42);
+        var result = await step.ExecuteAsync(42).ConfigureAwait(false);
 
         result.Should().Be("42");
     }
@@ -39,9 +39,9 @@ public sealed class IStepTests
     {
         IStep<int, string> step = new FailureStep();
 
-        var act = async () => await step.ExecuteAsync(42);
+        var act = async () => await step.ExecuteAsync(42).ConfigureAwait(false);
 
-        var ex = await act.Should().ThrowAsync<StepExecutionException>();
+        var ex = await act.Should().ThrowAsync<StepExecutionException>().ConfigureAwait(false);
         ex.Which.StepType.Should().Be(typeof(FailureStep));
         ex.Which.InputValue.Should().Be(42);
     }
@@ -51,9 +51,9 @@ public sealed class IStepTests
     {
         IStep<int, string> step = new FailureWithExceptionStep();
 
-        var act = async () => await step.ExecuteAsync(42);
+        var act = async () => await step.ExecuteAsync(42).ConfigureAwait(false);
 
-        var ex = await act.Should().ThrowAsync<StepExecutionException>();
+        var ex = await act.Should().ThrowAsync<StepExecutionException>().ConfigureAwait(false);
         ex.Which.InnerException.Should().BeOfType<InvalidOperationException>();
     }
 
@@ -62,7 +62,7 @@ public sealed class IStepTests
     {
         IStep<int, string> step = new SuccessStep();
 
-        var result = await step.TryExecuteAsync(42);
+        var result = await step.TryExecuteAsync(42).ConfigureAwait(false);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().Be("42");
@@ -73,7 +73,7 @@ public sealed class IStepTests
     {
         IStep<int, string> step = new FailureStep();
 
-        var result = await step.TryExecuteAsync(42);
+        var result = await step.TryExecuteAsync(42).ConfigureAwait(false);
 
         result.IsSuccess.Should().BeFalse();
         result.ErrorMessage.Should().Be("step failed");
