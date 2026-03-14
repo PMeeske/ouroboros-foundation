@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "label": "foundation coverage",
-  "message": "2.5%",
-  "color": "red",
+  "message": "62.4%",
+  "color": "yellowgreen",
   "namedLogo": "dotnet",
   "logoColor": "white"
 }
