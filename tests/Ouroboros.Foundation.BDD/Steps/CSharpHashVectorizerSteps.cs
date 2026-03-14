@@ -1,4 +1,4 @@
-using Ouroboros.Infrastructure.FeatureEngineering;
+﻿using Ouroboros.Infrastructure.FeatureEngineering;
 
 namespace Ouroboros.Specs.Steps;
 
@@ -47,7 +47,7 @@ public class CSharpHashVectorizerSteps
         {
             _vectorizerPrimary = new CSharpHashVectorizer(dimension);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _thrown = ex;
         }

@@ -1,4 +1,4 @@
-using Ouroboros.Abstractions.Monads;
+﻿using Ouroboros.Abstractions.Monads;
 using Ouroboros.Core.Processing;
 
 namespace Ouroboros.Core.Tests.Processing;
@@ -31,7 +31,7 @@ public class RecursiveChunkProcessorTests
     {
         var processor = CreateProcessor();
 
-        var result = await processor.ProcessLargeContextAsync<int, string>(42).ConfigureAwait(false);
+        var result = await processor.ProcessLargeContextAsync<int, string>(42);
 
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Contain("string input");
@@ -42,7 +42,7 @@ public class RecursiveChunkProcessorTests
     {
         var processor = CreateProcessor();
 
-        var result = await processor.ProcessLargeContextAsync<string, string>("").ConfigureAwait(false);
+        var result = await processor.ProcessLargeContextAsync<string, string>("");
 
         result.IsFailure.Should().BeTrue();
     }
@@ -52,7 +52,7 @@ public class RecursiveChunkProcessorTests
     {
         var processor = CreateProcessor();
 
-        var result = await processor.ProcessLargeContextAsync<string, string>("   ").ConfigureAwait(false);
+        var result = await processor.ProcessLargeContextAsync<string, string>("   ");
 
         result.IsFailure.Should().BeTrue();
     }
@@ -63,7 +63,7 @@ public class RecursiveChunkProcessorTests
         var processor = CreateProcessor();
         var input = "This is a small test input.";
 
-        var result = await processor.ProcessLargeContextAsync<string, string>(input).ConfigureAwait(false);
+        var result = await processor.ProcessLargeContextAsync<string, string>(input);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().NotBeNullOrEmpty();
@@ -111,7 +111,7 @@ public class RecursiveChunkProcessorTests
 
         var input = "Some text to process.";
 
-        var result = await processor.ProcessLargeContextAsync<string, string>(input).ConfigureAwait(false);
+        var result = await processor.ProcessLargeContextAsync<string, string>(input);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -125,7 +125,7 @@ public class RecursiveChunkProcessorTests
 
         var input = "Some text to process that is long enough.";
 
-        var result = await processor.ProcessLargeContextAsync<string, string>(input).ConfigureAwait(false);
+        var result = await processor.ProcessLargeContextAsync<string, string>(input);
 
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Contain("combine");
@@ -137,7 +137,7 @@ public class RecursiveChunkProcessorTests
         var processor = new RecursiveChunkProcessor(
             async chunk =>
             {
-                await Task.Delay(1000).ConfigureAwait(false);
+                await Task.Delay(1000);
                 return Result<string>.Success(chunk);
             },
             results => Task.FromResult(Result<string>.Success(string.Join("", results))));
@@ -156,7 +156,7 @@ public class RecursiveChunkProcessorTests
     {
         var processor = CreateProcessor();
 
-        var result = await processor.ProcessLargeContextAsync<string, int>("test").ConfigureAwait(false);
+        var result = await processor.ProcessLargeContextAsync<string, int>("test");
 
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Contain("Cannot convert");

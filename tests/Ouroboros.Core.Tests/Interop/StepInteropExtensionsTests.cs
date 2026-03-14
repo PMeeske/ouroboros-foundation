@@ -1,4 +1,4 @@
-namespace Ouroboros.Tests.Interop;
+﻿namespace Ouroboros.Tests.Interop;
 
 using Ouroboros.Core.Interop;
 using Ouroboros.Core.Kleisli;
@@ -14,7 +14,7 @@ public class StepInteropExtensionsTests
 
         Step<int, string> step = func.ToStep();
 
-        var result = await step(42).ConfigureAwait(false);
+        var result = await step(42);
 
         result.Should().Be("value=42");
     }
@@ -29,7 +29,7 @@ public class StepInteropExtensionsTests
         var task = step(5);
 
         task.IsCompleted.Should().BeTrue();
-        (await task.ConfigureAwait(false)).Should().Be(10);
+        (await task).Should().Be(10);
     }
 
     [Fact]
@@ -39,7 +39,7 @@ public class StepInteropExtensionsTests
 
         Step<string, string> step = identity.ToStep();
 
-        var result = await step("test").ConfigureAwait(false);
+        var result = await step("test");
 
         result.Should().Be("test");
     }
@@ -55,7 +55,7 @@ public class StepInteropExtensionsTests
 
         Step<int, string> step = asyncFunc.ToStep();
 
-        var result = await step(7).ConfigureAwait(false);
+        var result = await step(7);
 
         result.Should().Be("async=7");
     }
@@ -66,14 +66,14 @@ public class StepInteropExtensionsTests
         var executed = false;
         Func<int, Task<int>> asyncFunc = async i =>
         {
-            await Task.Delay(1).ConfigureAwait(false);
+            await Task.Delay(1);
             executed = true;
             return i + 1;
         };
 
         Step<int, int> step = asyncFunc.ToStep();
 
-        var result = await step(10).ConfigureAwait(false);
+        var result = await step(10);
 
         executed.Should().BeTrue();
         result.Should().Be(11);
@@ -86,10 +86,10 @@ public class StepInteropExtensionsTests
 
         Step<string, string?> step = func.ToStep();
 
-        var result1 = await step("hello").ConfigureAwait(false);
+        var result1 = await step("hello");
         result1.Should().Be("hello");
 
-        var result2 = await step("hi").ConfigureAwait(false);
+        var result2 = await step("hi");
         result2.Should().BeNull();
     }
 
@@ -104,7 +104,7 @@ public class StepInteropExtensionsTests
 
         var act = () => step(0);
 
-        await act.Should().ThrowAsync<DivideByZeroException>().ConfigureAwait(false);
+        await act.Should().ThrowAsync<DivideByZeroException>();
     }
 
     [Fact]
@@ -134,8 +134,8 @@ public class StepInteropExtensionsTests
         Step<int, string> showStep = showFunc.ToStep();
 
         var input = 5;
-        var intermediate = await doubleStep(input).ConfigureAwait(false);
-        var result = await showStep(intermediate).ConfigureAwait(false);
+        var intermediate = await doubleStep(input);
+        var result = await showStep(intermediate);
 
         result.Should().Be("10");
     }

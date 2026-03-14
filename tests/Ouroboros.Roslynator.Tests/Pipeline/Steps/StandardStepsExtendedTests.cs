@@ -1,4 +1,4 @@
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
@@ -16,7 +16,7 @@ public sealed class StandardStepsExtendedTests
 {
     private static FixState CreateState(string code, string diagnosticId, int spanStart, int spanLength)
     {
-        var workspace = new AdhocWorkspace();
+        using var workspace = new AdhocWorkspace();
         var project = workspace.AddProject("TestProject", LanguageNames.CSharp);
         var document = project.AddDocument("Test.cs", SourceText.From(code));
         var root = document.GetSyntaxRootAsync().GetAwaiter().GetResult()!;
@@ -32,7 +32,7 @@ public sealed class StandardStepsExtendedTests
     {
         // Arrange - CS0219 is similar to CS0168 (variable assigned but never used)
         string code = "class C { void M() { int unused = 42; } }";
-        var workspace = new AdhocWorkspace();
+        using var workspace = new AdhocWorkspace();
         var project = workspace.AddProject("TestProject", LanguageNames.CSharp);
         var document = project.AddDocument("Test.cs", SourceText.From(code));
         var root = (await document.GetSyntaxRootAsync())!;
@@ -58,7 +58,7 @@ public sealed class StandardStepsExtendedTests
     {
         // Arrange - CS8600: Converting null literal to non-nullable type
         string code = "class C { void M() { string s = null; } }";
-        var workspace = new AdhocWorkspace();
+        using var workspace = new AdhocWorkspace();
         var project = workspace.AddProject("TestProject", LanguageNames.CSharp);
         var document = project.AddDocument("Test.cs", SourceText.From(code));
         var root = (await document.GetSyntaxRootAsync())!;
@@ -85,7 +85,7 @@ public sealed class StandardStepsExtendedTests
     {
         // Arrange - CS8602: Dereference of a possibly null reference
         string code = "class C { void M(string? s) { var len = s.Length; } }";
-        var workspace = new AdhocWorkspace();
+        using var workspace = new AdhocWorkspace();
         var project = workspace.AddProject("TestProject", LanguageNames.CSharp);
         var document = project.AddDocument("Test.cs", SourceText.From(code));
         var root = (await document.GetSyntaxRootAsync())!;
@@ -112,7 +112,7 @@ public sealed class StandardStepsExtendedTests
     {
         // Arrange - CS0266: Cannot implicitly convert type
         string code = "class C { void M() { int x = null; } }";
-        var workspace = new AdhocWorkspace();
+        using var workspace = new AdhocWorkspace();
         var project = workspace.AddProject("TestProject", LanguageNames.CSharp);
         var document = project.AddDocument("Test.cs", SourceText.From(code));
         var root = (await document.GetSyntaxRootAsync())!;
@@ -165,7 +165,7 @@ public sealed class StandardStepsExtendedTests
     {
         // Arrange - var declaration should not be changed to nullable
         string code = "class C { void M() { var s = (string?)null; } }";
-        var workspace = new AdhocWorkspace();
+        using var workspace = new AdhocWorkspace();
         var project = workspace.AddProject("TestProject", LanguageNames.CSharp);
         var document = project.AddDocument("Test.cs", SourceText.From(code));
         var root = (await document.GetSyntaxRootAsync())!;

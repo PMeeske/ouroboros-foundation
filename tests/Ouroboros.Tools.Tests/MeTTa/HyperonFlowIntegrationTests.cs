@@ -1,4 +1,4 @@
-namespace Ouroboros.Tests.Tools.MeTTa;
+﻿namespace Ouroboros.Tests.Tools.MeTTa;
 
 using Ouroboros.Tools.MeTTa;
 
@@ -108,7 +108,7 @@ public class HyperonFlowIntegrationTests : IAsyncDisposable
     public async Task DisposeAsync_MultipleCalls_DoesNotThrow()
     {
         await _sut.DisposeAsync();
-        var act = () => _sut.DisposeAsync();
+        Func<Task> act = async () => await _sut.DisposeAsync();
         await act.Should().NotThrowAsync();
     }
 

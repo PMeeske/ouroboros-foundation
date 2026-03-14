@@ -1,4 +1,4 @@
-// <copyright file="KleisliPropertyTests.cs" company="Ouroboros">
+﻿// <copyright file="KleisliPropertyTests.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -37,12 +37,12 @@ public class KleisliPropertyTests
         // Left: (f >=> g) >=> h
         Result<int, string> leftComposed = await ComposeKleisliResult(
             ComposeKleisliResult(f, g),
-            h)(input).ConfigureAwait(false);
+            h)(input);
 
         // Right: f >=> (g >=> h)
         Result<int, string> rightComposed = await ComposeKleisliResult(
             f,
-            ComposeKleisliResult(g, h))(input).ConfigureAwait(false);
+            ComposeKleisliResult(g, h))(input);
 
         return (leftComposed.IsSuccess == rightComposed.IsSuccess &&
                 (leftComposed.IsFailure || leftComposed.Value == rightComposed.Value));
@@ -76,12 +76,12 @@ public class KleisliPropertyTests
         // Left: (f >=> g) >=> h
         Result<int, string> leftComposed = await ComposeKleisliResult(
             ComposeKleisliResult(f, g),
-            h)(input).ConfigureAwait(false);
+            h)(input);
 
         // Right: f >=> (g >=> h)
         Result<int, string> rightComposed = await ComposeKleisliResult(
             f,
-            ComposeKleisliResult(g, h))(input).ConfigureAwait(false);
+            ComposeKleisliResult(g, h))(input);
 
         return (leftComposed.IsSuccess == rightComposed.IsSuccess &&
                 (leftComposed.IsFailure || leftComposed.Value == rightComposed.Value) &&
@@ -104,8 +104,8 @@ public class KleisliPropertyTests
         KleisliResult<int, int, string> f = x =>
             Task.FromResult(Result<int, string>.Success(x * 3 + 7));
 
-        Result<int, string> composed = await ComposeKleisliResult(identity, f)(input).ConfigureAwait(false);
-        Result<int, string> direct = await f(input).ConfigureAwait(false);
+        Result<int, string> composed = await ComposeKleisliResult(identity, f)(input);
+        Result<int, string> direct = await f(input);
 
         return (composed.IsSuccess == direct.IsSuccess &&
                 composed.Value == direct.Value);
@@ -127,8 +127,8 @@ public class KleisliPropertyTests
         KleisliResult<int, int, string> identity = x =>
             Task.FromResult(Result<int, string>.Success(x));
 
-        Result<int, string> composed = await ComposeKleisliResult(f, identity)(input).ConfigureAwait(false);
-        Result<int, string> direct = await f(input).ConfigureAwait(false);
+        Result<int, string> composed = await ComposeKleisliResult(f, identity)(input);
+        Result<int, string> direct = await f(input);
 
         return (composed.IsSuccess == direct.IsSuccess &&
                 composed.Value == direct.Value);
@@ -152,8 +152,8 @@ public class KleisliPropertyTests
                 ? Result<int, string>.Success(x * 2)
                 : Result<int, string>.Failure("negative"));
 
-        Result<int, string> composed = await ComposeKleisliResult(identity, f)(input).ConfigureAwait(false);
-        Result<int, string> direct = await f(input).ConfigureAwait(false);
+        Result<int, string> composed = await ComposeKleisliResult(identity, f)(input);
+        Result<int, string> direct = await f(input);
 
         return (composed.IsSuccess == direct.IsSuccess &&
                 (composed.IsFailure || composed.Value == direct.Value) &&
@@ -178,8 +178,8 @@ public class KleisliPropertyTests
         KleisliResult<int, int, string> identity = x =>
             Task.FromResult(Result<int, string>.Success(x));
 
-        Result<int, string> composed = await ComposeKleisliResult(f, identity)(input).ConfigureAwait(false);
-        Result<int, string> direct = await f(input).ConfigureAwait(false);
+        Result<int, string> composed = await ComposeKleisliResult(f, identity)(input);
+        Result<int, string> direct = await f(input);
 
         return (composed.IsSuccess == direct.IsSuccess &&
                 (composed.IsFailure || composed.Value == direct.Value) &&
@@ -203,13 +203,13 @@ public class KleisliPropertyTests
     {
         return async input =>
         {
-            Result<TMid, TError> firstResult = await f(input).ConfigureAwait(false);
+            Result<TMid, TError> firstResult = await f(input);
             if (firstResult.IsFailure)
             {
                 return Result<TOut, TError>.Failure(firstResult.Error);
             }
 
-            return await g(firstResult.Value).ConfigureAwait(false);
+            return await g(firstResult.Value);
         };
     }
 }

@@ -1,4 +1,4 @@
-namespace Ouroboros.Tests.Interop;
+﻿namespace Ouroboros.Tests.Interop;
 
 using Ouroboros.Abstractions.Monads;
 using Ouroboros.Core.Interop;
@@ -45,7 +45,7 @@ public class PipelineBuilderTests
         var builder = new PipelineBuilder<string>("test")
             .AddResultStep(parseStep);
 
-        var result = await builder.ExecuteAsync("42").ConfigureAwait(false);
+        var result = await builder.ExecuteAsync("42");
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().Be(42);
@@ -125,7 +125,7 @@ public class PipelineBuilderTests
             .AddStep(doubleStep)
             .Build();
 
-        var result = await (3 | pipeline).ConfigureAwait(false);
+        var result = await (3 | pipeline);
 
         result.Should().Be(6);
     }

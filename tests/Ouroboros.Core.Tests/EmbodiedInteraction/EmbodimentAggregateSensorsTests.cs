@@ -1,4 +1,4 @@
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Ouroboros.Abstractions;
 using Ouroboros.Abstractions.Monads;
@@ -27,7 +27,7 @@ public class EmbodimentAggregateSensorsTests : IDisposable
     [Fact]
     public async Task ActivateSensorAsync_UnknownProvider_ReturnsFailure()
     {
-        var result = await _sut.ActivateSensorAsync("unknown:sensor1").ConfigureAwait(false);
+        var result = await _sut.ActivateSensorAsync("unknown:sensor1");
 
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Contain("not found");
@@ -38,7 +38,7 @@ public class EmbodimentAggregateSensorsTests : IDisposable
     {
         _sut.Dispose();
 
-        var result = await _sut.ActivateSensorAsync("prov1:sensor1").ConfigureAwait(false);
+        var result = await _sut.ActivateSensorAsync("prov1:sensor1");
 
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Contain("disposed");
@@ -51,7 +51,7 @@ public class EmbodimentAggregateSensorsTests : IDisposable
             .Setup(p => p.ActivateSensorAsync("sensor1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Unit>.Failure("sensor error"));
 
-        var result = await _sut.ActivateSensorAsync("prov1:sensor1").ConfigureAwait(false);
+        var result = await _sut.ActivateSensorAsync("prov1:sensor1");
 
         result.IsFailure.Should().BeTrue();
     }
@@ -69,7 +69,7 @@ public class EmbodimentAggregateSensorsTests : IDisposable
             .ReturnsAsync(Result<IReadOnlyList<SensorInfo>>.Success(
                 new List<SensorInfo> { sensorInfo }));
 
-        var result = await _sut.ActivateSensorAsync("prov1:sensor1").ConfigureAwait(false);
+        var result = await _sut.ActivateSensorAsync("prov1:sensor1");
 
         result.IsSuccess.Should().BeTrue();
         result.Value.SensorId.Should().Be("sensor1");
@@ -78,7 +78,7 @@ public class EmbodimentAggregateSensorsTests : IDisposable
     [Fact]
     public async Task DeactivateSensorAsync_UnknownProvider_ReturnsFailure()
     {
-        var result = await _sut.DeactivateSensorAsync("unknown:sensor1").ConfigureAwait(false);
+        var result = await _sut.DeactivateSensorAsync("unknown:sensor1");
 
         result.IsFailure.Should().BeTrue();
     }
@@ -88,7 +88,7 @@ public class EmbodimentAggregateSensorsTests : IDisposable
     {
         _sut.Dispose();
 
-        var result = await _sut.DeactivateSensorAsync("prov1:sensor1").ConfigureAwait(false);
+        var result = await _sut.DeactivateSensorAsync("prov1:sensor1");
 
         result.IsFailure.Should().BeTrue();
     }
@@ -100,7 +100,7 @@ public class EmbodimentAggregateSensorsTests : IDisposable
             .Setup(p => p.DeactivateSensorAsync("sensor1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<Unit>.Success(Unit.Value));
 
-        var result = await _sut.DeactivateSensorAsync("prov1:sensor1").ConfigureAwait(false);
+        var result = await _sut.DeactivateSensorAsync("prov1:sensor1");
 
         result.IsSuccess.Should().BeTrue();
     }
@@ -108,7 +108,7 @@ public class EmbodimentAggregateSensorsTests : IDisposable
     [Fact]
     public async Task ReadSensorAsync_UnknownProvider_ReturnsFailure()
     {
-        var result = await _sut.ReadSensorAsync("unknown:sensor1").ConfigureAwait(false);
+        var result = await _sut.ReadSensorAsync("unknown:sensor1");
 
         result.IsFailure.Should().BeTrue();
     }
@@ -118,7 +118,7 @@ public class EmbodimentAggregateSensorsTests : IDisposable
     {
         _sut.Dispose();
 
-        var result = await _sut.ReadSensorAsync("prov1:sensor1").ConfigureAwait(false);
+        var result = await _sut.ReadSensorAsync("prov1:sensor1");
 
         result.IsFailure.Should().BeTrue();
     }
@@ -132,7 +132,7 @@ public class EmbodimentAggregateSensorsTests : IDisposable
             .Setup(p => p.ReadSensorAsync("sensor1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<PerceptionData>.Success(perceptionData));
 
-        var result = await _sut.ReadSensorAsync("prov1:sensor1").ConfigureAwait(false);
+        var result = await _sut.ReadSensorAsync("prov1:sensor1");
 
         result.IsSuccess.Should().BeTrue();
         result.Value.SensorId.Should().Be("sensor1");
@@ -143,7 +143,7 @@ public class EmbodimentAggregateSensorsTests : IDisposable
     {
         var action = new ActuatorAction("speak", new Dictionary<string, object>());
 
-        var result = await _sut.ExecuteActionAsync("unknown:actuator1", action).ConfigureAwait(false);
+        var result = await _sut.ExecuteActionAsync("unknown:actuator1", action);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -154,7 +154,7 @@ public class EmbodimentAggregateSensorsTests : IDisposable
         _sut.Dispose();
         var action = new ActuatorAction("speak", new Dictionary<string, object>());
 
-        var result = await _sut.ExecuteActionAsync("prov1:actuator1", action).ConfigureAwait(false);
+        var result = await _sut.ExecuteActionAsync("prov1:actuator1", action);
 
         result.IsFailure.Should().BeTrue();
     }
@@ -168,7 +168,7 @@ public class EmbodimentAggregateSensorsTests : IDisposable
             .Setup(p => p.ExecuteActionAsync("actuator1", action, It.IsAny<CancellationToken>()))
             .ReturnsAsync(Result<ActionOutcome>.Success(outcome));
 
-        var result = await _sut.ExecuteActionAsync("prov1:actuator1", action).ConfigureAwait(false);
+        var result = await _sut.ExecuteActionAsync("prov1:actuator1", action);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Success.Should().BeTrue();

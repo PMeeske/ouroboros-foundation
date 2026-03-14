@@ -1,4 +1,4 @@
-namespace Ouroboros.Specs.Steps;
+﻿namespace Ouroboros.Specs.Steps;
 
 using Ouroboros.Domain.Events;
 using Ouroboros.Domain.Persistence;

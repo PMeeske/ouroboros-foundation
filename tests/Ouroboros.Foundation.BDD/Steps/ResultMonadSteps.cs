@@ -1,4 +1,4 @@
-namespace Ouroboros.Specs.Steps;
+﻿namespace Ouroboros.Specs.Steps;
 
 [Binding]
 [Scope(Feature = "Result Monad")]
@@ -56,7 +56,7 @@ public class ResultMonadSteps
         {
             _ = _intResult!.Value.Value;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _thrownException = ex;
         }
@@ -69,7 +69,7 @@ public class ResultMonadSteps
         {
             _ = _intResult!.Value.Error;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _thrownException = ex;
         }

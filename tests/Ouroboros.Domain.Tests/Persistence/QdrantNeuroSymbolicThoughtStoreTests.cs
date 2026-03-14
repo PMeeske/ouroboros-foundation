@@ -1,4 +1,4 @@
-using Ouroboros.Core.Configuration;
+﻿using Ouroboros.Core.Configuration;
 using Ouroboros.Domain.Persistence;
 using Qdrant.Client;
 
@@ -66,7 +66,7 @@ public class QdrantNeuroSymbolicThoughtStoreTests : IDisposable
         var store = new QdrantNeuroSymbolicThoughtStore(_client, _registry.Object, _settings);
 
         store.Should().NotBeNull();
-        await store.DisposeAsync().ConfigureAwait(false);
+        await store.DisposeAsync();
     }
 
     #endregion
@@ -80,7 +80,7 @@ public class QdrantNeuroSymbolicThoughtStoreTests : IDisposable
         var store = new QdrantNeuroSymbolicThoughtStore(_client, _registry.Object, _settings, embeddingFunc);
 
         store.SupportsSemanticSearch.Should().BeTrue();
-        await store.DisposeAsync().ConfigureAwait(false);
+        await store.DisposeAsync();
     }
 
     [Fact]
@@ -89,7 +89,7 @@ public class QdrantNeuroSymbolicThoughtStoreTests : IDisposable
         var store = new QdrantNeuroSymbolicThoughtStore(_client, _registry.Object, _settings);
 
         store.SupportsSemanticSearch.Should().BeFalse();
-        await store.DisposeAsync().ConfigureAwait(false);
+        await store.DisposeAsync();
     }
 
     #endregion
@@ -104,7 +104,7 @@ public class QdrantNeuroSymbolicThoughtStoreTests : IDisposable
         _registry.Verify(r => r.GetCollectionName(QdrantCollectionRole.NeuroThoughts), Times.Once);
         _registry.Verify(r => r.GetCollectionName(QdrantCollectionRole.ThoughtRelations), Times.Once);
         _registry.Verify(r => r.GetCollectionName(QdrantCollectionRole.ThoughtResults), Times.Once);
-        await store.DisposeAsync().ConfigureAwait(false);
+        await store.DisposeAsync();
     }
 
     #endregion

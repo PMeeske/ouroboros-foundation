@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
@@ -18,7 +18,7 @@ public sealed class FixStateDeepTests
     private static (Document Document, SyntaxNode Root, Diagnostic Diagnostic) CreateTestContext(
         string code = "class C { }")
     {
-        var workspace = new AdhocWorkspace();
+        using var workspace = new AdhocWorkspace();
         var project = workspace.AddProject("TestProject", LanguageNames.CSharp);
         var document = project.AddDocument("Test.cs", SourceText.From(code));
         var root = document.GetSyntaxRootAsync().GetAwaiter().GetResult()!;
@@ -206,7 +206,7 @@ public sealed class FixStateDeepTests
         var (document, root, diagnostic) = CreateTestContext();
         var state = new FixState(document, diagnostic, root);
 
-        var workspace2 = new AdhocWorkspace();
+        using var workspace2 = new AdhocWorkspace();
         var project2 = workspace2.AddProject("P2", LanguageNames.CSharp);
         var doc2 = project2.AddDocument("T2.cs", SourceText.From("class D { }"));
 

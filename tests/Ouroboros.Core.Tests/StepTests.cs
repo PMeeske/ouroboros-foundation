@@ -1,4 +1,4 @@
-// <copyright file="StepTests.cs" company="Ouroboros">
+﻿// <copyright file="StepTests.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -26,7 +26,7 @@ public class StepTests
         Step<int, int> double_ = x => Task.FromResult(x * 2);
 
         // Act
-        var result = await double_(5).ConfigureAwait(false);
+        var result = await double_(5);
 
         // Assert
         result.Should().Be(10);
@@ -39,7 +39,7 @@ public class StepTests
         Step<int, string> toString = x => Task.FromResult(x.ToString());
 
         // Act
-        var result = await toString(42).ConfigureAwait(false);
+        var result = await toString(42);
 
         // Assert
         result.Should().Be("42");
@@ -51,12 +51,12 @@ public class StepTests
         // Arrange
         Step<int, int> delayedDouble = async x =>
         {
-            await Task.Delay(10).ConfigureAwait(false);
+            await Task.Delay(10);
             return x * 2;
         };
 
         // Act
-        var result = await delayedDouble(5).ConfigureAwait(false);
+        var result = await delayedDouble(5);
 
         // Assert
         result.Should().Be(10);
@@ -73,7 +73,7 @@ public class StepTests
         Step<int, int> identity = Arrow.Identity<int>();
 
         // Act
-        var result = await identity(42).ConfigureAwait(false);
+        var result = await identity(42);
 
         // Assert
         result.Should().Be(42);
@@ -86,7 +86,7 @@ public class StepTests
         Step<int, int> lifted = Arrow.Lift<int, int>(x => x * 2);
 
         // Act
-        var result = await lifted(5).ConfigureAwait(false);
+        var result = await lifted(5);
 
         // Assert
         result.Should().Be(10);
@@ -99,7 +99,7 @@ public class StepTests
         Step<int, int> lifted = Arrow.LiftAsync<int, int>(x => Task.FromResult(x * 2));
 
         // Act
-        var result = await lifted(5).ConfigureAwait(false);
+        var result = await lifted(5);
 
         // Assert
         result.Should().Be(10);
@@ -112,7 +112,7 @@ public class StepTests
         KleisliResult<int, int, Exception> arrow = Arrow.TryLift<int, int>(x => x * 2);
 
         // Act
-        Result<int, Exception> result = await arrow(5).ConfigureAwait(false);
+        Result<int, Exception> result = await arrow(5);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -130,7 +130,7 @@ public class StepTests
         });
 
         // Act
-        Result<int, Exception> result = await arrow(-1).ConfigureAwait(false);
+        Result<int, Exception> result = await arrow(-1);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -143,12 +143,12 @@ public class StepTests
         // Arrange
         KleisliResult<int, int, Exception> arrow = Arrow.TryLiftAsync<int, int>(async x =>
         {
-            await Task.Delay(1).ConfigureAwait(false);
+            await Task.Delay(1);
             return x * 2;
         });
 
         // Act
-        Result<int, Exception> result = await arrow(5).ConfigureAwait(false);
+        Result<int, Exception> result = await arrow(5);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -161,12 +161,12 @@ public class StepTests
         // Arrange
         KleisliResult<int, int, Exception> arrow = Arrow.TryLiftAsync<int, int>(async x =>
         {
-            await Task.Delay(1).ConfigureAwait(false);
+            await Task.Delay(1);
             throw new InvalidOperationException("Test error");
         });
 
         // Act
-        Result<int, Exception> result = await arrow(5).ConfigureAwait(false);
+        Result<int, Exception> result = await arrow(5);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -180,7 +180,7 @@ public class StepTests
         KleisliResult<int, string, string> arrow = Arrow.Success<int, string, string>("constant");
 
         // Act
-        Result<string, string> result = await arrow(42).ConfigureAwait(false);
+        Result<string, string> result = await arrow(42);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
@@ -194,7 +194,7 @@ public class StepTests
         KleisliResult<int, string, string> arrow = Arrow.Failure<int, string, string>("error");
 
         // Act
-        Result<string, string> result = await arrow(42).ConfigureAwait(false);
+        Result<string, string> result = await arrow(42);
 
         // Assert
         result.IsFailure.Should().BeTrue();
@@ -208,7 +208,7 @@ public class StepTests
         KleisliOption<int, string> arrow = Arrow.Some<int, string>("value");
 
         // Act
-        Option<string> result = await arrow(42).ConfigureAwait(false);
+        Option<string> result = await arrow(42);
 
         // Assert
         result.HasValue.Should().BeTrue();
@@ -222,7 +222,7 @@ public class StepTests
         KleisliOption<int, string> arrow = Arrow.None<int, string>();
 
         // Act
-        Option<string> result = await arrow(42).ConfigureAwait(false);
+        Option<string> result = await arrow(42);
 
         // Assert
         result.HasValue.Should().BeFalse();
@@ -242,7 +242,7 @@ public class StepTests
 
         // Act
         Kleisli<int, string> composed = compose(double_, toString);
-        var result = await composed(5).ConfigureAwait(false);
+        var result = await composed(5);
 
         // Assert
         result.Should().Be("10");
@@ -259,7 +259,7 @@ public class StepTests
 
         // Act
         Kleisli<int, string> composed = curriedCompose(toString);
-        var result = await composed(5).ConfigureAwait(false);
+        var result = await composed(5);
 
         // Assert
         result.Should().Be("10");
@@ -290,7 +290,7 @@ public class StepTests
 
         // Act
         Step<int, int> asyncStep = syncStep.ToAsync();
-        var result = await asyncStep(5).ConfigureAwait(false);
+        var result = await asyncStep(5);
 
         // Assert
         result.Should().Be(10);
@@ -320,7 +320,7 @@ public class StepTests
 
         // Act
         Step<int, string> composed = double_.Pipe(toString);
-        var result = await composed(5).ConfigureAwait(false);
+        var result = await composed(5);
 
         // Assert
         result.Should().Be("10");
@@ -375,7 +375,7 @@ public class StepTests
 
         // Act
         Step<int, int> asyncStep = syncStep;
-        var result = await asyncStep(5).ConfigureAwait(false);
+        var result = await asyncStep(5);
 
         // Assert
         result.Should().Be(10);
@@ -408,7 +408,7 @@ public class StepTests
 
         // Act
         Step<int, string> composed = syncStep.Then(asyncStep);
-        var result = await composed(5).ConfigureAwait(false);
+        var result = await composed(5);
 
         // Assert
         result.Should().Be("10");
@@ -423,7 +423,7 @@ public class StepTests
 
         // Act
         Step<int, string> composed = asyncStep.Then(syncStep);
-        var result = await composed(5).ConfigureAwait(false);
+        var result = await composed(5);
 
         // Assert
         result.Should().Be("10");
@@ -519,8 +519,8 @@ public class StepTests
         Kleisli<int, int> composed = Arrow.Compose<int, int, int>()(identityKleisli, f);
 
         // Act
-        var composedResult = await composed(a).ConfigureAwait(false);
-        var directResult = await f(a).ConfigureAwait(false);
+        var composedResult = await composed(a);
+        var directResult = await f(a);
 
         // Assert
         composedResult.Should().Be(directResult);
@@ -539,8 +539,8 @@ public class StepTests
         Kleisli<int, int> composed = Arrow.Compose<int, int, int>()(f, identityKleisli);
 
         // Act
-        var composedResult = await composed(a).ConfigureAwait(false);
-        var directResult = await f(a).ConfigureAwait(false);
+        var composedResult = await composed(a);
+        var directResult = await f(a);
 
         // Assert
         composedResult.Should().Be(directResult);
@@ -564,8 +564,8 @@ public class StepTests
         Kleisli<int, int> f_gh = Arrow.Compose<int, int, int>()(f, gh);
 
         // Act
-        var leftResult = await fg_h(a).ConfigureAwait(false);
-        var rightResult = await f_gh(a).ConfigureAwait(false);
+        var leftResult = await fg_h(a);
+        var rightResult = await f_gh(a);
 
         // Assert
         leftResult.Should().Be(rightResult);
@@ -624,14 +624,14 @@ public class StepTests
 
         // Act - This demonstrates a real-world pattern
         var input = "21";
-        Result<int, Exception> parseResult = await parseNumber(input).ConfigureAwait(false);
+        Result<int, Exception> parseResult = await parseNumber(input);
 
         // Build the final result
         string result;
         if (parseResult.IsSuccess)
         {
-            var doubled = await doubleNumber(parseResult.Value).ConfigureAwait(false);
-            var formatted = await formatResult(doubled).ConfigureAwait(false);
+            var doubled = await doubleNumber(parseResult.Value);
+            var formatted = await formatResult(doubled);
             result = formatted;
         }
         else

@@ -1,4 +1,4 @@
-// <copyright file="OllamaHealthCheckProviderTests.cs" company="Ouroboros">
+﻿// <copyright file="OllamaHealthCheckProviderTests.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -67,7 +67,7 @@ public class OllamaHealthCheckProviderTests
         using var provider = new OllamaHealthCheckProvider("http://localhost:59999", 1);
 
         // Act
-        var result = await provider.CheckHealthAsync().ConfigureAwait(false);
+        var result = await provider.CheckHealthAsync();
 
         // Assert
         result.Status.Should().Be(HealthStatus.Unhealthy);
@@ -84,7 +84,7 @@ public class OllamaHealthCheckProviderTests
         cts.Cancel();
 
         // Act
-        var result = await provider.CheckHealthAsync(cts.Token).ConfigureAwait(false);
+        var result = await provider.CheckHealthAsync(cts.Token);
 
         // Assert
         result.Status.Should().Be(HealthStatus.Unhealthy);

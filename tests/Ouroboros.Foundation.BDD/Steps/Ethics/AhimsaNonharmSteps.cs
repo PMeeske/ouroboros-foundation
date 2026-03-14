@@ -1,4 +1,4 @@
-using Ouroboros.Core.Ethics;
+﻿using Ouroboros.Core.Ethics;
 using Ouroboros.Core.LawsOfForm;
 using Reqnroll;
 

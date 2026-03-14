@@ -13,7 +13,7 @@ public class PatternMatchTests
         {
             Pattern = "test-pattern",
             SubscriptionId = "sub1",
-            Bindings = new Substitution(),
+            Bindings = Substitution.Empty,
         };
         match.Pattern.Should().Be("test-pattern");
     }
@@ -25,7 +25,7 @@ public class PatternMatchTests
         {
             Pattern = "p",
             SubscriptionId = "my-sub",
-            Bindings = new Substitution(),
+            Bindings = Substitution.Empty,
         };
         match.SubscriptionId.Should().Be("my-sub");
     }
@@ -33,7 +33,7 @@ public class PatternMatchTests
     [Fact]
     public void Bindings_CanBeSet()
     {
-        var sub = new Substitution();
+        var sub = Substitution.Empty;
         var match = new PatternMatch
         {
             Pattern = "p",
@@ -50,7 +50,7 @@ public class PatternMatchTests
         {
             Pattern = "p",
             SubscriptionId = "s",
-            Bindings = new Substitution(),
+            Bindings = Substitution.Empty,
         };
         match.MatchedAtoms.Should().BeEmpty();
     }
@@ -63,7 +63,7 @@ public class PatternMatchTests
         {
             Pattern = "p",
             SubscriptionId = "s",
-            Bindings = new Substitution(),
+            Bindings = Substitution.Empty,
             MatchedAtoms = atoms,
         };
         match.MatchedAtoms.Should().HaveCount(1);
@@ -77,7 +77,7 @@ public class PatternMatchTests
         {
             Pattern = "p",
             SubscriptionId = "s",
-            Bindings = new Substitution(),
+            Bindings = Substitution.Empty,
         };
         match.Timestamp.Should().BeOnOrAfter(before);
     }

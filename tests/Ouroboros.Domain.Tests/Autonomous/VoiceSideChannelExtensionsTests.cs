@@ -1,4 +1,4 @@
-namespace Ouroboros.Tests.Autonomous;
+﻿namespace Ouroboros.Tests.Autonomous;
 
 using Ouroboros.Domain.Autonomous;
 
@@ -15,7 +15,7 @@ public class VoiceSideChannelExtensionsTests : IAsyncDisposable
         _channel.MessageSkipped += (_, msg) => _skippedMessages.Add(msg);
     }
 
-    public async ValueTask DisposeAsync() => await _channel.DisposeAsync().ConfigureAwait(false);
+    public async ValueTask DisposeAsync() => await _channel.DisposeAsync();
 
     [Fact]
     public void SayAs_DelegatesToSayWithPersona()

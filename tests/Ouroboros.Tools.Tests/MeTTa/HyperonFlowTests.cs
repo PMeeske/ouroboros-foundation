@@ -1,4 +1,4 @@
-namespace Ouroboros.Tests.Tools.MeTTa;
+﻿namespace Ouroboros.Tests.Tools.MeTTa;
 
 using Ouroboros.Tools.MeTTa;
 
@@ -105,7 +105,7 @@ public class HyperonFlowTests : IDisposable
     [Fact]
     public async Task ExecuteAsync_CancellationToken_ThrowsWhenCancelled()
     {
-        var cts = new CancellationTokenSource();
+        using var cts = new CancellationTokenSource();
         cts.Cancel();
 
         var flow = _integration.CreateFlow("cancel-test", "test")

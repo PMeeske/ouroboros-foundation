@@ -1,4 +1,4 @@
-using Ouroboros.Core.Configuration;
+﻿using Ouroboros.Core.Configuration;
 using Ouroboros.Domain.Vectors;
 using Qdrant.Client;
 
@@ -58,7 +58,7 @@ public class QdrantCollectionAdminTests
         admin.AddCollectionLink(link);
 
         admin.CollectionLinks.Should().Contain(link);
-        await admin.DisposeAsync().ConfigureAwait(false);
+        await admin.DisposeAsync();
         client.Dispose();
     }
 
@@ -79,7 +79,7 @@ public class QdrantCollectionAdminTests
         admin.AddCollectionLink(link);
 
         admin.CollectionLinks.Count(l => l.SourceCollection == "a" && l.TargetCollection == "b").Should().Be(1);
-        await admin.DisposeAsync().ConfigureAwait(false);
+        await admin.DisposeAsync();
         client.Dispose();
     }
 
@@ -100,7 +100,7 @@ public class QdrantCollectionAdminTests
         var linked = admin.GetLinkedCollections("a");
 
         linked.Should().HaveCount(1);
-        await admin.DisposeAsync().ConfigureAwait(false);
+        await admin.DisposeAsync();
         client.Dispose();
     }
 }

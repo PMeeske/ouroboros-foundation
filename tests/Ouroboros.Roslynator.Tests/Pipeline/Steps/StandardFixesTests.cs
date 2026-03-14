@@ -1,4 +1,4 @@
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using Ouroboros.Roslynator.Pipeline;
@@ -11,7 +11,7 @@ public sealed class StandardFixesTests
 {
     private static FixState CreateState(string code, string diagnosticId, int spanStart = 0, int spanLength = 5)
     {
-        var workspace = new AdhocWorkspace();
+        using var workspace = new AdhocWorkspace();
         var project = workspace.AddProject("TestProject", LanguageNames.CSharp);
         var document = project.AddDocument("Test.cs", SourceText.From(code));
         var root = document.GetSyntaxRootAsync().GetAwaiter().GetResult()!;

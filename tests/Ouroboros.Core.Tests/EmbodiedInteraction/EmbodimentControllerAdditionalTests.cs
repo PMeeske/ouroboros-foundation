@@ -1,4 +1,4 @@
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Ouroboros.Core.EmbodiedInteraction;
 using Ouroboros.Core.Monads;
@@ -118,7 +118,7 @@ public class EmbodimentControllerAdditionalTests : IDisposable
     [Fact]
     public async Task StartAsync_WithNoSensors_ReturnsSuccessAndSetsRunning()
     {
-        var result = await _sut.StartAsync().ConfigureAwait(false);
+        var result = await _sut.StartAsync();
 
         result.IsSuccess.Should().BeTrue();
         _sut.IsRunning.Should().BeTrue();
@@ -127,9 +127,9 @@ public class EmbodimentControllerAdditionalTests : IDisposable
     [Fact]
     public async Task StartAsync_WhenAlreadyRunning_ReturnsFailure()
     {
-        await _sut.StartAsync().ConfigureAwait(false);
+        await _sut.StartAsync();
 
-        var result = await _sut.StartAsync().ConfigureAwait(false);
+        var result = await _sut.StartAsync();
 
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain("Already running");
@@ -140,7 +140,7 @@ public class EmbodimentControllerAdditionalTests : IDisposable
     {
         _sut.Dispose();
 
-        var result = await _sut.StartAsync().ConfigureAwait(false);
+        var result = await _sut.StartAsync();
 
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain("disposed");
@@ -155,7 +155,7 @@ public class EmbodimentControllerAdditionalTests : IDisposable
         using var sensor = new AudioSensor(sttModel.Object, _virtualSelf);
         _sut.RegisterAudioSensor("audio1", sensor);
 
-        var result = await _sut.StartAsync().ConfigureAwait(false);
+        var result = await _sut.StartAsync();
 
         result.IsSuccess.Should().BeTrue();
         sensor.IsListening.Should().BeTrue();
@@ -169,7 +169,7 @@ public class EmbodimentControllerAdditionalTests : IDisposable
         using var sensor = new VisualSensor(visionModel.Object, _virtualSelf);
         _sut.RegisterVisualSensor("visual1", sensor);
 
-        var result = await _sut.StartAsync().ConfigureAwait(false);
+        var result = await _sut.StartAsync();
 
         result.IsSuccess.Should().BeTrue();
         sensor.IsObserving.Should().BeTrue();
@@ -178,7 +178,7 @@ public class EmbodimentControllerAdditionalTests : IDisposable
     [Fact]
     public async Task StartAsync_SetsVirtualSelfStateToAwake()
     {
-        await _sut.StartAsync().ConfigureAwait(false);
+        await _sut.StartAsync();
 
         _virtualSelf.CurrentState.State.Should().Be(EmbodimentState.Awake);
     }
@@ -191,10 +191,10 @@ public class EmbodimentControllerAdditionalTests : IDisposable
         sttModel.Setup(m => m.SupportsStreaming).Returns(false);
         sttModel.Setup(m => m.ModelName).Returns("test-stt");
         using var sensor = new AudioSensor(sttModel.Object, _virtualSelf);
-        await sensor.StartListeningAsync().ConfigureAwait(false); // Start it first so it fails again
+        await sensor.StartListeningAsync(); // Start it first so it fails again
         _sut.RegisterAudioSensor("audio1", sensor);
 
-        var result = await _sut.StartAsync().ConfigureAwait(false);
+        var result = await _sut.StartAsync();
 
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain("Failed to start audio sensor");
@@ -210,7 +210,7 @@ public class EmbodimentControllerAdditionalTests : IDisposable
         sensor.StartObserving(); // Start it first
         _sut.RegisterVisualSensor("visual1", sensor);
 
-        var result = await _sut.StartAsync().ConfigureAwait(false);
+        var result = await _sut.StartAsync();
 
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain("Failed to start visual sensor");
@@ -223,7 +223,7 @@ public class EmbodimentControllerAdditionalTests : IDisposable
     [Fact]
     public async Task StopAsync_WhenNotRunning_ReturnsSuccess()
     {
-        var result = await _sut.StopAsync().ConfigureAwait(false);
+        var result = await _sut.StopAsync();
 
         result.IsSuccess.Should().BeTrue();
     }
@@ -231,9 +231,9 @@ public class EmbodimentControllerAdditionalTests : IDisposable
     [Fact]
     public async Task StopAsync_WhenRunning_StopsAndSetsStateAndReturnsSuccess()
     {
-        await _sut.StartAsync().ConfigureAwait(false);
+        await _sut.StartAsync();
 
-        var result = await _sut.StopAsync().ConfigureAwait(false);
+        var result = await _sut.StopAsync();
 
         result.IsSuccess.Should().BeTrue();
         _sut.IsRunning.Should().BeFalse();
@@ -248,9 +248,9 @@ public class EmbodimentControllerAdditionalTests : IDisposable
         sttModel.Setup(m => m.ModelName).Returns("test-stt");
         using var sensor = new AudioSensor(sttModel.Object, _virtualSelf);
         _sut.RegisterAudioSensor("audio1", sensor);
-        await _sut.StartAsync().ConfigureAwait(false);
+        await _sut.StartAsync();
 
-        await _sut.StopAsync().ConfigureAwait(false);
+        await _sut.StopAsync();
 
         sensor.IsListening.Should().BeFalse();
     }
@@ -262,9 +262,9 @@ public class EmbodimentControllerAdditionalTests : IDisposable
         visionModel.Setup(m => m.ModelName).Returns("test-vision");
         using var sensor = new VisualSensor(visionModel.Object, _virtualSelf);
         _sut.RegisterVisualSensor("visual1", sensor);
-        await _sut.StartAsync().ConfigureAwait(false);
+        await _sut.StartAsync();
 
-        await _sut.StopAsync().ConfigureAwait(false);
+        await _sut.StopAsync();
 
         sensor.IsObserving.Should().BeFalse();
     }
@@ -278,7 +278,7 @@ public class EmbodimentControllerAdditionalTests : IDisposable
     {
         var request = new ActionRequest("voice1", ActuatorModality.Voice, "Hello", null);
 
-        var result = await _sut.ExecuteActionAsync(request).ConfigureAwait(false);
+        var result = await _sut.ExecuteActionAsync(request);
 
         result.Success.Should().BeFalse();
         result.Error.Should().Contain("No voice actuator");
@@ -298,7 +298,7 @@ public class EmbodimentControllerAdditionalTests : IDisposable
         _sut.RegisterVoiceActuator("voice1", actuator);
 
         var request = new ActionRequest("voice1", ActuatorModality.Voice, "Hello", null);
-        var result = await _sut.ExecuteActionAsync(request).ConfigureAwait(false);
+        var result = await _sut.ExecuteActionAsync(request);
 
         result.Success.Should().BeTrue();
     }
@@ -318,7 +318,7 @@ public class EmbodimentControllerAdditionalTests : IDisposable
 
         var parameters = new Dictionary<string, object> { ["emotion"] = "happy" };
         var request = new ActionRequest("voice1", ActuatorModality.Voice, "Hello", parameters);
-        var result = await _sut.ExecuteActionAsync(request).ConfigureAwait(false);
+        var result = await _sut.ExecuteActionAsync(request);
 
         result.Success.Should().BeTrue();
     }
@@ -338,7 +338,7 @@ public class EmbodimentControllerAdditionalTests : IDisposable
 
         // Request targets "unknown-voice" which doesn't exist, should fall back to first
         var request = new ActionRequest("unknown-voice", ActuatorModality.Voice, "Hello", null);
-        var result = await _sut.ExecuteActionAsync(request).ConfigureAwait(false);
+        var result = await _sut.ExecuteActionAsync(request);
 
         result.Success.Should().BeTrue();
     }
@@ -360,7 +360,7 @@ public class EmbodimentControllerAdditionalTests : IDisposable
         using var actuator = new VoiceActuator(ttsModel.Object, _virtualSelf);
         _sut.RegisterVoiceActuator("voice1", actuator);
 
-        var result = await _sut.SpeakAsync("Hi", actuatorId: "voice1").ConfigureAwait(false);
+        var result = await _sut.SpeakAsync("Hi", actuatorId: "voice1");
 
         result.IsSuccess.Should().BeTrue();
     }
@@ -378,7 +378,7 @@ public class EmbodimentControllerAdditionalTests : IDisposable
         using var actuator = new VoiceActuator(ttsModel.Object, _virtualSelf);
         _sut.RegisterVoiceActuator("voice1", actuator);
 
-        var result = await _sut.SpeakAsync("Hi", emotion: "cheerful").ConfigureAwait(false);
+        var result = await _sut.SpeakAsync("Hi", emotion: "cheerful");
 
         result.IsSuccess.Should().BeTrue();
     }
@@ -391,7 +391,7 @@ public class EmbodimentControllerAdditionalTests : IDisposable
         using var actuator = new VoiceActuator(ttsModel.Object, _virtualSelf);
         _sut.RegisterVoiceActuator("voice1", actuator);
 
-        var result = await _sut.SpeakAsync("Hi", actuatorId: "unknown").ConfigureAwait(false);
+        var result = await _sut.SpeakAsync("Hi", actuatorId: "unknown");
 
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain("No voice actuator");
@@ -410,7 +410,7 @@ public class EmbodimentControllerAdditionalTests : IDisposable
         using var actuator = new VoiceActuator(ttsModel.Object, _virtualSelf);
         _sut.RegisterVoiceActuator("voice1", actuator);
 
-        var result = await _sut.SpeakAsync("Hi").ConfigureAwait(false);
+        var result = await _sut.SpeakAsync("Hi");
 
         result.IsSuccess.Should().BeTrue();
     }
@@ -453,7 +453,7 @@ public class EmbodimentControllerAdditionalTests : IDisposable
     [Fact]
     public async Task StartAsync_RoutesAudioPerceptionsToVirtualSelf()
     {
-        await _sut.StartAsync().ConfigureAwait(false);
+        await _sut.StartAsync();
 
         // Verify VirtualSelf state is Awake
         _virtualSelf.CurrentState.State.Should().Be(EmbodimentState.Awake);
@@ -495,9 +495,9 @@ public class EmbodimentControllerAdditionalTests : IDisposable
     [Fact]
     public async Task GetFusedPerceptionAsync_Timeout_ReturnsFailure()
     {
-        await _sut.StartAsync().ConfigureAwait(false);
+        await _sut.StartAsync();
 
-        var result = await _sut.GetFusedPerceptionAsync(TimeSpan.FromMilliseconds(50)).ConfigureAwait(false);
+        var result = await _sut.GetFusedPerceptionAsync(TimeSpan.FromMilliseconds(50));
 
         result.IsSuccess.Should().BeFalse();
         // Should get either "Timeout" or "No perceptions available"

@@ -1,4 +1,4 @@
-namespace Ouroboros.Core.Tests.Monads;
+﻿namespace Ouroboros.Core.Tests.Monads;
 
 [Trait("Category", "Unit")]
 public sealed class AsyncKleisliExtensionsAdditionalTests
@@ -12,7 +12,7 @@ public sealed class AsyncKleisliExtensionsAdditionalTests
 
         var composed = f.SelectMany(mid =>
             (AsyncKleisli<int, int>)(x => ToAsyncEnumerable(new[] { x * 10 })));
-        var results = await CollectAsync(composed(3)).ConfigureAwait(false);
+        var results = await CollectAsync(composed(3));
 
         results.Should().BeEquivalentTo(new[] { 30, 40 });
     }
@@ -29,7 +29,7 @@ public sealed class AsyncKleisliExtensionsAdditionalTests
         var composed = f.SelectMany(
             mid => ToAsyncEnumerable(new[] { mid * 10 }),
             (mid, result) => result);
-        var results = await CollectAsync(composed(3)).ConfigureAwait(false);
+        var results = await CollectAsync(composed(3));
 
         results.Should().BeEquivalentTo(new[] { 30, 40 });
     }
@@ -42,7 +42,7 @@ public sealed class AsyncKleisliExtensionsAdditionalTests
         var composed = f.SelectMany(
             mid => ToAsyncEnumerable(new[] { mid * 10 }),
             (mid, result) => mid + result);
-        var results = await CollectAsync(composed(3)).ConfigureAwait(false);
+        var results = await CollectAsync(composed(3));
 
         // mid=3, result=30 => 33; mid=4, result=40 => 44
         results.Should().BeEquivalentTo(new[] { 33, 44 });
@@ -58,7 +58,7 @@ public sealed class AsyncKleisliExtensionsAdditionalTests
         AsyncKleisli<int, int> empty = _ => ToAsyncEnumerable(Array.Empty<int>());
         var mapped = empty.Map<int, int, string>(x => x.ToString());
 
-        var results = await CollectAsync(mapped(1)).ConfigureAwait(false);
+        var results = await CollectAsync(mapped(1));
         results.Should().BeEmpty();
     }
 
@@ -76,7 +76,7 @@ public sealed class AsyncKleisliExtensionsAdditionalTests
             return $"v:{n}";
         });
 
-        var results = await CollectAsync(mapped(10)).ConfigureAwait(false);
+        var results = await CollectAsync(mapped(10));
         results.Should().BeEquivalentTo(new[] { "v:10", "v:11", "v:12" });
     }
 
@@ -90,7 +90,7 @@ public sealed class AsyncKleisliExtensionsAdditionalTests
         AsyncKleisli<int, int> source = x => ToAsyncEnumerable(new[] { 1, 2, 3 });
         var filtered = source.Where<int, int>(_ => true);
 
-        var results = await CollectAsync(filtered(0)).ConfigureAwait(false);
+        var results = await CollectAsync(filtered(0));
         results.Should().BeEquivalentTo(new[] { 1, 2, 3 });
     }
 
@@ -100,7 +100,7 @@ public sealed class AsyncKleisliExtensionsAdditionalTests
         AsyncKleisli<int, int> source = x => ToAsyncEnumerable(new[] { 1, 2, 3 });
         var filtered = source.Where<int, int>(_ => false);
 
-        var results = await CollectAsync(filtered(0)).ConfigureAwait(false);
+        var results = await CollectAsync(filtered(0));
         results.Should().BeEmpty();
     }
 
@@ -118,7 +118,7 @@ public sealed class AsyncKleisliExtensionsAdditionalTests
             return false;
         });
 
-        var results = await CollectAsync(filtered(0)).ConfigureAwait(false);
+        var results = await CollectAsync(filtered(0));
         results.Should().BeEmpty();
     }
 
@@ -132,7 +132,7 @@ public sealed class AsyncKleisliExtensionsAdditionalTests
         AsyncKleisli<int, int> source = x => ToAsyncEnumerable(new[] { 1, 2, 3 });
         var limited = source.Take<int, int>(100);
 
-        var results = await CollectAsync(limited(0)).ConfigureAwait(false);
+        var results = await CollectAsync(limited(0));
         results.Should().BeEquivalentTo(new[] { 1, 2, 3 });
     }
 
@@ -146,7 +146,7 @@ public sealed class AsyncKleisliExtensionsAdditionalTests
         AsyncKleisli<int, int> source = x => ToAsyncEnumerable(new[] { 1, 2, 3 });
         var distinct = source.Distinct<int, int>();
 
-        var results = await CollectAsync(distinct(0)).ConfigureAwait(false);
+        var results = await CollectAsync(distinct(0));
         results.Should().BeEquivalentTo(new[] { 1, 2, 3 });
     }
 
@@ -156,7 +156,7 @@ public sealed class AsyncKleisliExtensionsAdditionalTests
         AsyncKleisli<int, int> source = _ => ToAsyncEnumerable(Array.Empty<int>());
         var distinct = source.Distinct<int, int>();
 
-        var results = await CollectAsync(distinct(0)).ConfigureAwait(false);
+        var results = await CollectAsync(distinct(0));
         results.Should().BeEmpty();
     }
 
@@ -171,7 +171,7 @@ public sealed class AsyncKleisliExtensionsAdditionalTests
         AsyncKleisli<int, int> g = _ => ToAsyncEnumerable(Array.Empty<int>());
 
         var merged = f.Union(g);
-        var results = await CollectAsync(merged(0)).ConfigureAwait(false);
+        var results = await CollectAsync(merged(0));
 
         results.Should().Contain(new[] { 1, 2 });
     }
@@ -183,7 +183,7 @@ public sealed class AsyncKleisliExtensionsAdditionalTests
         AsyncKleisli<int, int> g = _ => ToAsyncEnumerable(Array.Empty<int>());
 
         var merged = f.Union(g);
-        var results = await CollectAsync(merged(0)).ConfigureAwait(false);
+        var results = await CollectAsync(merged(0));
 
         results.Should().BeEmpty();
     }
@@ -199,7 +199,7 @@ public sealed class AsyncKleisliExtensionsAdditionalTests
         AsyncKleisli<int, string> toString = x => ToAsyncEnumerable(new[] { x.ToString() });
 
         var composed = empty.Then(toString);
-        var results = await CollectAsync(composed(5)).ConfigureAwait(false);
+        var results = await CollectAsync(composed(5));
 
         results.Should().BeEmpty();
     }
@@ -214,7 +214,7 @@ public sealed class AsyncKleisliExtensionsAdditionalTests
         var arrow = AsyncKleisliExtensions.LiftMany<int, int>(_ =>
             ToAsyncEnumerable(Array.Empty<int>()));
 
-        var results = await CollectAsync(arrow(5)).ConfigureAwait(false);
+        var results = await CollectAsync(arrow(5));
         results.Should().BeEmpty();
     }
 
@@ -225,7 +225,7 @@ public sealed class AsyncKleisliExtensionsAdditionalTests
     private static async Task<List<T>> CollectAsync<T>(IAsyncEnumerable<T> source)
     {
         var items = new List<T>();
-        await foreach (var item in source.ConfigureAwait(false))
+        await foreach (var item in source)
         {
             items.Add(item);
         }

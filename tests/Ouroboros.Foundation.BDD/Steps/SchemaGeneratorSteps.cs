@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Ouroboros.Specs.Steps;
@@ -41,7 +41,7 @@ public class SchemaGeneratorSteps
         {
             _generatedSchema = SchemaGenerator.GenerateSchema(null!);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _thrownException = ex;
         }

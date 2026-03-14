@@ -1,4 +1,4 @@
-// <copyright file="OrchestratorToolExtensionsTests.cs" company="Ouroboros">
+﻿// <copyright file="OrchestratorToolExtensionsTests.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 

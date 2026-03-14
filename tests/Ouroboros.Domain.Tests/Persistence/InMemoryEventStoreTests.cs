@@ -1,4 +1,4 @@
-using Ouroboros.Domain.Events;
+﻿using Ouroboros.Domain.Events;
 using Ouroboros.Domain.Persistence;
 
 namespace Ouroboros.Tests.Persistence;
@@ -210,7 +210,7 @@ public class InMemoryEventStoreTests
         {
             try
             {
-                await _store.AppendEventsAsync(BranchId, new[] { CreateEvent() }, expectedVersion: 0).ConfigureAwait(false);
+                await _store.AppendEventsAsync(BranchId, new[] { CreateEvent() }, expectedVersion: 0);
                 Interlocked.Increment(ref successCount);
             }
             catch (ConcurrencyException)

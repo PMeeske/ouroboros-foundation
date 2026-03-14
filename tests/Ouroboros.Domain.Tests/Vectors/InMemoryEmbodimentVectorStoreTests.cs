@@ -1,4 +1,4 @@
-using Ouroboros.Core.EmbodiedInteraction;
+﻿using Ouroboros.Core.EmbodiedInteraction;
 using Ouroboros.Domain.Vectors;
 
 namespace Ouroboros.Tests.Vectors;
@@ -12,7 +12,7 @@ public class InMemoryEmbodimentVectorStoreTests : IAsyncLifetime
 
     public async Task DisposeAsync()
     {
-        await _store.DisposeAsync().ConfigureAwait(false);
+        await _store.DisposeAsync();
     }
 
     private static float[] MakeEmbedding(float seed, int dim = 4)
@@ -39,7 +39,7 @@ public class InMemoryEmbodimentVectorStoreTests : IAsyncLifetime
     [Fact]
     public async Task InitializeAsync_ShouldCompleteWithoutError()
     {
-        await _store.InitializeAsync().ConfigureAwait(false);
+        await _store.InitializeAsync();
     }
 
     [Fact]
@@ -48,8 +48,8 @@ public class InMemoryEmbodimentVectorStoreTests : IAsyncLifetime
         var embedding = MakeEmbedding(1f);
         var perception = MakePerception();
 
-        await _store.StorePerceptionAsync(perception, embedding).ConfigureAwait(false);
-        var results = await _store.RecallPerceptionsAsync(embedding, limit: 5).ConfigureAwait(false);
+        await _store.StorePerceptionAsync(perception, embedding);
+        var results = await _store.RecallPerceptionsAsync(embedding, limit: 5);
 
         results.Should().HaveCount(1);
         results[0].Score.Should().BeGreaterThan(0.9f);
@@ -58,10 +58,10 @@ public class InMemoryEmbodimentVectorStoreTests : IAsyncLifetime
     [Fact]
     public async Task RecallPerceptions_WithModalityFilter_ShouldFilterResults()
     {
-        await _store.StorePerceptionAsync(MakePerception(SensorModality.Audio), MakeEmbedding(1f)).ConfigureAwait(false);
-        await _store.StorePerceptionAsync(MakePerception(SensorModality.Text), MakeEmbedding(2f)).ConfigureAwait(false);
+        await _store.StorePerceptionAsync(MakePerception(SensorModality.Audio), MakeEmbedding(1f));
+        await _store.StorePerceptionAsync(MakePerception(SensorModality.Text), MakeEmbedding(2f));
 
-        var results = await _store.RecallPerceptionsAsync(MakeEmbedding(1f), modalityFilter: SensorModality.Audio).ConfigureAwait(false);
+        var results = await _store.RecallPerceptionsAsync(MakeEmbedding(1f), modalityFilter: SensorModality.Audio);
 
         results.Should().HaveCount(1);
     }
@@ -71,8 +71,8 @@ public class InMemoryEmbodimentVectorStoreTests : IAsyncLifetime
     {
         var embedding = MakeEmbedding(1f);
 
-        await _store.StoreStateSnapshotAsync(MakeSnapshot(), embedding).ConfigureAwait(false);
-        var results = await _store.RecallStatesAsync(embedding, limit: 5).ConfigureAwait(false);
+        await _store.StoreStateSnapshotAsync(MakeSnapshot(), embedding);
+        var results = await _store.RecallStatesAsync(embedding, limit: 5);
 
         results.Should().HaveCount(1);
     }
@@ -82,8 +82,8 @@ public class InMemoryEmbodimentVectorStoreTests : IAsyncLifetime
     {
         var embedding = MakeEmbedding(1f);
 
-        await _store.StoreAffordanceAsync(MakeAffordance(), embedding).ConfigureAwait(false);
-        var results = await _store.FindAffordancesAsync(embedding, limit: 5).ConfigureAwait(false);
+        await _store.StoreAffordanceAsync(MakeAffordance(), embedding);
+        var results = await _store.FindAffordancesAsync(embedding, limit: 5);
 
         results.Should().HaveCount(1);
     }
@@ -91,12 +91,12 @@ public class InMemoryEmbodimentVectorStoreTests : IAsyncLifetime
     [Fact]
     public async Task GetCounts_AfterStoring_ShouldReflectCounts()
     {
-        await _store.StorePerceptionAsync(MakePerception(), MakeEmbedding(1f)).ConfigureAwait(false);
-        await _store.StorePerceptionAsync(MakePerception(), MakeEmbedding(2f)).ConfigureAwait(false);
-        await _store.StoreStateSnapshotAsync(MakeSnapshot(), MakeEmbedding(3f)).ConfigureAwait(false);
-        await _store.StoreAffordanceAsync(MakeAffordance(), MakeEmbedding(4f)).ConfigureAwait(false);
+        await _store.StorePerceptionAsync(MakePerception(), MakeEmbedding(1f));
+        await _store.StorePerceptionAsync(MakePerception(), MakeEmbedding(2f));
+        await _store.StoreStateSnapshotAsync(MakeSnapshot(), MakeEmbedding(3f));
+        await _store.StoreAffordanceAsync(MakeAffordance(), MakeEmbedding(4f));
 
-        var counts = await _store.GetCountsAsync().ConfigureAwait(false);
+        var counts = await _store.GetCountsAsync();
 
         counts.Perceptions.Should().Be(2);
         counts.StateSnapshots.Should().Be(1);
@@ -106,7 +106,7 @@ public class InMemoryEmbodimentVectorStoreTests : IAsyncLifetime
     [Fact]
     public async Task RecallPerceptions_WhenEmpty_ShouldReturnEmpty()
     {
-        var results = await _store.RecallPerceptionsAsync(MakeEmbedding(1f)).ConfigureAwait(false);
+        var results = await _store.RecallPerceptionsAsync(MakeEmbedding(1f));
         results.Should().BeEmpty();
     }
 
@@ -114,9 +114,9 @@ public class InMemoryEmbodimentVectorStoreTests : IAsyncLifetime
     public async Task RecallPerceptions_WithLimit_ShouldRespectLimit()
     {
         for (int i = 0; i < 10; i++)
-            await _store.StorePerceptionAsync(MakePerception(), MakeEmbedding(i)).ConfigureAwait(false);
+            await _store.StorePerceptionAsync(MakePerception(), MakeEmbedding(i));
 
-        var results = await _store.RecallPerceptionsAsync(MakeEmbedding(1f), limit: 3).ConfigureAwait(false);
+        var results = await _store.RecallPerceptionsAsync(MakeEmbedding(1f), limit: 3);
         results.Should().HaveCount(3);
     }
 }

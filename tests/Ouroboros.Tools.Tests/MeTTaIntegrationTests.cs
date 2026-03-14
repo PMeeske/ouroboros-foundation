@@ -1,4 +1,4 @@
-// <copyright file="MeTTaIntegrationTests.cs" company="Ouroboros">
+﻿// <copyright file="MeTTaIntegrationTests.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -141,7 +141,7 @@ public class MeTTaIntegrationTests
     public async Task MeTTaTool_WithQueryOperation_CallsExecuteQueryAsync()
     {
         // Arrange
-        var engine = new MockMeTTaEngine();
+        using var engine = new MockMeTTaEngine();
         var tool = new MeTTaTool(engine);
         var json = @"{""expression"": ""!(+ 2 3)"", ""operation"": ""query""}";
 
@@ -157,7 +157,7 @@ public class MeTTaIntegrationTests
     public async Task MeTTaTool_WithDefaultOperation_ExecutesAsQuery()
     {
         // Arrange
-        var engine = new MockMeTTaEngine();
+        using var engine = new MockMeTTaEngine();
         var tool = new MeTTaTool(engine);
 
         // Act
@@ -173,7 +173,7 @@ public class MeTTaIntegrationTests
     public async Task MeTTaTool_QueryWithError_ReturnsFailure()
     {
         // Arrange
-        var engine = new MockMeTTaEngine(
+        using var engine = new MockMeTTaEngine(
             queryHandler: _ => Result<string, string>.Failure("Query execution failed"));
         var tool = new MeTTaTool(engine);
 
@@ -193,7 +193,7 @@ public class MeTTaIntegrationTests
     public async Task MeTTaTool_WithAddFactOperation_CallsAddFactAsync()
     {
         // Arrange
-        var engine = new MockMeTTaEngine();
+        using var engine = new MockMeTTaEngine();
         var tool = new MeTTaTool(engine);
         var json = @"{""expression"": ""(human Socrates)"", ""operation"": ""add_fact""}";
 
@@ -210,7 +210,7 @@ public class MeTTaIntegrationTests
     public async Task MeTTaTool_AddFactWithError_ReturnsFailure()
     {
         // Arrange
-        var engine = new MockMeTTaEngine(
+        using var engine = new MockMeTTaEngine(
             addFactHandler: _ => Result<Unit, string>.Failure("Fact addition failed"));
         var tool = new MeTTaTool(engine);
         var json = @"{""expression"": ""(invalid fact)"", ""operation"": ""add_fact""}";
@@ -231,7 +231,7 @@ public class MeTTaIntegrationTests
     public async Task MeTTaTool_WithApplyRuleOperation_CallsApplyRuleAsync()
     {
         // Arrange
-        var engine = new MockMeTTaEngine();
+        using var engine = new MockMeTTaEngine();
         var tool = new MeTTaTool(engine);
         var json = @"{""expression"": ""(-> (human $x) (mortal $x))"", ""operation"": ""apply_rule""}";
 
@@ -247,7 +247,7 @@ public class MeTTaIntegrationTests
     public async Task MeTTaTool_ApplyRuleWithError_ReturnsFailure()
     {
         // Arrange
-        var engine = new MockMeTTaEngine(
+        using var engine = new MockMeTTaEngine(
             applyRuleHandler: _ => Result<string, string>.Failure("Rule application failed"));
         var tool = new MeTTaTool(engine);
         var json = @"{""expression"": ""(invalid rule)"", ""operation"": ""apply_rule""}";
@@ -268,7 +268,7 @@ public class MeTTaIntegrationTests
     public async Task MeTTaTool_WithVerifyPlanOperation_CallsVerifyPlanAsync()
     {
         // Arrange
-        var engine = new MockMeTTaEngine();
+        using var engine = new MockMeTTaEngine();
         var tool = new MeTTaTool(engine);
         var json = @"{""expression"": ""(plan step1 step2)"", ""operation"": ""verify_plan""}";
 
@@ -285,7 +285,7 @@ public class MeTTaIntegrationTests
     public async Task MeTTaTool_VerifyPlanInvalid_ReturnsInvalidMessage()
     {
         // Arrange
-        var engine = new MockMeTTaEngine(
+        using var engine = new MockMeTTaEngine(
             verifyPlanHandler: _ => Result<bool, string>.Success(false));
         var tool = new MeTTaTool(engine);
         var json = @"{""expression"": ""(invalid plan)"", ""operation"": ""verify_plan""}";
@@ -302,7 +302,7 @@ public class MeTTaIntegrationTests
     public async Task MeTTaTool_VerifyPlanWithError_ReturnsFailure()
     {
         // Arrange
-        var engine = new MockMeTTaEngine(
+        using var engine = new MockMeTTaEngine(
             verifyPlanHandler: _ => Result<bool, string>.Failure("Plan verification failed"));
         var tool = new MeTTaTool(engine);
         var json = @"{""expression"": ""(plan)"", ""operation"": ""verify_plan""}";
@@ -323,7 +323,7 @@ public class MeTTaIntegrationTests
     public async Task MeTTaTool_WithWellFormedJson_ParsesCorrectly()
     {
         // Arrange
-        var engine = new MockMeTTaEngine();
+        using var engine = new MockMeTTaEngine();
         var tool = new MeTTaTool(engine);
         var json = @"{
             ""expression"": ""!(test)"",
@@ -341,7 +341,7 @@ public class MeTTaIntegrationTests
     public async Task MeTTaTool_WithMissingExpressionProperty_ReturnsFailure()
     {
         // Arrange
-        var engine = new MockMeTTaEngine();
+        using var engine = new MockMeTTaEngine();
         var tool = new MeTTaTool(engine);
         var json = @"{""operation"": ""query""}";
 
@@ -357,7 +357,7 @@ public class MeTTaIntegrationTests
     public async Task MeTTaTool_WithInvalidJson_TreatsAsDirectExpression()
     {
         // Arrange
-        var engine = new MockMeTTaEngine();
+        using var engine = new MockMeTTaEngine();
         var tool = new MeTTaTool(engine);
 
         // Act
@@ -375,7 +375,7 @@ public class MeTTaIntegrationTests
     public async Task MeTTaTool_OperationIsCaseInsensitive(string operation)
     {
         // Arrange
-        var engine = new MockMeTTaEngine();
+        using var engine = new MockMeTTaEngine();
         var tool = new MeTTaTool(engine);
         var json = $@"{{""expression"": ""!(test)"", ""operation"": ""{operation}""}}";
 
@@ -395,7 +395,7 @@ public class MeTTaIntegrationTests
     public async Task MeTTaTool_WithNullInput_ReturnsFailure()
     {
         // Arrange
-        var engine = new MockMeTTaEngine();
+        using var engine = new MockMeTTaEngine();
         var tool = new MeTTaTool(engine);
 
         // Act
@@ -410,7 +410,7 @@ public class MeTTaIntegrationTests
     public async Task MeTTaTool_WithWhitespaceInput_ReturnsFailure()
     {
         // Arrange
-        var engine = new MockMeTTaEngine();
+        using var engine = new MockMeTTaEngine();
         var tool = new MeTTaTool(engine);
 
         // Act
@@ -424,7 +424,7 @@ public class MeTTaIntegrationTests
     public async Task MeTTaTool_WithUnknownOperation_ReturnsFailure()
     {
         // Arrange
-        var engine = new MockMeTTaEngine();
+        using var engine = new MockMeTTaEngine();
         var tool = new MeTTaTool(engine);
         var json = @"{""expression"": ""test"", ""operation"": ""unknown_operation""}";
 
@@ -446,7 +446,7 @@ public class MeTTaIntegrationTests
         // Arrange
         using var cts = new CancellationTokenSource();
         bool cancellationTokenPassed = false;
-        var engine = new MockMeTTaEngine(
+        using var engine = new MockMeTTaEngine(
             queryHandler: query =>
             {
                 cancellationTokenPassed = true;
@@ -469,7 +469,7 @@ public class MeTTaIntegrationTests
     public void MeTTaTool_Name_ReturnsMetta()
     {
         // Arrange
-        var engine = new MockMeTTaEngine();
+        using var engine = new MockMeTTaEngine();
         var tool = new MeTTaTool(engine);
 
         // Act
@@ -483,7 +483,7 @@ public class MeTTaIntegrationTests
     public void MeTTaTool_Description_ContainsKeywords()
     {
         // Arrange
-        var engine = new MockMeTTaEngine();
+        using var engine = new MockMeTTaEngine();
         var tool = new MeTTaTool(engine);
 
         // Act
@@ -499,7 +499,7 @@ public class MeTTaIntegrationTests
     public void MeTTaTool_JsonSchema_IsValid()
     {
         // Arrange
-        var engine = new MockMeTTaEngine();
+        using var engine = new MockMeTTaEngine();
         var tool = new MeTTaTool(engine);
 
         // Act
@@ -523,7 +523,7 @@ public class MeTTaIntegrationTests
     public async Task MeTTaTool_CompleteWorkflow_ExecutesCorrectly()
     {
         // Arrange
-        var engine = new MockMeTTaEngine();
+        using var engine = new MockMeTTaEngine();
         var tool = new MeTTaTool(engine);
 
         // Act & Assert - Add facts
@@ -555,7 +555,7 @@ public class MeTTaIntegrationTests
     public async Task MockEngine_AfterDispose_ThrowsObjectDisposedException()
     {
         // Arrange
-        var engine = new MockMeTTaEngine();
+        using var engine = new MockMeTTaEngine();
         engine.Dispose();
 
         // Act & Assert

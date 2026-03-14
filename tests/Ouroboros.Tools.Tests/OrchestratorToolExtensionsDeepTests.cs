@@ -1,4 +1,4 @@
-namespace Ouroboros.Tests.Tools;
+﻿namespace Ouroboros.Tests.Tools;
 
 using Ouroboros.Tools;
 

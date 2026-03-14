@@ -1,4 +1,4 @@
-namespace Ouroboros.Core.Tests.Steps;
+﻿namespace Ouroboros.Core.Tests.Steps;
 
 [Trait("Category", "Unit")]
 public sealed class IStepTests
@@ -29,7 +29,7 @@ public sealed class IStepTests
     {
         IStep<int, string> step = new SuccessStep();
 
-        var result = await step.ExecuteAsync(42).ConfigureAwait(false);
+        var result = await step.ExecuteAsync(42);
 
         result.Should().Be("42");
     }
@@ -39,9 +39,9 @@ public sealed class IStepTests
     {
         IStep<int, string> step = new FailureStep();
 
-        var act = async () => await step.ExecuteAsync(42).ConfigureAwait(false);
+        var act = async () => await step.ExecuteAsync(42);
 
-        var ex = await act.Should().ThrowAsync<StepExecutionException>().ConfigureAwait(false);
+        var ex = await act.Should().ThrowAsync<StepExecutionException>();
         ex.Which.StepType.Should().Be(typeof(FailureStep));
         ex.Which.InputValue.Should().Be(42);
     }
@@ -51,9 +51,9 @@ public sealed class IStepTests
     {
         IStep<int, string> step = new FailureWithExceptionStep();
 
-        var act = async () => await step.ExecuteAsync(42).ConfigureAwait(false);
+        var act = async () => await step.ExecuteAsync(42);
 
-        var ex = await act.Should().ThrowAsync<StepExecutionException>().ConfigureAwait(false);
+        var ex = await act.Should().ThrowAsync<StepExecutionException>();
         ex.Which.InnerException.Should().BeOfType<InvalidOperationException>();
     }
 
@@ -62,7 +62,7 @@ public sealed class IStepTests
     {
         IStep<int, string> step = new SuccessStep();
 
-        var result = await step.TryExecuteAsync(42).ConfigureAwait(false);
+        var result = await step.TryExecuteAsync(42);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().Be("42");
@@ -73,7 +73,7 @@ public sealed class IStepTests
     {
         IStep<int, string> step = new FailureStep();
 
-        var result = await step.TryExecuteAsync(42).ConfigureAwait(false);
+        var result = await step.TryExecuteAsync(42);
 
         result.IsSuccess.Should().BeFalse();
         result.ErrorMessage.Should().Be("step failed");

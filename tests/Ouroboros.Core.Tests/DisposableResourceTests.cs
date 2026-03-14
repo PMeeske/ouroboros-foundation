@@ -1,4 +1,4 @@
-namespace Ouroboros.Core.Tests;
+﻿namespace Ouroboros.Core.Tests;
 
 [Trait("Category", "Unit")]
 public class DisposableResourceTests
@@ -59,7 +59,7 @@ public class DisposableResourceTests
     {
         var sut = new TestDisposableResource();
 
-        await sut.DisposeAsync().ConfigureAwait(false);
+        await sut.DisposeAsync();
 
         sut.AsyncManagedReleased.Should().BeTrue();
         sut.ManagedReleased.Should().BeTrue();
@@ -72,9 +72,9 @@ public class DisposableResourceTests
     {
         var sut = new TestDisposableResource();
 
-        await sut.DisposeAsync().ConfigureAwait(false);
+        await sut.DisposeAsync();
         sut.AsyncManagedReleased = false;
-        await sut.DisposeAsync().ConfigureAwait(false);
+        await sut.DisposeAsync();
 
         sut.AsyncManagedReleased.Should().BeFalse();
     }

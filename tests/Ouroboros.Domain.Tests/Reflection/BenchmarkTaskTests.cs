@@ -1,4 +1,4 @@
-using Ouroboros.Domain.Reflection;
+﻿using Ouroboros.Domain.Reflection;
 
 namespace Ouroboros.Tests.Reflection;
 
@@ -47,7 +47,7 @@ public class BenchmarkTaskTests
         var task = new BenchmarkTask("Slow", CognitiveDimension.Reasoning,
             async () =>
             {
-                await Task.Delay(TimeSpan.FromSeconds(10)).ConfigureAwait(false);
+                await Task.Delay(TimeSpan.FromSeconds(10));
                 return true;
             },
             TimeSpan.FromMilliseconds(50));

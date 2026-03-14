@@ -1,4 +1,4 @@
-namespace Ouroboros.Tests.Autonomous;
+﻿namespace Ouroboros.Tests.Autonomous;
 
 using Ouroboros.Domain.Autonomous;
 
@@ -7,7 +7,7 @@ public class VoiceSideChannelTests : IAsyncDisposable
 {
     private readonly VoiceSideChannel _channel = new(maxQueueSize: 5);
 
-    public async ValueTask DisposeAsync() => await _channel.DisposeAsync().ConfigureAwait(false);
+    public async ValueTask DisposeAsync() => await _channel.DisposeAsync();
 
     // ═══════════════════════════════════════════════════════════════
     // Construction

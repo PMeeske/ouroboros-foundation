@@ -1,4 +1,4 @@
-using Ouroboros.Roslynator.Pipeline;
+﻿using Ouroboros.Roslynator.Pipeline;
 
 namespace Ouroboros.Tests.Pipeline;
 
@@ -119,7 +119,7 @@ public sealed class FutureTests
     public async Task RunAsync_WithCancellationToken_PassesToken()
     {
         // Arrange
-        var cts = new CancellationTokenSource();
+        using var cts = new CancellationTokenSource();
         CancellationToken capturedToken = default;
 
         var future = new Future<int>(ct =>

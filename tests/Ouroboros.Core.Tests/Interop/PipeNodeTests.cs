@@ -1,4 +1,4 @@
-namespace Ouroboros.Tests.Interop;
+﻿namespace Ouroboros.Tests.Interop;
 
 using Ouroboros.Abstractions.Monads;
 using Ouroboros.Core.Interop;
@@ -23,7 +23,7 @@ public class PipeNodeTests
         var inner = new LambdaNode<int, string>("test", (i, _) => Task.FromResult($"val={i}"));
         var pipeNode = new PipeNode<int, string>(inner);
 
-        var result = await (42 | pipeNode).ConfigureAwait(false);
+        var result = await (42 | pipeNode);
 
         result.Should().Be("val=42");
     }
@@ -37,7 +37,7 @@ public class PipeNodeTests
             new LambdaNode<int, string>("show", (i, _) => Task.FromResult($"length={i}")));
 
         var composed = first.Pipe(second);
-        var result = await ("hello" | composed).ConfigureAwait(false);
+        var result = await ("hello" | composed);
 
         result.Should().Be("length=5");
     }
@@ -68,7 +68,7 @@ public class PipeNodeTests
         };
 
         var composed = pipeNode.Pipe(showStep);
-        var result = await ("test" | composed).ConfigureAwait(false);
+        var result = await ("test" | composed);
 
         result.Should().Be("n=4");
     }
@@ -94,7 +94,7 @@ public class PipeNodeTests
 
         Step<int, string> step = pipeNode.ToStep();
 
-        var result = await step(7).ConfigureAwait(false);
+        var result = await step(7);
 
         result.Should().Be("x=7");
     }
@@ -106,7 +106,7 @@ public class PipeNodeTests
             new LambdaNode<int, int>("inc", (i, _) => Task.FromResult(i + 1)));
 
         var kleisli = pipeNode.ToKleisliResult();
-        var result = await kleisli(10).ConfigureAwait(false);
+        var result = await kleisli(10);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().Be(11);
@@ -120,7 +120,7 @@ public class PipeNodeTests
                 throw new InvalidOperationException("boom")));
 
         var kleisli = pipeNode.ToKleisliResult();
-        var result = await kleisli(1).ConfigureAwait(false);
+        var result = await kleisli(1);
 
         result.IsFailure.Should().BeTrue();
         result.Error.Should().BeOfType<InvalidOperationException>();
@@ -138,7 +138,7 @@ public class PipeNodeTests
 
         var act = () => kleisli(1);
 
-        await act.Should().ThrowAsync<OperationCanceledException>().ConfigureAwait(false);
+        await act.Should().ThrowAsync<OperationCanceledException>();
     }
 
     [Fact]
@@ -169,7 +169,7 @@ public class PipeNodeTests
             new LambdaNode<int, string>("show", (i, _) => Task.FromResult($"result={i}")));
 
         var composed = first.Pipe(second).Pipe(third);
-        var result = await ("hello" | composed).ConfigureAwait(false);
+        var result = await ("hello" | composed);
 
         result.Should().Be("result=5");
     }

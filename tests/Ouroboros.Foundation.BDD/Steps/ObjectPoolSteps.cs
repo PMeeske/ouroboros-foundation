@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Ouroboros.Core.Performance;
 
 namespace Ouroboros.Specs.Steps;
@@ -219,7 +219,7 @@ public class ObjectPoolSteps
         {
             Task.WaitAll(tasks);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _thrownException = ex;
         }

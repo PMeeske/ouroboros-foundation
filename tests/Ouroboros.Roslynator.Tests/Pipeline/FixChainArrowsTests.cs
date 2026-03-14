@@ -1,4 +1,4 @@
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using Ouroboros.Roslynator.Pipeline;
@@ -14,7 +14,7 @@ public sealed class FixChainArrowsTests
     private static (Document Document, SyntaxNode Root, Diagnostic Diagnostic) CreateTestContext(
         string code = "class C { }")
     {
-        var workspace = new AdhocWorkspace();
+        using var workspace = new AdhocWorkspace();
         var project = workspace.AddProject("TestProject", LanguageNames.CSharp);
         var document = project.AddDocument("Test.cs", SourceText.From(code));
         var root = document.GetSyntaxRootAsync().GetAwaiter().GetResult()!;

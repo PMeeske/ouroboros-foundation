@@ -1,4 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Ouroboros.Abstractions.Agent.Dispatch;
 using Ouroboros.Core.Dispatch;
 
@@ -38,7 +38,7 @@ public sealed class ServiceProviderDispatcherTests
         var provider = services.BuildServiceProvider();
 
         var dispatcher = new ServiceProviderDispatcher(provider);
-        var result = await dispatcher.SendAsync<string>(new TestCommand("test")).ConfigureAwait(false);
+        var result = await dispatcher.SendAsync<string>(new TestCommand("test"));
 
         result.Should().Be("handled:test");
     }
@@ -53,7 +53,7 @@ public sealed class ServiceProviderDispatcherTests
 
         var act = () => dispatcher.SendAsync<string>(new TestCommand("test"));
         await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*No command handler*TestCommand*").ConfigureAwait(false);
+            .WithMessage("*No command handler*TestCommand*");
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public sealed class ServiceProviderDispatcherTests
         var provider = services.BuildServiceProvider();
 
         var dispatcher = new ServiceProviderDispatcher(provider);
-        var result = await dispatcher.QueryAsync<int>(new TestQuery(5)).ConfigureAwait(false);
+        var result = await dispatcher.QueryAsync<int>(new TestQuery(5));
 
         result.Should().Be(50);
     }
@@ -79,7 +79,7 @@ public sealed class ServiceProviderDispatcherTests
 
         var act = () => dispatcher.QueryAsync<int>(new TestQuery(5));
         await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*No query handler*TestQuery*").ConfigureAwait(false);
+            .WithMessage("*No query handler*TestQuery*");
     }
 
     [Fact]
@@ -100,7 +100,7 @@ public sealed class ServiceProviderDispatcherTests
         var provider = services.BuildServiceProvider();
 
         var dispatcher = new ServiceProviderDispatcher(provider);
-        await dispatcher.SendAsync<string>(new TestCommand("test"), cts.Token).ConfigureAwait(false);
+        await dispatcher.SendAsync<string>(new TestCommand("test"), cts.Token);
 
         capturedToken.Should().Be(cts.Token);
     }

@@ -1,4 +1,4 @@
-// <copyright file="ToolRegistryExtendedTests.cs" company="Ouroboros">
+﻿// <copyright file="ToolRegistryExtendedTests.cs" company="Ouroboros">
 // Copyright (c) Ouroboros. All rights reserved.
 // </copyright>
 
@@ -435,7 +435,7 @@ public class ToolRegistryExtendedTests
                 var newRegistry = registry.WithTool(new MockTool($"tool_{i}"));
                 results.Add(newRegistry);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 exceptions.Add(ex);
             }

@@ -1,4 +1,4 @@
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
@@ -20,7 +20,7 @@ public sealed class StandardFixesDeepTests
     private static async Task<FixState> CreateStateAsync(
         string code, string diagnosticId, Func<SyntaxNode, TextSpan> spanSelector)
     {
-        var workspace = new AdhocWorkspace();
+        using var workspace = new AdhocWorkspace();
         var project = workspace.AddProject("TestProject", LanguageNames.CSharp);
         var document = project.AddDocument("Test.cs", SourceText.From(code));
         var root = (await document.GetSyntaxRootAsync())!;
@@ -34,7 +34,7 @@ public sealed class StandardFixesDeepTests
 
     private static FixState CreateStateSync(string code, string diagnosticId, int spanStart, int spanLength)
     {
-        var workspace = new AdhocWorkspace();
+        using var workspace = new AdhocWorkspace();
         var project = workspace.AddProject("TestProject", LanguageNames.CSharp);
         var document = project.AddDocument("Test.cs", SourceText.From(code));
         var root = document.GetSyntaxRootAsync().GetAwaiter().GetResult()!;
@@ -142,7 +142,7 @@ public sealed class StandardFixesDeepTests
     {
         // Arrange
         var code = "class OldName { }";
-        var workspace = new AdhocWorkspace();
+        using var workspace = new AdhocWorkspace();
         var project = workspace.AddProject("TestProject", LanguageNames.CSharp);
         var document = project.AddDocument("Test.cs", SourceText.From(code));
         var root = (await document.GetSyntaxRootAsync())!;

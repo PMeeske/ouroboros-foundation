@@ -1,4 +1,4 @@
-namespace Ouroboros.Tests.Tools.MeTTa;
+﻿namespace Ouroboros.Tests.Tools.MeTTa;
 
 using Ouroboros.Core.LawsOfForm;
 using Ouroboros.Tools.MeTTa;
@@ -122,7 +122,7 @@ public class FormReasoningFlowExtensionsTests : IDisposable
     [Fact]
     public void CreateFormAwareConsciousnessLoop_ReturnsCts()
     {
-        var cts = _integration.CreateFormAwareConsciousnessLoop(
+        using var cts = _integration.CreateFormAwareConsciousnessLoop(
             "loop1",
             onReflection: _ => { },
             interval: TimeSpan.FromMilliseconds(100));

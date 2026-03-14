@@ -1,4 +1,4 @@
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
@@ -16,7 +16,7 @@ public sealed class StandardFixesExtendedTests
 {
     private static FixState CreateState(string code, string diagnosticId, int spanStart, int spanLength)
     {
-        var workspace = new AdhocWorkspace();
+        using var workspace = new AdhocWorkspace();
         var project = workspace.AddProject("TestProject", LanguageNames.CSharp);
         var document = project.AddDocument("Test.cs", SourceText.From(code));
         var root = document.GetSyntaxRootAsync().GetAwaiter().GetResult()!;
@@ -38,7 +38,7 @@ public sealed class StandardFixesExtendedTests
         var classDecl = root.DescendantNodes().OfType<ClassDeclarationSyntax>().First();
         _ = classDecl.WithIdentifier(SyntaxFactory.Identifier("NewClass"));
 
-        var workspace = new AdhocWorkspace();
+        using var workspace = new AdhocWorkspace();
         var project = workspace.AddProject("TestProject", LanguageNames.CSharp);
         var document = project.AddDocument("Test.cs", SourceText.From("class OldClass { }"));
         var docRoot = (await document.GetSyntaxRootAsync())!;
@@ -194,7 +194,7 @@ public sealed class StandardFixesExtendedTests
     public void ShouldSkip_StateWithNullRoot_ReturnsTrue()
     {
         // Arrange - create a state then use with expression to null out root
-        var workspace = new AdhocWorkspace();
+        using var workspace = new AdhocWorkspace();
         var project = workspace.AddProject("TestProject", LanguageNames.CSharp);
         var document = project.AddDocument("Test.cs", SourceText.From("class C { }"));
         var root = document.GetSyntaxRootAsync().GetAwaiter().GetResult()!;
@@ -214,7 +214,7 @@ public sealed class StandardFixesExtendedTests
     public void ShouldSkip_StateWithNullDiagnostic_ReturnsTrue()
     {
         // Arrange
-        var workspace = new AdhocWorkspace();
+        using var workspace = new AdhocWorkspace();
         var project = workspace.AddProject("TestProject", LanguageNames.CSharp);
         var document = project.AddDocument("Test.cs", SourceText.From("class C { }"));
         var root = document.GetSyntaxRootAsync().GetAwaiter().GetResult()!;

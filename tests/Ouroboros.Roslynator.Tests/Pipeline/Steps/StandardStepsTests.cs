@@ -1,4 +1,4 @@
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using Ouroboros.Roslynator.Pipeline;
@@ -11,7 +11,7 @@ public sealed class StandardStepsTests
 {
     private static FixState CreateState(string code, string diagnosticId, int spanStart, int spanLength)
     {
-        var workspace = new AdhocWorkspace();
+        using var workspace = new AdhocWorkspace();
         var project = workspace.AddProject("TestProject", LanguageNames.CSharp);
         var document = project.AddDocument("Test.cs", SourceText.From(code));
         var root = document.GetSyntaxRootAsync().GetAwaiter().GetResult()!;
@@ -52,7 +52,7 @@ public sealed class StandardStepsTests
     {
         // Arrange
         string code = "using System.Linq;\nclass C { }";
-        var workspace = new AdhocWorkspace();
+        using var workspace = new AdhocWorkspace();
         var project = workspace.AddProject("TestProject", LanguageNames.CSharp);
         var document = project.AddDocument("Test.cs", SourceText.From(code));
         var root = (await document.GetSyntaxRootAsync())!;
@@ -78,7 +78,7 @@ public sealed class StandardStepsTests
     {
         // Arrange
         string code = "class C { void M() { int x = 0; } }";
-        var workspace = new AdhocWorkspace();
+        using var workspace = new AdhocWorkspace();
         var project = workspace.AddProject("TestProject", LanguageNames.CSharp);
         var document = project.AddDocument("Test.cs", SourceText.From(code));
         var root = (await document.GetSyntaxRootAsync())!;

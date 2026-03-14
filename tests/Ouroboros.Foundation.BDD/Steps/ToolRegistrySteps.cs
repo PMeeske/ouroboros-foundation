@@ -1,4 +1,4 @@
-namespace Ouroboros.Specs.Steps;
+﻿namespace Ouroboros.Specs.Steps;
 
 [Binding]
 public class ToolRegistrySteps
@@ -87,7 +87,7 @@ public class ToolRegistrySteps
             _registry.Should().NotBeNull();
             _newRegistry = _registry!.WithTool(null!);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _thrownException = ex;
         }
@@ -132,7 +132,7 @@ public class ToolRegistrySteps
             _registry.Should().NotBeNull();
             _toolOption = _registry!.GetTool(null!);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _thrownException = ex;
         }

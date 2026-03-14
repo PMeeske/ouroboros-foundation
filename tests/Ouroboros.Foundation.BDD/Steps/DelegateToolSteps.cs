@@ -1,4 +1,4 @@
-namespace Ouroboros.Specs.Steps;
+﻿namespace Ouroboros.Specs.Steps;
 
 [Binding]
 [Scope(Feature = "Delegate Tool")]
@@ -139,7 +139,7 @@ public class DelegateToolSteps
                 "description",
                 (input, ct) => Task.FromResult(Result<string, string>.Success("result")));
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _thrownException = ex;
         }
@@ -155,7 +155,7 @@ public class DelegateToolSteps
                 null!,
                 (input, ct) => Task.FromResult(Result<string, string>.Success("result")));
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _thrownException = ex;
         }
@@ -171,7 +171,7 @@ public class DelegateToolSteps
                 "description",
                 (Func<string, CancellationToken, Task<Result<string, string>>>)null!);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
             _thrownException = ex;
         }

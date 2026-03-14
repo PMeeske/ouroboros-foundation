@@ -1,4 +1,4 @@
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Ouroboros.Abstractions;
 using Ouroboros.Abstractions.Monads;
@@ -90,7 +90,7 @@ public class EmbodimentAggregateTests : IDisposable
     [Fact]
     public async Task UnregisterProviderAsync_UnknownProvider_ReturnsFailure()
     {
-        var result = await _sut.UnregisterProviderAsync("unknown").ConfigureAwait(false);
+        var result = await _sut.UnregisterProviderAsync("unknown");
 
         result.IsFailure.Should().BeTrue();
     }
@@ -98,7 +98,7 @@ public class EmbodimentAggregateTests : IDisposable
     [Fact]
     public async Task ActivateAsync_NoProviders_ReturnsSuccess()
     {
-        var result = await _sut.ActivateAsync().ConfigureAwait(false);
+        var result = await _sut.ActivateAsync();
 
         result.IsSuccess.Should().BeTrue();
         _sut.State.Status.Should().Be(AggregateStatus.Active);
@@ -107,9 +107,9 @@ public class EmbodimentAggregateTests : IDisposable
     [Fact]
     public async Task ActivateAsync_AlreadyActive_ReturnsCachedCapabilities()
     {
-        await _sut.ActivateAsync().ConfigureAwait(false);
+        await _sut.ActivateAsync();
 
-        var result = await _sut.ActivateAsync().ConfigureAwait(false);
+        var result = await _sut.ActivateAsync();
 
         result.IsSuccess.Should().BeTrue();
     }
@@ -117,9 +117,9 @@ public class EmbodimentAggregateTests : IDisposable
     [Fact]
     public async Task DeactivateAsync_WhenActive_ReturnsSuccess()
     {
-        await _sut.ActivateAsync().ConfigureAwait(false);
+        await _sut.ActivateAsync();
 
-        var result = await _sut.DeactivateAsync().ConfigureAwait(false);
+        var result = await _sut.DeactivateAsync();
 
         result.IsSuccess.Should().BeTrue();
         _sut.State.Status.Should().Be(AggregateStatus.Inactive);
@@ -128,7 +128,7 @@ public class EmbodimentAggregateTests : IDisposable
     [Fact]
     public async Task DeactivateAsync_AlreadyInactive_ReturnsSuccess()
     {
-        var result = await _sut.DeactivateAsync().ConfigureAwait(false);
+        var result = await _sut.DeactivateAsync();
 
         result.IsSuccess.Should().BeTrue();
     }
@@ -166,7 +166,7 @@ public class EmbodimentAggregateTests : IDisposable
     [Fact]
     public async Task ActivateSensorAsync_UnknownProvider_ReturnsFailure()
     {
-        var result = await _sut.ActivateSensorAsync("unknown:sensor1").ConfigureAwait(false);
+        var result = await _sut.ActivateSensorAsync("unknown:sensor1");
 
         result.IsFailure.Should().BeTrue();
     }
@@ -174,7 +174,7 @@ public class EmbodimentAggregateTests : IDisposable
     [Fact]
     public async Task DeactivateSensorAsync_UnknownProvider_ReturnsFailure()
     {
-        var result = await _sut.DeactivateSensorAsync("unknown:sensor1").ConfigureAwait(false);
+        var result = await _sut.DeactivateSensorAsync("unknown:sensor1");
 
         result.IsFailure.Should().BeTrue();
     }
@@ -182,7 +182,7 @@ public class EmbodimentAggregateTests : IDisposable
     [Fact]
     public async Task ReadSensorAsync_UnknownProvider_ReturnsFailure()
     {
-        var result = await _sut.ReadSensorAsync("unknown:sensor1").ConfigureAwait(false);
+        var result = await _sut.ReadSensorAsync("unknown:sensor1");
 
         result.IsFailure.Should().BeTrue();
     }
@@ -191,7 +191,7 @@ public class EmbodimentAggregateTests : IDisposable
     public async Task ExecuteActionAsync_UnknownProvider_ReturnsFailure()
     {
         var action = new ActuatorAction("test", new Dictionary<string, object>());
-        var result = await _sut.ExecuteActionAsync("unknown:actuator1", action).ConfigureAwait(false);
+        var result = await _sut.ExecuteActionAsync("unknown:actuator1", action);
 
         result.IsFailure.Should().BeTrue();
     }
