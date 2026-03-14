@@ -2,6 +2,11 @@
   <!-- Import repo-level props (Foundation → ouroboros-build base) -->
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..'))" />
 
+  <!-- xUnit has no SynchronizationContext — ConfigureAwait is unnecessary in tests -->
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);CA2007</NoWarn>
+  </PropertyGroup>
+
   <!-- Common test global usings (mirrors original Ouroboros.Tests GlobalUsings.cs) -->
   <ItemGroup Condition="'$(MSBuildProjectName)' != 'Ouroboros.Roslynator.Tests'">
     <Using Include="Xunit" />
